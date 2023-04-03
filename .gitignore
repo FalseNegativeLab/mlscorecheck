@@ -1,0 +1,4 @@
+.eggs/*
+*.pyc
+*egg-info*
+.vscode/*
