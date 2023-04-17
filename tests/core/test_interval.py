@@ -1,0 +1,455 @@
+"""
+This module tests the interval computing
+"""
+
+import numpy as np
+
+from mlscorecheck.core import Interval, IntervalUnion
+
+def test_interval_equality():
+    """
+    Testing the interval equality
+    """
+    interval = Interval(-2, 5)
+
+    assert interval != -2
+    assert interval == Interval(-2, 5)
+    assert interval != Interval(-2, 6)
+
+def test_interval_repr():
+    """
+    Testing the representation
+    """
+    assert Interval(0, 1).__repr__() == '[0,\n1]'
+
+def test_interval_addition():
+    """
+    Testing the interval addition
+    """
+
+    int0 = Interval(-2, 3)
+    int1 = Interval(-1, 4)
+
+    add = int0 + int1
+
+    assert add.lower_bound == int0.lower_bound + int1.lower_bound
+    assert add.upper_bound == int0.upper_bound + int1.upper_bound
+
+    add = int0 + 2
+
+    assert add.lower_bound == int0.lower_bound + 2
+
+    add = 2 + int0
+
+    assert add.lower_bound == int0.lower_bound + 2
+
+def test_interval_subtraction():
+    """
+    Testing the interval subtraction
+    """
+    int0 = Interval(-2, 3)
+    int1 = Interval(-1, 4)
+
+    sub = int0 - int1
+
+    assert sub.lower_bound == int0.lower_bound - int1.upper_bound
+    assert sub.upper_bound == int0.upper_bound - int1.lower_bound
+
+    sub = int0 - 2
+
+    assert sub.lower_bound == int0.lower_bound - 2
+
+    sub = 2 - int0
+
+    assert sub.lower_bound == 2 - int0.upper_bound
+
+def test_interval_multiplication():
+    """
+    Testing the interval multiplication
+    """
+    int0 = Interval(-2, 3)
+    int1 = Interval(-1, 4)
+
+    mult = int0 * int1
+
+    terms = [int0.lower_bound * int1.lower_bound,
+             int0.lower_bound * int1.upper_bound,
+             int0.upper_bound * int1.lower_bound,
+             int0.upper_bound * int1.upper_bound]
+
+    assert mult.lower_bound == min(terms)
+    assert mult.upper_bound == max(terms)
+
+    mult = int0 * 2
+
+    assert mult.lower_bound == 2 * int0.lower_bound
+
+    mult = 2 * int0
+
+    assert mult.lower_bound == 2 * int0.lower_bound
+
+def test_interval_division_scalar():
+    """
+    Testing the interval division with scalar
+    """
+    int0 = Interval(-2, 3)
+
+    div = 1.0 / int0
+
+    assert isinstance(div, IntervalUnion)
+    assert div.intervals[0].lower_bound == -np.inf
+    assert div.intervals[0].upper_bound == 1.0/int0.lower_bound
+    assert div.intervals[1].lower_bound == 1.0/int0.upper_bound
+    assert div.intervals[1].upper_bound == np.inf
+
+    div = 1.0 / Interval(1, 2)
+    assert div.lower_bound == 0.5
+    assert div.upper_bound == 1
+
+    div = 1.0 / Interval(0, 2)
+    assert div.lower_bound == 0.5
+    assert div.upper_bound == np.inf
+
+    div = 1.0 / Interval(-2, 0)
+    assert div.lower_bound == -np.inf
+    assert div.upper_bound == -0.5
+
+    div = int0 / 1.0
+
+    assert int0.lower_bound == div.lower_bound and int0.upper_bound == div.upper_bound
+
+    div = int0 / (-1.0)
+
+    assert int0.lower_bound == -div.upper_bound and int0.upper_bound == -div.lower_bound
+
+def test_interval_division_composite():
+    """
+    Testing the interval division with intervals
+    """
+    int0 = Interval(-2, 3)
+
+    int1 = Interval(1, 2)
+    inverse = 1.0 / int1
+
+    div1 = int0 / int1
+
+    terms = [int0.lower_bound * inverse.lower_bound,
+             int0.lower_bound * inverse.upper_bound,
+             int0.upper_bound * inverse.lower_bound,
+             int0.upper_bound * inverse.upper_bound]
+
+    assert div1.lower_bound == min(terms)
+    assert div1.upper_bound == max(terms)
+
+    int1 = Interval(1, 2)
+    inverse = 1.0 / int1
+
+    div1 = int0 / int1
+
+    terms = [int0.lower_bound * inverse.lower_bound,
+             int0.lower_bound * inverse.upper_bound,
+             int0.upper_bound * inverse.lower_bound,
+             int0.upper_bound * inverse.upper_bound]
+
+    assert div1.lower_bound == min(terms)
+    assert div1.upper_bound == max(terms)
+
+    int1 = Interval(-5, -1)
+    inverse = 1.0 / int1
+
+    div1 = int0 / int1
+
+    terms = [int0.lower_bound * inverse.lower_bound,
+             int0.lower_bound * inverse.upper_bound,
+             int0.upper_bound * inverse.lower_bound,
+             int0.upper_bound * inverse.upper_bound]
+
+    assert div1.lower_bound == min(terms)
+    assert div1.upper_bound == max(terms)
+
+    int0 = Interval(2, 5)
+    int1 = Interval(-5, 7)
+    inverse = 1.0 / int1
+
+    div1 = int0 / int1
+
+    terms = [int0.lower_bound * inverse.intervals[0].lower_bound,
+             int0.lower_bound * inverse.intervals[0].upper_bound,
+             int0.upper_bound * inverse.intervals[0].lower_bound,
+             int0.upper_bound * inverse.intervals[0].upper_bound]
+
+    assert div1.intervals[0].lower_bound == min(terms)
+    assert div1.intervals[0].upper_bound == max(terms)
+
+    terms = [int0.lower_bound * inverse.intervals[1].lower_bound,
+             int0.lower_bound * inverse.intervals[1].upper_bound,
+             int0.upper_bound * inverse.intervals[1].lower_bound,
+             int0.upper_bound * inverse.intervals[1].upper_bound]
+
+    assert div1.intervals[1].lower_bound == min(terms)
+    assert div1.intervals[1].upper_bound == max(terms)
+
+def test_interval_union_simplify():
+    """
+    Testing the interval union simplification
+    """
+
+    # simple
+    intun = IntervalUnion([Interval(1, 2),
+                           Interval(3, 5),
+                           Interval(4, 6),
+                           Interval(5, 8),
+                           Interval(10, 11)])
+
+    assert len(intun.intervals) == 3
+    assert intun.intervals[1].lower_bound == 3
+    assert intun.intervals[1].upper_bound == 8
+
+    # shuffled
+    intun = IntervalUnion([Interval(1, 2),
+                           Interval(3, 5),
+                           Interval(10, 11),
+                           Interval(5, 8),
+                           Interval(4, 6)])
+
+    assert len(intun.intervals) == 3
+    assert intun.intervals[1].lower_bound == 3
+    assert intun.intervals[1].upper_bound == 8
+
+    # subsets
+    intun = IntervalUnion([Interval(1.5, 1.6),
+                           Interval(1, 2),
+                           Interval(3, 5),
+                           Interval(4, 6),
+                           Interval(5, 8),
+                           Interval(10, 11),
+                           Interval(4, 4)])
+
+    assert len(intun.intervals) == 3
+    assert intun.intervals[1].lower_bound == 3
+    assert intun.intervals[1].upper_bound == 8
+
+    # first union
+    intun = IntervalUnion([Interval(3, 5),
+                           Interval(4, 6),
+                           Interval(5, 8),
+                           Interval(10, 11)])
+
+    assert len(intun.intervals) == 2
+    assert intun.intervals[0].lower_bound == 3
+    assert intun.intervals[0].upper_bound == 8
+
+    # last union
+    intun = IntervalUnion([Interval(1, 2),
+                           Interval(3, 5),
+                           Interval(4, 6),
+                           Interval(5, 8)])
+
+    assert len(intun.intervals) == 2
+    assert intun.intervals[1].lower_bound == 3
+    assert intun.intervals[1].upper_bound == 8
+
+    # duplicate
+    intun = IntervalUnion([Interval(1, 2),
+                           Interval(3, 5),
+                           Interval(1, 2),
+                           Interval(5, 8),
+                           Interval(10, 11)])
+
+    assert len(intun.intervals) == 3
+    assert intun.intervals[1].lower_bound == 3
+    assert intun.intervals[1].upper_bound == 8
+
+    # all one
+    intun = IntervalUnion([Interval(4, 4),
+                           Interval(3, 5),
+                           Interval(4, 6),
+                           Interval(5, 8),
+                           Interval(4, 7)])
+
+    assert len(intun.intervals) == 1
+    assert intun.intervals[0].lower_bound == 3
+    assert intun.intervals[0].upper_bound == 8
+
+def test_interval_union_add():
+    """
+    Testing addition with interval unions
+    """
+    intun0 = IntervalUnion([Interval(1, 2),
+                            Interval(10, 20),
+                            Interval(100, 200)])
+    intun1 = IntervalUnion([Interval(-1, 1),
+                            Interval(2, 8)])
+
+    add = intun0 + intun1
+
+    results = []
+    for int0 in intun0.intervals:
+        for int1 in intun1.intervals:
+            results.append(int0 + int1)
+    tmp = IntervalUnion(results)
+
+    assert len(add.intervals) <= len(intun0.intervals) * len(intun1.intervals)
+    assert len(add.intervals) == len(tmp.intervals)
+    assert add.intervals[0] == tmp.intervals[0]
+
+    add = intun0 + 2
+
+    assert len(add.intervals) == len(intun0.intervals)
+    assert add.intervals[0] == intun0.intervals[0] + 2
+
+    add = 2 + intun0
+
+    assert len(add.intervals) == len(intun0.intervals)
+    assert add.intervals[0] == intun0.intervals[0] + 2
+
+def test_interval_union_subtract():
+    """
+    Testing subtraction with interval unions
+    """
+    intun0 = IntervalUnion([Interval(1, 2),
+                            Interval(10, 20),
+                            Interval(100, 200)])
+    intun1 = IntervalUnion([Interval(-1, 1),
+                            Interval(2, 8)])
+
+    sub = intun0 - intun1
+
+    results = []
+    for int0 in intun0.intervals:
+        for int1 in intun1.intervals:
+            results.append(int0 - int1)
+    tmp = IntervalUnion(results)
+
+    assert len(sub.intervals) <= len(intun0.intervals) * len(intun1.intervals)
+    assert len(sub.intervals) == len(tmp.intervals)
+    assert sub.intervals[0] == tmp.intervals[0]
+
+    sub = intun0 - 2
+
+    assert len(sub.intervals) == len(intun0.intervals)
+    assert sub.intervals[0] == intun0.intervals[0] - 2
+
+    sub = 2 - intun0
+
+    print(sub.intervals)
+    print(2 - intun0)
+
+    assert len(sub.intervals) == len(intun0.intervals)
+    assert sub.intervals[2] == (2 - intun0.intervals[0])
+
+def test_interval_union_multiply():
+    """
+    Testing addition with interval unions
+    """
+    intun0 = IntervalUnion([Interval(1, 2),
+                            Interval(10, 20),
+                            Interval(100, 200)])
+    intun1 = IntervalUnion([Interval(-1, 1),
+                            Interval(2, 8)])
+
+    mult = intun0 * intun1
+
+    results = []
+    for int0 in intun0.intervals:
+        for int1 in intun1.intervals:
+            results.append(int0 * int1)
+    tmp = IntervalUnion(results)
+
+    assert len(mult.intervals) <= len(intun0.intervals) * len(intun1.intervals)
+    assert len(mult.intervals) == len(tmp.intervals)
+    assert mult.intervals[0] == tmp.intervals[0]
+
+    mult = intun0 * 2
+
+    assert len(mult.intervals) == len(intun0.intervals)
+    assert mult.intervals[0] == intun0.intervals[0] * 2
+
+    mult = 2 * intun0
+
+    assert len(mult.intervals) == len(intun0.intervals)
+    assert mult.intervals[0] == intun0.intervals[0] * 2
+
+def test_interval_union_divide():
+    """
+    Testing addition with interval unions
+    """
+    intun0 = IntervalUnion([Interval(1, 2),
+                            Interval(10, 20),
+                            Interval(100, 200)])
+    intun1 = IntervalUnion([Interval(-1, 1),
+                            Interval(2, 8),
+                            Interval(0, 1.5),
+                            Interval(-2.2, 0)])
+
+    div = intun0 / intun1
+
+    results = []
+    for int0 in intun0.intervals:
+        for int1 in intun1.intervals:
+            tmp = int0 / int1
+            if isinstance(tmp, Interval):
+                results.append(tmp)
+            else:
+                results.extend(tmp.intervals)
+    tmp = IntervalUnion(results)
+
+    assert len(div.intervals) <= len(intun0.intervals) * len(intun1.intervals)
+    assert len(div.intervals) == len(tmp.intervals)
+    assert div.intervals[0] == tmp.intervals[0]
+
+    div = intun0 / 2
+
+    assert len(div.intervals) == len(intun0.intervals)
+    assert div.intervals[0] == intun0.intervals[0] / 2
+
+    div = 2 / intun0
+
+    assert len(div.intervals) == len(intun0.intervals)
+    assert div.intervals[0] == 2 / intun0.intervals[2]
+
+def test_interval_union_equality():
+    """
+    Testing the interval union equality
+    """
+    intun = IntervalUnion([Interval(-2, 5)])
+
+    assert intun != -2
+    assert intun == IntervalUnion([Interval(-2, 5)])
+    assert intun == IntervalUnion([Interval(-2, 4), Interval(4, 5)])
+    assert intun != IntervalUnion([Interval(-2, 6)])
+    assert intun != IntervalUnion([Interval(0, 1), Interval(2, 3)])
+
+def test_interval_union_repr():
+    """
+    Testing the representation
+    """
+    assert IntervalUnion([Interval(0, 1), Interval(2, 3)]).__repr__() == '[0, 1],\n[2, 3]'
+
+def test_cross_interval_intervalunion():
+    """
+    Testing cross operations between intervals and interval unions
+    """
+    int0 = Interval(-1, 2)
+    intun = IntervalUnion([Interval(3, 5)])
+
+    res0 = int0 + intun
+    res1 = intun + int0
+
+    assert res0 == res1
+
+    res0 = int0 - intun
+    res1 = (-1)*(intun - int0)
+
+    assert res0 == res1
+
+    res0 = int0 * intun
+    res1 = intun * int0
+
+    assert res0 == res1
+
+    res0 = int0 / intun
+    res1 = intun / int0
+
+    assert (1.0 / res0) == res1
+
