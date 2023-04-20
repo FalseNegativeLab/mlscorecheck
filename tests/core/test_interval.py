@@ -453,3 +453,103 @@ def test_cross_interval_intervalunion():
 
     assert (1.0 / res0) == res1
 
+def test_intersection():
+    """
+    Testing the interval intersection
+    """
+
+    assert Interval(0, 1).intersection(Interval(0.5, 2)) == Interval(0.5, 1)
+    assert Interval(0, 1).intersection(Interval(1, 2)) == Interval(1, 1)
+    assert Interval(0, 1).intersection(Interval(2, 3)) == Interval(1, 0)
+    assert Interval(0, 10).intersection(Interval(3, 4)) == Interval(3, 4)
+    assert Interval(3, 4).intersection(Interval(0, 10)) == Interval(3, 4)
+
+def test_integer():
+    """
+    Testing the integer condition
+    """
+
+    assert Interval(0, 1).integer()
+    assert Interval(-0.1, 0.9).integer()
+    assert Interval(0.9, 1.1).integer()
+    assert Interval(1.0, 1.1).integer()
+    assert Interval(1.5, 3.5).integer()
+    assert Interval(-np.inf, 5).integer()
+    assert Interval(-2, np.inf).integer()
+
+    assert not Interval(0.5, 0.6).integer()
+    assert not Interval(-0.6, -0.5).integer()
+
+def test_contains():
+    """
+    Testing the contain function
+    """
+
+    assert Interval(0, 1).contains(0)
+    assert Interval(0, 1).contains(1)
+    assert Interval(0, 1).contains(0.5)
+    assert not Interval(0, 1).contains(-np.inf)
+    assert not Interval(0, 1).contains(np.inf)
+    assert not Interval(0, 1).contains(6)
+    assert Interval(-np.inf, 5).contains(-np.inf)
+    assert Interval(5, np.inf).contains(10)
+
+def test_union_intersection():
+    """
+    Testing the intersections of unions
+    """
+
+    assert IntervalUnion([Interval(0, 1), Interval(1, 2)])\
+            .intersection(IntervalUnion([Interval(1, 2), Interval(2, 3)])) == \
+            IntervalUnion([Interval(1, 2)])
+
+    assert IntervalUnion([Interval(0, 1), Interval(2, 3)])\
+            .intersection(IntervalUnion([Interval(1, 2), Interval(2, 3)])) == \
+            IntervalUnion([Interval(1, 1), Interval(2, 2), Interval(2, 3)])
+
+    assert IntervalUnion([Interval(0, 1), Interval(2, 3)])\
+            .intersection(IntervalUnion([Interval(1.5, 1.8), Interval(3.2, 4)])) == \
+            IntervalUnion([])
+
+    assert IntervalUnion([Interval(0, 1), Interval(2, 3)])\
+            .intersection(IntervalUnion([Interval(0.5, 2.5), Interval(2.8, 3.2)])) == \
+            IntervalUnion([Interval(0, 1).intersection(Interval(0.5, 2.5)),
+                           Interval(0, 1).intersection(Interval(2.8, 3.2)),
+                           Interval(2, 3).intersection(Interval(0.5, 2.5)),
+                           Interval(2, 3).intersection(Interval(2.8, 3.2))])
+
+def test_union_integer():
+    """
+    Testing the integer condition for interval union
+    """
+
+    assert IntervalUnion([Interval(0, 1), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(-0.1, 0.9), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(0.9, 1.1), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(1.0, 1.1), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(1.5, 3.5), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(-np.inf, 5), Interval(0.5, 0.6)]).integer()
+    assert IntervalUnion([Interval(-2, np.inf), Interval(0.5, 0.6)]).integer()
+
+    assert not IntervalUnion([Interval(-0.6, -0.5)]).integer()
+    assert not IntervalUnion([Interval(0.5, 0.6)]).integer()
+    assert not IntervalUnion([Interval(-0.6, -0.5), Interval(0.5, 0.6)]).integer()
+
+def test_union_contains():
+    """
+    Testing the contain function for interval union
+    """
+
+    assert IntervalUnion([Interval(0, 1), Interval(0.5, 0.6)]).contains(0.55)
+    assert IntervalUnion([Interval(-0.1, 0.9), Interval(0.5, 0.6)]).contains(0)
+    assert IntervalUnion([Interval(0.9, 1.1), Interval(0.5, 0.6)]).contains(1)
+    assert IntervalUnion([Interval(1.0, 1.1), Interval(0.5, 0.6)]).contains(1)
+    assert IntervalUnion([Interval(1.5, 3.5), Interval(0.5, 0.6)]).contains(2)
+    assert IntervalUnion([Interval(-np.inf, 5), Interval(0.5, 0.6)]).contains(0)
+    assert IntervalUnion([Interval(-2, np.inf), Interval(0.5, 0.6)]).contains(0)
+    assert IntervalUnion([Interval(-np.inf, 5), Interval(0.5, 0.6)]).contains(-np.inf)
+    assert IntervalUnion([Interval(-2, np.inf), Interval(0.5, 0.6)]).contains(np.inf)
+
+    assert not IntervalUnion([Interval(-0.6, -0.5)]).contains(0)
+    assert not IntervalUnion([Interval(0.5, 0.6)]).contains(0)
+    assert not IntervalUnion([Interval(-0.6, -0.5), Interval(0.5, 0.6)]).contains(0)

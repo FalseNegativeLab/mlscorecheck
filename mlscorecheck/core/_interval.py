@@ -22,6 +22,67 @@ class Interval:
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
 
+    def to_tuple(self):
+        """
+        Convert to tuple representation
+
+        Returns:
+            tuple: the interval
+        """
+        return (self.lower_bound, self.upper_bound)
+
+    def contains(self, value):
+        """
+        Check if the interval contains the value
+
+        Args:
+            value (float/int): the value to check
+
+        Returns:
+            bool: True if the interval contains the value, otherwise False
+        """
+        return value >= self.lower_bound and value <= self.upper_bound
+
+    def intersection(self, other):
+        """
+        Returns the intersection of two intervals
+
+        Args:
+            other (Interval): the other interval
+
+        Returns:
+            Interval: the intersection, [1, 0] if the intersection is empty
+        """
+
+        if self.lower_bound >= other.lower_bound and self.upper_bound <= other.upper_bound:
+            return Interval(self.lower_bound, self.upper_bound)
+        if self.lower_bound <= other.lower_bound and self.upper_bound >= other.upper_bound:
+            return Interval(other.lower_bound, other.upper_bound)
+
+        tmp_lower = self
+        tmp_upper = other
+        if tmp_upper.lower_bound < tmp_lower.lower_bound:
+            tmp_lower, tmp_upper = tmp_upper, tmp_lower
+
+        assert tmp_lower.lower_bound <= tmp_upper.lower_bound
+
+        if tmp_lower.upper_bound >= tmp_upper.lower_bound:
+            return Interval(tmp_upper.lower_bound, tmp_lower.upper_bound)
+
+        return Interval(1, 0)
+
+    def integer(self):
+        """
+        Check whether the interval fulfills integer conditions
+
+        Returns:
+            bool: whether the interval contains an integer
+        """
+        if self.upper_bound - self.lower_bound >= 1.0:
+            return True
+
+        return np.ceil(self.lower_bound) == np.floor(self.upper_bound)
+
     def __add__(self, other):
         """
         The addition operator
@@ -224,7 +285,17 @@ class IntervalUnion:
             intervals (list(Interval)): a list of intervals
         """
         self.intervals = intervals
-        self.simplify()
+        if len(intervals) > 0:
+            self.simplify()
+
+    def to_tuple():
+        """
+        Convert to tuple representation
+
+        Returns:
+            list(tuple): the interval tuples
+        """
+        return [interval.to_tuple() for interval in self.intervals]
 
     def simplify(self):
         """
@@ -232,6 +303,7 @@ class IntervalUnion:
 
         TODO: a more efficient implementation would be desired
         """
+
         intervals = self.intervals
 
         # removing those intervals that are entirely contained by another one
@@ -261,6 +333,53 @@ class IntervalUnion:
         final_intervals.append(interval)
 
         self.intervals = final_intervals
+
+    def contains(self, value):
+        """
+        Check if the interval contains the value
+
+        Args:
+            value (float/int): the value to check
+
+        Returns:
+            bool: True if the interval contains the value, otherwise False
+        """
+        return any([interval.contains(value) for interval in self.intervals])
+
+    def intersection(self, other):
+        """
+        Returns the intersection of two intervals
+
+        Args:
+            other (Interval/IntervalUnion): the other interval
+
+        Returns:
+            IntervalUnion: the intersection, empty interval union if the intersection
+                           is empty
+        """
+        if isinstance(other, Interval):
+            new_intervals = [other.intersection(interval) for interval in self.intervals]
+            new_intervals = [interval for interval in new_intervals
+                                      if not interval == Interval(1, 0)]
+            return IntervalUnion(new_intervals)
+
+        intersections = []
+        for int0 in self.intervals:
+            for int1 in other.intervals:
+                intersections.append(int0.intersection(int1))
+
+        return IntervalUnion([interval for interval in intersections
+                                       if not interval == Interval(1, 0)])
+
+    def integer(self):
+        """
+        Check whether the interval fulfills integer conditions
+
+        Returns:
+            bool: whether the interval contains an integer
+        """
+
+        return any([interval.integer() for interval in self.intervals])
 
     def __add__(self, other):
         """
