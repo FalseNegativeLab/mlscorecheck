@@ -54,6 +54,7 @@ def check_integer_constraints(tp, tn):
     return decision, details
 
 def check(*, p, n, eps, acc=None, sens=None, spec=None, ppv=None, npv=None, return_details=False):
+    # TODO: refactor, pretty ugly and overly complex
     scores = {'acc': acc, 'sens': sens, 'spec': spec, 'ppv': ppv, 'npv': npv}
     scores = {key: value for key, value in scores.items() if value is not None}
 
