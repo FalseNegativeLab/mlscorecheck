@@ -10,139 +10,20 @@ from ..core import (accuracy,
                     positive_predictive_value,
                     negative_predictive_value,
                     Interval)
+from ._solvers import solver_functions
 
-__all__ = ['solve_sens_spec',
-           'solve_sens_acc',
-           'solve_sens_ppv',
-           'solve_sens_npv',
-           'solve_spec_acc',
-           'solve_spec_ppv',
-           'solve_spec_npv',
-           'solve_acc_ppv',
-           'solve_acc_npv',
-           'solve_ppv_npv',
-           'problems_to_check',
+__all__ = ['problems_to_check',
            'check']
 
-def problems_to_check(all_scores):
-    combinations = itertools.combinations(all_scores, 2)
-
-    score_set = set(all_scores)
-
-    problems = [(set(comb), score_set.difference(set(comb))) for comb in combinations]
-
-    return problems
-
-def check_integer_constraints(tp, tn):
-    details = {}
-    decision = True
-    if tp.integer():
-        {'tp_integer': True}
-        decision = decision and True
-    else:
-        {'tp_integer': False}
-        decision = decision and False
-    if tn.integer():
-        {'tn_integer': True}
-        decision = decision and True
-    else:
-        {'tn_integer': False}
-        decision = decision and False
-
-    details['decision'] = decision
-
-    return decision, details
-
-def check(*, p, n, eps, acc=None, sens=None, spec=None, ppv=None, npv=None, return_details=False):
-    # TODO: refactor, pretty ugly and overly complex
-    scores = {'acc': acc, 'sens': sens, 'spec': spec, 'ppv': ppv, 'npv': npv}
-    scores = {key: value for key, value in scores.items() if value is not None}
-
-    if 'acc' in scores and 'sens' in scores and 'spec' in scores:
-        if not ((sens <= acc <= spec) or (spec <= acc <= sens)):
-            if not return_details:
-                return False
-
-            return False, {'acc_sens_spec_check_failed': True,
-                           'acc': acc,
-                           'sens': sens,
-                           'spec': spec}
-
-    problems = problems_to_check(list(scores.keys()))
-
-    intervals = {key: Interval(value - eps, value + eps) for key, value in scores.items()}
-    intervals['p'] = p
-    intervals['n'] = n
-
-    results = []
-    decisions = []
-
-    for problem in problems:
-        if problem[0] == {'acc', 'sens'}:
-            tp, tn = solve_sens_acc(**intervals)
-        elif problem[0] == {'acc', 'spec'}:
-            tp, tn = solve_spec_acc(**intervals)
-        elif problem[0] == {'acc', 'npv'}:
-            tp, tn = solve_acc_npv(**intervals)
-        elif problem[0] == {'acc', 'ppv'}:
-            tp, tn = solve_acc_ppv(**intervals)
-        elif problem[0] == {'sens', 'spec'}:
-            tp, tn = solve_sens_spec(**intervals)
-        elif problem[0] == {'sens', 'ppv'}:
-            tp, tn = solve_sens_ppv(**intervals)
-        elif problem[0] == {'sens', 'npv'}:
-            tp, tn = solve_sens_npv(**intervals)
-        elif problem[0] == {'spec', 'ppv'}:
-            tp, tn = solve_spec_ppv(**intervals)
-        elif problem[0] == {'spec', 'npv'}:
-            tp, tn = solve_spec_npv(**intervals)
-        elif problem[0] == {'npv', 'ppv'}:
-            tp, tn = solve_ppv_npv(**intervals)
-
-        int_decision, int_details = check_integer_constraints(tp, tn)
-        if not int_decision:
-            decisions.append(False)
-            results.append(int_details)
-            continue
-
-        fp = n - tn
-        fn = p - tp
-
-        for score in problem[1]:
-            if score == 'acc':
-                decision, details = check_acc(acc=acc, tp_i=tp, tn_i=tn, total=p+n)
-            if score == 'sens':
-                decision, details = check_sens(sens=sens, tp_i=tp, p=p)
-            if score == 'spec':
-                decision, details = check_spec(spec=spec, tn_i=tn, n=n)
-            if score == 'ppv':
-                decision, details = check_ppv(ppv=ppv, tp_i=tp, fp_i=fp)
-            if score == 'npv':
-                decision, details = check_npv(npv=npv, tn_i=tn, fn_i=fn)
-
-            details['intervals_computed_from'] = {key: intervals[key].to_tuple()
-                                                  for key in problem[0]}
-            details['atoms'] = {'tp': tp.to_tuple(),
-                                'tn': tn.to_tuple(),
-                                'fp': fp.to_tuple(),
-                                'fn': fn.to_tuple()}
-
-            decisions.append(decision)
-            results.append(details)
-
-    if not return_details:
-        return all(decisions)
-
-    return all(decisions), results
-
-def check_acc(*, acc, tp_i, tn_i, total):
-    acc_i = accuracy(tp=tp_i, tn=tn_i, total=total)
+def check_acc(*, acc, tp_i, tn_i, p, n):
+    acc_i = accuracy(tp=tp_i, tn=tn_i, p=p, n=n)
     decision = acc_i.contains(acc)
 
     return decision, {'acc_interval': acc_i.to_tuple(),
                         'tp_interval': tp_i.to_tuple(),
                         'tn_interval': tn_i.to_tuple(),
-                        'total': total,
+                        'p': p,
+                        'n': n,
                         'acc_real': acc,
                         'decision': decision}
 
@@ -186,62 +67,154 @@ def check_ppv(*, ppv, tp_i, fp_i):
                         'ppv_real': ppv,
                         'decision': decision}
 
-def solve_sens_spec(*, sens, spec, p, n, **_kwargs):
-    tp = p*sens
-    tn = n*spec
+def check_f_beta(*, f_beta, beta, tp_i, fp_i, fn_i):
+    f_beta_i = f_beta(tp=tp_i, fp=fp_i, fn=fn_i, beta=beta)
+    decision = f_beta_i.contains(f_beta)
 
-    return tp, tn
+    return decision, {'f_beta_interval': f_beta_i.to_tuple(),
+                      'tp_interval': tp_i.to_tuple(),
+                      'fp_interval': fp_i.to_tuple(),
+                      'fn_interval': fn_i.to_tuple(),
+                      'beta': beta,
+                      'f_beta_real': f_beta,
+                      'decision': decision}
 
-def solve_sens_acc(*, sens, acc, p, n, **_kwargs):
-    tp = p*sens
-    tn = acc*n + acc*p - p*sens
+check_functions = {
+    'acc': (check_acc, (('tp', 'tn'), ('p', 'n'))),
+    'sens': (check_sens, (('tp',), ('p',))),
+    'spec': (check_spec, (('tn',), ('n',))),
+    'ppv': (check_ppv, (('tp', 'fp'), tuple())),
+    'npv': (check_npv, (('tn', 'fn'), tuple())),
+    'f_beta': (check_f_beta, (('tp', 'fp', 'fn'), 'beta'))
+}
 
-    return tp, tn
+def problems_to_check(all_scores):
+    combinations = itertools.combinations(all_scores, 2)
 
-def solve_sens_ppv(*, sens, ppv, p, n, **_kwargs):
-    tp = p*sens
-    tn = n + p*sens - p*sens/ppv
+    score_set = set(all_scores)
 
-    return tp, tn
+    problems = [(set(comb), score_set.difference(set(comb))) for comb in combinations]
 
-def solve_sens_npv(*, sens, npv, p, **_kwargs):
-    tp = p*sens
-    tn = npv*p*(sens - 1)/(npv - 1)
+    return problems
 
-    return tp, tn
+def check_integer_constraints(tp, tn):
+    details = {}
+    decision = True
+    if tp.integer():
+        {'tp_integer': True}
+        decision = decision and True
+    else:
+        {'tp_integer': False}
+        decision = decision and False
+    if tn.integer():
+        {'tn_integer': True}
+        decision = decision and True
+    else:
+        {'tn_integer': False}
+        decision = decision and False
 
-def solve_spec_acc(*, spec, acc, p, n, **_kwargs):
-    tp = acc*n + acc*p - n*spec
-    tn = n*spec
+    details['decision'] = decision
 
-    return tp, tn
+    return decision, details
 
-def solve_spec_ppv(*, spec, ppv, n, **_kwargs):
-    tp = n*ppv*(spec - 1)/(ppv - 1)
-    tn = n*spec
+def check_acc_sens_spec(*, scores, return_details=False):
+    acc, sens, spec = scores['acc'], scores['sens'], scores['spec']
 
-    return tp, tn
+    decision = False
+    if min(sens, spec) <= acc <= max(sens, spec):
+        decision = True
 
-def solve_spec_npv(*, spec, npv, p, n, **_kwargs):
-    tp = n*spec - n*spec/npv + p
-    tn = n*spec
+    if not return_details:
+        return decision
 
-    return tp, tn
+    return decision, {'acc_sens_spec_check': decision,
+                        'acc': acc,
+                        'sens': sens,
+                        'spec': spec}
 
-def solve_acc_ppv(*, acc, ppv, p, n, **_kwargs):
-    tp = ppv*(acc*n + acc*p - n)/(2*ppv - 1)
-    tn = (acc*n*ppv - acc*n + acc*p*ppv - acc*p + n*ppv)/(2*ppv - 1)
+def check_f_beta_sens_ppv(*, scores, return_details=False):
+    f_beta, sens, ppv = scores['f_beta'], scores['sens'], scores['ppv']
 
-    return tp, tn
+    decision = False
+    if min(sens, ppv) <= f_beta <= max(sens, ppv):
+        decision = True
 
-def solve_acc_npv(*, acc, npv, p, n, **_kwargs):
-    tp = (acc*n*npv - acc*n + acc*npv*p - acc*p + npv*p)/(2*npv - 1)
-    tn = npv*(acc*n + acc*p - p)/(2*npv - 1)
+    if not return_details:
+        return decision
 
-    return tp, tn
+    return decision, {'f_beta_sens_ppv_check': decision,
+                        'f_beta': f_beta,
+                        'sens': sens,
+                        'ppv': ppv}
 
-def solve_ppv_npv(*, ppv, npv, p, n, **_kwargs):
-    tp = ppv*(n*npv - n + npv*p)/(npv + ppv - 1)
-    tn = npv*(n*ppv + p*ppv - p)/(npv + ppv - 1)
+def check_problem(problem, scores, intervals, all_params):
+    solver = solver_functions[tuple(sorted(tuple(problem[0])))]
+    params = {'p': all_params['p'],
+              'n': all_params['n'],
+              **{score: scores[score] for score in problem}}
+    if 'f_beta' in problem[0]:
+        params['beta'] = all_params['beta']
+    tp, tn = solver(**params)
 
-    return tp, tn,
+    fp = all_params['n'] - tn
+    fn = all_params['p'] - tp
+
+    decisions = []
+    results = []
+
+    for score in problem[1]:
+        check_specification = check_functions[score]
+        check_func = check_specification[0]
+        check_params = {**{intervals[key] for key in check_specification[1][0]},
+                        **{all_params[key] for key in check_specification[1][1]}}
+
+        decision, details = check_func(**check_params)
+
+        details['intervals_computed_from'] = {key: intervals[key].to_tuple()
+                                                for key in problem[0]}
+        details['atoms'] = {'tp': tp.to_tuple(),
+                            'tn': tn.to_tuple(),
+                            'fp': fp.to_tuple(),
+                            'fn': fn.to_tuple()}
+
+        decisions.append(decision)
+        results.append(details)
+
+    return decisions, results
+
+def check(*, p, n, eps,
+          acc=None,
+          sens=None,
+          spec=None,
+          ppv=None,
+          npv=None,
+          f_beta=None,
+          beta=None,
+          return_details=False):
+
+    if f_beta is not None and beta is None:
+        raise ValueError('f_beta is set, but beta is not specified.\n'
+                         'If you intended to use f_1 score, set beta=1')
+
+    scores = {'acc': acc, 'sens': sens, 'spec': spec, 'ppv': ppv, 'npv': npv, 'f_beta': f_beta}
+    scores = {key: value for key, value in scores.items() if value is not None}
+    all_params = {**scores, **{'p': p, 'n': n}}
+    if beta is not None:
+        all_params['beta'] = beta
+
+    problems = problems_to_check(list(scores.keys()))
+
+    intervals = {key: Interval(value - eps, value + eps) for key, value in scores.items()}
+
+    results = []
+    decisions = []
+
+    for problem in problems:
+        check_problem(problem, scores, intervals, all_params)
+
+    if not return_details:
+        return all(decisions)
+
+    return all(decisions), results
+
+

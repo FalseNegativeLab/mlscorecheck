@@ -288,7 +288,7 @@ class IntervalUnion:
         if len(intervals) > 0:
             self.simplify()
 
-    def to_tuple():
+    def to_tuple(self):
         """
         Convert to tuple representation
 
