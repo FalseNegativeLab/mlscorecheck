@@ -5,42 +5,75 @@ This module implements the calculation of scores
 import sympy
 import numpy as np
 
+from ._interval import Interval, union
+
 __all__ = ['accuracy',
-           'error_rate',
-           'sensitivity',
-           'specificity',
-           'positive_predictive_value',
-           'precision',
-           'negative_predictive_value',
-           'f_beta_plus',
-           'f_beta_minus',
-           'f1_plus',
-           'f1_minus',
-           'unified_performance_measure',
-           'true_positive_rate',
-           'recall',
-           'false_positive_rate',
-           'false_negative_rate',
-           'true_negative_rate',
-           'false_discovery_rate',
-           'false_omission_rate',
-           'geometric_mean',
-           'fowlkes_mallows_index',
-           'markedness',
-           'positive_likelihood_ratio',
-           'negative_likelihood_ratio',
-           'matthews_correlation_coefficient',
-           'informedness',
-           'prevalence_threshold',
-           'diagnostic_odds_ratio',
-           'threat_score',
-           'jaccard_index',
-           'balanced_accuracy',
-           'cohens_kappa',
-           'score_function_set',
-           'aliases',
-           'complementers',
-           'sqrt']
+            'error_rate',
+            'sensitivity',
+            'specificity',
+            'positive_predictive_value',
+            'precision',
+            'negative_predictive_value',
+            'f_beta_plus',
+            'f_beta_minus',
+            'f1_plus',
+            'f1_minus',
+            'unified_performance_measure',
+            'true_positive_rate',
+            'recall',
+            'false_positive_rate',
+            'false_negative_rate',
+            'true_negative_rate',
+            'false_discovery_rate',
+            'false_omission_rate',
+            'geometric_mean',
+            'fowlkes_mallows_index',
+            'markedness',
+            'positive_likelihood_ratio',
+            'negative_likelihood_ratio',
+            'matthews_correlation_coefficient',
+            'informedness',
+            'prevalence_threshold',
+            'diagnostic_odds_ratio',
+            'threat_score',
+            'jaccard_index',
+            'balanced_accuracy',
+            'cohens_kappa',
+            'p4',
+            'score_function_set',
+            'aliases',
+            'complementers',
+            'sqrt',
+            'reduce_solutions']
+
+def reduce_solutions(tps, tns, p, n):
+    """
+    Reduce multiple solutions to one
+    """
+    results = []
+    for idx in range(len(tps)):
+        #if not np.isnan(tps[idx]) and not np.isnan(tns[idx]):
+        results.append({'tp': tps[idx], 'tn': tns[idx]})
+    return results
+
+"""
+    if len(tps) == 1:
+        return tps, tns
+
+    tps_filtered = []
+    tns_filtered = []
+    if isinstance(tps[0], Interval) and isinstance(tns[0], Interval):
+        # TODO: write this
+        tp = union([tps[idx].intersection(Interval(0, p)) for idx in range(len(tps))])
+        tn = union([tns[idx].intersection(Interval(0, n)) for idx in range(len(tns))])
+        return tp, tn
+
+    for idx in range(len(tps)):
+        if 0 - 1e-2 <= tps[idx] <= p + 1e-2 and 0 - 1e-2 <= tns[idx] <= n + 1e-2:
+            tps_filtered.append(tps[idx])
+            tns_filtered.append(tns[idx])
+    return tps_filtered, tns_filtered
+"""
 
 def accuracy(*, tp, tn, p, n):
     """
@@ -227,9 +260,13 @@ def sqrt(object):
     Returns:
         object: the square root
     """
+
+
     if isinstance(object, sympy.Basic):
         return sympy.sqrt(object)
 
+    if object < 0:
+        print('negative square root')
     return np.sqrt(object)
 
 def true_positive_rate(*, tp, p):
@@ -551,6 +588,28 @@ def cohens_kappa(*, tp, tn, p, n):
 
     return acc/(acc + term)
 
+def p4(*, tp, tn, p, n):
+    """
+    The P4-metric
+
+    Args:
+        tp (int/float/np.array/Interval): the number of true positives
+        tn (int/float/np.array/Interval): the number of true negatives
+        p (int/float/np.array/Interval): the number of positives
+        n (int/float/np.array/Interval): the number of negatives
+
+    Returns:
+        float/np.array/Interval: the Cohen's kappa score
+    """
+
+    fp = p - tn
+    fn = n - tp
+
+    num = (4*tp*tn)
+    denom = num + (tp + tn) * (fp + fn)
+
+    return num/denom
+
 def score_function_set():
     """
     Return a set of scores with no aliases
@@ -575,9 +634,9 @@ def score_function_set():
             'mcc': matthews_correlation_coefficient,
             'ji': jaccard_index,
             'ba': balanced_accuracy,
-            'kappa': cohens_kappa,
-            'gm': geometric_mean,
-            'upm': unified_performance_measure
+            #'kappa': cohens_kappa,
+            #'gm': geometric_mean,
+            #'upm': unified_performance_measure
             }
 
 def aliases():

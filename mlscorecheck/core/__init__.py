@@ -8,3 +8,4 @@ from ._aggregated_rom import *
 from ._scores import *
 from ._interval import *
 from ._symbolic_interval import *
+from ._solutions import *

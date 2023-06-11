@@ -5,7 +5,19 @@ This module implements the interval arithmetics
 import numpy as np
 
 __all__ = ['Interval',
-           'IntervalUnion']
+            'IntervalUnion',
+            'union']
+
+def union(intervals):
+    if len(intervals) == 1:
+        return intervals[0]
+
+    union_tmp = intervals[0]
+
+    for idx in range(1, len(intervals)):
+        union_tmp = union_tmp.union(intervals[idx])
+
+    return union_tmp
 
 class Interval:
     """
