@@ -314,7 +314,7 @@ def negative_likelihood_ratio(*, tn, fn, p, n):
   Returns:
     int/float/np.array/Interval: the score
   """
-  return p*fn/(tn*n)
+  return n*fn/(tn*p)
 
 def matthews_correlation_coefficient(*, tp, tn, p, n, sqrt=np.sqrt):
   """

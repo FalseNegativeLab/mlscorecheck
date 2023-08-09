@@ -323,7 +323,7 @@ def negative_likelihood_ratio_standardized(*, tp, tn, p, n):
   Returns:
     int/float/np.array/Interval: the score
   """
-  return p*(p - tp)/(tn*n)
+  return n*(p - tp)/(tn*p)
 
 def matthews_correlation_coefficient_standardized(*, tp, tn, p, n, sqrt=np.sqrt):
   """

@@ -21,7 +21,7 @@ def score_functions(complements=False):
     if complements:
         comp = {'err': error_rate,
                 'fdr': false_discovery_rate,
-                'for': false_omission_rate,
+                'for_': false_omission_rate,
                 'fnr': false_negative_rate,
                 'fpr': false_positive_rate}
     else:
@@ -62,7 +62,7 @@ def score_functions_standardized(complements=False):
     if complements:
         comp = {'err': error_rate_standardized,
                 'fdr': false_discovery_rate_standardized,
-                'for': false_omission_rate_standardized,
+                'for_': false_omission_rate_standardized,
                 'fnr': false_negative_rate_standardized,
                 'fpr': false_positive_rate_standardized}
     else:
@@ -113,7 +113,7 @@ def score_function_complementers():
         dict: the complementer mapping
     """
     return {'fdr': 'ppv',
-            'for': 'npv',
+            'for_': 'npv',
             'fnr': 'tpr',
             'fpr': 'tnr',
             'err': 'acc'}
