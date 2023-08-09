@@ -95,6 +95,12 @@ class Interval:
 
         return np.ceil(self.lower_bound) == np.floor(self.upper_bound)
 
+    def shrink_to_integers(self):
+        return Interval(np.ceil(self.lower_bound), np.floor(self.upper_bound))
+
+    def is_empty(self):
+        return self.upper_bound < self.lower_bound
+
     def __add__(self, other):
         """
         The addition operator
@@ -257,7 +263,7 @@ class Interval:
         Returns:
             str: the representation
         """
-        return str(f"[{str(self.lower_bound)},\n{str(self.upper_bound)}]")
+        return str(f"({str(self.lower_bound)}, {str(self.upper_bound)})")
 
     def __eq__(self, other):
         """
@@ -284,6 +290,7 @@ class Interval:
             bool: whether the objects are not equal
         """
         return not self.__eq__(other)
+
 
 class IntervalUnion:
     """
@@ -381,7 +388,7 @@ class IntervalUnion:
                 intersections.append(int0.intersection(int1))
 
         return IntervalUnion([interval for interval in intersections
-                                       if not interval == Interval(1, 0)])
+                                        if not interval == Interval(1, 0)])
 
     def integer(self):
         """
@@ -392,6 +399,12 @@ class IntervalUnion:
         """
 
         return any([interval.integer() for interval in self.intervals])
+
+    def shrink_to_integer(self):
+        return IntervalUnion([interval.shrink_to_integer() for interval in self.intervals])
+
+    def is_empty(self):
+        return all(interval.is_empty() for interval in self.intervals)
 
     def __add__(self, other):
         """
@@ -547,7 +560,7 @@ class IntervalUnion:
         Returns:
             str: the representation
         """
-        return ',\n'.join([f'[{interval.lower_bound}, {interval.upper_bound}]'
+        return ' | '.join([f'({interval.lower_bound}, {interval.upper_bound})'
                                                 for interval in self.intervals])
 
     def __eq__(self, other):

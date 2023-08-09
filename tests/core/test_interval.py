@@ -20,7 +20,7 @@ def test_interval_repr():
     """
     Testing the representation
     """
-    assert Interval(0, 1).__repr__() == '[0,\n1]'
+    assert Interval(0, 1).__repr__() == '(0, 1)'
 
 def test_interval_addition():
     """
@@ -424,7 +424,7 @@ def test_interval_union_repr():
     """
     Testing the representation
     """
-    assert IntervalUnion([Interval(0, 1), Interval(2, 3)]).__repr__() == '[0, 1],\n[2, 3]'
+    assert IntervalUnion([Interval(0, 1), Interval(2, 3)]).__repr__() == '(0, 1) | (2, 3)'
 
 def test_cross_interval_intervalunion():
     """

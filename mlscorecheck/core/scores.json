@@ -1,0 +1,311 @@
+{
+    "scores": {
+        "acc": {
+            "name": "accuracy",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "error_rate",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "(tp + tn)/(p + n)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "(tp + tn)/(p + n)"
+        },
+        "err": {
+            "name": "error_rate",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "accuracy",
+            "args": ["fp", "fn", "p", "n"],
+            "formula": "(fp + fn)/(p + n)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "1 - (tp + tn)/(p + n)"
+        },
+        "sens": {
+            "name": "sensitivity",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "false_negative_rate",
+            "args": ["tp", "p"],
+            "formula": "tp/p",
+            "args_standardized": ["tp", "p"],
+            "formula_standardized": "tp/p",
+            "synonyms": ["recall", "true_positive_rate"]
+        },
+        "fnr": {
+            "name": "false_negative_rate",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "sensitivity",
+            "args": ["fn", "p"],
+            "formula": "fn/p",
+            "args_standardized": ["tp", "p"],
+            "formula_standardized": "1 - tp/p",
+            "synonyms": ["miss_rate"]
+        },
+        "fpr": {
+            "name": "false_positive_rate",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "specificity",
+            "args": ["fp", "n"],
+            "formula": "fp/n",
+            "args_standardized": ["tn", "n"],
+            "formula_standardized": "1 - tn/n",
+            "synonyms": ["false_alarm", "fall_out"]
+        },
+        "spec": {
+            "name": "specificity",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": null,
+            "complement": "false_positive_rate",
+            "args": ["tn", "n"],
+            "formula": "tn/n",
+            "args_standardized": ["tn", "n"],
+            "formula_standardized": "tn/n",
+            "synonyms": ["selectivity", "true_negative_rate"]
+        },
+        "ppv": {
+            "name": "positive_predictive_value",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}],
+            "complement": "false_discovery_rate",
+            "args": ["tp", "fp"],
+            "formula": "tp/(tp + fp)",
+            "args_standardized": ["tp", "tn", "n"],
+            "formula_standardized": "tp/(tp + n - tn)",
+            "synonyms": ["precision"]
+        },
+        "fdr": {
+            "name": "false_discovery_rate",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}],
+            "complement": "positive_predictive_value",
+            "args": ["tp", "fp"],
+            "formula": "fp/(tp + fp)",
+            "args_standardized": ["tp", "tn", "n"],
+            "formula_standardized": "1 - tp/(tp + n - tn)"
+        },
+        "for": {
+            "name": "false_omission_rate",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tn": 0, "fn": 0}],
+            "complement": "negative_predictive_value",
+            "args": ["tn", "fn"],
+            "formula": "fn/(tn + fn)",
+            "args_standardized": ["tp", "tn", "p"],
+            "formula_standardized": "1 - tn/(tn + p - tp)"
+        },
+        "npv": {
+            "name": "negative_predictive_value",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tn": 0, "fn": 0}],
+            "complement": "false_omission_rate",
+            "args": ["tn", "fn"],
+            "formula": "tn/(tn + fn)",
+            "args_standardized": ["tp", "tn", "p"],
+            "formula_standardized": "tn/(tn + p - tp)"
+        },
+        "fbp": {
+            "name": "f_beta_plus",
+            "lower_bound": 0,
+            "upper_bound": null,
+            "args": ["tp", "fp", "p", "beta_plus"],
+            "formula": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + fp)",
+            "args_standardized": ["tp", "tn", "p", "n", "beta_plus"],
+            "formula_standardized": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + n - tn)"
+        },
+        "fbm": {
+            "name": "f_beta_minus",
+            "lower_bound": 0,
+            "upper_bound": null,
+            "args": ["tn", "fn", "n", "beta_minus"],
+            "formula": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + fn)",
+            "args_standardized": ["tp", "tn", "p", "n", "beta_minus"],
+            "formula_standardized": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + p - tp)"
+        },
+        "f1p": {
+            "name": "f1_plus",
+            "lower_bound": 0,
+            "upper_bound": null,
+            "args": ["tp", "fp", "p"],
+            "formula": "(2*tp) / (tp + p + fp)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+            "synonyms": ["f1"]
+        },
+        "f1m": {
+            "name": "f1_minus",
+            "lower_bound": 0,
+            "upper_bound": null,
+            "args": ["tn", "fn", "n"],
+            "formula": "(2*tn) / (tn + n + fn)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "(2*tn) / (tn + n + p - tp)"
+        },
+        "upm": {
+            "name": "unified_performance_measure",
+            "lower_bound": 0,
+            "upper_bound": null,
+            "nans": [{"tp": 0, "tn": 0}],
+            "short_args": ["f1p", "f1m"],
+            "short_formula": "2*f1p*f1m/(f1p + f1m)",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))"
+        },
+        "gm": {
+            "name": "geometric_mean",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "sqrt": true,
+            "short_args": ["sens", "spec"],
+            "short_formula": "sqrt(sens*spec)",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))"
+        },
+        "fm": {
+            "name": "fowlkes_mallows_index",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}],
+            "sqrt": true,
+            "short_args": ["ppv", "tpr"],
+            "short_formula": "sqrt(ppv*tpr)",
+            "args": ["tp", "fp", "p"],
+            "formula": "tp/sqrt(p*(fp + tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp/sqrt(p*(n - tn + tp))"
+        },
+        "mk": {
+            "name": "markedness",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}],
+            "short_args": ["ppv", "npv"],
+            "short_formula": "ppv + npv - 1",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "tp/(tp + n - tn) + tn/(tn + p - tp) - 1",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp/(tp + n - tn) + tn/(tn + p - tp) - 1",
+            "synonyms": ["delta_p"]
+        },
+        "lrp": {
+            "name": "positive_likelihood_ratio",
+            "lower_bound": 0,
+            "nans": [{"fp": 0}],
+            "short_args": ["tpr", "fpr"],
+            "short_formula": "tpr/fpr",
+            "args": ["tp", "fp", "p", "n"],
+            "formula": "n*tp/(fp*p)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "n*tp/((n-tn)*p)"
+        },
+        "lrn": {
+            "name": "negative_likelihood_ratio",
+            "lower_bound": 0,
+            "nans": [{"tn": 0}],
+            "short_args": ["tnr", "fnr"],
+            "short_formula": "fnr/tnr",
+            "args": ["tn", "fn", "p", "n"],
+            "formula": "p*fn/(tn*n)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "p*(p - tp)/(tn*n)"
+        },
+        "mcc": {
+            "name": "matthews_correlation_coefficient",
+            "lower_bound": -1,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
+            "sqrt": true,
+            "short_args": ["tpr", "tnr", "ppv", "npv", "fnr", "fpr", "for", "fdr"],
+            "short_formula": "sqrt(tpr*tnr*ppv*npv) - sqrt(fnr*fpr*for*fdr)",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))"
+        },
+        "bm": {
+            "name": "bookmaker_informedness",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "short_args": ["tpr", "tnr"],
+            "short_formula": "tpr + tnr - 1",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "tp/p + tn/n - 1",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp/p + tn/n - 1",
+            "synonyms": ["informedness"]
+        },
+        "pt": {
+            "name": "prevalence_threshold",
+            "sqrt": true,
+            "short_args": ["tpr", "fpr"],
+            "short_formula": "(sqrt(tpr*fpr) - fpr)/(tpr - fpr)",
+            "args": ["tp", "fp", "p", "n"],
+            "formula": "p*(fp - n*sqrt(fp*tp/(n*p)))/(fp*p - n*tp)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "p*((n-tn) - n*sqrt((n-tn)*tp/(n*p)))/((n-tn)*p - n*tp)"
+        },
+        "dor": {
+            "name": "diagnostic_odds_ratio",
+            "lower_bound": 0,
+            "nans": [{"tn": "n"}, {"tp": "p"}],
+            "short_args": ["lrp", "lrn"],
+            "short_formula": "lrp/lrn",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "tn*tp/((n-tn)*(p-tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tn*tp/((n-tn)*(p-tp))"
+        },
+        "ji": {
+            "name": "jaccard_index",
+            "lower_bound": 0,
+            "args": ["tp", "fp", "p"],
+            "formula": "tp/(fp + p)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp / (n - tn + p)",
+            "synonyms": ["threat_score"]
+        },
+        "bacc": {
+            "name": "balanced_accuracy",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "short_args": ["tpr", "tnr"],
+            "short_formula": "(tpr + tnr)/2",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "tp/(2*p) + tn/(2*n)",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp/(2*p) + tn/(2*n)"
+        },
+        "kappa": {
+            "name": "cohens_kappa",
+            "nans": [{"tn": 0, "tp": 0}],
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "(2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "-2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)"
+        },
+        "p4": {
+            "name": "p4",
+            "lower_bound": 0,
+            "upper_bound": 1,
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))"
+        }
+    }
+}

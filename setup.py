@@ -39,30 +39,33 @@ if on_rtd:
 else:
     INSTALL_REQUIRES= ['numpy', 'scipy', 'scikit-learn', 'pulp']
 EXTRAS_REQUIRE= {'tests': ['pytest'],
-                 'docs': ['sphinx', 'sphinx-gallery', 'sphinx_rtd_theme', 'matplotlib', 'pandas', 'pulp']}
+                    'docs': ['sphinx', 'sphinx-gallery', 'sphinx_rtd_theme', 'matplotlib', 'pandas', 'pulp']}
 PYTHON_REQUIRES= '>=3.5'
 PACKAGE_DIR= {'mlscorecheck': 'mlscorecheck'}
 SETUP_REQUIRES=['setuptools>=41.0.1', 'wheel>=0.33.4', 'pytest-runner']
 TESTS_REQUIRE=['pytest']
 
 setup(name=DISTNAME,
-      maintainer=MAINTAINER,
-      maintainer_email=MAINTAINER_EMAIL,
-      author=MAINTAINER,
-      author_email=MAINTAINER_EMAIL,
-      description=DESCRIPTION,
-      license=LICENSE,
-      url=URL,
-      version=VERSION,
-      download_url=DOWNLOAD_URL,
-      long_description=LONG_DESCRIPTION,
-      long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
-      zip_safe=False,
-      classifiers=CLASSIFIERS,
-      install_requires=INSTALL_REQUIRES,
-      extras_require=EXTRAS_REQUIRE,
-      python_requires=PYTHON_REQUIRES,
-      setup_requires=SETUP_REQUIRES,
-      tests_require=TESTS_REQUIRE,
-      package_dir=PACKAGE_DIR,
-      packages=find_packages(exclude=[]))
+        maintainer=MAINTAINER,
+        maintainer_email=MAINTAINER_EMAIL,
+        author=MAINTAINER,
+        author_email=MAINTAINER_EMAIL,
+        description=DESCRIPTION,
+        license=LICENSE,
+        url=URL,
+        version=VERSION,
+        download_url=DOWNLOAD_URL,
+        long_description=LONG_DESCRIPTION,
+        long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
+        zip_safe=False,
+        classifiers=CLASSIFIERS,
+        install_requires=INSTALL_REQUIRES,
+        extras_require=EXTRAS_REQUIRE,
+        python_requires=PYTHON_REQUIRES,
+        setup_requires=SETUP_REQUIRES,
+        tests_require=TESTS_REQUIRE,
+        package_dir=PACKAGE_DIR,
+        packages=find_packages(exclude=[]),
+        package_data={'mlscorecheck': [os.path.join('core', 'solutions.json'),
+                                        os.path.join('core', 'scores.json')]},
+        include_package_data=True)

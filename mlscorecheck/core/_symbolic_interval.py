@@ -173,8 +173,8 @@ class SymbolicInterval:
                                 (lower_constraint & upper_constraint)
 
                     intervals.append(SymbolicInterval(lower,
-                                                      upper,
-                                                      condition))
+                                                        upper,
+                                                        condition))
         return SymbolicIntervalUnion(intervals)
 
     def __rmul__(self, other):
@@ -206,12 +206,12 @@ class SymbolicInterval:
 
         if not isinstance(other, SymbolicInterval):
             pos = SymbolicInterval(lower_bound=self.lower_bound/other,
-                                   upper_bound=self.upper_bound/other,
-                                   condition=self.condition & (other >= 0))
+                                    upper_bound=self.upper_bound/other,
+                                    condition=self.condition & (other >= 0))
 
             neg = SymbolicInterval(lower_bound=self.upper_bound/other,
-                                   upper_bound=self.lower_bound/other,
-                                   condition=self.condition & (other < 0))
+                                    upper_bound=self.lower_bound/other,
+                                    condition=self.condition & (other < 0))
 
             return SymbolicIntervalUnion([pos, neg])
 
@@ -220,35 +220,35 @@ class SymbolicInterval:
         condition = self.condition & other.condition & \
                     ((other.lower_bound > 0) | (other.upper_bound < 0))
         intervals.extend((self * SymbolicInterval(1.0/other.upper_bound,
-                                                 1.0/other.lower_bound,
-                                                 condition=condition)).intervals)
+                                                    1.0/other.lower_bound,
+                                                    condition=condition)).intervals)
 
         condition = (self.condition \
                     & other.condition \
                     & sympy.Eq(other.upper_bound, 0) \
                     & ((other.lower_bound < 0) | (other.lower_bound > 0)))
         intervals.extend((self * SymbolicInterval(-np.inf,
-                                                 1.0/other.lower_bound,
-                                                 condition=condition)).intervals)
+                                                    1.0/other.lower_bound,
+                                                    condition=condition)).intervals)
 
         condition = (self.condition \
                     & other.condition\
                     & sympy.Eq(other.lower_bound, 0) \
                     & ((other.upper_bound < 0) | (other.upper_bound > 0)))
         intervals.extend((self * SymbolicInterval(1.0/other.upper_bound,
-                                                 np.inf,
-                                                 condition=condition)).intervals)
+                                                    np.inf,
+                                                    condition=condition)).intervals)
 
         condition = (self.condition \
                     & other.condition \
                     & (other.lower_bound < 0)\
                     & (other.upper_bound > 0))
         intervals.extend((self * SymbolicInterval(-np.inf,
-                                                 1.0/other.lower_bound,
-                                                 condition=condition)).intervals)
+                                                    1.0/other.lower_bound,
+                                                    condition=condition)).intervals)
         intervals.extend((self * SymbolicInterval(1.0/other.upper_bound,
-                                                 np.inf,
-                                                 condition=condition)).intervals)
+                                                    np.inf,
+                                                    condition=condition)).intervals)
 
         return SymbolicIntervalUnion(intervals)
 
@@ -276,7 +276,7 @@ class SymbolicInterval:
             str: the representation
         """
         return str(f"[{str(self.lower_bound)},\n{str(self.upper_bound)}]"
-                   f"\nsubject to {self.condition}")
+                    f"\nsubject to {self.condition}")
 
     def __eq__(self, other):
         """
@@ -323,7 +323,7 @@ class SymbolicIntervalUnion:
         """
         intervals = list(set(intervals))
         self.intervals = [interval for interval in intervals
-                          if interval.condition != False]
+                            if interval.condition != False]
 
     def to_interval_union(self, subst):
         """
@@ -336,11 +336,11 @@ class SymbolicIntervalUnion:
             IntervalUnion: the real interval union
         """
         return IntervalUnion([interval.to_interval(subst)
-                              for interval in self.intervals
-                              if ((not isinstance(interval.condition, bool))
-                                  and interval.condition.subs(subst))
-                              or (interval.condition == True)
-                              ])
+                                for interval in self.intervals
+                                if ((not isinstance(interval.condition, bool))
+                                    and interval.condition.subs(subst))
+                                or (interval.condition == True)
+                                ])
 
     def condition_mask(self, subst):
         """
@@ -518,8 +518,8 @@ class SymbolicIntervalUnion:
             str: the representation
         """
         return ',\n'.join([f'[{interval.lower_bound}, {interval.upper_bound}]'
-                           f'subject to {interval.condition}'
-                           for interval in self.intervals])
+                            f'subject to {interval.condition}'
+                            for interval in self.intervals])
 
     def __eq__(self, other):
         """
