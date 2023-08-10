@@ -56,7 +56,7 @@ be installed:
 
 Installing sage into a conda environment:
 
-.. code-block:
+.. code-block::
 
     conda config --add channels conda-forge
     conda install sage
