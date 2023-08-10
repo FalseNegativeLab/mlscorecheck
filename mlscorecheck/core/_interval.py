@@ -291,6 +291,9 @@ class Interval:
         """
         return not self.__eq__(other)
 
+    def __neg__(self):
+        return (-1)*self
+
 
 class IntervalUnion:
     """
@@ -552,6 +555,9 @@ class IntervalUnion:
             other = IntervalUnion([other])
 
         return other / self
+
+    def __neg__(self):
+        return (-1)*self
 
     def __repr__(self):
         """

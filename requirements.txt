@@ -2,4 +2,3 @@ numpy
 pandas
 pulp
 pytest-cov
-sympy

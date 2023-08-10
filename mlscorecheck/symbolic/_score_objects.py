@@ -7,9 +7,10 @@ import importlib
 
 import numpy as np
 
-from ._scores import *
+from ..core import *
 from ._algebra import *
-from ._solutions import load_scores
+from ..core import load_scores
+from ..core import score_functions_standardized
 
 __all__ = ['Score',
             'PositiveLikelihoodRatio',
@@ -43,22 +44,19 @@ __all__ = ['Score',
             'P4',
             'get_base_objects']
 
+scores = load_scores()
+functions = score_functions_standardized()
+
 class Score:
     """
     The Score base class
     """
     def __init__(self,
                     symbols,
+                    descriptor,
                     *,
-                    abbreviation,
-                    name,
                     function,
-                    nans=None,
-                    range_=None,
                     symbol=None,
-                    synonyms=None,
-                    complement=None,
-                    args=None,
                     expression=None,
                     equation=None,
                     equation_polynomial=None):
@@ -80,7 +78,18 @@ class Score:
             equation (sympy/sage/None): the equation form
             equation_polynomial (sympy/sage/None): the equation in polynomial form
         """
+        self.descriptor = descriptor
+
+        abbreviation = descriptor['abbreviation']
+        name = descriptor['name']
+        nans = descriptor.get('nans', None)
+        synonyms = descriptor.get('synonyms', None)
+        complement = descriptor.get('complement', None)
+        args = descriptor.get('args_standardized')
+        range_ = (descriptor.get('lower_bound', -np.inf), descriptor.get('upper_bound', -np.inf))
+
         # setting the base kit of symbols
+
         self.symbols = symbols
 
         # setting the symbol
@@ -154,13 +163,7 @@ class Score:
             dict: the dictionary representation
         """
         return {
-            'abbreviation': self.abbreviation,
-            'name': self.name,
-            'nans': self.nans,
-            'range_': self.range,
-            'synonyms': self.synonyms,
-            'complement': self.complement,
-            'args': self.args,
+            'descriptor': self.descriptor,
             'expression': str(self.expression),
             'equation': str(self.equation),
             'equation_polynomial': str(self.equation_polynomial),
@@ -180,12 +183,8 @@ class MatthewsCorrelationCoefficient(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='mcc',
-                        name='matthews_correlation_coefficient',
-                        range_=[-1, 1],
-                        nans=[{'tp': 0, 'fp': 0},
-                                {'tn': 0, 'fn': 0}],
-                        function=matthews_correlation_coefficient_standardized)
+                        scores['mcc'],
+                        function=functions['mcc'])
 
         num, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.symbol**2 * denom**2 - num**2)
@@ -203,12 +202,8 @@ class Accuracy(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='acc',
-                        name='accuracy',
-                        range_=[0, 1],
-                        nans=None,
-                        function=accuracy_standardized,
-                        complement='error_rate')
+                        scores['acc'],
+                        function=functions['acc'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -226,12 +221,8 @@ class ErrorRate(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='err',
-                        name='error_rate',
-                        range_=[0, 1],
-                        nans=None,
-                        function=error_rate_standardized,
-                        complement='accuracy')
+                        scores['err'],
+                        function=functions['err'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -249,13 +240,8 @@ class Sensitivity(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='sens',
-                        name='sensitivity',
-                        range_=[0, 1],
-                        nans=None,
-                        function=sensitivity_standardized,
-                        synonyms=['recall', 'true_positive_rate', 'Recall', 'TruePositiveRate'],
-                        complement='false_negative_rate')
+                        scores['sens'],
+                        function=functions['sens'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -273,13 +259,8 @@ class FalseNegativeRate(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fnr',
-                        name='false_negative_rate',
-                        range_=[0, 1],
-                        nans=None,
-                        function=false_negative_rate_standardized,
-                        synonyms=['miss_rate', 'MissRate'],
-                        complement='sensitivity')
+                        scores['fnr'],
+                        function=functions['fnr'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -297,13 +278,8 @@ class FalsePositiveRate(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fpr',
-                        name='false_positive_rate',
-                        range_=[0, 1],
-                        nans=None,
-                        function=false_positive_rate_standardized,
-                        synonyms=['false_alarm', 'fall_out', 'FalseAlarm', 'FallOut'],
-                        complement='specificity')
+                        scores['fpr'],
+                        function=functions['fpr'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -321,13 +297,8 @@ class Specificity(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='spec',
-                        name='specificity',
-                        range_=[0, 1],
-                        nans=None,
-                        function=specificity_standardized,
-                        synonyms=['selectivity', 'Selectivity', 'true_negative_rate', 'TrueNegativeRate'],
-                        complement='false_positive_rate')
+                        scores['spec'],
+                        function=functions['spec'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -345,13 +316,8 @@ class PositivePredictiveValue(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='ppv',
-                        name='positive_predictive_value',
-                        range_=[0, 1],
-                        nans=[{'tp': 0, 'fp': 0}],
-                        function=positive_predictive_value_standardized,
-                        synonyms=('precision', 'Precision'),
-                        complement='false_discovery_rate')
+                        scores['ppv'],
+                        function=functions['ppv'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -369,12 +335,8 @@ class FalseDiscoveryRate(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fdr',
-                        name='false_discovery_rate',
-                        range_=[0, 1],
-                        nans=[{'tp': 0, 'fp': 0}],
-                        function=false_discovery_rate_standardized,
-                        complement='positive_predictive_value')
+                        scores['fdr'],
+                        function=functions['fdr'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -392,12 +354,8 @@ class FalseOmissionRate(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='for_',
-                        name='false_omission_rate',
-                        range_=[0, 1],
-                        nans=[{'tn': 0, 'fn': 0}],
-                        function=false_omission_rate_standardized,
-                        complement='negative_predictive_value')
+                        scores['for_'],
+                        function=functions['for_'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -415,12 +373,8 @@ class NegativePredictiveValue(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='npv',
-                        name='negative_predictive_value',
-                        range_=[0, 1],
-                        nans=[{'tn': 0, 'fn': 0}],
-                        function=negative_predictive_value_standardized,
-                        complement='false_omission_rate')
+                        scores['npv'],
+                        function=functions['npv'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -438,11 +392,8 @@ class FBetaPlus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fbp',
-                        name='f_beta_plus',
-                        range_=[0, np.inf],
-                        nans=None,
-                        function=f_beta_plus_standardized)
+                        scores['fbp'],
+                        function=functions['fbp'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -460,10 +411,8 @@ class F1Plus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='f1p',
-                        name='f1_plus',
-                        range_=[0, 1],
-                        function=f1_plus_standardized)
+                        scores['f1p'],
+                        function=functions['f1p'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -481,10 +430,8 @@ class FBetaMinus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fbm',
-                        name='f_beta_minus',
-                        range_=[0, np.inf],
-                        function=f_beta_minus_standardized)
+                        scores['fbm'],
+                        function=functions['fbm'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -502,10 +449,8 @@ class F1Minus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='f1m',
-                        name='f1_minus',
-                        range_=[0, 1],
-                        function=f1_minus_standardized)
+                        scores['f1m'],
+                        function=functions['f1m'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -523,11 +468,8 @@ class UnifiedPerformanceMeasure(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='upm',
-                        name='unified_performance_measure',
-                        range_=[0, np.inf],
-                        nans=[{'tp': 0, 'tn': 0}],
-                        function=unified_performance_measure_standardized)
+                        scores['upm'],
+                        function=functions['upm'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -545,10 +487,8 @@ class GeometricMean(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='gm',
-                        name='geometric_mean',
-                        range_=[0, 1],
-                        function=geometric_mean_standardized)
+                        scores['gm'],
+                        function=functions['gm'])
 
         self.equation_polynomial = self.symbol**2 - symbols.tp**2*symbols.tn**2/(symbols.p**2*symbols.n**2)
 
@@ -565,10 +505,8 @@ class FowlkesMallowsIndex(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='fm',
-                        name='fowlkes_mallows_index',
-                        range_=[0, 1],
-                        function=fowlkes_mallows_index_standardized)
+                        scores['fm'],
+                        function=functions['fm'])
 
         p = symbols.p
         n = symbols.n
@@ -590,11 +528,8 @@ class Markedness(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='mk',
-                        name='markedness',
-                        range_=[0, 1],
-                        function=markedness_standardized,
-                        synonyms=['delta_p', 'DeltaP'])
+                        scores['mk'],
+                        function=functions['mk'])
 
         tp = symbols.tp
         tn = symbols.tn
@@ -616,11 +551,8 @@ class PositiveLikelihoodRatio(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='lrp',
-                        name='positive_likelihood_ratio',
-                        range_=[0, np.inf],
-                        nans=[{'fp': 0}],
-                        function=positive_likelihood_ratio_standardized)
+                        scores['lrp'],
+                        function=functions['lrp'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -638,11 +570,8 @@ class NegativeLikelihoodRatio(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='lrn',
-                        name='negative_likelihood_ratio',
-                        range_=[0, np.inf],
-                        nans=[{'fn': 0}],
-                        function=negative_likelihood_ratio_standardized)
+                        scores['lrn'],
+                        function=functions['lrn'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -660,11 +589,8 @@ class Informedness(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='bm',
-                        name='informedness',
-                        range_=[0, 1],
-                        function=informedness_standardized,
-                        synonyms=['bookmaker_informedness', 'BookmakerInformeness'])
+                        scores['bm'],
+                        function=functions['bm'])
 
         p = symbols.p
         n = symbols.n
@@ -684,10 +610,8 @@ class PrevalenceThreshold(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='pt',
-                        name='prevalence_threshold',
-                        range_=[-np.inf, np.inf],
-                        function=prevalence_threshold_standardized)
+                        scores['pt'],
+                        function=functions['pt'])
 
         tp = symbols.tp
         fp = symbols.n - symbols.tn
@@ -709,12 +633,8 @@ class DiagnosticOddsRatio(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='dor',
-                        name='diagnostic_odds_ratio',
-                        range_=[0, np.inf],
-                        nans=[{'tn': 'n'},
-                                {'tp': 'p'}],
-                        function=diagnostic_odds_ratio_standardized)
+                        scores['dor'],
+                        function=functions['dor'])
 
         tp = symbols.tp
         tn = symbols.tn
@@ -736,11 +656,8 @@ class JaccardIndex(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='ji',
-                        name='jaccard_index',
-                        range_=[0, np.inf],
-                        function=jaccard_index_standardized,
-                        synonyms=['threat_score', 'ThreadScore', 'critical_success_index', 'CriticalSuccessIndex'])
+                        scores['ji'],
+                        function=functions['ji'])
 
         _, denom = symbols.algebra.num_denom(self.expression)
         self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
@@ -758,10 +675,8 @@ class BalancedAccuracy(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='ba',
-                        name='balanced_accuracy',
-                        range_=[0, 1],
-                        function=balanced_accuracy_standardized)
+                        scores['bacc'],
+                        function=functions['bacc'])
 
 
         tp = symbols.tp
@@ -784,11 +699,8 @@ class CohensKappa(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='kappa',
-                        name='cohens_kappa',
-                        range_=[-np.inf, np.inf],
-                        nans=[{'tn': 0, 'tp': 0}],
-                        function=cohens_kappa_standardized)
+                        scores['kappa'],
+                        function=functions['kappa'])
 
         tp = symbols.tp
         tn = symbols.tn
@@ -810,11 +722,8 @@ class P4(Score):
         """
         Score.__init__(self,
                         symbols,
-                        abbreviation='p4',
-                        name='p4',
-                        range_=[0, 1],
-                        nans=[{'tn': 0, 'tp': 0}],
-                        function=p4_standardized)
+                        scores['p4'],
+                        function=functions['p4'])
 
         tp = symbols.tp
         tn = symbols.tn

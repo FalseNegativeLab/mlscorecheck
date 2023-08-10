@@ -3,45 +3,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
@@ -61,9 +72,9 @@
                                 "p"
                             ],
                             "tn": [
+                                "sens",
                                 "p",
                                 "n",
-                                "sens",
                                 "acc"
                             ]
                         }
@@ -76,45 +87,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
@@ -149,49 +171,61 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
@@ -207,16 +241,16 @@
                         },
                         "symbols": {
                             "tp": [
-                                "p",
-                                "acc",
                                 "n",
-                                "ppv"
+                                "ppv",
+                                "p",
+                                "acc"
                             ],
                             "tn": [
-                                "p",
                                 "ppv",
-                                "acc",
-                                "n"
+                                "p",
+                                "n",
+                                "acc"
                             ]
                         }
                     },
@@ -235,46 +269,58 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
@@ -290,16 +336,16 @@
                         },
                         "symbols": {
                             "tp": [
-                                "acc",
                                 "p",
+                                "acc",
                                 "n",
                                 "npv"
                             ],
                             "tn": [
-                                "p",
+                                "n",
                                 "npv",
-                                "acc",
-                                "n"
+                                "p",
+                                "acc"
                             ]
                         }
                     },
@@ -318,45 +364,62 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 }
             ],
@@ -364,21 +427,21 @@
                 {
                     "solution": {
                         "expressions": {
-                            "tp": "p*(acc*n + acc*p - 2*ba*n)/(-n + p)",
-                            "tn": "n*(acc*n + acc*p - 2*ba*p)/(n - p)"
+                            "tp": "p*(acc*n + acc*p - 2*bacc*n)/(-n + p)",
+                            "tn": "n*(acc*n + acc*p - 2*bacc*p)/(n - p)"
                         },
                         "symbols": {
                             "tp": [
+                                "bacc",
                                 "p",
-                                "ba",
-                                "n",
-                                "acc"
+                                "acc",
+                                "n"
                             ],
                             "tn": [
+                                "bacc",
                                 "p",
-                                "ba",
-                                "n",
-                                "acc"
+                                "acc",
+                                "n"
                             ]
                         }
                     },
@@ -398,42 +461,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "acc",
-                    "name": "accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "error_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "accuracy",
+                        "abbreviation": "acc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "err",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "(tp + tn)/(p + n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(tp + tn)/(p + n)"
+                    },
                     "expression": "(tn + tp)/(n + p)",
                     "equation": "acc - (tn + tp)/(n + p)",
                     "equation_polynomial": "acc*(n + p) - tn - tp",
                     "function": "accuracy_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -449,16 +526,16 @@
                         },
                         "symbols": {
                             "tp": [
+                                "acc",
                                 "p",
                                 "f1p",
-                                "acc",
                                 "n"
                             ],
                             "tn": [
                                 "p",
-                                "acc",
+                                "f1p",
                                 "n",
-                                "f1p"
+                                "acc"
                             ]
                         }
                     },
@@ -477,48 +554,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
                     "function": "sensitivity_standardized"
                 },
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
@@ -551,52 +636,61 @@
         {
             "scores": [
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
                     "function": "sensitivity_standardized"
                 },
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
@@ -616,10 +710,10 @@
                                 "p"
                             ],
                             "tn": [
-                                "p",
-                                "n",
                                 "sens",
-                                "ppv"
+                                "ppv",
+                                "p",
+                                "n"
                             ]
                         }
                     },
@@ -638,49 +732,58 @@
         {
             "scores": [
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
                     "function": "sensitivity_standardized"
                 },
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
@@ -700,9 +803,9 @@
                                 "p"
                             ],
                             "tn": [
-                                "p",
                                 "npv",
-                                "sens"
+                                "sens",
+                                "p"
                             ]
                         }
                     },
@@ -721,48 +824,62 @@
         {
             "scores": [
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
                     "function": "sensitivity_standardized"
                 },
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 }
             ],
@@ -771,7 +888,7 @@
                     "solution": {
                         "expressions": {
                             "tp": "p*sens",
-                            "tn": "n*(2*ba - sens)"
+                            "tn": "n*(2*bacc - sens)"
                         },
                         "symbols": {
                             "tp": [
@@ -779,9 +896,9 @@
                                 "p"
                             ],
                             "tn": [
-                                "ba",
+                                "n",
                                 "sens",
-                                "n"
+                                "bacc"
                             ]
                         }
                     },
@@ -793,45 +910,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "sens",
-                    "name": "sensitivity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "recall",
-                        "true_positive_rate",
-                        "Recall",
-                        "TruePositiveRate"
-                    ],
-                    "complement": "false_negative_rate",
-                    "args": [
-                        "tp",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "sensitivity",
+                        "abbreviation": "sens",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fnr",
+                        "args": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula": "tp/p",
+                        "args_standardized": [
+                            "tp",
+                            "p"
+                        ],
+                        "formula_standardized": "tp/p",
+                        "synonyms": [
+                            "recall",
+                            "true_positive_rate"
+                        ]
+                    },
                     "expression": "tp/p",
                     "equation": "sens - tp/p",
                     "equation_polynomial": "p*sens - tp",
                     "function": "sensitivity_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -851,10 +979,10 @@
                                 "p"
                             ],
                             "tn": [
-                                "p",
-                                "n",
                                 "sens",
-                                "f1p"
+                                "p",
+                                "f1p",
+                                "n"
                             ]
                         }
                     },
@@ -873,52 +1001,61 @@
         {
             "scores": [
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
                     "function": "specificity_standardized"
                 },
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
@@ -938,9 +1075,9 @@
                                 "n"
                             ],
                             "tp": [
-                                "spec",
                                 "n",
-                                "ppv"
+                                "ppv",
+                                "spec"
                             ]
                         }
                     },
@@ -959,49 +1096,58 @@
         {
             "scores": [
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
                     "function": "specificity_standardized"
                 },
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
@@ -1022,8 +1168,8 @@
                             ],
                             "tp": [
                                 "p",
-                                "spec",
                                 "n",
+                                "spec",
                                 "npv"
                             ]
                         }
@@ -1043,48 +1189,62 @@
         {
             "scores": [
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
                     "function": "specificity_standardized"
                 },
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 }
             ],
@@ -1093,7 +1253,7 @@
                     "solution": {
                         "expressions": {
                             "tn": "n*spec",
-                            "tp": "p*(2*ba - spec)"
+                            "tp": "p*(2*bacc - spec)"
                         },
                         "symbols": {
                             "tn": [
@@ -1101,9 +1261,9 @@
                                 "n"
                             ],
                             "tp": [
-                                "ba",
-                                "p",
-                                "spec"
+                                "spec",
+                                "bacc",
+                                "p"
                             ]
                         }
                     },
@@ -1115,45 +1275,56 @@
         {
             "scores": [
                 {
-                    "abbreviation": "spec",
-                    "name": "specificity",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "selectivity",
-                        "Selectivity",
-                        "true_negative_rate",
-                        "TrueNegativeRate"
-                    ],
-                    "complement": "false_positive_rate",
-                    "args": [
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "specificity",
+                        "abbreviation": "spec",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": null,
+                        "complement": "fpr",
+                        "args": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula": "tn/n",
+                        "args_standardized": [
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tn/n",
+                        "synonyms": [
+                            "selectivity",
+                            "true_negative_rate"
+                        ]
+                    },
                     "expression": "tn/n",
                     "equation": "spec - tn/n",
                     "equation_polynomial": "n*spec - tn",
                     "function": "specificity_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -1173,10 +1344,10 @@
                                 "n"
                             ],
                             "tp": [
-                                "p",
-                                "f1p",
+                                "n",
                                 "spec",
-                                "n"
+                                "p",
+                                "f1p"
                             ]
                         }
                     },
@@ -1195,53 +1366,63 @@
         {
             "scores": [
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
                     "function": "positive_predictive_value_standardized"
                 },
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
@@ -1257,16 +1438,16 @@
                         },
                         "symbols": {
                             "tp": [
-                                "p",
                                 "ppv",
-                                "npv",
-                                "n"
+                                "p",
+                                "n",
+                                "npv"
                             ],
                             "tn": [
-                                "p",
                                 "ppv",
-                                "npv",
-                                "n"
+                                "p",
+                                "n",
+                                "npv"
                             ]
                         }
                     },
@@ -1286,52 +1467,67 @@
         {
             "scores": [
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
                     "function": "positive_predictive_value_standardized"
                 },
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 }
             ],
@@ -1339,20 +1535,20 @@
                 {
                     "solution": {
                         "expressions": {
-                            "tp": "n*p*ppv*(2*ba - 1)/(n*ppv + p*ppv - p)",
-                            "tn": "n*(2*ba*p*ppv - 2*ba*p + n*ppv)/(n*ppv + p*ppv - p)"
+                            "tp": "n*p*ppv*(2*bacc - 1)/(n*ppv + p*ppv - p)",
+                            "tn": "n*(2*bacc*p*ppv - 2*bacc*p + n*ppv)/(n*ppv + p*ppv - p)"
                         },
                         "symbols": {
                             "tp": [
+                                "ppv",
+                                "bacc",
                                 "p",
-                                "ba",
-                                "n",
-                                "ppv"
+                                "n"
                             ],
                             "tn": [
-                                "p",
-                                "ba",
                                 "ppv",
+                                "bacc",
+                                "p",
                                 "n"
                             ]
                         }
@@ -1361,9 +1557,9 @@
                         {
                             "expression": "n*ppv + p*ppv - p",
                             "symbols": [
+                                "ppv",
                                 "n",
-                                "p",
-                                "ppv"
+                                "p"
                             ]
                         }
                     ],
@@ -1374,49 +1570,61 @@
         {
             "scores": [
                 {
-                    "abbreviation": "ppv",
-                    "name": "positive_predictive_value",
-                    "nans": [
-                        {
-                            "tp": 0,
-                            "fp": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": [
-                        "precision",
-                        "Precision"
-                    ],
-                    "complement": "false_discovery_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "positive_predictive_value",
+                        "abbreviation": "ppv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tp": 0,
+                                "fp": 0
+                            }
+                        ],
+                        "complement": "fdr",
+                        "args": [
+                            "tp",
+                            "fp"
+                        ],
+                        "formula": "tp/(tp + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(tp + n - tn)",
+                        "synonyms": [
+                            "precision"
+                        ]
+                    },
                     "expression": "tp/(n - tn + tp)",
                     "equation": "ppv - tp/(n - tn + tp)",
                     "equation_polynomial": "ppv*(n - tn + tp) - tp",
                     "function": "positive_predictive_value_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -1432,13 +1640,13 @@
                         },
                         "symbols": {
                             "tp": [
-                                "p",
                                 "ppv",
+                                "p",
                                 "f1p"
                             ],
                             "tn": [
-                                "p",
                                 "ppv",
+                                "p",
                                 "f1p",
                                 "n"
                             ]
@@ -1460,49 +1668,64 @@
         {
             "scores": [
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
                     "function": "negative_predictive_value_standardized"
                 },
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 }
             ],
@@ -1510,19 +1733,19 @@
                 {
                     "solution": {
                         "expressions": {
-                            "tp": "p*(2*ba*n*npv - 2*ba*n + npv*p)/(n*npv - n + npv*p)",
-                            "tn": "n*npv*p*(2*ba - 1)/(n*npv - n + npv*p)"
+                            "tp": "p*(2*bacc*n*npv - 2*bacc*n + npv*p)/(n*npv - n + npv*p)",
+                            "tn": "n*npv*p*(2*bacc - 1)/(n*npv - n + npv*p)"
                         },
                         "symbols": {
                             "tp": [
+                                "bacc",
                                 "p",
-                                "ba",
                                 "n",
                                 "npv"
                             ],
                             "tn": [
+                                "bacc",
                                 "p",
-                                "ba",
                                 "n",
                                 "npv"
                             ]
@@ -1532,8 +1755,8 @@
                         {
                             "expression": "n*npv - n + npv*p",
                             "symbols": [
-                                "n",
                                 "npv",
+                                "n",
                                 "p"
                             ]
                         }
@@ -1545,46 +1768,58 @@
         {
             "scores": [
                 {
-                    "abbreviation": "npv",
-                    "name": "negative_predictive_value",
-                    "nans": [
-                        {
-                            "tn": 0,
-                            "fn": 0
-                        }
-                    ],
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": "false_omission_rate",
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p"
-                    ],
+                    "descriptor": {
+                        "name": "negative_predictive_value",
+                        "abbreviation": "npv",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "nans": [
+                            {
+                                "tn": 0,
+                                "fn": 0
+                            }
+                        ],
+                        "complement": "for_",
+                        "args": [
+                            "tn",
+                            "fn"
+                        ],
+                        "formula": "tn/(tn + fn)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p"
+                        ],
+                        "formula_standardized": "tn/(tn + p - tp)"
+                    },
                     "expression": "tn/(p + tn - tp)",
                     "equation": "npv - tn/(p + tn - tp)",
                     "equation_polynomial": "npv*(p + tn - tp) - tn",
                     "function": "negative_predictive_value_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -1617,8 +1852,8 @@
                         {
                             "expression": "f1p + 2*npv - 2",
                             "symbols": [
-                                "f1p",
-                                "npv"
+                                "npv",
+                                "f1p"
                             ]
                         }
                     ],
@@ -1629,42 +1864,59 @@
         {
             "scores": [
                 {
-                    "abbreviation": "ba",
-                    "name": "balanced_accuracy",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
-                    "expression": "0.5*tp/p + 0.5*tn/n",
-                    "equation": "ba - 0.5*tp/p - 0.5*tn/n",
-                    "equation_polynomial": "2*ba*n*p - n*tp - p*tn",
+                    "descriptor": {
+                        "name": "balanced_accuracy",
+                        "abbreviation": "bacc",
+                        "lower_bound": 0,
+                        "upper_bound": 1,
+                        "short_args": [
+                            "tpr",
+                            "tnr"
+                        ],
+                        "short_formula": "(tpr + tnr)/2",
+                        "args": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula": "tp/(2*p) + tn/(2*n)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "tp/(2*p) + tn/(2*n)"
+                    },
+                    "expression": "tp/(2*p) + tn/(2*n)",
+                    "equation": "bacc - tp/(2*p) - tn/(2*n)",
+                    "equation_polynomial": "2*bacc*n*p - n*tp - p*tn",
                     "function": "balanced_accuracy_standardized"
                 },
                 {
-                    "abbreviation": "f1p",
-                    "name": "f1_plus",
-                    "nans": null,
-                    "range_": [
-                        0,
-                        1
-                    ],
-                    "synonyms": null,
-                    "complement": null,
-                    "args": [
-                        "tp",
-                        "tn",
-                        "p",
-                        "n"
-                    ],
+                    "descriptor": {
+                        "name": "f1_plus",
+                        "abbreviation": "f1p",
+                        "lower_bound": 0,
+                        "upper_bound": null,
+                        "args": [
+                            "tp",
+                            "fp",
+                            "p"
+                        ],
+                        "formula": "(2*tp) / (tp + p + fp)",
+                        "args_standardized": [
+                            "tp",
+                            "tn",
+                            "p",
+                            "n"
+                        ],
+                        "formula_standardized": "(2*tp) / (tp + p + n - tn)",
+                        "synonyms": [
+                            "f1"
+                        ]
+                    },
                     "expression": "2*tp/(n + p - tn + tp)",
                     "equation": "f1p - 2*tp/(n + p - tn + tp)",
                     "equation_polynomial": "f1p*(n + p - tn + tp) - 2*tp",
@@ -1675,21 +1927,21 @@
                 {
                     "solution": {
                         "expressions": {
-                            "tp": "f1p*p*(2*ba*n - n - p)/(f1p*n + f1p*p - 2*p)",
-                            "tn": "n*(2*ba*f1p*p - 4*ba*p + f1p*n + f1p*p)/(f1p*n + f1p*p - 2*p)"
+                            "tp": "f1p*p*(2*bacc*n - n - p)/(f1p*n + f1p*p - 2*p)",
+                            "tn": "n*(2*bacc*f1p*p - 4*bacc*p + f1p*n + f1p*p)/(f1p*n + f1p*p - 2*p)"
                         },
                         "symbols": {
                             "tp": [
+                                "bacc",
                                 "p",
-                                "ba",
-                                "n",
-                                "f1p"
+                                "f1p",
+                                "n"
                             ],
                             "tn": [
+                                "bacc",
                                 "p",
-                                "ba",
-                                "n",
-                                "f1p"
+                                "f1p",
+                                "n"
                             ]
                         }
                     },
@@ -1698,8 +1950,8 @@
                             "expression": "f1p*n + f1p*p - 2*p",
                             "symbols": [
                                 "n",
-                                "p",
-                                "f1p"
+                                "f1p",
+                                "p"
                             ]
                         }
                     ],

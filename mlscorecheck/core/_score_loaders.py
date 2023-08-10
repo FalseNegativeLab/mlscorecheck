@@ -9,7 +9,17 @@ from ._solutions import load_scores
 __all__ = ['score_functions',
             'score_functions_standardized',
             'score_function_aliases',
-            'score_function_complementers']
+            'score_function_complementers',
+            'score_functions_with_solutions']
+
+def score_functions_with_solutions():
+    return {'acc': accuracy,
+            'sens': sensitivity,
+            'spec': specificity,
+            'npv': negative_predictive_value,
+            'ppv': positive_predictive_value,
+            'bacc': balanced_accuracy,
+            'f1p': f1_plus}
 
 def score_functions(complements=False):
     """

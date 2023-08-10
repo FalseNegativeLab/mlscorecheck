@@ -4,6 +4,8 @@ This module implements the joint interface to the algebraic systems
 to be used.
 """
 
+import abc
+
 import importlib
 
 __all__ = ['Algebra',
@@ -11,16 +13,18 @@ __all__ = ['Algebra',
             'SageAlgebra',
             'Symbols']
 
-class Algebra:
+class Algebra(metaclass=abc.ABCMeta):
     """
     The base class of the algebra abstractions
     """
+    @abc.abstractmethod
     def __init__(self):
         """
         The constructor of the algebra
         """
         pass
 
+    @abc.abstractmethod
     def create_symbol(self, name, **kwargs):
         """
         Create a symbol in the algebra with the specified name and assumptions
@@ -32,8 +36,8 @@ class Algebra:
         Returns:
             object: the symbol
         """
-        pass
 
+    @abc.abstractmethod
     def num_denom(self, expression):
         """
         Extract the numerator and denominator
@@ -44,8 +48,8 @@ class Algebra:
         Returns:
             object, object: the numerator and denominator
         """
-        pass
 
+    @abc.abstractmethod
     def simplify(self, expression):
         """
         Simplify the expression
@@ -56,8 +60,8 @@ class Algebra:
         Returns:
             object: the symplified expression
         """
-        pass
 
+    @abc.abstractmethod
     def solve(self, equation, var):
         """
         Solve an equation for a variable
@@ -69,8 +73,8 @@ class Algebra:
         Returns:
             list(dict): the solutions
         """
-        pass
 
+    @abc.abstractmethod
     def subs(self, expression, subs_dict):
         """
         Substitute a substitution into the expression
@@ -82,8 +86,8 @@ class Algebra:
         Returns:
             object: the result of the substitution
         """
-        pass
 
+    @abc.abstractmethod
     def args(self, expression):
         """
         The list of arguments
@@ -94,8 +98,8 @@ class Algebra:
         Returns:
             list: the list of arguments
         """
-        pass
 
+    @abc.abstractmethod
     def is_trivial(self, expression):
         """
         Checks if the expression is trivial
@@ -106,8 +110,8 @@ class Algebra:
         Returns:
             bool: True if the expression is trivial, False otherwise
         """
-        pass
 
+    @abc.abstractmethod
     def is_root(self, expression):
         """
         Checks if the expression is a root
@@ -118,8 +122,8 @@ class Algebra:
         Returns:
             bool: True if the expression is a root, False otherwise
         """
-        pass
 
+    @abc.abstractmethod
     def operands(self, expression):
         """
         Returns the list of operands
@@ -130,8 +134,8 @@ class Algebra:
         Returns:
             list: the operands
         """
-        pass
 
+    @abc.abstractmethod
     def free_symbols(self, expression):
         """
         Get all free symbols in an expression
@@ -142,7 +146,6 @@ class Algebra:
         Returns:
             list: the list of free symbols
         """
-        pass
 
 class SympyAlgebra(Algebra):
     """
@@ -253,6 +256,7 @@ class SympyAlgebra(Algebra):
         if expression is None:
             return True
         if expression == 1:
+            #TODO: checking other constants
             return True
 
         return False
@@ -268,7 +272,7 @@ class SympyAlgebra(Algebra):
             bool: True if the expression is a root, False otherwise
         """
         if isinstance(expression, self.algebra.core.power.Pow):
-            base, exponent = expression.args()
+            base, exponent = expression.args
             if exponent < 1:
                 return True
         return False

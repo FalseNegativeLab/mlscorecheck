@@ -2,6 +2,7 @@
     "scores": {
         "acc": {
             "name": "accuracy",
+            "abbreviation": "acc",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -13,6 +14,7 @@
         },
         "err": {
             "name": "error_rate",
+            "abbreviation": "err",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -24,6 +26,7 @@
         },
         "sens": {
             "name": "sensitivity",
+            "abbreviation": "sens",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -36,6 +39,7 @@
         },
         "fnr": {
             "name": "false_negative_rate",
+            "abbreviation": "fnr",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -48,6 +52,7 @@
         },
         "fpr": {
             "name": "false_positive_rate",
+            "abbreviation": "fpr",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -60,6 +65,7 @@
         },
         "spec": {
             "name": "specificity",
+            "abbreviation": "spec",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": null,
@@ -72,6 +78,7 @@
         },
         "ppv": {
             "name": "positive_predictive_value",
+            "abbreviation": "ppv",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}],
@@ -84,6 +91,7 @@
         },
         "fdr": {
             "name": "false_discovery_rate",
+            "abbreviation": "fdr",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}],
@@ -95,6 +103,7 @@
         },
         "for_": {
             "name": "false_omission_rate",
+            "abbreviation": "for_",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tn": 0, "fn": 0}],
@@ -106,6 +115,7 @@
         },
         "npv": {
             "name": "negative_predictive_value",
+            "abbreviation": "npv",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tn": 0, "fn": 0}],
@@ -117,6 +127,7 @@
         },
         "fbp": {
             "name": "f_beta_plus",
+            "abbreviation": "fbp",
             "lower_bound": 0,
             "upper_bound": null,
             "args": ["tp", "fp", "p", "beta_plus"],
@@ -126,6 +137,7 @@
         },
         "fbm": {
             "name": "f_beta_minus",
+            "abbreviation": "fbm",
             "lower_bound": 0,
             "upper_bound": null,
             "args": ["tn", "fn", "n", "beta_minus"],
@@ -135,6 +147,7 @@
         },
         "f1p": {
             "name": "f1_plus",
+            "abbreviation": "f1p",
             "lower_bound": 0,
             "upper_bound": null,
             "args": ["tp", "fp", "p"],
@@ -145,6 +158,7 @@
         },
         "f1m": {
             "name": "f1_minus",
+            "abbreviation": "f1m",
             "lower_bound": 0,
             "upper_bound": null,
             "args": ["tn", "fn", "n"],
@@ -154,6 +168,7 @@
         },
         "upm": {
             "name": "unified_performance_measure",
+            "abbreviation": "upm",
             "lower_bound": 0,
             "upper_bound": null,
             "nans": [{"tp": 0, "tn": 0}],
@@ -166,6 +181,7 @@
         },
         "gm": {
             "name": "geometric_mean",
+            "abbreviation": "gm",
             "lower_bound": 0,
             "upper_bound": 1,
             "sqrt": true,
@@ -178,6 +194,7 @@
         },
         "fm": {
             "name": "fowlkes_mallows_index",
+            "abbreviation": "fm",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}],
@@ -191,6 +208,7 @@
         },
         "mk": {
             "name": "markedness",
+            "abbreviation": "mk",
             "lower_bound": 0,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}],
@@ -204,6 +222,7 @@
         },
         "lrp": {
             "name": "positive_likelihood_ratio",
+            "abbreviation": "lrp",
             "lower_bound": 0,
             "nans": [{"fp": 0}],
             "short_args": ["tpr", "fpr"],
@@ -215,6 +234,7 @@
         },
         "lrn": {
             "name": "negative_likelihood_ratio",
+            "abbreviation": "lrn",
             "lower_bound": 0,
             "nans": [{"tn": 0}],
             "short_args": ["tnr", "fnr"],
@@ -226,6 +246,7 @@
         },
         "mcc": {
             "name": "matthews_correlation_coefficient",
+            "abbreviation": "mcc",
             "lower_bound": -1,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
@@ -239,6 +260,7 @@
         },
         "bm": {
             "name": "bookmaker_informedness",
+            "abbreviation": "bm",
             "lower_bound": 0,
             "upper_bound": 1,
             "short_args": ["tpr", "tnr"],
@@ -251,6 +273,7 @@
         },
         "pt": {
             "name": "prevalence_threshold",
+            "abbreviation": "pt",
             "sqrt": true,
             "short_args": ["tpr", "fpr"],
             "short_formula": "(sqrt(tpr*fpr) - fpr)/(tpr - fpr)",
@@ -261,6 +284,7 @@
         },
         "dor": {
             "name": "diagnostic_odds_ratio",
+            "abbreviation": "dor",
             "lower_bound": 0,
             "nans": [{"tn": "n"}, {"tp": "p"}],
             "short_args": ["lrp", "lrn"],
@@ -272,6 +296,7 @@
         },
         "ji": {
             "name": "jaccard_index",
+            "abbreviation": "ji",
             "lower_bound": 0,
             "args": ["tp", "fp", "p"],
             "formula": "tp/(fp + p)",
@@ -281,6 +306,7 @@
         },
         "bacc": {
             "name": "balanced_accuracy",
+            "abbreviation": "bacc",
             "lower_bound": 0,
             "upper_bound": 1,
             "short_args": ["tpr", "tnr"],
@@ -292,6 +318,7 @@
         },
         "kappa": {
             "name": "cohens_kappa",
+            "abbreviation": "kappa",
             "nans": [{"tn": 0, "tp": 0}],
             "args": ["tp", "tn", "p", "n"],
             "formula": "(2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))",
@@ -300,6 +327,7 @@
         },
         "p4": {
             "name": "p4",
+            "abbreviation": "p4",
             "lower_bound": 0,
             "upper_bound": 1,
             "args": ["tp", "tn", "p", "n"],

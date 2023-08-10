@@ -6,8 +6,8 @@ import numpy as np
 
 from sympy import Symbol
 
-from mlscorecheck.core import (Interval, IntervalUnion,
-                               SymbolicInterval, SymbolicIntervalUnion)
+from mlscorecheck.core import (Interval, IntervalUnion)
+from mlscorecheck.utils import (SymbolicInterval, SymbolicIntervalUnion)
 
 def test_equality():
     """

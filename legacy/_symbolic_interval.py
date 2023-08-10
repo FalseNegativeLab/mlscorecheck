@@ -5,10 +5,10 @@ This module implements the interval arithmetics
 import numpy as np
 import sympy
 
-from ._interval import Interval, IntervalUnion
+from ..core import Interval, IntervalUnion
 
 __all__ = ['SymbolicInterval',
-           'SymbolicIntervalUnion']
+            'SymbolicIntervalUnion']
 
 class SymbolicInterval:
     """

@@ -99,6 +99,18 @@ def check_2v1(intervals,
         tp = tp.shrink_to_integers()
         tn = tn.shrink_to_integers()
 
+        tp = tp.intersection(Interval(0, p))
+        tn = tn.intersection(Interval(0, n))
+
+        if tp.is_empty():
+            res['solution'] = result
+            res['consistency'] = False
+            res['explanation'] = f'tp interval does not contain suitable integers {tp}'
+        elif tn.is_empty():
+            res['solution'] = result
+            res['consistency'] = False
+            res['explanation'] = f'tn interval does not contain suitable integers {tn}'
+
         params = {**result['results']}
 
         params['p'] = p
@@ -137,8 +149,6 @@ def check(scores, p, n, eps):
     intervals = create_intervals(scores, eps)
 
     problems = create_problems_2(list(scores.keys()))
-
-    print(intervals)
 
     results = [check_2v1(intervals, problem, p, n) for problem in problems]
 
