@@ -311,7 +311,7 @@ class SageAlgebra(Algebra):
         """
         Algebra.__init__(self)
 
-        self.algebra = importlib.import_module("sage").all
+        self.algebra = importlib.import_module("sage.all")
         self.sqrt = self.algebra.sqrt
 
     def create_symbol(self, name, **kwargs):
@@ -409,7 +409,7 @@ class SageAlgebra(Algebra):
         Returns:
             list: the list of arguments
         """
-        return expression.args()
+        return set(expression.args())
 
     def is_trivial(self, expression):
         """
@@ -453,7 +453,7 @@ class SageAlgebra(Algebra):
         Returns:
             list: the operands
         """
-        return expression.operands()
+        return tuple(expression.operands())
 
     def free_symbols(self, expression):
         """
@@ -506,4 +506,3 @@ class Symbols:
                 'beta_plus': self.beta_plus,
                 'beta_minus': self.beta_minus,
                 'sqrt': self.sqrt}
-

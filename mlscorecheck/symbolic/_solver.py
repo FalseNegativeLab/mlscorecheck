@@ -2,7 +2,7 @@
 This module implements the problem solver
 """
 
-from ..core import logger
+from ..core import logger, Solutions
 
 __all__ = ['ProblemSolver']
 
@@ -72,6 +72,7 @@ class ProblemSolver:
             self: the solver object
         """
         self.solutions = []
+        self.real_solutions = []
 
         equation0 = self.score0.equation_polynomial
         equation1 = self.score1.equation_polynomial
@@ -135,6 +136,7 @@ class ProblemSolver:
                                 var1: algebra.free_symbols(sol[var1])}
 
                 self.solutions.append({'expressions': {key: str(item) for key, item in sol.items()}, 'symbols': sol_symbols})
+                self.real_solutions.append({'expressions': {key: item for key, item in sol.items()}, 'symbols': sol_symbols})
 
         return self
 
@@ -145,11 +147,12 @@ class ProblemSolver:
         self.denoms = []
         self.bases = []
 
-        for solution in self.solutions:
+        for solution in self.real_solutions:
             denoms_sol = set()
             bases_sol = set()
 
             for _, item in solution['expressions'].items():
+                print(item.__class__)
                 denoms, bases = collect_denominators_and_bases(item, self.score0.symbols.algebra)
                 denoms = list(denoms)
                 bases = list(bases)

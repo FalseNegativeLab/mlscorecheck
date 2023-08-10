@@ -4,8 +4,8 @@ This module tests the functionalities of the algebra abstractions
 
 import pytest
 
-from mlscorecheck.utils import symbolic_toolkits
-from mlscorecheck.utils import Algebra, SympyAlgebra, SageAlgebra
+from mlscorecheck.symbolic import symbolic_toolkits
+from mlscorecheck.symbolic import Algebra, SympyAlgebra, SageAlgebra
 
 @pytest.mark.skipif('sympy' not in symbolic_toolkits, reason='sympy not installed')
 def test_sympy_algebra():
@@ -33,15 +33,15 @@ def test_sympy_algebra():
     assert alg.args(p + tp) == {p, tp}
 
     assert alg.is_trivial(None)
-    assert alg.is_trivial(1)
+    assert alg.is_trivial(alg.simplify(p/p))
     assert not alg.is_trivial(p)
 
     assert alg.is_root(tp**0.5)
     assert not alg.is_root(tp)
 
-    assert alg.operands(tp + p**2) == (tp, p**2)
+    assert sorted(map(str, list(alg.operands(tp + p**2)))) == sorted(map(str, [tp, p**2]))
 
-    assert sorted(alg.free_symbols(tp + p)) == sorted(['p', 'tp'])
+    assert sorted(map(str, alg.free_symbols(tp + p))) == sorted(map(str, ['p', 'tp']))
 
 @pytest.mark.skipif('sage' not in symbolic_toolkits, reason='sage not installed')
 def test_sage_algebra():
@@ -69,12 +69,12 @@ def test_sage_algebra():
     assert alg.args(p + tp) == {p, tp}
 
     assert alg.is_trivial(None)
-    assert alg.is_trivial(1)
+    assert alg.is_trivial(alg.simplify(p/p))
     assert not alg.is_trivial(p)
 
     assert alg.is_root(tp**0.5)
     assert not alg.is_root(tp)
 
-    assert alg.operands(tp + p**2) == (tp, p**2)
+    assert sorted(map(str, list(alg.operands(tp + p**2)))) == sorted(map(str, [tp, p**2]))
 
-    assert sorted(alg.free_symbols(tp + p)) == sorted(['p', 'tp'])
+    assert sorted(map(str, alg.free_symbols(tp + p))) == sorted(map(str, ['p', 'tp']))
