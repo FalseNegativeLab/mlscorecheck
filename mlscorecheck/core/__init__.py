@@ -11,3 +11,5 @@ from ._score_loaders import *
 from ._interval import *
 from ._solutions import *
 from ._check import *
+from ._expression import *
+from ._safe_eval import *

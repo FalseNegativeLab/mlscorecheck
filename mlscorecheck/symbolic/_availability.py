@@ -2,24 +2,40 @@
 This module implements a function to check if a symbolic toolkit is available
 """
 
+import importlib
+
 __all__ = ['symbolic_toolkits',
-            'get_symbolic_toolkit']
+            'get_symbolic_toolkit',
+            'check_importability']
 
 symbolic_toolkits = []
 
-try:
-    import sympy
-    symbolic_toolkits.append('sympy')
-except ImportError as exception:
-    pass
+def check_importability(package):
+    """
+    Tests the importability of a package
 
-try:
-    import sage
-    symbolic_toolkits.append('sage')
-except ImportError as exception:
-    pass
+    Args:
+        str: the name of the package
+
+    Returns:
+        str/None: the name of the package if importable or None if not importable
+    """
+    try:
+        module = importlib.import_module(package)
+        return package
+    except ModuleNotFoundError as exception:
+        return None
+
+symbolic_toolkits.append(check_importability('sympy'))
+symbolic_toolkits.append(check_importability('sage'))
+
+symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
 
 def get_symbolic_toolkit():
-    if len(symbolic_toolkits) > 0:
-        return symbolic_toolkits[0]
-    return None
+    """
+    Returns the name of an available symbolic toolkit (in sympy, sage order)
+
+    Returns:
+        str: the name of the available module
+    """
+    return symbolic_toolkits[0] if len(symbolic_toolkits) > 0 else None

@@ -5,19 +5,7 @@ This module implements the interval arithmetics
 import numpy as np
 
 __all__ = ['Interval',
-            'IntervalUnion',
-            'union']
-
-def union(intervals):
-    if len(intervals) == 1:
-        return intervals[0]
-
-    union_tmp = intervals[0]
-
-    for idx in range(1, len(intervals)):
-        union_tmp = union_tmp.union(intervals[idx])
-
-    return union_tmp
+            'IntervalUnion']
 
 class Interval:
     """
@@ -228,7 +216,7 @@ class Interval:
 
         if (other.lower_bound > 0) or (other.upper_bound < 0):
             return self * Interval(1.0/other.upper_bound,
-                                   1.0/other.lower_bound)
+                                    1.0/other.lower_bound)
 
         if (other.upper_bound == 0) and (other.lower_bound != 0):
             return self * Interval(-np.inf, 1.0/other.lower_bound)
@@ -292,6 +280,9 @@ class Interval:
         return not self.__eq__(other)
 
     def __neg__(self):
+        """
+        The negation operator
+        """
         return (-1)*self
 
 
@@ -377,12 +368,12 @@ class IntervalUnion:
 
         Returns:
             IntervalUnion: the intersection, empty interval union if the intersection
-                           is empty
+                            is empty
         """
         if isinstance(other, Interval):
             new_intervals = [other.intersection(interval) for interval in self.intervals]
             new_intervals = [interval for interval in new_intervals
-                                      if not interval == Interval(1, 0)]
+                                        if not interval == Interval(1, 0)]
             return IntervalUnion(new_intervals)
 
         intersections = []
@@ -403,10 +394,24 @@ class IntervalUnion:
 
         return any([interval.integer() for interval in self.intervals])
 
-    def shrink_to_integer(self):
-        return IntervalUnion([interval.shrink_to_integer() for interval in self.intervals])
+    def shrink_to_integers(self):
+        """
+        Shrinking the interval to integer boundaries
+
+        Returns:
+            IntervalUnion: the shrinked interval union
+        """
+        return IntervalUnion([interval.shrink_to_integers() for interval in self.intervals])
 
     def is_empty(self):
+        """
+        Checking if the interval union is empty
+
+        Returns:
+            bool: whether the interval union is empty
+        """
+        if len(self.intervals) == 0:
+            return True
         return all(interval.is_empty() for interval in self.intervals)
 
     def __add__(self, other):
@@ -557,6 +562,9 @@ class IntervalUnion:
         return other / self
 
     def __neg__(self):
+        """
+        The negation operator
+        """
         return (-1)*self
 
     def __repr__(self):
@@ -580,6 +588,9 @@ class IntervalUnion:
             bool: whether the objects equal
         """
         if not isinstance(other, IntervalUnion):
+            if isinstance(other, Interval):
+                if len(self.intervals) == 1:
+                    return self.intervals[0] == other
             return False
 
         if len(self.intervals) != len(other.intervals):

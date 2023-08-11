@@ -22,6 +22,12 @@ def test_interval_repr():
     """
     assert Interval(0, 1).__repr__() == '(0, 1)'
 
+def test_to_tuple():
+    """
+    Testing the tuple conversion
+    """
+    assert Interval(0, 1).to_tuple() == (0, 1)
+
 def test_interval_addition():
     """
     Testing the interval addition
@@ -189,6 +195,15 @@ def test_interval_division_composite():
     assert div1.intervals[1].lower_bound == min(terms)
     assert div1.intervals[1].upper_bound == max(terms)
 
+def test_interval_union_to_tuple():
+    """
+    Testing the tuple conversion of interval union
+    """
+
+    intu = IntervalUnion([Interval(0, 1), Interval(3, 4)])
+
+    assert intu.to_tuple() == [(0, 1), (3, 4)]
+
 def test_interval_union_simplify():
     """
     Testing the interval union simplification
@@ -196,10 +211,10 @@ def test_interval_union_simplify():
 
     # simple
     intun = IntervalUnion([Interval(1, 2),
-                           Interval(3, 5),
-                           Interval(4, 6),
-                           Interval(5, 8),
-                           Interval(10, 11)])
+                            Interval(3, 5),
+                            Interval(4, 6),
+                            Interval(5, 8),
+                            Interval(10, 11)])
 
     assert len(intun.intervals) == 3
     assert intun.intervals[1].lower_bound == 3
@@ -207,10 +222,10 @@ def test_interval_union_simplify():
 
     # shuffled
     intun = IntervalUnion([Interval(1, 2),
-                           Interval(3, 5),
-                           Interval(10, 11),
-                           Interval(5, 8),
-                           Interval(4, 6)])
+                            Interval(3, 5),
+                            Interval(10, 11),
+                            Interval(5, 8),
+                            Interval(4, 6)])
 
     assert len(intun.intervals) == 3
     assert intun.intervals[1].lower_bound == 3
@@ -218,12 +233,12 @@ def test_interval_union_simplify():
 
     # subsets
     intun = IntervalUnion([Interval(1.5, 1.6),
-                           Interval(1, 2),
-                           Interval(3, 5),
-                           Interval(4, 6),
-                           Interval(5, 8),
-                           Interval(10, 11),
-                           Interval(4, 4)])
+                            Interval(1, 2),
+                            Interval(3, 5),
+                            Interval(4, 6),
+                            Interval(5, 8),
+                            Interval(10, 11),
+                            Interval(4, 4)])
 
     assert len(intun.intervals) == 3
     assert intun.intervals[1].lower_bound == 3
@@ -231,9 +246,9 @@ def test_interval_union_simplify():
 
     # first union
     intun = IntervalUnion([Interval(3, 5),
-                           Interval(4, 6),
-                           Interval(5, 8),
-                           Interval(10, 11)])
+                            Interval(4, 6),
+                            Interval(5, 8),
+                            Interval(10, 11)])
 
     assert len(intun.intervals) == 2
     assert intun.intervals[0].lower_bound == 3
@@ -241,9 +256,9 @@ def test_interval_union_simplify():
 
     # last union
     intun = IntervalUnion([Interval(1, 2),
-                           Interval(3, 5),
-                           Interval(4, 6),
-                           Interval(5, 8)])
+                            Interval(3, 5),
+                            Interval(4, 6),
+                            Interval(5, 8)])
 
     assert len(intun.intervals) == 2
     assert intun.intervals[1].lower_bound == 3
@@ -251,10 +266,10 @@ def test_interval_union_simplify():
 
     # duplicate
     intun = IntervalUnion([Interval(1, 2),
-                           Interval(3, 5),
-                           Interval(1, 2),
-                           Interval(5, 8),
-                           Interval(10, 11)])
+                            Interval(3, 5),
+                            Interval(1, 2),
+                            Interval(5, 8),
+                            Interval(10, 11)])
 
     assert len(intun.intervals) == 3
     assert intun.intervals[1].lower_bound == 3
@@ -262,10 +277,10 @@ def test_interval_union_simplify():
 
     # all one
     intun = IntervalUnion([Interval(4, 4),
-                           Interval(3, 5),
-                           Interval(4, 6),
-                           Interval(5, 8),
-                           Interval(4, 7)])
+                            Interval(3, 5),
+                            Interval(4, 6),
+                            Interval(5, 8),
+                            Interval(4, 7)])
 
     assert len(intun.intervals) == 1
     assert intun.intervals[0].lower_bound == 3
@@ -514,9 +529,12 @@ def test_union_intersection():
     assert IntervalUnion([Interval(0, 1), Interval(2, 3)])\
             .intersection(IntervalUnion([Interval(0.5, 2.5), Interval(2.8, 3.2)])) == \
             IntervalUnion([Interval(0, 1).intersection(Interval(0.5, 2.5)),
-                           Interval(0, 1).intersection(Interval(2.8, 3.2)),
-                           Interval(2, 3).intersection(Interval(0.5, 2.5)),
-                           Interval(2, 3).intersection(Interval(2.8, 3.2))])
+                            Interval(0, 1).intersection(Interval(2.8, 3.2)),
+                            Interval(2, 3).intersection(Interval(0.5, 2.5)),
+                            Interval(2, 3).intersection(Interval(2.8, 3.2))])
+
+    assert IntervalUnion([Interval(0, 1), Interval(1, 2)])\
+            .intersection(Interval(0.5, 1.5)) == Interval(0.5, 1.5)
 
 def test_union_integer():
     """
@@ -553,3 +571,38 @@ def test_union_contains():
     assert not IntervalUnion([Interval(-0.6, -0.5)]).contains(0)
     assert not IntervalUnion([Interval(0.5, 0.6)]).contains(0)
     assert not IntervalUnion([Interval(-0.6, -0.5), Interval(0.5, 0.6)]).contains(0)
+
+def test_interval_shrink_to_integer():
+    """
+    Testing the shrinking of intervals to integer boundaries
+    """
+
+    assert Interval(0.2, 4.5).shrink_to_integers() == Interval(1, 4)
+    assert Interval(0.2, 1.2).shrink_to_integers() == Interval(1, 1)
+    assert Interval(0.2, 0.3).shrink_to_integers() == Interval(1, 0)
+
+def test_interval_union_shrink_to_integer():
+    """
+    Testing shrinking the interval union to integer boundaries
+    """
+
+    assert IntervalUnion([Interval(0.2, 4.5), Interval(6.3, 6.8)])\
+            .shrink_to_integers() == IntervalUnion([Interval(1, 4), Interval(7, 6)])
+
+def test_is_empty():
+    """
+    Testing the is_empty functionalities
+    """
+    assert not Interval(1, 2).is_empty()
+    assert Interval(1, 0).is_empty()
+    assert not IntervalUnion([Interval(1, 2)]).is_empty()
+    assert IntervalUnion([Interval(1, 0)]).is_empty()
+    assert IntervalUnion([]).is_empty()
+
+def test_negation():
+    """
+    Testing the negation operators
+    """
+
+    assert -Interval(0, 1) == Interval(-1, 0)
+    assert -IntervalUnion([Interval(0, 1)]) == IntervalUnion([Interval(-1, 0)])

@@ -4,7 +4,9 @@ This module implements the problem solver
 
 from ..core import logger, Solutions
 
-__all__ = ['ProblemSolver']
+__all__ = ['ProblemSolver',
+            'collect_denominators_and_bases',
+            '_collect_denominators_and_bases']
 
 def _collect_denominators_and_bases(expression, denoms, bases, algebra):
     """
@@ -24,7 +26,7 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
 
     if algebra.is_root(num):
         # fractional exponents are already checked here
-        base, _ = algebra.operands()
+        base, _ = algebra.operands(num)
         bases.append(base)
         _collect_denominators_and_bases(base, denoms, bases, algebra)
     else:
@@ -129,14 +131,21 @@ class ProblemSolver:
                 if sym1 in algebra.args(v0_sol):
                     v0_sol = algebra.subs(v0_sol, v1)
 
-                sol = {var0: algebra.simplify(v0_sol),
+                sol = {var0: {'expression': algebra.simplify(v0_sol),
+                                'symbols': algebra.free_symbols(v0_sol)},
+                        var1: {'expression': algebra.simplify(v1[sym1]),
+                                'symbols': algebra.free_symbols(v1[sym1])}}
+
+                """sol = {var0: algebra.simplify(v0_sol),
                         var1: algebra.simplify(v1[sym1])}
 
                 sol_symbols = {var0: algebra.free_symbols(sol[var0]),
                                 var1: algebra.free_symbols(sol[var1])}
 
-                self.solutions.append({'expressions': {key: str(item) for key, item in sol.items()}, 'symbols': sol_symbols})
-                self.real_solutions.append({'expressions': {key: item for key, item in sol.items()}, 'symbols': sol_symbols})
+                self.solutions.append({'expressions': {key: str(item) for key, item in sol.items()}, 'symbols': sol_symbols})"""
+
+                #self.real_solutions.append({'expressions': {key: item for key, item in sol.items()}, 'symbols': sol_symbols})
+                self.solutions.append(sol)
 
         return self
 
@@ -146,14 +155,14 @@ class ProblemSolver:
         """
         self.denoms = []
         self.bases = []
+        self.str_solutions = []
 
-        for solution in self.real_solutions:
+        for solution in self.solutions:
             denoms_sol = set()
             bases_sol = set()
 
-            for _, item in solution['expressions'].items():
-                print(item.__class__)
-                denoms, bases = collect_denominators_and_bases(item, self.score0.symbols.algebra)
+            for item, sol in solution.items():
+                denoms, bases = collect_denominators_and_bases(sol['expression'], self.score0.symbols.algebra)
                 denoms = list(denoms)
                 bases = list(bases)
                 denoms_sol = denoms_sol.union(set(denoms))
@@ -164,6 +173,7 @@ class ProblemSolver:
 
             self.denoms.append(denoms_sol)
             self.bases.append(bases_sol)
+            self.str_solutions.append({str(key): {key2: str(value2) if key2 == 'expression' else value2 for key2, value2 in value.items()} for key, value in solution.items()})
 
     def get_solution(self):
         """
@@ -173,16 +183,12 @@ class ProblemSolver:
             Solution: the solution object
         """
         results = []
-        for solution, denoms, bases in zip(self.solutions, self.denoms, self.bases):
-            sol_str = {str(key): item for key, item in solution.items()}
-            denom_str = denoms
-            base_str = bases
+        for solution, denoms, bases in zip(self.str_solutions, self.denoms, self.bases):
+            results.append({'solution': solution,
+                            'non_zero': denoms,
+                            'non_negative': bases})
 
-            results.append({'solution': sol_str,
-                            'non_zero': denom_str,
-                            'non_negative': base_str})
-
-        solution = Solutions(scores=[self.score0.to_dict(), self.score1.to_dict()],
+        solution = Solutions(scores=[self.score0.abbreviation, self.score1.abbreviation],
                             solutions=results)
 
         return solution

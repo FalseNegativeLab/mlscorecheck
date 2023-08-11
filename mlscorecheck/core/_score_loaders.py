@@ -124,6 +124,6 @@ def score_function_complementers():
     """
     return {'fdr': 'ppv',
             'for_': 'npv',
-            'fnr': 'tpr',
-            'fpr': 'tnr',
+            'fnr': 'sens',
+            'fpr': 'spec',
             'err': 'acc'}

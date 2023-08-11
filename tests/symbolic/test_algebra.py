@@ -5,7 +5,7 @@ This module tests the functionalities of the algebra abstractions
 import pytest
 
 from mlscorecheck.symbolic import symbolic_toolkits
-from mlscorecheck.symbolic import Algebra, SympyAlgebra, SageAlgebra
+from mlscorecheck.symbolic import Algebra, SympyAlgebra, SageAlgebra, Symbols
 
 @pytest.mark.skipif('sympy' not in symbolic_toolkits, reason='sympy not installed')
 def test_sympy_algebra():
@@ -53,6 +53,12 @@ def test_sage_algebra():
 
     assert alg.create_symbol('tp') is not None
 
+    assert alg.create_symbol('x', nonnegative=True) is not None
+    assert alg.create_symbol('y', positive=True) is not None
+    assert alg.create_symbol('z', negative=True) is not None
+    assert alg.create_symbol('a', nonpositive=True) is not None
+    assert alg.create_symbol('b', real=True) is not None
+
     assert alg.create_symbol('tp', lower_bound=0, upper_bound=1) is not None
 
     tp = alg.create_symbol('tp')
@@ -78,3 +84,23 @@ def test_sage_algebra():
     assert sorted(map(str, list(alg.operands(tp + p**2)))) == sorted(map(str, [tp, p**2]))
 
     assert sorted(map(str, alg.free_symbols(tp + p))) == sorted(map(str, ['p', 'tp']))
+
+@pytest.mark.skipif('sympy' not in symbolic_toolkits, reason='sympy not installed')
+def test_symbols_sympy():
+    """
+    Testing the base symbols with sympy
+    """
+
+    symbols = Symbols(algebraic_system='sympy')
+
+    assert len(symbols.to_dict()) == 7
+
+@pytest.mark.skipif('sage' not in symbolic_toolkits, reason='sage not installed')
+def test_symbols_sage():
+    """
+    Testing the base symbols with sympy
+    """
+
+    symbols = Symbols(algebraic_system='sage')
+
+    assert len(symbols.to_dict()) == 7

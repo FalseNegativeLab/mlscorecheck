@@ -2,20 +2,17 @@
 This module imports the solutions
 """
 
-from io import StringIO
-
 from importlib.resources import files
 
 import json
 
 from ._interval import Interval, IntervalUnion
+from ._expression import Expression
 
 __all__ = ['load_solutions',
             'load_scores',
             'Solution',
-            'Solutions',
-            'ZeroDivision',
-            'NegativeBase']
+            'Solutions']
 
 def load_solutions():
     sio = files('mlscorecheck').joinpath('core/solutions.json').read_text() # pylint: disable=unspecified-encoding
@@ -25,7 +22,7 @@ def load_solutions():
     results = {}
 
     for sol in solutions['solutions']:
-        scores = [score['descriptor']['abbreviation'] for score in sol['scores']]
+        scores = [score for score in sol['scores']]
         results[tuple(sorted(scores))] = Solutions(**sol)
 
     return results
@@ -36,32 +33,6 @@ def load_scores():
     scores = json.loads(sio)
 
     return scores['scores']
-
-class ZeroDivision(Exception):
-    """
-    An exception indicating zero division
-    """
-    def __init__(self, expression):
-        """
-        The constructor of the exception
-
-        Args:
-            expression (dict): the expression and its value
-        """
-        self.expression = expression
-
-class NegativeBase(BaseException):
-    """
-    An exception indicating the root of a negative number
-    """
-    def __init__(self, expression):
-        """
-        The constructor of the exception
-
-        Args:
-            expression (dict): the expression and its value
-        """
-        self.expression = expression
 
 class Solution:
     """
@@ -84,23 +55,17 @@ class Solution:
         self.non_zero = non_zero
         self.non_negative = non_negative
 
-        #print(self.solution)
-        #print(self.non_zero)
-        #print(self.non_negative)
-
         # extracting all symbols
         self.all_symbols = set()
 
-        for _, item in self.solution['symbols'].items():
-            self.all_symbols = self.all_symbols.union(set(item))
+        for key, item in self.solution.items():
+            self.all_symbols = self.all_symbols.union(item['symbols'])
 
         for non_zero in self.non_zero:
             self.all_symbols = self.all_symbols.union(non_zero['symbols'])
 
         for non_negative in self.non_negative:
             self.all_symbols = self.all_symbols.union(non_negative['symbols'])
-
-        #print(self.all_symbols)
 
     def to_dict(self):
         """
@@ -133,10 +98,8 @@ class Solution:
         Returns:
             bool: the result of the check
         """
-        non_zeros = {non_zero['expression']: eval(non_zero['expression'], subs)
+        non_zeros = {non_zero['expression']: Expression(**non_zero).evaluate(subs)
                                 for non_zero in self.non_zero}
-
-        #print(non_zeros)
 
         return self.check_non_zeros(non_zeros)
 
@@ -164,7 +127,7 @@ class Solution:
         Returns:
             bool: the result of the check
         """
-        non_negatives = {non_negative['expression']: eval(non_negative['expression'], subs)
+        non_negatives = {non_negative['expression']: Expression(**non_negative).evaluate(subs)
                                 for non_negative in self.non_negative}
 
         return self.check_non_negatives(non_negatives)
@@ -178,24 +141,22 @@ class Solution:
 
         Returns:
             dict: the results
-
-        Throws:
-            ZeroDivision: when zero division occurs
-            NegativeBase: when the root of a negative number is taken
         """
         subs = {key: subs[key] for key in self.all_symbols}
 
-        non_zero = self.non_zero_conditions(subs)
+        if non_zero := self.non_zero_conditions(subs):
+            return {'tp': None,
+                    'tn': None,
+                    'message': 'zero division',
+                    'denominator': non_zero}
 
-        if non_zero:
-            raise ZeroDivision(expression=non_zero)
+        if non_negative := self.non_negative_conditions(subs):
+            return {'tp': None,
+                    'tn': None,
+                    'message': 'negative base',
+                    'base': non_negative}
 
-        non_negative = self.non_negative_conditions(subs)
-
-        if non_negative:
-            raise NegativeBase(expression=non_negative)
-
-        return {key: eval(value, subs) for key, value in self.solution['expressions'].items()}
+        return {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
 
 class Solutions:
     """
@@ -238,21 +199,7 @@ class Solutions:
         results = []
 
         for sol in self.solutions:
-            try:
-                res = sol.evaluate(subs)
-                res['message'] = None
-            except ZeroDivision as exc:
-                res = {'tp': None,
-                        'tn': None,
-                        'message': 'zero division error',
-                        'denominator': exc.expression}
-            except NegativeBase as exc:
-                res = {'tp': None,
-                        'tn': None,
-                        'message': 'negative base',
-                        'base': exc.expression}
-            tmp = {'formula': sol.solution['expressions'],
-                    'results': res}
-            results.append(tmp)
+            res = sol.evaluate(subs)
+            results.append({**res})
 
         return results

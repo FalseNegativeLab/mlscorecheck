@@ -42,10 +42,11 @@ __all__ = ['Score',
             'BalancedAccuracy',
             'CohensKappa',
             'P4',
-            'get_base_objects']
+            'get_base_objects',
+            'get_all_objects']
 
 scores = load_scores()
-functions = score_functions_standardized()
+functions = score_functions_standardized(complements=True)
 
 class Score:
     """
@@ -56,7 +57,6 @@ class Score:
                     descriptor,
                     *,
                     function,
-                    symbol=None,
                     expression=None,
                     equation=None,
                     equation_polynomial=None):
@@ -65,15 +65,8 @@ class Score:
 
         Args:
             symbols (Symbol): A Symbols object representing the base kit of symbols to use
-            abbreviation (str): the abbreviation
-            name (str): the name of the score
+            descriptor (dict): a dictionary descriptor of the score
             function (callable): the functional form
-            nans (list/None): the list of configurations when the score cannot be computed
-            range_ (tuple/None): the lower and upper bound
-            symbol (sympy/sage): the algebraic symbol
-            synonyms (list/None): the synonyms if any
-            complement (list/None): the complements
-            args (list/None): the list of arguments
             expression (sympy/sage/None): the expression of the score
             equation (sympy/sage/None): the equation form
             equation_polynomial (sympy/sage/None): the equation in polynomial form
@@ -87,20 +80,19 @@ class Score:
         complement = descriptor.get('complement', None)
         args = descriptor.get('args_standardized')
         range_ = (descriptor.get('lower_bound', -np.inf), descriptor.get('upper_bound', -np.inf))
+        sqrt = descriptor.get('sqrt', False)
 
         # setting the base kit of symbols
 
         self.symbols = symbols
 
         # setting the symbol
-        if symbol is None:
-            kwargs = {}
-            if range_ is not None:
-                kwargs['lower_bound'] = range_[0]
-                kwargs['upper_bound'] = range_[1]
-            self.symbol = self.symbols.algebra.create_symbol(abbreviation, real=True, **kwargs)
-        else:
-            self.symbol = symbol
+        kwargs = {}
+        if range_ is not None:
+            kwargs['lower_bound'] = range_[0]
+            kwargs['upper_bound'] = range_[1]
+        self.symbol = self.symbols.algebra.create_symbol(abbreviation, real=True, **kwargs)
+
 
         self.abbreviation = abbreviation
         self.name = name
@@ -115,20 +107,19 @@ class Score:
             self.function = function
 
         # generating the list of arguments
-        if args is None:
-            self.args = list(function.__code__.co_varnames[:function.__code__.co_kwonlyargcount])
-        else:
-            self.args = args
+        self.args = args
 
         # handling the case of sqrt expressions
-        self.sqrt = 'sqrt' in self.args
-        self.args = [arg for arg in self.args if arg != 'sqrt']
+        self.sqrt = sqrt
 
         self.synonyms = synonyms
         self.complement = complement
 
         # generating the list of argument symbols
         arg_symbols = {arg: getattr(symbols, arg) for arg in self.args}
+
+        if self.sqrt:
+            arg_symbols['sqrt'] = symbols.sqrt
 
         # setting the expression
         if expression is not None:
@@ -747,6 +738,19 @@ def get_base_objects(algebraic_system='sympy'):
                                                         NegativePredictiveValue,
                                                         BalancedAccuracy,
                                                         F1Plus]]
+    score_objects = {obj.abbreviation: obj for obj in score_objects}
+
+    return score_objects
+
+def get_all_objects(algebraic_system='sympy'):
+    """
+    Returns the dict of basic score objects
+
+    Returns:
+        dict: the dictionary of basic score objects
+    """
+    symbols = Symbols(algebraic_system=algebraic_system)
+    score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
     score_objects = {obj.abbreviation: obj for obj in score_objects}
 
     return score_objects
