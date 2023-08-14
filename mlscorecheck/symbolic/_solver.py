@@ -18,20 +18,32 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
         bases (list): the list of already collected bases
         algebra (Algebra): the algebra to be used
     """
-    num, denom = algebra.num_denom(algebra.simplify(expression))
+    print('processing', expression)
+    #simplified = algebra.simplify(expression)
 
-    if not algebra.is_trivial(denom):
-        denoms.append(denom)
-        _collect_denominators_and_bases(denom, denoms, bases, algebra)
+    if algebra.is_division(expression):
+        num, denom = algebra.num_denom(expression)
+        num = algebra.simplify(num)
+        denom = algebra.simplify(denom)
+        print('nd', num, denom)
 
-    if algebra.is_root(num):
+        if not algebra.is_trivial(denom):
+            denoms.append(denom)
+            _collect_denominators_and_bases(denom, denoms, bases, algebra)
+        _collect_denominators_and_bases(num, denoms, bases, algebra)
+    elif algebra.is_root(expression):
         # fractional exponents are already checked here
-        base, _ = algebra.operands(num)
+        base, _ = algebra.operands(expression)
         bases.append(base)
-        _collect_denominators_and_bases(base, denoms, bases, algebra)
-    else:
-        for operand in algebra.operands(num):
+        print('base', base)
+
+        for operand in algebra.operands(base):
             _collect_denominators_and_bases(operand, denoms, bases, algebra)
+    else:
+        for operand in algebra.operands(expression):
+            if not algebra.is_trivial(operand):
+                _collect_denominators_and_bases(operand, denoms, bases, algebra)
+
     return
 
 def collect_denominators_and_bases(expression, algebra):
@@ -136,16 +148,14 @@ class ProblemSolver:
                         var1: {'expression': algebra.simplify(v1[sym1]),
                                 'symbols': algebra.free_symbols(v1[sym1])}}
 
-                """sol = {var0: algebra.simplify(v0_sol),
-                        var1: algebra.simplify(v1[sym1])}
+                flag = True
+                if str(sol[var0]['expression']) in [0, 'n', 'p']:
+                    flag = False
+                if str(sol[var1]['expression']) in [0, 'n', 'p']:
+                    flag = False
 
-                sol_symbols = {var0: algebra.free_symbols(sol[var0]),
-                                var1: algebra.free_symbols(sol[var1])}
-
-                self.solutions.append({'expressions': {key: str(item) for key, item in sol.items()}, 'symbols': sol_symbols})"""
-
-                #self.real_solutions.append({'expressions': {key: item for key, item in sol.items()}, 'symbols': sol_symbols})
-                self.solutions.append(sol)
+                if flag:
+                    self.solutions.append(sol)
 
         return self
 
@@ -162,14 +172,21 @@ class ProblemSolver:
             bases_sol = set()
 
             for item, sol in solution.items():
-                denoms, bases = collect_denominators_and_bases(sol['expression'], self.score0.symbols.algebra)
+                print('aaa', sol['expression'])
+                print('bbb', self.score0.symbols.algebra.simplify(sol['expression']))
+                denoms, bases = collect_denominators_and_bases(self.score0.symbols.algebra.simplify(sol['expression']), self.score0.symbols.algebra)
                 denoms = list(denoms)
                 bases = list(bases)
+                print('ccc', denoms)
+                print('ddd', bases)
                 denoms_sol = denoms_sol.union(set(denoms))
                 bases_sol = bases_sol.union(set(bases))
 
-            denoms_sol = [{'expression': str(denom), 'symbols': self.score0.symbols.algebra.free_symbols(denom)} for denom in denoms]
-            bases_sol = [{'expression': str(base), 'symbols': self.score0.symbols.algebra.free_symbols(base)} for base in bases]
+            denoms_sol = [{'expression': str(denom), 'symbols': self.score0.symbols.algebra.free_symbols(denom)} for denom in denoms_sol]
+            bases_sol = [{'expression': str(base), 'symbols': self.score0.symbols.algebra.free_symbols(base)} for base in bases_sol]
+
+            print('EEE', denoms_sol)
+            print('FFF', bases_sol)
 
             self.denoms.append(denoms_sol)
             self.bases.append(bases_sol)

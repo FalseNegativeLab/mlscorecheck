@@ -7,6 +7,11 @@ import numpy as np
 __all__ = ['Interval',
             'IntervalUnion']
 
+def sqrt(obj):
+    if isinstance(obj, (Interval, IntervalUnion)):
+        return obj**(0.5)
+    return np.sqrt(obj)
+
 class Interval:
     """
     The interval abstraction
@@ -21,6 +26,14 @@ class Interval:
         """
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
+
+        if np.isnan(self.lower_bound) or np.isnan(self.upper_bound):
+            self.lower_bound = 1
+            self.upper_bound = 0
+
+        if self.lower_bound > self.upper_bound:
+            self.lower_bound = 1
+            self.upper_bound = 0
 
     def to_tuple(self):
         """
@@ -53,6 +66,8 @@ class Interval:
         Returns:
             Interval: the intersection, [1, 0] if the intersection is empty
         """
+        if isinstance(other, IntervalUnion):
+            return IntervalUnion([self]).intersection(other)
 
         if self.lower_bound >= other.lower_bound and self.upper_bound <= other.upper_bound:
             return Interval(self.lower_bound, self.upper_bound)
@@ -214,15 +229,15 @@ class Interval:
             return Interval(lower_bound=lower_bound,
                             upper_bound=upper_bound)
 
-        if (other.lower_bound > 0) or (other.upper_bound < 0):
-            return self * Interval(1.0/other.upper_bound,
-                                    1.0/other.lower_bound)
-
         if (other.upper_bound == 0) and (other.lower_bound != 0):
             return self * Interval(-np.inf, 1.0/other.lower_bound)
 
         if (other.lower_bound == 0) and (other.upper_bound != 0):
             return self * Interval(1.0/other.upper_bound, np.inf)
+
+        if (other.lower_bound > 0) or (other.upper_bound < 0):
+            return self * Interval(1.0/other.upper_bound,
+                                    1.0/other.lower_bound)
 
         res_0 = Interval(-np.inf, 1.0/other.lower_bound)
         res_1 = Interval(1.0/other.upper_bound, np.inf)
@@ -285,6 +300,20 @@ class Interval:
         """
         return (-1)*self
 
+    def __pow__(self, other):
+
+        tmp = self
+        if other < 1:
+            tmp = self.intersection(Interval(0, np.inf))
+            res = Interval(tmp.lower_bound**other, tmp.upper_bound**other)
+        elif other == 2:
+            if self.lower_bound > 0 or self.upper_bound < 0:
+                lower_bound = self.lower_bound**2
+                upper_bound = self.upper_bound**2
+                res = Interval(min(lower_bound, upper_bound), max(lower_bound, upper_bound))
+            else:
+                res = Interval(0, max(self.lower_bound**2, self.upper_bound**2))
+        return res
 
 class IntervalUnion:
     """
@@ -297,7 +326,18 @@ class IntervalUnion:
         Args:
             intervals (list(Interval)): a list of intervals
         """
-        self.intervals = intervals
+        if isinstance(intervals, Interval):
+            self.intervals = [intervals]
+        elif isinstance(intervals, tuple):
+            self.intervals = [Interval(intervals[0], intervals[1])]
+        elif isinstance(intervals, (list)) and len(intervals) > 0:
+            if isinstance(intervals[0], Interval):
+                self.intervals = intervals
+            else:
+                self.intervals = [Interval(interval[0], interval[1]) for interval in intervals]
+        else:
+            self.intervals = intervals
+
         if len(intervals) > 0:
             self.simplify()
 
@@ -613,3 +653,6 @@ class IntervalUnion:
             bool: whether the objects are not equal
         """
         return not self.__eq__(other)
+
+    def __pow__(self, other):
+        return IntervalUnion([interval**other for interval in self.intervals])

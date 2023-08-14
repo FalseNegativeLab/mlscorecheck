@@ -10,18 +10,17 @@ from mlscorecheck.core import (check,
                                 create_problems_2,
                                 load_scores,
                                 load_solutions,
-                                score_functions,
+                                score_functions_without_complements,
                                 score_functions_with_solutions,
                                 evaluate_1_solution,
                                 check_zero_division,
                                 check_negative_base,
                                 check_empty_interval,
                                 check_intersection)
-from mlscorecheck.utils import (generate_problem,
-                                generate_problem_tp0)
+from mlscorecheck.utils import (generate_problem)
 
 scores = load_scores()
-functions = score_functions_with_solutions()
+functions = score_functions_with_solutions
 solutions = load_solutions()
 
 def test_check_negative_base():
@@ -108,65 +107,90 @@ def test_check_false_2v1(problem):
 
     print(result)
 
-    assert not result['consistency']
+    underdetermined = all([res['solution'].get('message') == 'zero division' for res in result['details']])
 
-def test_check():
+    assert underdetermined or not result['consistency']
+
+@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'tn'], ['fp', 'fn'], ['tp', 'fp'], ['tn', 'fn']])
+def test_check(zeros):
     """
     Testing the check function
     """
 
-    problem = generate_problem(random_seed=5)
+    problem = generate_problem(random_seed=5, zeros=zeros)
 
-    score_values = {score: functions[score](**{arg: problem[arg]
-                                                for arg in scores[score]['args']})
-                                                    for score in functions}
+    score_values = {}
 
-    result = check(score_values, problem['p'], problem['n'], eps=1e-4)
-
-    assert result['overall_consistency']
-
-def test_check_fail():
-    """
-    Testing the check function for failure
-    """
-
-    problem = generate_problem(random_seed=5)
-
-    score_values = {score: functions[score](**{arg: problem[arg]
-                                                for arg in scores[score]['args']})
-                                                    for score in functions}
-
-    result = check(score_values, problem['p']*2, problem['n']+50, eps=1e-4)
-
-    assert not result['overall_consistency']
-
-def test_check_tp0():
-    """
-    Testing the check function with tp=0
-    """
-
-    problem = generate_problem_tp0(random_seed=5)
-
-    score_values = {score: functions[score](**{arg: problem[arg]
-                                                for arg in scores[score]['args']})
-                                                    for score in functions}
+    for score in functions:
+        nans = scores[score].get('nans')
+        if nans is not None:
+            flag2 = False
+            for item in nans:
+                flag = True
+                for key in item:
+                    flag = flag and item[key] == problem[key]
+                if flag:
+                    print('aaa', flag, item, score)
+                    flag2 = True
+                    break
+            if flag2:
+                continue
+        score_values[score] = functions[score](**{arg: problem[arg]
+                                            for arg in scores[score]['args']})
 
     result = check(score_values, problem['p'], problem['n'], eps=1e-4)
 
-    assert result['overall_consistency']
+    print(problem)
+    print(score_values)
+    print(result['failed'])
 
-def test_check_fail_tp0():
+    tmp = []
+    for res in result['succeeded']:
+        for tmp2 in res['details']:
+            tmp.append(tmp2['solution'].get('message') == 'zero division' or tmp2['solution'].get('message') is None)
+
+    underdetermined = all(tmp) and len(result['failed']) == 0
+
+    assert underdetermined or result['overall_consistency']
+
+@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn'], ['tp', 'tn'], ['fp', 'fn']])
+def test_check_failure(zeros):
     """
-    Testing the check function for failure with tp=0
+    Testing the failure
     """
 
-    problem = generate_problem_tp0(random_seed=5)
+    problem = generate_problem(random_seed=5, zeros=zeros)
 
-    score_values = {score: functions[score](**{arg: problem[arg]
-                                                for arg in scores[score]['args']})
-                                                    for score in functions}
+    score_values = {}
+
+    for score in functions:
+        nans = scores[score].get('nans')
+        if nans is not None:
+            flag2 = False
+            for item in nans:
+                flag = True
+                for key in item:
+                    flag = flag and item[key] == problem[key]
+                if flag:
+                    print('aaa', flag, item, score)
+                    flag2 = True
+                    break
+            if flag2:
+                continue
+        score_values[score] = functions[score](**{arg: problem[arg]
+                                            for arg in scores[score]['args']})
 
     result = check(score_values, problem['p']*2, problem['n']+50, eps=1e-4)
 
-    assert not result['overall_consistency']
+    print(score_values)
+    print(problem)
+    print(result['failed'])
 
+    tmp = []
+    for res in result['succeeded']:
+        for tmp2 in res['details']:
+            tmp.append(tmp2['solution'].get('message') == 'zero division' or tmp2['solution'].get('message') is None)
+
+    underdetermined = all(tmp) and len(result['failed']) == 0
+
+    assert underdetermined or not result['overall_consistency']

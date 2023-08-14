@@ -10,7 +10,7 @@ import numpy as np
 from ..core import *
 from ._algebra import *
 from ..core import load_scores
-from ..core import score_functions_standardized
+from ..core import score_functions_standardized_with_complements
 
 __all__ = ['Score',
             'PositiveLikelihoodRatio',
@@ -46,7 +46,7 @@ __all__ = ['Score',
             'get_all_objects']
 
 scores = load_scores()
-functions = score_functions_standardized(complements=True)
+functions = score_functions_standardized_with_complements
 
 class Score:
     """
@@ -101,7 +101,7 @@ class Score:
 
         # setting the score function
         if isinstance(function, str):
-            module = importlib.import_module('mlscorecheck')
+            module = importlib.import_module('mlscorecheck.core')
             self.function = getattr(module, function)
         else:
             self.function = function
@@ -737,7 +737,8 @@ def get_base_objects(algebraic_system='sympy'):
                                                         PositivePredictiveValue,
                                                         NegativePredictiveValue,
                                                         BalancedAccuracy,
-                                                        F1Plus]]
+                                                        F1Plus,
+                                                        FowlkesMallowsIndex]]
     score_objects = {obj.abbreviation: obj for obj in score_objects}
 
     return score_objects

@@ -9,15 +9,15 @@ import pytest
 import numbers
 
 from mlscorecheck.utils import (generate_problem)
-from mlscorecheck.core import (score_functions,
-                                score_functions_standardized,
+from mlscorecheck.core import (score_functions_with_complements,
+                                score_functions_standardized_with_complements,
                                 load_scores,
                                 score_function_aliases)
 
-functions = score_functions(complements=True)
-functions_standardized = score_functions_standardized(complements=True)
+functions = score_functions_with_complements
+functions_standardized = score_functions_standardized_with_complements
 scores = load_scores()
-aliases = score_function_aliases()
+aliases = score_function_aliases
 
 short_formula_scores = {key: score for key, score in scores.items() if 'short_args' in score}
 complement_scores = {key: score for key, score in scores.items() if 'complement' in score}

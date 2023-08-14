@@ -4,11 +4,14 @@ This module implements the main check functionality
 
 import itertools
 
-from ._solutions import (load_solutions)
-from ._score_loaders import (score_functions,
-                            score_functions_standardized, score_function_aliases,
-                            score_function_complementers)
-from ._interval import Interval
+import numpy as np
+
+from ._solutions import (load_solutions, load_scores)
+from ._score_loaders import (score_functions_without_complements,
+                            score_functions_standardized_without_complements,
+                            score_function_aliases,
+                            score_function_complements)
+from ._interval import Interval, IntervalUnion, sqrt
 from ._safe_eval import safe_eval, safe_call
 from ._logger import logger
 
@@ -22,12 +25,13 @@ __all__ = ['check',
             'check_empty_interval',
             'check_intersection']
 
+score_descriptors = load_scores()
 solutions = load_solutions()
 supported_scores = {key[0] for key in solutions}.union({key[1] for key in solutions})
-aliases = score_function_aliases()
-complementers = score_function_complementers()
-functions = score_functions()
-functions_standardized = score_functions_standardized()
+aliases = score_function_aliases
+complementers = score_function_complements
+functions = score_functions_without_complements
+functions_standardized = score_functions_standardized_without_complements
 
 def create_intervals(scores, eps):
     if not isinstance(eps, dict):
@@ -48,6 +52,16 @@ def create_intervals(scores, eps):
             complemented[complementers[key]] = 1.0 - val
         else:
             complemented[key] = val
+
+    for key, val in complemented.items():
+        if key in score_descriptors:
+            lower_bound = score_descriptors[key].get('lower_bound', -np.inf)
+            upper_bound = score_descriptors[key].get('upper_bound', np.inf)
+            if lower_bound is None:
+                lower_bound = -np.inf
+            if upper_bound is None:
+                upper_bound = np.inf
+            complemented[key] = complemented[key].intersection(Interval(lower_bound, upper_bound))
 
     return complemented
 
@@ -80,17 +94,18 @@ def check_empty_interval(interval, name):
     return None
 
 def check_intersection(target, reconstructed):
+
     if target.intersection(reconstructed).is_empty():
         return {'consistency': False,
                 'explanation': f'the target score interval ({target}) and '\
                                 f'the reconstructed intervals ({reconstructed}) '\
                                 'do not intersect',
-                'target_interval_reconstructed': reconstructed}
+                'target_interval_reconstructed': reconstructed.to_tuple()}
     return {'consistency': True,
             'explanation': f'the target score interval ({target}) and '\
                                 f'the reconstructed intervals ({reconstructed}) '\
-                                'do not intersect',
-            'target_interval_reconstructed': reconstructed}
+                                'do intersect',
+            'target_interval_reconstructed': reconstructed.to_tuple()}
 
 
 def evaluate_1_solution(target_interval, result, p, n, score_function):
@@ -101,6 +116,11 @@ def evaluate_1_solution(target_interval, result, p, n, score_function):
     if tmp := check_negative_base(result):
         return tmp
 
+    if not isinstance(result['tp'], (Interval, IntervalUnion)):
+        result['tp'] = Interval(result['tp'], result['tp'])
+    if not isinstance(result['tn'], (Interval, IntervalUnion)):
+        result['tn'] = Interval(result['tn'], result['tn'])
+
     tp = result['tp'].shrink_to_integers().intersection(Interval(0, p))
     tn = result['tn'].shrink_to_integers().intersection(Interval(0, n))
 
@@ -110,7 +130,7 @@ def evaluate_1_solution(target_interval, result, p, n, score_function):
     if tmp := check_empty_interval(tn, 'tn'):
         return tmp
 
-    score = safe_call(score_function, {**result, 'p': p, 'n': n})
+    score = safe_call(score_function, {**result, 'p': p, 'n': n, 'sqrt': sqrt})
 
     return check_intersection(target_interval, score)
 
@@ -138,11 +158,11 @@ def check_2v1(intervals,
     # iterating and evaluating all sub-solutions
     for result in results:
         res = {'score_0': score0,
-                'score_0_interval': intervals[score0],
+                'score_0_interval': intervals[score0].to_tuple(),
                 'score_1': score1,
-                'score_1_interval': intervals[score1],
+                'score_1_interval': intervals[score1].to_tuple(),
                 'target_score': target,
-                'target_interval': intervals[target],
+                'target_interval': intervals[target].to_tuple(),
                 'solution': result}
 
         evaluation = evaluate_1_solution(intervals[target], result, p, n, score_function)

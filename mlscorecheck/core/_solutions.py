@@ -2,9 +2,10 @@
 This module imports the solutions
 """
 
-from importlib.resources import files
-
+import os
 import json
+
+from importlib.resources import files
 
 from ._interval import Interval, IntervalUnion
 from ._expression import Expression
@@ -15,7 +16,7 @@ __all__ = ['load_solutions',
             'Solutions']
 
 def load_solutions():
-    sio = files('mlscorecheck').joinpath('core/solutions.json').read_text() # pylint: disable=unspecified-encoding
+    sio = files('mlscorecheck').joinpath(os.path.join('core', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
 
     solutions = json.loads(sio)
 
@@ -28,7 +29,7 @@ def load_solutions():
     return results
 
 def load_scores():
-    sio = files('mlscorecheck').joinpath('core/scores.json').read_text() # pylint: disable=unspecified-encoding
+    sio = files('mlscorecheck').joinpath(os.path.join('core', 'scores.json')).read_text() # pylint: disable=unspecified-encoding
 
     scores = json.loads(sio)
 
@@ -84,7 +85,7 @@ class Solution:
                 if value.contains(0):
                     return {key: value}
             else:
-                if value == 0:
+                if abs(value) < 1e-8:
                     return {key: value}
         return None
 
@@ -107,10 +108,10 @@ class Solution:
         for key, value in evals.items():
             if isinstance(value, (Interval, IntervalUnion)):
                 if isinstance(value, Interval):
-                    if value.lower_bound < 0:
+                    if value.upper_bound < 0:
                         return {key: value}
                 else:
-                    if any(interval.lower_bound < 0 for interval in value.intervals):
+                    if any(interval.upper_bound < 0 for interval in value.intervals):
                         return {key: value}
             else:
                 if value < 0:
@@ -156,7 +157,16 @@ class Solution:
                     'message': 'negative base',
                     'base': non_negative}
 
-        return {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
+        res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
+        if 'tp' in self.solution:
+            res['tp_formula'] = self.solution['tp']['expression']
+        else:
+            print('no tp', self.solution)
+        if 'tn' in self.solution:
+            res['tn_formula'] = self.solution['tn']['expression']
+        else:
+            print('no tn', self.solution)
+        return res
 
 class Solutions:
     """

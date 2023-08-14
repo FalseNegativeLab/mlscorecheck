@@ -4,24 +4,33 @@ This module implements some loader functions for the scores
 
 from ._scores import *
 from ._scores_standardized import *
-from ._solutions import load_scores
 
-__all__ = ['score_functions',
-            'score_functions_standardized',
+__all__ = ['load_score_functions',
+            'load_score_functions_standardized',
+            'load_score_function_aliases',
+            'load_score_function_complements',
+            'load_score_functions_with_solutions',
+            'score_functions_with_solutions',
+            'score_functions_without_complements',
+            'score_functions_with_complements',
+            'score_functions_standardized_without_complements',
+            'score_functions_standardized_with_complements',
             'score_function_aliases',
-            'score_function_complementers',
-            'score_functions_with_solutions']
+            'score_function_complements']
 
-def score_functions_with_solutions():
+def load_score_functions_with_solutions():
     return {'acc': accuracy,
             'sens': sensitivity,
             'spec': specificity,
             'npv': negative_predictive_value,
             'ppv': positive_predictive_value,
             'bacc': balanced_accuracy,
-            'f1p': f1_plus}
+            'f1p': f1_plus,
+            'fm': fowlkes_mallows_index}
 
-def score_functions(complements=False):
+score_functions_with_solutions = load_score_functions_with_solutions()
+
+def load_score_functions(complements=False):
     """
     Return a set of scores with no aliases
 
@@ -62,7 +71,10 @@ def score_functions(complements=False):
             'p4': p4,
             **comp}
 
-def score_functions_standardized(complements=False):
+score_functions_without_complements = load_score_functions()
+score_functions_with_complements = load_score_functions(True)
+
+def load_score_functions_standardized(complements=False):
     """
     Return a set of scores with no aliases
 
@@ -103,7 +115,10 @@ def score_functions_standardized(complements=False):
             'p4': p4_standardized,
             **comp}
 
-def score_function_aliases():
+score_functions_standardized_without_complements = load_score_functions_standardized()
+score_functions_standardized_with_complements = load_score_functions_standardized(True)
+
+def load_score_function_aliases():
     """
     Returns the alias mapping
 
@@ -113,9 +128,12 @@ def score_function_aliases():
     return {'tpr': 'sens',
             'tnr': 'spec',
             'prec': 'ppv',
-            'rec': 'sens'}
+            'rec': 'sens',
+            'f1': 'f1p'}
 
-def score_function_complementers():
+score_function_aliases = load_score_function_aliases()
+
+def load_score_function_complements():
     """
     Returns the complementer mapping
 
@@ -127,3 +145,5 @@ def score_function_complementers():
             'fnr': 'sens',
             'fpr': 'spec',
             'err': 'acc'}
+
+score_function_complements = load_score_function_complements()

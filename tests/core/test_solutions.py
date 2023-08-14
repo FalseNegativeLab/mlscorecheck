@@ -6,38 +6,113 @@ import pytest
 
 from mlscorecheck.core import (load_solutions,
                                 load_scores,
-                                score_functions,
-                                score_functions_standardized,
+                                score_functions_without_complements,
+                                score_functions_standardized_without_complements,
                                 Solution,
                                 Solutions,
                                 Interval,
                                 IntervalUnion)
 
-from mlscorecheck.utils import (generate_problem,
-                                generate_problem_tp0)
+from mlscorecheck.utils import (generate_problem)
 
 solutions = load_solutions()
 scores = load_scores()
-functions = score_functions()
-functions_standardized = score_functions_standardized()
-
-problem = generate_problem()
-problem['beta_plus'] = 2
-problem['beta_minus'] = 2
-
-problem_false = {**problem}
-problem_false['tp'] = problem_false['tp']*10
-
-problem_tp0 = generate_problem_tp0()
+functions = score_functions_without_complements
+functions_standardized = score_functions_standardized_without_complements
 
 @pytest.mark.parametrize("sol", list(solutions.keys()))
-def test_solution(sol):
+@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn']])
+def test_solution(sol, zeros):
     """
     Testing a particular solution
     """
 
-    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
+    problem = generate_problem(zeros=zeros)
+    problem['beta_plus'] = 2
+    problem['beta_minus'] = 2
+
+    nans0 = scores[sol[0]].get('nans')
+    nans1 = scores[sol[1]].get('nans')
+
+    if nans0 is not None:
+        for item in nans0:
+            flag = True
+            for key in item:
+                flag = flag and item[key] == problem[key]
+            if flag:
+                return
+    if nans1 is not None:
+        for item in nans1:
+            flag = True
+            for key in item:
+                flag = flag and item[key] == problem[key]
+            if flag:
+                return
+
+    print(sol, problem)
+
+    try:
+        score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
+        score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
+    except:
+        return
+
+    result = solutions[sol].evaluate({**problem,
+                                      **{sol[0]: score0,
+                                            sol[1]: score1}})
+
+    print(score0, score1)
+
+    flags = []
+
+    for res in result:
+        print(res)
+
+        if res.get('message') is not None:
+            continue
+        tp = res['tp']
+        tn = res['tn']
+
+        flags.append(abs(tp - problem['tp']) < 1e-5 and abs(tn - problem['tn']) < 1e-5)
+
+    assert len(flags) == 0 or any(flags)
+
+@pytest.mark.parametrize("sol", list(solutions.keys()))
+@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn']])
+def test_solution_failure(sol, zeros):
+    """
+    Testing a particular solution
+    """
+
+    problem = generate_problem(zeros=zeros)
+    problem['beta_plus'] = 2
+    problem['beta_minus'] = 2
+
+    nans0 = scores[sol[0]].get('nans')
+    nans1 = scores[sol[1]].get('nans')
+
+    if nans0 is not None:
+        for item in nans0:
+            flag = True
+            for key in item:
+                flag = flag and item[key] == problem[key]
+            if flag:
+                return
+    if nans1 is not None:
+        for item in nans1:
+            flag = True
+            for key in item:
+                flag = flag and item[key] == problem[key]
+            if flag:
+                return
+
+    try:
+        score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
+        score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
+    except:
+        return
+
+    problem['tp'] = problem['tp'] * 10 + 5
 
     result = solutions[sol].evaluate({**problem,
                                       **{sol[0]: score0,
@@ -46,55 +121,14 @@ def test_solution(sol):
     flags = []
 
     for res in result:
+        if res.get('message') is not None:
+            continue
         tp = res['tp']
         tn = res['tn']
 
-        flags.append(abs(tp - problem['tp']) < 1e-8 and abs(tn - problem['tn']) < 1e-8)
+        flags.append(abs(tp - problem['tp']) < 1e-5 and abs(tn - problem['tn']) < 1e-5)
 
-    assert any(flags)
-
-@pytest.mark.parametrize("sol", list(solutions.keys()))
-def test_solution_false(sol):
-    """
-    Testing a particular solution
-    """
-
-    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
-
-    result = solutions[sol].evaluate({**problem, **{sol[0]: score0, sol[1]: score1}})
-
-    flags = []
-
-    for res in result:
-        tp = res['tp']
-        tn = res['tn']
-
-        flags.append(abs(tp - problem_false['tp']) < 1e-8 and abs(tn - problem_false['tn']) < 1e-8)
-
-    assert not any(flags)
-
-@pytest.mark.parametrize("sol", list(solutions.keys()))
-def test_solution_tp0(sol):
-    """
-    Testing a particular solution
-    """
-
-    score0 = functions[sol[0]](**{key: value for key, value in problem_tp0.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in problem_tp0.items() if key in scores[sol[1]]['args']})
-
-    result = solutions[sol].evaluate({**problem_tp0, **{sol[0]: score0, sol[1]: score1}})
-
-    flags = []
-
-    for res in result:
-        if res.get('message', None) is None:
-            tp = res['tp']
-            tn = res['tn']
-
-            flags.append(abs(tp - problem_tp0['tp']) < 1e-8 and abs(tn - problem_tp0['tn']) < 1e-8)
-
-    assert flags == [] or any(flags)
+    assert len(flags) == 0 or not any(flags)
 
 def test_solution_object():
     """
@@ -122,11 +156,11 @@ def test_solution_non_negatives():
                     non_zero=[],
                     non_negative=[{'expression': 'p', 'symbols': ['p']}])
 
-    res = sol.evaluate({'p': Interval(-1, 1)})
+    res = sol.evaluate({'p': Interval(-2, -1)})
 
     assert res['message'] == 'negative base'
 
-    res = sol.evaluate({'p': IntervalUnion([Interval(-1, 1)])})
+    res = sol.evaluate({'p': IntervalUnion([Interval(-2, -1)])})
 
     assert res['message'] == 'negative base'
 

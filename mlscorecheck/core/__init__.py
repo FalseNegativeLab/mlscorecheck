@@ -13,3 +13,7 @@ from ._solutions import *
 from ._check import *
 from ._expression import *
 from ._safe_eval import *
+from ._aggregated_mor import *
+from ._aggregated_rom import *
+from ._aggregated_assemble_results import *
+from ._folds import *
