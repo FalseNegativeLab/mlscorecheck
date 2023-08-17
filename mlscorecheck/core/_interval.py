@@ -338,7 +338,7 @@ class IntervalUnion:
         else:
             self.intervals = intervals
 
-        if len(intervals) > 0:
+        if len(self.intervals) > 0:
             self.simplify()
 
     def to_tuple(self):

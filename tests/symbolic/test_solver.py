@@ -50,3 +50,9 @@ def test_root_in_edge_cases():
     _collect_denominators_and_bases(symbols.tp**0.5, denoms, bases, symbols.algebra)
 
     assert bases
+
+    denoms = []
+    bases = []
+    _collect_denominators_and_bases((symbols.tp + symbols.tn)**0.5, denoms, bases, symbols.algebra)
+
+    assert bases

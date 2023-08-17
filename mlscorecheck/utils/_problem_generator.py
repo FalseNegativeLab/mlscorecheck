@@ -7,8 +7,7 @@ import numpy as np
 from ..core import (determine_fold_configurations,
                     score_functions_with_solutions,
                     score_specifications,
-                    safe_call,
-                    score_functions_standardized_without_complements)
+                    safe_call)
 
 __all__ = ['generate_problems',
             'calculate_scores_rom',
@@ -16,7 +15,8 @@ __all__ = ['generate_problems',
             'generate_problems_with_folds',
             'calculate_scores',
             'calculate_all_scores',
-            'problem_structure_depth']
+            'problem_structure_depth',
+            'round_scores']
 
 def round_scores(scores, rounding_decimals=None):
     if rounding_decimals is None:

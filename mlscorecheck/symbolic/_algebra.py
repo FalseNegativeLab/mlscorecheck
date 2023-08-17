@@ -124,6 +124,30 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
+    def is_division(self, expression):
+        """
+        Checks if the expression is a division
+
+        Args:
+            expression (object): the expression to check if it is a division
+
+        Returns:
+            bool: True if the expression is a division, False otherwise
+        """
+
+    @abc.abstractmethod
+    def is_power(self, expression):
+        """
+        Checks if the expression is a power
+
+        Args:
+            expression (object): the expression to check if it is a power
+
+        Returns:
+            bool: True if the expression is a power, False otherwise
+        """
+
+    @abc.abstractmethod
     def operands(self, expression):
         """
         Returns the list of operands
@@ -476,9 +500,14 @@ class SageAlgebra(Algebra):
 
         if hasattr(expression.operator(), '__qualname__') and expression.operator().__qualname__ == 'mul_vararg':
             operands = expression.operands()
+            print(operands)
             if len(operands) == 2:
                 if self.is_power(operands[1]):
                     base, power = operands[1].operands()
+                    if power < 0:
+                        return True
+                elif self.is_power(operands[0]):
+                    base, power = operands[0].operands()
                     if power < 0:
                         return True
         return False

@@ -16,7 +16,8 @@ from mlscorecheck.core import (check,
                                 check_zero_division,
                                 check_negative_base,
                                 check_empty_interval,
-                                check_intersection)
+                                check_intersection,
+                                Interval)
 from mlscorecheck.utils import (generate_problems)
 
 scores = load_scores()
@@ -38,6 +39,13 @@ def test_evaluate_1_solution_negative_base():
     tmp = evaluate_1_solution(None, {'message': 'negative base'}, None, None, None)
     assert tmp['explanation'].startswith('negative base')
 
+def test_evaluate_1_scalar():
+    """
+    Testing the evaluate_1_solution with scalar tp and tn
+    """
+    tmp = evaluate_1_solution(Interval(0, 1), {'tp': 5, 'tn': 10, 'fn': 5, 'fp': 10}, p=10, n=20, score_function=functions['acc'])
+    assert tmp['consistency']
+
 def test_create_intervals():
     """
     Testing the create intervals function
@@ -51,6 +59,10 @@ def test_create_intervals():
     intervals = create_intervals({'fnr': 0.6}, eps=1e-4)
     assert abs(intervals['sens'].lower_bound - 0.3999) < 1e-8
     assert abs(intervals['sens'].upper_bound - 0.4001) < 1e-8
+
+    intervals = create_intervals({'kappa': 0.5}, eps=1e-4)
+    assert abs(intervals['kappa'].lower_bound - 0.4999) < 1e-8
+    assert abs(intervals['kappa'].upper_bound - 0.5001) < 1e-8
 
 def test_create_problems_2():
     """

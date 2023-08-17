@@ -38,7 +38,7 @@ def test_consistent():
     scores_new = calculate_scores(details['configuration'],
                                     strategy=('mor', 'mor'))
 
-    for key in scores_new:
+    for key in scores:
         assert abs(scores[key] - scores_new[key]) <= eps
 
 def test_consistent_differing_configurations():

@@ -3,24 +3,24 @@ This module implements methods to assemble a detailed result for the
 linear programming based consistency checks
 """
 
-__all__ = ['assemble_results',
+__all__ = [#'assemble_results',
             'assemble_results_problem',
             'assemble_results_problems']
 
-def assemble_results(pulp_problem):
-    """
-    Assembles a structured result for the problem
-
-    Args:
-        pulp_problem (pl.LpProblem): a solved pulp linear programming problem
-
-    Returns:
-        dict: the structured results
-    """
-
-    return {'overall_consistency': pulp_problem.status == 1,
-            'configuration': {var.name: var.varValue
-                                    for var in pulp_problem.variables()}}
+#def assemble_results(pulp_problem):
+#    """
+#    Assembles a structured result for the problem
+#
+#    Args:
+#        pulp_problem (pl.LpProblem): a solved pulp linear programming problem
+#
+#    Returns:
+#        dict: the structured results
+#    """
+#
+#    return {'overall_consistency': pulp_problem.status == 1,
+#            'configuration': {var.name: var.varValue
+#                                    for var in pulp_problem.variables()}}
 
 def assemble_results_problem(pulp_problem, ps, ns):
     """

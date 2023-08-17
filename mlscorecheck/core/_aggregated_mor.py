@@ -5,7 +5,7 @@ This module implements some core consistency tests for mean-of-rations aggregati
 import numpy as np
 import pulp as pl
 
-from ._aggregated_assemble_results import assemble_results_problem, assemble_results, assemble_results_problems
+from ._aggregated_assemble_results import assemble_results_problem, assemble_results_problems
 from ._folds import (stratified_configurations_sklearn, determine_fold_configurations)
 
 __all__ = ['consistency_1',

@@ -2,6 +2,8 @@
 This module tests the dataset functionalities
 """
 
+import pytest
+
 import os
 import json
 
@@ -24,7 +26,13 @@ def test_lookup_dataset():
     for entry in data['datasets']:
         dataset = lookup_dataset('common_datasets.' + entry['name'])
 
-        print(entry, dataset)
-
         assert entry['p'] == dataset['p']
         assert entry['n'] == dataset['n']
+
+def test_exception():
+    """
+    Testing the exception throwing
+    """
+
+    with pytest.raises(ValueError):
+        lookup_dataset('dummy')

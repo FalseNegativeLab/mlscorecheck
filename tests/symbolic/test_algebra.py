@@ -43,6 +43,16 @@ def test_sympy_algebra():
 
     assert sorted(map(str, alg.free_symbols(tp + p))) == sorted(map(str, ['p', 'tp']))
 
+    assert alg.is_power(tp**2)
+
+    assert alg.is_division(tp/p)
+
+    assert alg.is_division(p/tp)
+
+    assert alg.is_division(1/p)
+
+    assert not alg.is_division(p)
+
 @pytest.mark.skipif('sage' not in symbolic_toolkits, reason='sage not installed')
 def test_sage_algebra():
     """
@@ -84,6 +94,16 @@ def test_sage_algebra():
     assert sorted(map(str, list(alg.operands(tp + p**2)))) == sorted(map(str, [tp, p**2]))
 
     assert sorted(map(str, alg.free_symbols(tp + p))) == sorted(map(str, ['p', 'tp']))
+
+    assert alg.is_power(tp**2)
+
+    assert alg.is_division(tp/p)
+
+    assert alg.is_division(p/tp)
+
+    assert alg.is_division(1/p)
+
+    assert not alg.is_division(p)
 
 @pytest.mark.skipif('sympy' not in symbolic_toolkits, reason='sympy not installed')
 def test_symbols_sympy():

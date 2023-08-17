@@ -6,6 +6,16 @@ import numpy as np
 
 from mlscorecheck.core import Interval, IntervalUnion
 
+def test_interval_constructor():
+    """
+    Testing the interval constructor
+    """
+
+    interval = Interval(np.nan, 1)
+    assert interval == Interval(1, 0)
+
+    assert Interval(2, 1) == Interval(1, 0)
+
 def test_interval_equality():
     """
     Testing the interval equality
@@ -194,6 +204,25 @@ def test_interval_division_composite():
 
     assert div1.intervals[1].lower_bound == min(terms)
     assert div1.intervals[1].upper_bound == max(terms)
+
+def test_interval_union_constructor():
+    """
+    Testing the interval union constructor
+    """
+
+    assert IntervalUnion(Interval(0, 1)) == IntervalUnion([Interval(0, 1)])
+    assert IntervalUnion((0, 1)) == IntervalUnion([Interval(0, 1)])
+    assert IntervalUnion([(0, 1)]) == IntervalUnion([Interval(0, 1)])
+
+def test_interval_union_pow():
+    """
+    Testing the power operation on interval unions
+    """
+
+    intu = IntervalUnion([(-1, 2)])
+    intu = intu ** 2
+
+    assert intu == IntervalUnion([(0, 4)])
 
 def test_interval_union_to_tuple():
     """

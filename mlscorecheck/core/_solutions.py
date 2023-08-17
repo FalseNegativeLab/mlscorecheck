@@ -163,12 +163,10 @@ class Solution:
         res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
         if 'tp' in self.solution:
             res['tp_formula'] = self.solution['tp']['expression']
-        else:
-            print('no tp', self.solution)
+
         if 'tn' in self.solution:
             res['tn_formula'] = self.solution['tn']['expression']
-        else:
-            print('no tn', self.solution)
+
         return res
 
 class Solutions:

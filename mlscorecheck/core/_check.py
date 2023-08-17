@@ -57,10 +57,7 @@ def create_intervals(scores, eps):
         if key in score_descriptors:
             lower_bound = score_descriptors[key].get('lower_bound', -np.inf)
             upper_bound = score_descriptors[key].get('upper_bound', np.inf)
-            if lower_bound is None:
-                lower_bound = -np.inf
-            if upper_bound is None:
-                upper_bound = np.inf
+
             complemented[key] = complemented[key].intersection(Interval(lower_bound, upper_bound))
 
     return complemented
