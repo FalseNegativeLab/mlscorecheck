@@ -185,6 +185,7 @@ def check(scores, p, n, eps):
         n (int): the number of negatives
         eps (float/dict): the numerical uncertainty of the scores
     """
+    scores = {key: value for key, value in scores.items() if key in supported_scores}
 
     intervals = create_intervals(scores, eps)
 

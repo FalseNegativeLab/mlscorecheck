@@ -2,10 +2,10 @@
 This module implements some functionalities related to fold structures
 """
 
-__all__ = ['stratified_configurations',
+__all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations']
 
-def stratified_configurations(n0, n1, n_splits):
+def stratified_configurations_sklearn(n0, n1, n_splits):
     n0_base = n0 // n_splits
     n1_base = n1 // n_splits
     n0_remainder = n0 % n_splits
@@ -27,8 +27,11 @@ def stratified_configurations(n0, n1, n_splits):
 
     return results
 
-def determine_fold_configurations(p, n, n_folds, n_repeats):
-    confs = stratified_configurations(p, n, n_folds)
+def determine_fold_configurations(p, n, n_folds, n_repeats, folding='stratified_sklearn'):
+
+    if folding == 'stratified_sklearn':
+        confs = stratified_configurations_sklearn(p, n, n_folds)
+
     confs = [{'p': conf[0], 'n': conf[1]} for conf in confs]
     results = []
     for _ in range(n_repeats):

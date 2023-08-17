@@ -1,7 +1,6 @@
 {
     "datasets":
-    [
-    {"name": "abalone19", "p": 32, "n": 4142},
+    [{"name": "abalone19", "p": 32, "n": 4142},
     {"name": "abalone9_18", "p": 42, "n": 689},
     {"name": "abalone-17_vs_7-8-9-10", "p": 58, "n": 2280},
     {"name": "abalone-19_vs_10-11-12-13", "p": 32, "n": 1590},
@@ -90,7 +89,7 @@
     {"name": "shuttle-c0-vs-c4", "p": 123, "n": 1706},
     {"name": "shuttle-c2-vs-c4", "p": 6, "n": 123},
     {"name": "SPECTF", "p": 55, "n": 212},
-    {"name": "hypothyroid", "p": 805, "n": 12281},
+    {"name": "sylva", "p": 805, "n": 12281},
     {"name": "vehicle0", "p": 199, "n": 647},
     {"name": "vehicle1", "p": 217, "n": 629},
     {"name": "vehicle2", "p": 218, "n": 628},
@@ -119,6 +118,5 @@
     {"name": "yeast-1_vs_7", "p": 30, "n": 429},
     {"name": "yeast-2_vs_4", "p": 51, "n": 463},
     {"name": "yeast-2_vs_8", "p": 20, "n": 462},
-    {"name": "zoo-3", "p": 5, "n": 96}
-    ]
+    {"name": "zoo-3", "p": 5, "n": 96}]
 }

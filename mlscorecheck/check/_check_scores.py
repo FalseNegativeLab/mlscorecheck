@@ -6,15 +6,28 @@ from ..core import check
 from ..core import consistency_1, consistency_grouped
 from ..datasets import lookup_dataset
 
-def _determine_p_n(p=None, n=None, dataset=None):
-    if dataset is not None:
-        ds = lookup_dataset(dataset)
-        if ds is None:
-            raise ValueError(f'dataset {dataset} is not available')
-        return ds['p'], ds['n']
-    return p, n
+__all__ = ['_resolve_p_n',
+            'check_scores',
+            'check_kfold_rom_scores',
+            'check_multiple_datasets_rom_scores',
+            'check_multiple_datasets_rom_kfold_rom_scores',
+            'check_kfold_mor_scores',
+            'check_multiple_datasets_mor_scores',
+            'check_multiple_datasets_mor_kfold_rom_scores',
+            'check_multiple_datasets_mor_kfold_mor_scores']
 
 def _resolve_p_n(dataset_conf):
+    """
+    Resolve the dataset configuration from the integrated statistics
+
+    Args:
+        dataset_conf (dict/list(dict)): one or multiple dataset specification(s)
+                                with 'dataset' field(s) containing the name of
+                                the dataset(s)
+
+    Returns:
+        dict: the dataset configuration extended by the 'p' and 'n' figures
+    """
     if isinstance(dataset_conf, dict):
         result = {**dataset_conf}
         if result.get('dataset') is not None:
@@ -45,13 +58,13 @@ def check_scores(scores,
 
 def check_kfold_rom_scores(scores,
                             eps,
+                            dataset,
                             *,
-                            dataset_setup,
                             return_details=False):
     """
     Use when scores are aggregated in the RoM manner
     """
-    dataset_resolved = _resolve_p_n(dataset_setup)
+    dataset_resolved = _resolve_p_n(dataset)
     dataset_resolved['p'] = dataset_resolved['p'] * dataset_resolved['n_repeats']
     dataset_resolved['n'] = dataset_resolved['n'] * dataset_resolved['n_repeats']
 
@@ -62,10 +75,10 @@ def check_kfold_rom_scores(scores,
 
 def check_multiple_datasets_rom_scores(scores,
                                         eps,
-                                        dataset_setup,
+                                        datasets,
                                         *,
                                         return_details=False):
-    datasets = _resolve_p_n(dataset_setup)
+    datasets = _resolve_p_n(datasets)
     tmp = {'p': sum(dataset['p'] for dataset in datasets),
             'n': sum(dataset['n'] for dataset in datasets)}
 
@@ -76,13 +89,13 @@ def check_multiple_datasets_rom_scores(scores,
 
 def check_multiple_datasets_rom_kfold_rom_scores(scores,
                                                 eps,
-                                                setup,
+                                                datasets,
                                                 *,
                                                 return_details=False):
     """
     Use when scores are aggregated in the RoM manner
     """
-    datasets = _resolve_p_n(setup)
+    datasets = _resolve_p_n(datasets)
     tmp = {'p': sum(dataset['p']*dataset['n_repeats'] for dataset in datasets),
             'n': sum(dataset['n']*dataset['n_repeats'] for dataset in datasets)}
 
@@ -93,7 +106,7 @@ def check_multiple_datasets_rom_kfold_rom_scores(scores,
 
 def check_kfold_mor_scores(scores,
                             eps,
-                            fold_setup,
+                            dataset,
                             *,
                             return_details=False):
     """
@@ -102,50 +115,59 @@ def check_kfold_mor_scores(scores,
     By default, assumes stratified k-fold. If fold_setup is provided,
     it does overwrite all other arguments.
     """
-
+    dataset = _resolve_p_n(dataset)
     return consistency_1(scores=scores,
                             eps=eps,
-                            problem=fold_setup,
+                            problem=dataset,
                             return_details=return_details)
 
-def check_multiple_dataset_mor_scores(scores,
+def check_multiple_datasets_mor_scores(scores,
                                         eps,
-                                        dataset_setup,
+                                        datasets,
                                         *,
                                         return_details=False):
+    datasets = _resolve_p_n(datasets)
     return check_kfold_mor_scores(scores=scores,
                                     eps=eps,
-                                    fold_setup={'fold_configuration': dataset_setup},
+                                    dataset={'fold_configuration': datasets},
                                     return_details=return_details)
 
-def check_multiple_dataset_mor_kfold_rom_scores(scores,
+def check_multiple_datasets_mor_kfold_rom_scores(scores,
                                                 eps,
-                                                dataset_setup,
+                                                datasets,
                                                 *,
                                                 return_details=False):
     fold_configuration = []
 
-    for dataset in dataset_setup:
+    for dataset in datasets:
         dataset = _resolve_p_n(dataset)
-        n_repeats = dataset['n_repeats']
-        fold_configuration.append({'p': dataset['p']*n_repeats,
-                                    'n': dataset['n']*n_repeats,
-                                    'score_bounds': dataset.get('score_bounds'),
-                                    'tptn_bounds': dataset.get('tptn_bounds')})
+
+        if 'fold_configuration' in dataset:
+            fold_configuration.append({'p': sum(fold['p'] for fold in dataset['fold_configuration']),
+                                        'n': sum(fold['n'] for fold in dataset['fold_configuration']),
+                                        'score_bounds': dataset.get('score_bounds'),
+                                        'tptn_bounds': dataset.get('tptn_bounds')})
+        else:
+            n_repeats = dataset['n_repeats']
+            fold_configuration.append({'p': dataset['p']*n_repeats,
+                                        'n': dataset['n']*n_repeats,
+                                        'score_bounds': dataset.get('score_bounds'),
+                                        'tptn_bounds': dataset.get('tptn_bounds')})
 
     return check_kfold_mor_scores(scores=scores,
                                     eps=eps,
-                                    fold_setup={'fold_configuration': fold_configuration},
+                                    dataset={'fold_configuration': fold_configuration},
                                     return_details=return_details)
 
-def check_multiple_dataset_mor_kfold_mor_scores(scores,
+def check_multiple_datasets_mor_kfold_mor_scores(scores,
                                                 eps,
-                                                dataset_setup,
+                                                datasets,
                                                 *,
                                                 return_details=False):
+    datasets = _resolve_p_n(datasets)
 
     return consistency_grouped(scores=scores,
                                 eps=eps,
-                                problems=dataset_setup,
+                                problems=datasets,
                                 return_details=return_details)
 

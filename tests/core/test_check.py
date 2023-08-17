@@ -17,7 +17,7 @@ from mlscorecheck.core import (check,
                                 check_negative_base,
                                 check_empty_interval,
                                 check_intersection)
-from mlscorecheck.utils import (generate_problem)
+from mlscorecheck.utils import (generate_problems)
 
 scores = load_scores()
 functions = score_functions_with_solutions
@@ -67,7 +67,7 @@ def test_check_2v1(problem):
     Testing the check_2v1 function
     """
 
-    prob = generate_problem(random_seed=5)
+    prob = generate_problems(n_problems=1, random_seed=5, add_complements=True)
 
     base0 = problem[0]
     base1 = problem[1]
@@ -89,7 +89,7 @@ def test_check_false_2v1(problem):
     Testing the check_2v1 function
     """
 
-    prob = generate_problem(random_seed=5)
+    prob = generate_problems(n_problems=1, random_seed=5, add_complements=True)
 
     base0 = problem[0]
     base1 = problem[1]
@@ -117,7 +117,7 @@ def test_check(zeros):
     Testing the check function
     """
 
-    problem = generate_problem(random_seed=5, zeros=zeros)
+    problem = generate_problems(n_problems=1, random_seed=5, zeros=zeros, add_complements=True)
 
     score_values = {}
 
@@ -159,7 +159,7 @@ def test_check_failure(zeros):
     Testing the failure
     """
 
-    problem = generate_problem(random_seed=5, zeros=zeros)
+    problem = generate_problems(n_problems=1, random_seed=5, zeros=zeros, add_complements=True)
 
     score_values = {}
 

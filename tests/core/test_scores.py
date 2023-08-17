@@ -8,7 +8,7 @@ import pytest
 
 import numbers
 
-from mlscorecheck.utils import (generate_problem)
+from mlscorecheck.utils import (generate_problems)
 from mlscorecheck.core import (score_functions_with_complements,
                                 score_functions_standardized_with_complements,
                                 load_scores,
@@ -22,7 +22,7 @@ aliases = score_function_aliases
 short_formula_scores = {key: score for key, score in scores.items() if 'short_args' in score}
 complement_scores = {key: score for key, score in scores.items() if 'complement' in score}
 
-problem = generate_problem()
+problem = generate_problems(n_problems=1, random_seed=5, add_complements=True)
 problem['beta_plus'] = 2
 problem['beta_minus'] = 2
 problem['sqrt'] = np.sqrt

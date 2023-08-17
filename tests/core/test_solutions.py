@@ -13,7 +13,7 @@ from mlscorecheck.core import (load_solutions,
                                 Interval,
                                 IntervalUnion)
 
-from mlscorecheck.utils import (generate_problem)
+from mlscorecheck.utils import (generate_problems)
 
 solutions = load_solutions()
 scores = load_scores()
@@ -27,7 +27,7 @@ def test_solution(sol, zeros):
     Testing a particular solution
     """
 
-    problem = generate_problem(zeros=zeros)
+    problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
     problem['beta_plus'] = 2
     problem['beta_minus'] = 2
 
@@ -51,11 +51,8 @@ def test_solution(sol, zeros):
 
     print(sol, problem)
 
-    try:
-        score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-        score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
-    except:
-        return
+    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
+    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
 
     result = solutions[sol].evaluate({**problem,
                                       **{sol[0]: score0,
@@ -84,7 +81,7 @@ def test_solution_failure(sol, zeros):
     Testing a particular solution
     """
 
-    problem = generate_problem(zeros=zeros)
+    problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
     problem['beta_plus'] = 2
     problem['beta_minus'] = 2
 
@@ -106,11 +103,8 @@ def test_solution_failure(sol, zeros):
             if flag:
                 return
 
-    try:
-        score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-        score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
-    except:
-        return
+    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
+    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
 
     problem['tp'] = problem['tp'] * 10 + 5
 

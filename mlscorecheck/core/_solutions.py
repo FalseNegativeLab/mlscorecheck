@@ -13,7 +13,8 @@ from ._expression import Expression
 __all__ = ['load_solutions',
             'load_scores',
             'Solution',
-            'Solutions']
+            'Solutions',
+            'score_specifications']
 
 def load_solutions():
     sio = files('mlscorecheck').joinpath(os.path.join('core', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
@@ -34,6 +35,8 @@ def load_scores():
     scores = json.loads(sio)
 
     return scores['scores']
+
+score_specifications = load_scores()
 
 class Solution:
     """

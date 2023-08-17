@@ -6,7 +6,7 @@ import numpy as np
 import pulp as pl
 
 from ._aggregated_assemble_results import assemble_results_problem, assemble_results, assemble_results_problems
-from ._folds import (stratified_configurations, determine_fold_configurations)
+from ._folds import (stratified_configurations_sklearn, determine_fold_configurations)
 
 __all__ = ['consistency_1',
             'consistency_grouped',
@@ -114,7 +114,11 @@ def generate_structure_group(problem_setup):
     groups = []
 
     for pdx, problem in enumerate(problem_setup):
-        folds = problem.get('fold_configuration', determine_fold_configurations(problem['p'], problem['n'], problem['n_folds'], problem['n_repeats']))
+        if 'fold_configuration' in problem:
+            folds = problem['fold_configuration']
+        else:
+            folds = determine_fold_configurations(problem['p'], problem['n'], problem['n_folds'], problem['n_repeats'])
+
         groups.append([])
         for fdx, fold in enumerate(folds):
             ps.append(fold['p'])
@@ -250,13 +254,6 @@ def consistency_grouped(problems,
 
     ps, ns, tps, tns, score_bounds, groups = generate_structure_group(problems)
 
-    print(ps)
-    print(ns)
-    print(tps)
-    print(tns)
-    print(score_bounds)
-    print(groups)
-
     lp_problem += tps[0]
 
     for score in scores:
@@ -299,8 +296,6 @@ def consistency_grouped(problems,
 
     if not return_details:
         return prob.solve() == 1
-
-    print(prob.constraints)
 
     return prob.solve() == 1, assemble_results_problems(prob, ps, ns, groups)
 

@@ -15,7 +15,10 @@ __all__ = ['dataset_statistics',
 dataset_statistics = {}
 
 def lookup_dataset(dataset):
-    return dataset_statistics.get(dataset)
+    if dataset not in dataset_statistics:
+        raise ValueError(f"No statistics about dataset {dataset} are available. "\
+                            "Didn't you forget to identify like 'common_datasets.ecoli1'?")
+    return dataset_statistics[dataset]
 
 def load_json(directory, file):
     sio = files('mlscorecheck').joinpath(os.path.join('datasets', directory, file)).read_text()
