@@ -37,6 +37,16 @@ def test_problem_solver():
     ps.edge_cases()
     assert ps.get_solution() is not None
 
+    ps = ProblemSolver(base_scores['fm'], base_scores['ppv'])
+    ps.solve()
+    ps.edge_cases()
+    assert ps.get_solution() is not None
+
+    ps = ProblemSolver(base_scores['ppv'], base_scores['fm'])
+    ps.solve()
+    ps.edge_cases()
+    assert ps.get_solution() is not None
+
 @pytest.mark.skipif(symbolic_toolkit is None, reason='no symbolic toolkit available')
 def test_root_in_edge_cases():
     """

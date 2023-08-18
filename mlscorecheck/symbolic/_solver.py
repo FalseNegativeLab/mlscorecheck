@@ -149,9 +149,11 @@ class ProblemSolver:
                                 'symbols': algebra.free_symbols(v1[sym1])}}
 
                 flag = True
-                if str(sol[var0]['expression']) in [0, 'n', 'p']:
+                if str(sol[var0]['expression']) in ['0', 'n', 'p']:
+                    # triggered in the ppv-fm case
                     flag = False
-                if str(sol[var1]['expression']) in [0, 'n', 'p']:
+                if str(sol[var1]['expression']) in ['0', 'n', 'p']:
+                    # triggered in the fm-ppv case
                     flag = False
 
                 if flag:
