@@ -2,7 +2,8 @@
 This module implements the problem solver
 """
 
-from ..core import logger, Solutions
+from ..core import logger
+from ..individual import Solutions
 
 __all__ = ['ProblemSolver',
             'collect_denominators_and_bases',

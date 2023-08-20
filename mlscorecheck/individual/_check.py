@@ -12,8 +12,7 @@ from ._score_loaders import (score_functions_without_complements,
                             score_function_aliases,
                             score_function_complements)
 from ._interval import Interval, IntervalUnion, sqrt
-from ._safe_eval import safe_eval, safe_call
-from ._logger import logger
+from ..core import safe_eval, safe_call, logger
 
 __all__ = ['check',
             'check_2v1',

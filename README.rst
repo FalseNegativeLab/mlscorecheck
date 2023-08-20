@@ -71,8 +71,8 @@ Introduction
     dataset = {"dataset": "common_datasets.ADA"}
 
     # one dataset kfold ratio of means
-    dataset = {"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"}
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"}
+    dataset = {"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3}
+    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 5, "n_folds": 3}
     dataset = {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]
 
     # multiple dataset ratio of means
@@ -81,7 +81,7 @@ Introduction
                 {"fold_configuration": [{"p": 10, "n": 5}]]
 
     # multiple dataset ratio of means with kfold ratio of means
-    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"},
+    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3},
                 {"dataset": "common_datasets.ecoli1"},
                 {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]]
 
@@ -94,17 +94,17 @@ Introduction
     # multiple dataset mean of ratios
     datasets = [{"p": 10, "n": 20},
                 {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}]]
+                {"fold_configuration": [{"p": 10, "n": 5}]}]
     # additionally score_bounds and tptn_bounds for each dataset
 
     # multiple dataset mean of ratios kfold ratio of means
-    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"},
+    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3},
                 {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]]
+                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]}]
     # additionally score_bounds and tptn_bounds for each dataset
 
     # multiple dataset mean of ratios kfold mean of ratios
     datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"},
                 {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]]
+                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]}]
     # additionally score_bounds and tptn_bounds for each dataset and/or fold

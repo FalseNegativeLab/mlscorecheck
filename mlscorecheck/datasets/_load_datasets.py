@@ -10,9 +10,33 @@ from importlib.resources import files
 __all__ = ['dataset_statistics',
             'load_json',
             'load_ml_datasets',
-            'lookup_dataset']
+            'lookup_dataset',
+            '_resolve_pn']
 
 dataset_statistics = {}
+
+def _resolve_pn(dataset_conf):
+    """
+    Resolve the dataset configuration from the integrated statistics
+
+    Args:
+        dataset_conf (dict/list(dict)): one or multiple dataset specification(s)
+                                with 'dataset' field(s) containing the name of
+                                the dataset(s)
+
+    Returns:
+        dict: the dataset configuration extended by the 'p' and 'n' figures
+    """
+    if isinstance(dataset_conf, dict):
+        result = {**dataset_conf}
+        if result.get('dataset') is not None:
+            tmp = lookup_dataset(result['dataset'])
+            result['p'] = tmp['p']
+            result['n'] = tmp['n']
+    elif isinstance(dataset_conf, list):
+        result = [_resolve_p_n(dataset) for dataset in dataset_conf]
+
+    return result
 
 def lookup_dataset(dataset):
     if dataset not in dataset_statistics:

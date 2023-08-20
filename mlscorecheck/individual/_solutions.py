@@ -17,7 +17,7 @@ __all__ = ['load_solutions',
             'score_specifications']
 
 def load_solutions():
-    sio = files('mlscorecheck').joinpath(os.path.join('core', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
+    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
 
     solutions = json.loads(sio)
 
@@ -30,7 +30,7 @@ def load_solutions():
     return results
 
 def load_scores():
-    sio = files('mlscorecheck').joinpath(os.path.join('core', 'scores.json')).read_text() # pylint: disable=unspecified-encoding
+    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'scores.json')).read_text() # pylint: disable=unspecified-encoding
 
     scores = json.loads(sio)
 

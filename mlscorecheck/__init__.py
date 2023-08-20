@@ -6,4 +6,5 @@ from . import check
 from . import core
 from . import datasets
 from . import symbolic
-from . import utils
+from . import individual
+from . import aggregated

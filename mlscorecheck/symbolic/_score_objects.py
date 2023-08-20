@@ -7,10 +7,9 @@ import importlib
 
 import numpy as np
 
-from ..core import *
 from ._algebra import *
-from ..core import load_scores
-from ..core import score_functions_standardized_with_complements
+from ..individual import load_scores
+from ..individual import score_functions_standardized_with_complements
 
 __all__ = ['Score',
             'PositiveLikelihoodRatio',
