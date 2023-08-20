@@ -84,7 +84,7 @@ def calculate_scores_datasets(datasets,
         return_populated (bool): if True, returns the problem structure populated with figures
 
     Returns:
-        dict: the scores and the total figures
+        dict (, list): the scores and optionally the populated problem structure
     """
     if not populate_original:
         datasets = copy.deepcopy(datasets)

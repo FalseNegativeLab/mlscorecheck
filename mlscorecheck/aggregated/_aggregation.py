@@ -206,16 +206,14 @@ def _check_bounds(problem):
     flag = True
     if 'score_bounds' in problem:
         problem['score_bounds_check'] = True
-        for key in problem['score_bounds']:
-            key_flag = (problem[key] >= problem['score_bounds'][0]
-                        and problem[key] <= problem['score_bounds'][1])
+        for key, bounds in problem['score_bounds'].items():
+            key_flag = (problem[key] >= bounds[0] and problem[key] <= bounds[1])
             problem['score_bounds_check'] = problem['score_bounds_check'] and key_flag
             flag = flag and key_flag
     if 'tptn_bounds' in problem:
         problem['tptn_bounds_check'] = True
-        for key in problem['tptn_bounds']:
-            key_flag = (problem[key] >= problem['tptn_bounds'][0]
-                        and problem[key] <= problem['tptn_bounds'][1])
+        for key, bounds in problem['tptn_bounds'].items():
+            key_flag = (problem[key] >= bounds[0] and problem[key] <= bounds[1])
             problem['tptn_bounds_check'] = problem['tptn_bounds_check'] and key_flag
             flag = flag and key_flag
     return flag
