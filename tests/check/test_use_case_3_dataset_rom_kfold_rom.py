@@ -5,8 +5,8 @@ Testing the use case regarding kfold on multiple datasets
 import numpy as np
 
 from mlscorecheck.check import (check_multiple_datasets_rom_kfold_rom_scores)
-from mlscorecheck.utils import (generate_problems_with_folds,
-                                calculate_scores)
+from mlscorecheck.aggregated import generate_problems_with_evaluations
+from mlscorecheck.aggregated import calculate_scores_datasets
 
 k = 4
 eps = 10**(-k)
@@ -15,18 +15,18 @@ def test_consistent():
     """
     Testing a consistent configuration
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problems = generate_problems_with_evaluations(n_problems=3,
                                                     n_folds=3,
                                                     n_repeats=2,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
+    scores = calculate_scores_datasets(evals,
                                 strategy=('rom', 'rom'),
                                 rounding_decimals=k)
 
     flag, details = check_multiple_datasets_rom_kfold_rom_scores(scores,
                                                                 eps=eps,
-                                                                datasets=problem,
+                                                                datasets=problems,
                                                                 return_details=True)
 
     assert flag
@@ -35,25 +35,18 @@ def test_consistent_differing_configurations():
     """
     Testing a consistent configuration
     """
-    random_state = np.random.RandomState(5)
+    evals, problems = generate_problems_with_evaluations(n_problems=5,
+                                                n_folds=5,
+                                                n_repeats=3,
+                                                random_state=5)
 
-    folds, problem = [], []
-
-    for _ in range(5):
-        fold, prob = generate_problems_with_folds(n_problems=1,
-                                                    n_folds=random_state.randint(2, 5),
-                                                    n_repeats=random_state.randint(2, 5),
-                                                    random_seed=5)
-        folds.append(fold)
-        problem.append(prob)
-
-    scores = calculate_scores(folds,
+    scores = calculate_scores_datasets(evals,
                                 strategy=('rom', 'rom'),
                                 rounding_decimals=k)
 
     flag, details = check_multiple_datasets_rom_kfold_rom_scores(scores,
                                                                 eps=eps,
-                                                                datasets=problem,
+                                                                datasets=problems,
                                                                 return_details=True)
 
     assert flag
@@ -62,19 +55,19 @@ def test_failure():
     """
     Testing a failure
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problems = generate_problems_with_evaluations(n_problems=3,
                                                     n_folds=3,
                                                     n_repeats=2,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
+    scores = calculate_scores_datasets(evals,
                                 strategy=('rom', 'rom'),
                                 rounding_decimals=k)
     scores['bacc'] = 0.9
 
     flag, details = check_multiple_datasets_rom_kfold_rom_scores(scores,
                                                         eps=eps,
-                                                        datasets=problem,
+                                                        datasets=problems,
                                                         return_details=True)
 
     assert not flag
@@ -83,19 +76,12 @@ def test_failure_differing_configurations():
     """
     Testing a consistent configuration
     """
-    random_state = np.random.RandomState(5)
+    evals, problems = generate_problems_with_evaluations(n_problems=5,
+                                                n_folds=5,
+                                                n_repeats=3,
+                                                random_state=5)
 
-    folds, problem = [], []
-
-    for _ in range(5):
-        fold, prob = generate_problems_with_folds(n_problems=1,
-                                                    n_folds=random_state.randint(2, 5),
-                                                    n_repeats=random_state.randint(2, 5),
-                                                    random_seed=5)
-        folds.append(fold)
-        problem.append(prob)
-
-    scores = calculate_scores(folds,
+    scores = calculate_scores_datasets(evals,
                                 strategy=('rom', 'rom'),
                                 rounding_decimals=k)
 
@@ -103,7 +89,7 @@ def test_failure_differing_configurations():
 
     flag, details = check_multiple_datasets_rom_kfold_rom_scores(scores,
                                                                 eps=eps,
-                                                                datasets=problem,
+                                                                datasets=problems,
                                                                 return_details=True)
 
     assert not flag

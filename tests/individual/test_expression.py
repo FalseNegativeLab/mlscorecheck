@@ -2,7 +2,7 @@
 Testing the expression class
 """
 
-from mlscorecheck.core import Expression
+from mlscorecheck.individual import Expression
 
 def test_expression():
     """

@@ -1,0 +1,5 @@
+[BASIC]
+good-names=p4,p,n,tp,tn,fp,fn
+
+[TYPECHECK]
+ignored-modules = numpy

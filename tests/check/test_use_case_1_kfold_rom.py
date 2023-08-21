@@ -3,8 +3,8 @@ Testing the use case regarding kfold on one dataset
 """
 
 from mlscorecheck.check import (check_kfold_rom_scores)
-from mlscorecheck.utils import (generate_problems_with_folds,
-                                calculate_scores)
+from mlscorecheck.aggregated import generate_1_problem_with_evaluations
+from mlscorecheck.aggregated import calculate_scores_dataset
 
 k = 4
 eps = 10**(-k)
@@ -13,13 +13,13 @@ def test_consistent():
     """
     Testing a consistent configuration
     """
-    folds, problem = generate_problems_with_folds(n_folds=3,
+    evaluations, problem = generate_1_problem_with_evaluations(n_folds=3,
                                                     n_repeats=2,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='rom',
-                                rounding_decimals=k)
+    scores = calculate_scores_dataset(evaluations,
+                                        strategy='rom',
+                                        rounding_decimals=k)
 
     flag, details = check_kfold_rom_scores(scores,
                                             eps=eps,
@@ -32,11 +32,11 @@ def test_failure():
     """
     Testing a failure
     """
-    folds, problem = generate_problems_with_folds(n_folds=3,
+    evaluations, problem = generate_1_problem_with_evaluations(n_folds=3,
                                                     n_repeats=2,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
+    scores = calculate_scores_dataset(evaluations,
                                 strategy='rom',
                                 rounding_decimals=k)
     scores['bacc'] = 0.9

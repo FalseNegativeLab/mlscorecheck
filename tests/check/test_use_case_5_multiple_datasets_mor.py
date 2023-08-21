@@ -3,10 +3,11 @@ Testing the use case regarding multiple datasets in mor manner
 """
 
 from mlscorecheck.check import (check_multiple_datasets_mor_scores)
-from mlscorecheck.utils import (generate_problems_with_folds,
-                                calculate_scores)
+from mlscorecheck.aggregated import generate_problems_with_evaluations
+from mlscorecheck.aggregated import calculate_scores_datasets
 from ._score_ranges import (calculate_scores_for_folds,
-                            score_ranges)
+                            score_ranges,
+                            calculate_scores_for_datasets)
 
 k = 4
 eps = 10**(-k)
@@ -15,13 +16,13 @@ def test_consistent():
     """
     Testing a consistent configuration
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_folds=1,
                                                     n_repeats=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
     flag, details = check_multiple_datasets_mor_scores(scores,
@@ -31,23 +32,23 @@ def test_consistent():
 
     assert flag
 
-    scores_new = calculate_scores(details['configuration'],
-                                    strategy='mor')
+    scores_new = calculate_scores_datasets(details['configuration'],
+                                    strategy=('mor', 'mor'))
 
-    for key in scores_new:
+    for key in ['acc', 'sens', 'spec', 'bacc']:
         assert abs(scores[key] - scores_new[key]) <= eps
 
 def test_failure():
     """
     Testing a failure
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_repeats=1,
                                                     n_folds=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
     scores['bacc'] = 0.9
@@ -101,16 +102,16 @@ def test_score_bounds_consistency():
     """
     Testing the consistency with score bounds
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_repeats=1,
                                                     n_folds=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
-    bounds = score_ranges(calculate_scores_for_folds(folds))
+    bounds = score_ranges(calculate_scores_for_datasets(evals))
 
     for prob in problem:
         prob['score_bounds'] = bounds
@@ -122,26 +123,26 @@ def test_score_bounds_consistency():
 
     assert flag
 
-    scores_new = calculate_scores(details['configuration'],
-                                    strategy='mor')
+    scores_new = calculate_scores_datasets(details['configuration'],
+                                    strategy=('mor', 'mor'))
 
-    for key in scores_new:
+    for key in ['acc', 'sens', 'spec', 'bacc']:
         assert abs(scores[key] - scores_new[key]) <= eps
 
 def test_score_bounds_failure():
     """
     Testing the failure with score bounds
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_repeats=1,
                                                     n_folds=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
-    bounds = score_ranges(calculate_scores_for_folds(folds))
+    bounds = score_ranges(calculate_scores_for_datasets(evals))
     bounds['acc'] = (0.99, 1.0)
 
     for prob in problem:
@@ -158,16 +159,16 @@ def test_tptn_bounds_consistency():
     """
     Testing the consistency with tptn bounds
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_repeats=1,
                                                     n_folds=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
-    bounds = score_ranges(calculate_scores_for_folds(folds))
+    bounds = score_ranges(calculate_scores_for_datasets(evals))
 
     for prob in problem:
         prob['tptn_bounds'] = {'tp': bounds['tp'],
@@ -180,23 +181,23 @@ def test_tptn_bounds_consistency():
 
     assert flag
 
-    scores_new = calculate_scores(details['configuration'],
-                                    strategy='mor')
+    scores_new = calculate_scores_datasets(details['configuration'],
+                                    strategy=('mor', 'mor'))
 
-    for key in scores_new:
+    for key in ['acc', 'sens', 'spec', 'bacc']:
         assert abs(scores[key] - scores_new[key]) <= eps
 
 def test_tptn_bounds_failure():
     """
     Testing the failure with tptn bounds
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problem = generate_problems_with_evaluations(n_problems=3,
                                                     n_repeats=1,
                                                     n_folds=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='mor',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('mor', 'mor'),
                                 rounding_decimals=k)
 
     for prob in problem:

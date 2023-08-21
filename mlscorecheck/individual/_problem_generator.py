@@ -4,7 +4,8 @@ This module implements a random problem generator
 
 import numpy as np
 
-__all__ = ['generate_problems']
+__all__ = ['generate_problems',
+            'generate_1_problem']
 
 def generate_1_problem(*,
                         max_p=1000,
@@ -27,8 +28,6 @@ def generate_1_problem(*,
     """
     if random_state is None or isinstance(random_state, int):
         random_state = np.random.RandomState(random_state)
-    else:
-        random_state = random_state
 
     if zeros is None:
         zeros = []
@@ -56,7 +55,7 @@ def generate_1_problem(*,
         result['fn'] = p - tp
         result['fp'] = n - tn
 
-    return result
+    return result, {'p': result['p'], 'n': result['n']}
 
 def generate_problems(*,
                         n_problems=1,
@@ -81,13 +80,15 @@ def generate_problems(*,
 
     if random_state is None or isinstance(random_state, int):
         random_state = np.random.RandomState(random_state)
-    else:
-        random_state = random_state
 
-    problems = [generate_problems(max_p=max_p,
+    evaluations, problems = [], []
+    for _ in range(n_problems):
+        evaluation, problem = generate_1_problem(max_p=max_p,
                                     max_n=max_n,
                                     zeros=zeros,
                                     add_complements=add_complements,
-                                    random_state=random_state) for _ in range(n_problems)]
+                                    random_state=random_state)
+        evaluations.append(evaluation)
+        problems.append(problem)
 
-    return problems[0] if n_problems == 1 else problems
+    return (evaluations[0], problems[0]) if n_problems == 1 else (evaluations, problems)

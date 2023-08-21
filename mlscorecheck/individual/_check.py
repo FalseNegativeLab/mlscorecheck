@@ -6,11 +6,12 @@ import itertools
 
 import numpy as np
 
-from ._solutions import (load_solutions, load_scores)
-from ._score_loaders import (score_functions_without_complements,
+from ._solutions import (load_solutions)
+from ..scores import (score_functions_without_complements,
                             score_functions_standardized_without_complements,
                             score_function_aliases,
-                            score_function_complements)
+                            score_function_complements,
+                            score_specifications)
 from ._interval import Interval, IntervalUnion, sqrt
 from ..core import safe_eval, safe_call, logger
 
@@ -24,7 +25,7 @@ __all__ = ['check',
             'check_empty_interval',
             'check_intersection']
 
-score_descriptors = load_scores()
+score_descriptors = score_specifications
 solutions = load_solutions()
 supported_scores = {key[0] for key in solutions}.union({key[1] for key in solutions})
 aliases = score_function_aliases

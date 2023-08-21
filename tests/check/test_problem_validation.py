@@ -17,4 +17,4 @@ def test_validate_problem_specification():
         validate_problem_specification([{}])
 
     with pytest.raises(ValueError):
-        validate_problem_specification([{'fold_configuration': [{}]}])
+        validate_problem_specification([{'folds': [{}]}])

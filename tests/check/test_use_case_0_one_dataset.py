@@ -3,8 +3,8 @@ Testing the use case regarding one dataset
 """
 
 from mlscorecheck.check import (check_scores)
-from mlscorecheck.utils import (generate_problems_with_folds,
-                                calculate_scores)
+from mlscorecheck.aggregated import (generate_problems_with_evaluations)
+from mlscorecheck.individual import calculate_scores, generate_1_problem
 
 k = 4
 eps = 10**(-k)
@@ -13,11 +13,9 @@ def test_consistent():
     """
     Testing a consistent configuration
     """
-    folds, problem = generate_problems_with_folds(n_folds=1,
-                                                    n_repeats=1,
-                                                    random_seed=5)
+    evaluation, problem = generate_1_problem(random_state=5)
 
-    scores = calculate_scores(folds,
+    scores = calculate_scores(evaluation,
                                 rounding_decimals=k)
 
     flag, details = check_scores(scores,
@@ -31,11 +29,9 @@ def test_failure():
     """
     Testing a failure
     """
-    folds, problem = generate_problems_with_folds(n_folds=1,
-                                                    n_repeats=1,
-                                                    random_seed=5)
+    evaluation, problem = generate_1_problem(random_state=5)
 
-    scores = calculate_scores(folds,
+    scores = calculate_scores(evaluation,
                                 rounding_decimals=k)
     scores['bacc'] = 0.9
 

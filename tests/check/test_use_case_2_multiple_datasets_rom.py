@@ -3,8 +3,8 @@ Testing the use case regarding multiple datasets
 """
 
 from mlscorecheck.check import (check_multiple_datasets_rom_scores)
-from mlscorecheck.utils import (generate_problems_with_folds,
-                                calculate_scores)
+from mlscorecheck.aggregated import generate_problems_with_evaluations
+from mlscorecheck.aggregated import calculate_scores_datasets
 
 k = 4
 eps = 10**(-k)
@@ -13,18 +13,18 @@ def test_consistent():
     """
     Testing a consistent configuration
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problems = generate_problems_with_evaluations(n_problems=3,
                                                     n_folds=1,
                                                     n_repeats=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='rom',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('rom', 'rom'),
                                 rounding_decimals=k)
 
     flag, details = check_multiple_datasets_rom_scores(scores,
                                                         eps=eps,
-                                                        datasets=problem,
+                                                        datasets=problems,
                                                         return_details=True)
 
     assert flag
@@ -33,19 +33,19 @@ def test_failure():
     """
     Testing a failure
     """
-    folds, problem = generate_problems_with_folds(n_problems=3,
+    evals, problems = generate_problems_with_evaluations(n_problems=3,
                                                     n_folds=1,
                                                     n_repeats=1,
-                                                    random_seed=5)
+                                                    random_state=5)
 
-    scores = calculate_scores(folds,
-                                strategy='rom',
+    scores = calculate_scores_datasets(evals,
+                                strategy=('rom', 'rom'),
                                 rounding_decimals=k)
     scores['bacc'] = 0.9
 
     flag, details = check_multiple_datasets_rom_scores(scores,
                                                         eps=eps,
-                                                        datasets=problem,
+                                                        datasets=problems,
                                                         return_details=True)
 
     assert not flag

@@ -1,5 +1,8 @@
 """
-This module imports the solutions
+This module loads the solutions.
+
+The Solution abstractions enable the evaluation of the solution
+formulas with scalars and intervals too.
 """
 
 import os
@@ -11,12 +14,16 @@ from ._interval import Interval, IntervalUnion
 from ._expression import Expression
 
 __all__ = ['load_solutions',
-            'load_scores',
             'Solution',
-            'Solutions',
-            'score_specifications']
+            'Solutions']
 
 def load_solutions():
+    """
+    Load the solutions
+
+    Returns:
+        dict: the dictionary of the solutions
+    """
     sio = files('mlscorecheck').joinpath(os.path.join('individual', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
 
     solutions = json.loads(sio)
@@ -24,19 +31,10 @@ def load_solutions():
     results = {}
 
     for sol in solutions['solutions']:
-        scores = [score for score in sol['scores']]
+        scores = list(sol['scores'])
         results[tuple(sorted(scores))] = Solutions(**sol)
 
     return results
-
-def load_scores():
-    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'scores.json')).read_text() # pylint: disable=unspecified-encoding
-
-    scores = json.loads(sio)
-
-    return scores['scores']
-
-score_specifications = load_scores()
 
 class Solution:
     """
@@ -62,14 +60,14 @@ class Solution:
         # extracting all symbols
         self.all_symbols = set()
 
-        for key, item in self.solution.items():
+        for _, item in self.solution.items():
             self.all_symbols = self.all_symbols.union(item['symbols'])
 
-        for non_zero in self.non_zero:
-            self.all_symbols = self.all_symbols.union(non_zero['symbols'])
+        for non_zero_val in self.non_zero:
+            self.all_symbols = self.all_symbols.union(non_zero_val['symbols'])
 
-        for non_negative in self.non_negative:
-            self.all_symbols = self.all_symbols.union(non_negative['symbols'])
+        for non_negative_val in self.non_negative:
+            self.all_symbols = self.all_symbols.union(non_negative_val['symbols'])
 
     def to_dict(self):
         """
@@ -83,6 +81,15 @@ class Solution:
                 'non_negative': self.non_negative}
 
     def check_non_zeros(self, evals):
+        """
+        Check if the non-zero conditions hold
+
+        Args:
+            evals (dict): evaluations
+
+        Returns:
+            dict/None: if any of the conditions hold, the condition
+        """
         for key, value in evals.items():
             if isinstance(value, (Interval, IntervalUnion)):
                 if value.contains(0):
@@ -108,17 +115,24 @@ class Solution:
         return self.check_non_zeros(non_zeros)
 
     def check_non_negatives(self, evals):
+        """
+        Check if the non-negative conditions hold
+
+        Args:
+            evals (dict): evaluations
+
+        Returns:
+            dict/None: if any of the conditions hold, the condition
+        """
         for key, value in evals.items():
             if isinstance(value, (Interval, IntervalUnion)):
                 if isinstance(value, Interval):
                     if value.upper_bound < 0:
                         return {key: value}
-                else:
-                    if any(interval.upper_bound < 0 for interval in value.intervals):
-                        return {key: value}
-            else:
-                if value < 0:
+                elif any(interval.upper_bound < 0 for interval in value.intervals):
                     return {key: value}
+            elif value < 0:
+                return {key: value}
         return None
 
     def non_negative_conditions(self, subs):

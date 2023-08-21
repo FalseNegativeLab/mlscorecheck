@@ -4,19 +4,21 @@ This module tests the solutions
 
 import pytest
 
-from mlscorecheck.core import (load_solutions,
-                                load_scores,
-                                score_functions_without_complements,
-                                score_functions_standardized_without_complements,
+from mlscorecheck.core import safe_call
+from mlscorecheck.individual import (load_solutions,
                                 Solution,
                                 Solutions,
                                 Interval,
                                 IntervalUnion)
 
-from mlscorecheck.utils import (generate_problems)
+from mlscorecheck.scores import (score_functions_without_complements,
+                                    score_functions_standardized_without_complements,
+                                    score_specifications)
+
+from mlscorecheck.individual import (generate_problems)
 
 solutions = load_solutions()
-scores = load_scores()
+scores = score_specifications
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
 
@@ -27,10 +29,11 @@ def test_solution(sol, zeros):
     Testing a particular solution
     """
 
-    problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
-    problem['beta_plus'] = 2
-    problem['beta_minus'] = 2
+    evaluation, problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
+    evaluation['beta_plus'] = 2
+    evaluation['beta_minus'] = 2
 
+    """
     nans0 = scores[sol[0]].get('nans')
     nans1 = scores[sol[1]].get('nans')
 
@@ -38,23 +41,30 @@ def test_solution(sol, zeros):
         for item in nans0:
             flag = True
             for key in item:
-                flag = flag and item[key] == problem[key]
+                flag = flag and item[key] == evaluation[key]
             if flag:
                 return
     if nans1 is not None:
         for item in nans1:
             flag = True
             for key in item:
-                flag = flag and item[key] == problem[key]
+                flag = flag and item[key] == evaluation[key]
             if flag:
                 return
 
-    print(sol, problem)
+    print(sol, evaluation)
+    """
 
-    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
+    #score0 = functions[sol[0]](**{key: value for key, value in evaluation.items() if key in scores[sol[0]]['args']})
+    #score1 = functions[sol[1]](**{key: value for key, value in evaluation.items() if key in scores[sol[1]]['args']})
 
-    result = solutions[sol].evaluate({**problem,
+    score0 = safe_call(functions[sol[0]], evaluation, scores[sol[0]].get('nans'))
+    score1 = safe_call(functions[sol[1]], evaluation, scores[sol[1]].get('nans'))
+
+    if score0 is None or score1 is None:
+        return
+
+    result = solutions[sol].evaluate({**evaluation,
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
 
@@ -70,7 +80,7 @@ def test_solution(sol, zeros):
         tp = res['tp']
         tn = res['tn']
 
-        flags.append(abs(tp - problem['tp']) < 1e-5 and abs(tn - problem['tn']) < 1e-5)
+        flags.append(abs(tp - evaluation['tp']) < 1e-5 and abs(tn - evaluation['tn']) < 1e-5)
 
     assert len(flags) == 0 or any(flags)
 
@@ -81,9 +91,9 @@ def test_solution_failure(sol, zeros):
     Testing a particular solution
     """
 
-    problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
-    problem['beta_plus'] = 2
-    problem['beta_minus'] = 2
+    evaluation, problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
+    evaluation['beta_plus'] = 2
+    evaluation['beta_minus'] = 2
 
     nans0 = scores[sol[0]].get('nans')
     nans1 = scores[sol[1]].get('nans')
@@ -92,23 +102,23 @@ def test_solution_failure(sol, zeros):
         for item in nans0:
             flag = True
             for key in item:
-                flag = flag and item[key] == problem[key]
+                flag = flag and item[key] == evaluation[key]
             if flag:
                 return
     if nans1 is not None:
         for item in nans1:
             flag = True
             for key in item:
-                flag = flag and item[key] == problem[key]
+                flag = flag and item[key] == evaluation[key]
             if flag:
                 return
 
-    score0 = functions[sol[0]](**{key: value for key, value in problem.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in problem.items() if key in scores[sol[1]]['args']})
+    score0 = functions[sol[0]](**{key: value for key, value in evaluation.items() if key in scores[sol[0]]['args']})
+    score1 = functions[sol[1]](**{key: value for key, value in evaluation.items() if key in scores[sol[1]]['args']})
 
-    problem['tp'] = problem['tp'] * 10 + 5
+    evaluation['tp'] = evaluation['tp'] * 10 + 5
 
-    result = solutions[sol].evaluate({**problem,
+    result = solutions[sol].evaluate({**evaluation,
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
 
@@ -120,7 +130,7 @@ def test_solution_failure(sol, zeros):
         tp = res['tp']
         tn = res['tn']
 
-        flags.append(abs(tp - problem['tp']) < 1e-5 and abs(tn - problem['tn']) < 1e-5)
+        flags.append(abs(tp - evaluation['tp']) < 1e-5 and abs(tn - evaluation['tn']) < 1e-5)
 
     assert len(flags) == 0 or not any(flags)
 

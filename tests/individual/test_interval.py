@@ -4,7 +4,7 @@ This module tests the interval computing
 
 import numpy as np
 
-from mlscorecheck.core import Interval, IntervalUnion
+from mlscorecheck.individual import Interval, IntervalUnion
 
 def test_interval_constructor():
     """
@@ -30,7 +30,7 @@ def test_interval_repr():
     """
     Testing the representation
     """
-    assert Interval(0, 1).__repr__() == '(0, 1)'
+    assert str(Interval(0, 1)) == '(0, 1)'
 
 def test_to_tuple():
     """
@@ -468,7 +468,7 @@ def test_interval_union_repr():
     """
     Testing the representation
     """
-    assert IntervalUnion([Interval(0, 1), Interval(2, 3)]).__repr__() == '(0, 1) | (2, 3)'
+    assert str(IntervalUnion([Interval(0, 1), Interval(2, 3)])) == '(0, 1) | (2, 3)'
 
 def test_cross_interval_intervalunion():
     """

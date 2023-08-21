@@ -22,7 +22,6 @@ class Algebra(metaclass=abc.ABCMeta):
         """
         The constructor of the algebra
         """
-        pass
 
     @abc.abstractmethod
     def create_symbol(self, name, **kwargs):
@@ -270,6 +269,7 @@ class SympyAlgebra(Algebra):
     def is_trivial(self, expression):
         """
         Checks if the expression is trivial
+        TODO: checking other constants
 
         Args:
             expression (object): the expression to check
@@ -277,13 +277,7 @@ class SympyAlgebra(Algebra):
         Returns:
             bool: True if the expression is trivial, False otherwise
         """
-        if expression is None:
-            return True
-        if expression == 1:
-            #TODO: checking other constants
-            return True
-
-        return False
+        return True if expression is None else expression == 1
 
     def is_root(self, expression):
         """
@@ -296,29 +290,44 @@ class SympyAlgebra(Algebra):
             bool: True if the expression is a root, False otherwise
         """
         if self.is_power(expression):
-            base, exponent = expression.args
-            if exponent < 1 and exponent > 0:
+            _, exponent = expression.args
+            if 0 < exponent < 1:
                 return True
         return False
 
     def is_power(self, expression):
-        if isinstance(expression, self.algebra.core.power.Pow):
-            return True
-        return False
+        """
+        Checks whether the expression is a power
+
+        Args:
+            expression (object): the expression to check
+
+        Returns:
+            bool: whether the expression is a power
+        """
+        return isinstance(expression, self.algebra.core.power.Pow)
 
     def is_division(self, expression):
+        """
+        Checks whether the expression is a division
+
+        Args:
+            expression (object): the expression to check
+
+        Returns:
+            bool: whether the expression is a division
+        """
         if self.is_power(expression):
-            base, power = expression.args
+            _, power = expression.args
             if power < 0:
                 return True
 
         if isinstance(expression, self.algebra.core.power.Mul):
             args = expression.args
-            if len(args) == 2:
-                if self.is_power(args[1]):
-                    base, power = args[1].args
-                    if power < 0:
-                        return True
+            if len(args) == 2 and self.is_power(args[1]):
+                _, power = args[1].args
+                if power < 0:
+                    return True
         return False
 
     def operands(self, expression):
@@ -425,8 +434,7 @@ class SageAlgebra(Algebra):
         results = self.algebra.solve(equation, var)
         solutions = []
         for sol in results:
-            solution = {}
-            solution[sol.lhs()] = self.algebra.factor(sol.rhs())
+            solution = {sol.lhs(): self.algebra.factor(sol.rhs())}
             solutions.append(solution)
         return solutions
 
@@ -465,11 +473,7 @@ class SageAlgebra(Algebra):
         Returns:
             bool: True if the expression is trivial, False otherwise
         """
-        if expression is None:
-            return True
-        if expression.is_trivially_equal(1):
-            return True
-        return False
+        return True if expression is None else expression.is_trivially_equal(1)
 
     def is_root(self, expression):
         """
@@ -482,32 +486,50 @@ class SageAlgebra(Algebra):
             bool: True if the expression is a root, False otherwise
         """
         if self.is_power(expression):
-            base, exponent = expression.operands()
-            if exponent < 1 and exponent > 0:
+            _, exponent = expression.operands()
+            if 0 < exponent < 1:
                 return True
         return False
 
     def is_power(self, expression):
-        if hasattr(expression.operator(), '__qualname__') and expression.operator().__qualname__ == 'pow':
-            return True
-        return False
+        """
+        Checks whether the expression is a power
+
+        Args:
+            expression (object): the expression to check
+
+        Returns:
+            bool: whether the expression is a power
+        """
+        return bool(hasattr(expression.operator(), '__qualname__')\
+                    and expression.operator().__qualname__ == 'pow')
 
     def is_division(self, expression):
+        """
+        Checks whether the expression is a division
+
+        Args:
+            expression (object): the expression to check
+
+        Returns:
+            bool: whether the expression is a division
+        """
         if self.is_power(expression):
             operands = expression.operands()
             if operands[1] < 0:
                 return True
 
-        if hasattr(expression.operator(), '__qualname__') and expression.operator().__qualname__ == 'mul_vararg':
+        if hasattr(expression.operator(), '__qualname__') \
+            and expression.operator().__qualname__ == 'mul_vararg':
             operands = expression.operands()
             print(operands)
             if len(operands) == 2:
                 if self.is_power(operands[1]):
-                    base, power = operands[1].operands()
+                    _, power = operands[1].operands()
                     if power < 0:
                         return True
                 elif self.is_power(operands[0]):
-                    base, power = operands[0].operands()
+                    _, power = operands[0].operands()
                     if power < 0:
                         return True
         return False
@@ -536,7 +558,7 @@ class SageAlgebra(Algebra):
         """
         return [str(var) for var in list(expression.free_variables())]
 
-class Symbols:
+class Symbols: # pylint: disable=too-many-instance-attributes
     """
     A symbols class representing the basic symbols to be used
     """
@@ -560,6 +582,15 @@ class Symbols:
         self.beta_plus = self.algebra.create_symbol('beta_plus', positive=True, real=True)
         self.beta_minus = self.algebra.create_symbol('beta_minus', positive=True, real=True)
         self.sqrt = self.algebra.sqrt
+
+    def get_algebra(self):
+        """
+        Returns the algebra
+
+        Returns:
+            Algebra: the algebra object
+        """
+        return self.algebra
 
     def to_dict(self):
         """

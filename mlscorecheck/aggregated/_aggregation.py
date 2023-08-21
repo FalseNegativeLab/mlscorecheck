@@ -7,6 +7,7 @@ import copy
 import pulp as pl
 
 from ._calculate_scores import calculate_scores_datasets
+from ._folds import _expand_datasets
 
 __all__ = ['add_bounds',
             'calculate_scores_lp',
@@ -179,7 +180,7 @@ def create_target(total_variables,
 
         return scores
 
-def populate_solution(pulp_problem, problems, strategy):
+def populate_solution(pulp_problem, problems, strategy, calculate_scores=True):
     """
     Populates the values of the variables into the problem structure
 
@@ -198,7 +199,8 @@ def populate_solution(pulp_problem, problems, strategy):
         problem_idx, fold_idx = int(problem_idx), int(fold_idx)
         solutions[problem_idx]['folds'][fold_idx][name] = variable.varValue
 
-    calculate_scores_datasets(solutions, strategy=strategy, populate_original=True)
+    if calculate_scores:
+        calculate_scores_datasets(solutions, strategy=strategy, populate_original=True)
 
     return solutions
 
@@ -219,14 +221,18 @@ def _check_bounds(problem):
     return flag
 
 def _check_results(pulp_problem, problems, strategy):
-    solution = populate_solution(pulp_problem, problems, strategy)
-    overall_check = True
-    for dataset in solution:
-        for fold in dataset['folds']:
-            flag = _check_bounds(fold)
+    solution = populate_solution(pulp_problem, problems, strategy, pulp_problem.status==1)
+
+    if pulp_problem.status == 1:
+        overall_check = True
+        for dataset in solution:
+            for fold in dataset['folds']:
+                flag = _check_bounds(fold)
+                overall_check = overall_check and flag
+            flag = _check_bounds(dataset)
             overall_check = overall_check and flag
-        flag = _check_bounds(dataset)
-        overall_check = overall_check and flag
+    else:
+        overall_check = False
 
     return {'consistency': (pulp_problem.status == 1) and overall_check,
             'pulp_solution': pulp_problem.status == 1,
@@ -248,6 +254,8 @@ def check_aggregated_scores(scores, eps, datasets, *, strategy, return_details=F
         bool (, dict): the flag indicating the consistency and additionally the
                         details of the check
     """
+    datasets = _expand_datasets(datasets)
+
     # creating the linear programming problem
     pulp_problem = pl.LpProblem('feasibility')
 

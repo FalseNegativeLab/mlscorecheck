@@ -7,9 +7,11 @@ import importlib
 
 import numpy as np
 
-from ._algebra import *
-from ..individual import load_scores
-from ..individual import score_functions_standardized_with_complements
+from ..core import safe_eval
+from ..scores import score_specifications
+from ..scores import score_functions_standardized_with_complements
+
+from ._algebra import Symbols
 
 __all__ = ['Score',
             'PositiveLikelihoodRatio',
@@ -44,10 +46,10 @@ __all__ = ['Score',
             'get_base_objects',
             'get_all_objects']
 
-scores = load_scores()
+scores = score_specifications
 functions = score_functions_standardized_with_complements
 
-class Score:
+class Score: # pylint: disable=too-many-instance-attributes
     """
     The Score base class
     """
@@ -72,14 +74,15 @@ class Score:
         """
         self.descriptor = descriptor
 
-        abbreviation = descriptor['abbreviation']
-        name = descriptor['name']
-        nans = descriptor.get('nans', None)
-        synonyms = descriptor.get('synonyms', None)
-        complement = descriptor.get('complement', None)
-        args = descriptor.get('args_standardized')
-        range_ = (descriptor.get('lower_bound', -np.inf), descriptor.get('upper_bound', -np.inf))
-        sqrt = descriptor.get('sqrt', False)
+        self.abbreviation = descriptor['abbreviation']
+        self.name = descriptor['name']
+        self.nans = descriptor.get('nans', None)
+        self.synonyms = descriptor.get('synonyms', None)
+        self.complement = descriptor.get('complement', None)
+        self.args = descriptor.get('args_standardized')
+        self.range = (descriptor.get('lower_bound', -np.inf),
+                        descriptor.get('upper_bound', -np.inf))
+        self.sqrt = descriptor.get('sqrt', False)
 
         # setting the base kit of symbols
 
@@ -87,32 +90,17 @@ class Score:
 
         # setting the symbol
         kwargs = {}
-        if range_ is not None:
-            kwargs['lower_bound'] = range_[0]
-            kwargs['upper_bound'] = range_[1]
-        self.symbol = self.symbols.algebra.create_symbol(abbreviation, real=True, **kwargs)
-
-
-        self.abbreviation = abbreviation
-        self.name = name
-        self.range = range_
-        self.nans = nans
+        if self.range[0] > -np.inf and self.range[1] < np.inf:
+            kwargs['lower_bound'] = self.range[0]
+            kwargs['upper_bound'] = self.range[1]
+        self.symbol = self.symbols.algebra.create_symbol(self.abbreviation, real=True, **kwargs)
 
         # setting the score function
         if isinstance(function, str):
-            module = importlib.import_module('mlscorecheck.core')
+            module = importlib.import_module('mlscorecheck.scores')
             self.function = getattr(module, function)
         else:
             self.function = function
-
-        # generating the list of arguments
-        self.args = args
-
-        # handling the case of sqrt expressions
-        self.sqrt = sqrt
-
-        self.synonyms = synonyms
-        self.complement = complement
 
         # generating the list of argument symbols
         arg_symbols = {arg: getattr(symbols, arg) for arg in self.args}
@@ -122,19 +110,21 @@ class Score:
 
         # setting the expression
         if expression is not None:
-            self.expression = eval(expression, arg_symbols)
+            self.expression = safe_eval(expression, arg_symbols)
         else:
             self.expression = function(**arg_symbols)
 
         # setting the equation
         if equation is not None:
-            self.equation = eval(equation, {**{self.abbreviation: self.symbol}, **arg_symbols})
+            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+            self.equation = safe_eval(equation, subs)
         else:
             self.equation = self.symbol - self.expression
 
         # setting the polynomial equation
         if equation_polynomial is not None:
-            self.equation_polynomial = eval(equation_polynomial, {**{self.abbreviation: self.symbol}, **arg_symbols})
+            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+            self.equation_polynomial = safe_eval(equation_polynomial, subs)
         else:
             self.equation_polynomial = None
 
@@ -480,7 +470,8 @@ class GeometricMean(Score):
                         scores['gm'],
                         function=functions['gm'])
 
-        self.equation_polynomial = self.symbol**2 - symbols.tp**2*symbols.tn**2/(symbols.p**2*symbols.n**2)
+        self.equation_polynomial = self.symbol**2 - \
+                symbols.tp**2*symbols.tn**2/(symbols.p**2*symbols.n**2)
 
 class FowlkesMallowsIndex(Score):
     """
@@ -503,7 +494,8 @@ class FowlkesMallowsIndex(Score):
         tp = symbols.tp
         tn = symbols.tn
 
-        self.equation_polynomial = -(self.symbol**2*n*p - self.symbol**2*p*tn + self.symbol**2*p*tp - tp**2)
+        self.equation_polynomial = -(self.symbol**2*n*p - self.symbol**2*p*tn + \
+                                                        self.symbol**2*p*tp - tp**2)
 
 class Markedness(Score):
     """
@@ -631,7 +623,8 @@ class DiagnosticOddsRatio(Score):
         p = symbols.p
         n = symbols.n
 
-        self.equation_polynomial = symbols.algebra.simplify(self.symbol * (n - tn) * (p - tp) - tn*tp)
+        tmp = self.symbol * (n - tn) * (p - tp) - tn*tp
+        self.equation_polynomial = symbols.algebra.simplify(tmp)
 
 class JaccardIndex(Score):
     """
@@ -697,7 +690,8 @@ class CohensKappa(Score):
         p = symbols.p
         n = symbols.n
 
-        self.equation_polynomial = symbols.algebra.simplify(self.symbol * (n**2 + n*tn - n*tp + p**2 - p*tn + p*tp) + 2 * (n*p - n*tn - p*tp))
+        tmp = self.symbol * (n**2 + n*tn - n*tp + p**2 - p*tn + p*tp) + 2 * (n*p - n*tn - p*tp)
+        self.equation_polynomial = symbols.algebra.simplify(tmp)
 
 class P4(Score):
     """
@@ -720,7 +714,8 @@ class P4(Score):
         fp = symbols.n - tn
         fn = symbols.p - tp
 
-        self.equation_polynomial = symbols.algebra.simplify(self.symbol * (4*tp*tn + (tp + tn)*(fp + fn)) - 4*tp*tn)
+        tmp = self.symbol * (4*tp*tn + (tp + tn)*(fp + fn)) - 4*tp*tn
+        self.equation_polynomial = symbols.algebra.simplify(tmp)
 
 def get_base_objects(algebraic_system='sympy'):
     """

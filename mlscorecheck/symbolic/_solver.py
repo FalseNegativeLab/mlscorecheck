@@ -19,14 +19,11 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
         bases (list): the list of already collected bases
         algebra (Algebra): the algebra to be used
     """
-    print('processing', expression)
-    #simplified = algebra.simplify(expression)
 
     if algebra.is_division(expression):
         num, denom = algebra.num_denom(expression)
         num = algebra.simplify(num)
         denom = algebra.simplify(denom)
-        print('nd', num, denom)
 
         if not algebra.is_trivial(denom):
             denoms.append(denom)
@@ -36,7 +33,6 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
         # fractional exponents are already checked here
         base, _ = algebra.operands(expression)
         bases.append(base)
-        print('base', base)
 
         for operand in algebra.operands(base):
             _collect_denominators_and_bases(operand, denoms, bases, algebra)
@@ -44,8 +40,6 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
         for operand in algebra.operands(expression):
             if not algebra.is_trivial(operand):
                 _collect_denominators_and_bases(operand, denoms, bases, algebra)
-
-    return
 
 def collect_denominators_and_bases(expression, algebra):
     """
@@ -78,6 +72,66 @@ class ProblemSolver:
         """
         self.score0 = score0
         self.score1 = score1
+        self.solutions = None
+        self.real_solutions = None
+        self.denoms = None
+        self.bases = None
+        self.str_solutions = None
+
+    def determine_variable_order(self):
+        """
+        Determine the variable order
+
+        Returns:
+            obj, obj, obj, obj: the first variable to solve; the second variable
+                        to solve; the first equation to solve; the second equation to solve
+        """
+        equation0 = self.score0.equation_polynomial
+        equation1 = self.score1.equation_polynomial
+
+        # the initial choice of variable order to solve
+        var0 = 'tp'
+        var1 = 'tn'
+
+        args0 = self.score0.args
+        args1 = self.score1.args
+
+        n_vars0 = int('tp' in args0) + int('tn' in args0)
+        n_vars1 = int('tp' in args1) + int('tn' in args1)
+
+        if n_vars0 != 1 and n_vars1 == 1:
+            equation0, equation1 = (self.score1.equation_polynomial,
+                                    self.score0.equation_polynomial)
+            args0, args1 = args1, args0
+
+        if 'tp' not in args1:
+            var0, var1 = 'tn', 'tp'
+
+        if var0 not in args0:
+            var0, var1 = var1, var0
+
+        return var0, var1, equation0, equation1
+
+    def corner_case_solution(self, solution):
+        """
+        Checks if the solution is a corner case solution
+
+        Args:
+            solution (dict): a pair of solutions
+
+        Returns:
+            bool: a flag indicating if the solution is corner case
+        """
+        var0, var1 = list(solution.keys())
+        flag = False
+        if str(solution[var0]['expression']) in {'0', 'n', 'p'}:
+            # triggered in the ppv-fm case
+            flag = True
+        if str(solution[var1]['expression']) in {'0', 'n', 'p'}:
+            # triggered in the fm-ppv case
+            flag = True
+
+        return flag
 
     def solve(self):
         """
@@ -89,75 +143,54 @@ class ProblemSolver:
         self.solutions = []
         self.real_solutions = []
 
-        equation0 = self.score0.equation_polynomial
-        equation1 = self.score1.equation_polynomial
+        var0, var1, equation0, equation1 = self.determine_variable_order()
 
-        var0 = 'tp'
-        var1 = 'tn'
-
-        args0 = self.score0.args
-        args1 = self.score1.args
-
-        n_vars0 = int('tp' in args0) + int('tn' in args0)
-        n_vars1 = int('tp' in args1) + int('tn' in args1)
-
-        if n_vars0 != 1 and n_vars1 == 1:
-            equation0, equation1 = self.score1.equation_polynomial, self.score0.equation_polynomial
-            args0, args1 = args1, args0
-
-        if 'tp' not in args1:
-            var0, var1 = 'tn', 'tp'
-
-        if var0 not in args0:
-            var0, var1 = var1, var0
-
+        # querying the symbols
         sym0 = getattr(self.score0.symbols, var0)
         sym1 = getattr(self.score0.symbols, var1)
 
         algebra = self.score0.symbols.algebra
 
-        logger.info(f'eq0 {equation0}')
-        logger.info(f'sym0 {sym0}')
+        logger.info('eq0 %s', equation0)
+        logger.info('sym0 %s', sym0)
 
-        v0s = algebra.solve(equation0, sym0)
+        # solving the first equation for sym0
+        v0_sols = algebra.solve(equation0, sym0)
 
-        logger.info(f'v0s {v0s}')
+        logger.info('v0s %s', v0_sols)
 
-        for v0 in v0s:
-            logger.info('v0 {v0}')
+        for v0_sol in v0_sols:
+            # iterating through all solutions
+            logger.info('v0 %s', v0_sol)
+
+            # substitution into the other equation if needed
             equation1_tmp = equation1
 
-            logger.info(f'{algebra.args(equation1)}')
+            logger.info('%s', algebra.args(equation1))
             if sym0 in algebra.args(equation1):
-                logger.info(f'substitution {equation1} {v0}')
-                equation1_tmp = algebra.subs(equation1, v0)
+                logger.info('substitution %s %s', equation1, v0_sol)
+                equation1_tmp = algebra.subs(equation1, v0_sol)
 
-            logger.info(f'eq1tmp {equation1_tmp}')
+            logger.info('eq1tmp %s', equation1_tmp)
 
-            v1s = algebra.solve(equation1_tmp, sym1)
+            # solving for sym1
+            v1_sols = algebra.solve(equation1_tmp, sym1)
 
-            logger.info(f'v1s {v1s}')
+            logger.info('v1s %s', v1_sols)
 
-            for v1 in v1s:
-                v0_sol = v0[sym0]
+            # assembling all solutions
+            for v1_sol in v1_sols:
+                v0_final = v0_sol[sym0]
 
-                if sym1 in algebra.args(v0_sol):
-                    v0_sol = algebra.subs(v0_sol, v1)
+                if sym1 in algebra.args(v0_final):
+                    v0_final = algebra.subs(v0_final, v1_sol)
 
-                sol = {var0: {'expression': algebra.simplify(v0_sol),
-                                'symbols': algebra.free_symbols(v0_sol)},
-                        var1: {'expression': algebra.simplify(v1[sym1]),
-                                'symbols': algebra.free_symbols(v1[sym1])}}
+                sol = {var0: {'expression': algebra.simplify(v0_final),
+                                'symbols': algebra.free_symbols(v0_final)},
+                        var1: {'expression': algebra.simplify(v1_sol[sym1]),
+                                'symbols': algebra.free_symbols(v1_sol[sym1])}}
 
-                flag = True
-                if str(sol[var0]['expression']) in ['0', 'n', 'p']:
-                    # triggered in the ppv-fm case
-                    flag = False
-                if str(sol[var1]['expression']) in ['0', 'n', 'p']:
-                    # triggered in the fm-ppv case
-                    flag = False
-
-                if flag:
+                if not self.corner_case_solution(sol):
                     self.solutions.append(sol)
 
         return self
@@ -170,30 +203,32 @@ class ProblemSolver:
         self.bases = []
         self.str_solutions = []
 
+        algebra = self.score0.symbols.algebra
+
         for solution in self.solutions:
             denoms_sol = set()
             bases_sol = set()
 
-            for item, sol in solution.items():
-                print('aaa', sol['expression'])
-                print('bbb', self.score0.symbols.algebra.simplify(sol['expression']))
-                denoms, bases = collect_denominators_and_bases(self.score0.symbols.algebra.simplify(sol['expression']), self.score0.symbols.algebra)
+            for _, sol in solution.items():
+                simplified = algebra.simplify(sol['expression'])
+                denoms, bases = collect_denominators_and_bases(simplified, algebra)
                 denoms = list(denoms)
                 bases = list(bases)
-                print('ccc', denoms)
-                print('ddd', bases)
                 denoms_sol = denoms_sol.union(set(denoms))
                 bases_sol = bases_sol.union(set(bases))
 
-            denoms_sol = [{'expression': str(denom), 'symbols': self.score0.symbols.algebra.free_symbols(denom)} for denom in denoms_sol]
-            bases_sol = [{'expression': str(base), 'symbols': self.score0.symbols.algebra.free_symbols(base)} for base in bases_sol]
-
-            print('EEE', denoms_sol)
-            print('FFF', bases_sol)
+            denoms_sol = [{'expression': str(denom),
+                            'symbols': algebra.free_symbols(denom)} for denom in denoms_sol]
+            bases_sol = [{'expression': str(base),
+                            'symbols': algebra.free_symbols(base)} for base in bases_sol]
 
             self.denoms.append(denoms_sol)
             self.bases.append(bases_sol)
-            self.str_solutions.append({str(key): {key2: str(value2) if key2 == 'expression' else value2 for key2, value2 in value.items()} for key, value in solution.items()})
+            tmp = {str(key): {key2: str(value2)
+                                if key2 == 'expression'
+                                else value2 for key2, value2 in value.items()}
+                    for key, value in solution.items()}
+            self.str_solutions.append(tmp)
 
     def get_solution(self):
         """

@@ -101,18 +101,23 @@ def _create_folds(dataset):
                                                             dataset.get('n_repeats', 1))
         results['p'] = dataset['p'] * dataset.get('n_repeats', 1)
         results['n'] = dataset['n'] * dataset.get('n_repeats', 1)
-
-        if len(results['folds']) == 1 and 'tptn_bounds' in dataset:
-            results['folds'][0]['tptn_bounds'] = dataset['tptn_bounds']
-            results['tptn_bounds'] = dataset['tptn_bounds']
-        if 'score_bounds' in dataset:
-            for fold in results['folds']:
-                fold['score_bounds'] = dataset['score_bounds']
-            results['score_bounds'] = dataset['score_bounds']
     else:
         results['folds'] = dataset['folds']
         results['p'] = sum(fold['p'] for fold in dataset['folds'])
         results['n'] = sum(fold['n'] for fold in dataset['folds'])
+
+    if 'score_bounds' in dataset:
+            results['score_bounds'] = {**dataset['score_bounds']}
+    if 'tptn_bounds' in dataset:
+        results['tptn_bounds'] = {**dataset['tptn_bounds']}
+
+    if 'fold_score_bounds' in dataset:
+        for fold in results['folds']:
+            fold['score_bounds'] = {**dataset['fold_score_bounds']}
+    if 'fold_tptn_bounds' in dataset:
+        for fold in results['folds']:
+            fold['tptn_bounds'] = {**dataset['fold_tptn_bounds']}
+
     return results
 
 def _expand_datasets(datasets):

@@ -17,35 +17,35 @@ def test_problem_solver():
     """
     base_scores = get_base_objects(symbolic_toolkit)
 
-    ps = ProblemSolver(base_scores['sens'], base_scores['spec'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['sens'], base_scores['spec'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
-    ps = ProblemSolver(base_scores['sens'], base_scores['acc'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['sens'], base_scores['acc'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
-    ps = ProblemSolver(base_scores['acc'], base_scores['spec'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['acc'], base_scores['spec'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
-    ps = ProblemSolver(base_scores['acc'], base_scores['f1p'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['acc'], base_scores['f1p'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
-    ps = ProblemSolver(base_scores['fm'], base_scores['ppv'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['fm'], base_scores['ppv'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
-    ps = ProblemSolver(base_scores['ppv'], base_scores['fm'])
-    ps.solve()
-    ps.edge_cases()
-    assert ps.get_solution() is not None
+    prob_sol = ProblemSolver(base_scores['ppv'], base_scores['fm'])
+    prob_sol.solve()
+    prob_sol.edge_cases()
+    assert prob_sol.get_solution() is not None
 
 @pytest.mark.skipif(symbolic_toolkit is None, reason='no symbolic toolkit available')
 def test_root_in_edge_cases():
@@ -57,12 +57,18 @@ def test_root_in_edge_cases():
     denoms = []
     bases = []
 
-    _collect_denominators_and_bases(symbols.tp**0.5, denoms, bases, symbols.algebra)
+    _collect_denominators_and_bases(symbols.tp**0.5,
+                                    denoms,
+                                    bases,
+                                    symbols.algebra)
 
     assert bases
 
     denoms = []
     bases = []
-    _collect_denominators_and_bases((symbols.tp + symbols.tn)**0.5, denoms, bases, symbols.algebra)
+    _collect_denominators_and_bases((symbols.tp + symbols.tn)**0.5,
+                                    denoms,
+                                    bases,
+                                    symbols.algebra)
 
     assert bases

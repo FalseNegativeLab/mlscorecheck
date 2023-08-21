@@ -21,9 +21,9 @@ def check_importability(package):
         str/None: the name of the package if importable or None if not importable
     """
     try:
-        module = importlib.import_module(package)
+        _ = importlib.import_module(package)
         return package
-    except ModuleNotFoundError as exception:
+    except ModuleNotFoundError:
         return None
 
 symbolic_toolkits.append(check_importability('sympy'))

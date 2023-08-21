@@ -6,8 +6,8 @@ calculation of scores
 import numpy as np
 
 from ..core import safe_call
-from ._score_loaders import score_functions_with_solutions
-from ._solutions import score_specifications
+from ..scores import score_functions_with_solutions
+from ..scores import score_specifications
 
 __all__ = ['round_scores',
             'calculate_scores']

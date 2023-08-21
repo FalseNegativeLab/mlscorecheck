@@ -27,4 +27,6 @@ def test_safe_call():
     """
     Testing the safe call
     """
+    assert safe_call(mock_function, {'a': 2, 'b': 3}, [{'a': 2, 'b': 3}]) is None
+    assert safe_call(mock_function, {'a': 2, 'b': 3}, [{'a': 2, 'b': 4}]) == 4
     assert safe_call(mock_function, {'a': 2, 'b': 3}) == 4

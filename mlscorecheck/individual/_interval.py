@@ -8,9 +8,16 @@ __all__ = ['Interval',
             'IntervalUnion']
 
 def sqrt(obj):
-    if isinstance(obj, (Interval, IntervalUnion)):
-        return obj**(0.5)
-    return np.sqrt(obj)
+    """
+    Square root of an interval or interval union
+
+    Args:
+        obj (Interval/IntervalUnion/numeric): the object to take the square root of
+
+    Returns:
+        Interval/IntervalUnion/numeric: the square root of the parameter
+    """
+    return obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else np.sqrt(obj)
 
 class Interval:
     """
@@ -54,7 +61,7 @@ class Interval:
         Returns:
             bool: True if the interval contains the value, otherwise False
         """
-        return value >= self.lower_bound and value <= self.upper_bound
+        return self.lower_bound <= value <= self.upper_bound
 
     def intersection(self, other):
         """
@@ -99,9 +106,21 @@ class Interval:
         return np.ceil(self.lower_bound) == np.floor(self.upper_bound)
 
     def shrink_to_integers(self):
+        """
+        Shrinks the interval to integers
+
+        Returns:
+            Interval: the interval shrunk to integers
+        """
         return Interval(np.ceil(self.lower_bound), np.floor(self.upper_bound))
 
     def is_empty(self):
+        """
+        Checks if the interval is empty
+
+        Returns:
+            bool: True if the interval is empty, False otherwise
+        """
         return self.upper_bound < self.lower_bound
 
     def __add__(self, other):
@@ -301,7 +320,15 @@ class Interval:
         return (-1)*self
 
     def __pow__(self, other):
+        """
+        The power operation on the interval
 
+        Args:
+            other (numeric): the exponent
+
+        Returns:
+            Interval: the power of the interval
+        """
         tmp = self
         if other < 1:
             tmp = self.intersection(Interval(0, np.inf))
@@ -397,7 +424,7 @@ class IntervalUnion:
         Returns:
             bool: True if the interval contains the value, otherwise False
         """
-        return any([interval.contains(value) for interval in self.intervals])
+        return any(interval.contains(value) for interval in self.intervals)
 
     def intersection(self, other):
         """
@@ -413,7 +440,7 @@ class IntervalUnion:
         if isinstance(other, Interval):
             new_intervals = [other.intersection(interval) for interval in self.intervals]
             new_intervals = [interval for interval in new_intervals
-                                        if not interval == Interval(1, 0)]
+                                        if interval != Interval(1, 0)]
             return IntervalUnion(new_intervals)
 
         intersections = []
@@ -422,7 +449,7 @@ class IntervalUnion:
                 intersections.append(int0.intersection(int1))
 
         return IntervalUnion([interval for interval in intersections
-                                        if not interval == Interval(1, 0)])
+                                        if interval != Interval(1, 0)])
 
     def integer(self):
         """
@@ -432,7 +459,7 @@ class IntervalUnion:
             bool: whether the interval contains an integer
         """
 
-        return any([interval.integer() for interval in self.intervals])
+        return any(interval.integer() for interval in self.intervals)
 
     def shrink_to_integers(self):
         """
@@ -469,8 +496,7 @@ class IntervalUnion:
 
         intervals = []
         for int0 in self.intervals:
-            for int1 in other.intervals:
-                intervals.append(int0 + int1)
+            intervals.extend(int0 + int1 for int1 in other.intervals)
 
         return IntervalUnion(intervals)
 
@@ -655,4 +681,13 @@ class IntervalUnion:
         return not self.__eq__(other)
 
     def __pow__(self, other):
+        """
+        The power operation on the interval union
+
+        Args:
+            other (numeric): the exponent
+
+        Returns:
+            IntervalUnion: the return of the power operation
+        """
         return IntervalUnion([interval**other for interval in self.intervals])

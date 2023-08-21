@@ -5,13 +5,14 @@ This module implements score calculation for aggregated problems
 import copy
 
 from ..individual import (calculate_scores,
-                            round_scores,
-                            score_functions_with_solutions)
+                            round_scores)
+from ..scores import score_functions_with_solutions
 
-__all__ = ['calculate_scores_aggregated',
+__all__ = ['calculate_scores_list',
+            'calculate_scores_dataset',
             'calculate_scores_datasets']
 
-def calculate_scores_aggregated(problems,
+def calculate_scores_list(problems,
                                 *,
                                 strategy,
                                 rounding_decimals=None,
@@ -32,6 +33,7 @@ def calculate_scores_aggregated(problems,
     Returns:
         dict: the scores and the total figures
     """
+
     if not populate_original:
         problems = copy.deepcopy(problems)
 
@@ -61,6 +63,29 @@ def calculate_scores_aggregated(problems,
 
     return {**figures, **scores}
 
+def calculate_scores_dataset(dataset,
+                                strategy,
+                                rounding_decimals=None,
+                                populate_original=False,
+                                return_populated=False):
+    if not populate_original:
+        dataset = copy.deepcopy(dataset)
+
+    for fold in dataset['folds']:
+        scores = calculate_scores(fold)
+        for key in scores:
+            fold[key] = scores[key]
+
+    total_scores = calculate_scores_list(dataset['folds'],
+                                            strategy=strategy,
+                                            populate_original=populate_original)
+    for key in total_scores:
+        dataset[key] = total_scores[key]
+
+    total_scores = round_scores(total_scores, rounding_decimals)
+
+    return (total_scores, dataset) if return_populated else total_scores
+
 def calculate_scores_datasets(datasets,
                                     *,
                                     strategy,
@@ -89,21 +114,14 @@ def calculate_scores_datasets(datasets,
     if not populate_original:
         datasets = copy.deepcopy(datasets)
 
-    for problem in datasets:
-        for fold in problem['folds']:
-            scores = calculate_scores(fold)
-            for key in scores:
-                fold[key] = scores[key]
+    for dataset in datasets:
+        calculate_scores_dataset(dataset,
+                                    strategy=strategy[1],
+                                    populate_original=True)
 
-        total_scores = calculate_scores_aggregated(problem['folds'],
-                                                    strategy=strategy[1],
-                                                    populate_original=populate_original)
-        for key in total_scores:
-            problem[key] = total_scores[key]
-
-    scores = calculate_scores_aggregated(datasets,
-                                            strategy=strategy[0],
-                                            populate_original=populate_original)
+    scores = calculate_scores_list(datasets,
+                                    strategy=strategy[0],
+                                    populate_original=populate_original)
 
     scores = round_scores(scores, rounding_decimals)
 

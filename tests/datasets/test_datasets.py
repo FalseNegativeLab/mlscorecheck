@@ -2,17 +2,15 @@
 This module tests the dataset functionalities
 """
 
-import pytest
-
 import os
 import json
 
 from importlib.resources import files
 
-from mlscorecheck.datasets import (load_json,
-                                    dataset_statistics,
-                                    load_ml_datasets,
-                                    lookup_dataset)
+import pytest
+
+from mlscorecheck.datasets import (lookup_dataset,
+                                    _resolve_pn)
 
 def test_lookup_dataset():
     """
@@ -36,3 +34,12 @@ def test_exception():
 
     with pytest.raises(ValueError):
         lookup_dataset('dummy')
+
+def test_resolve_pn():
+    """
+    Testing the resolution of p and n figures
+    """
+
+    assert 'p' in _resolve_pn({'dataset': 'common_datasets.ADA'})
+    assert len(_resolve_pn([{'dataset': 'common_datasets.ADA'},
+                            {'dataset': 'common_datasets.ecoli1'}])) == 2

@@ -11,8 +11,8 @@ from ._folds import (determine_fold_configurations,
                         _expand_datasets)
 from ._calculate_scores import (calculate_scores_datasets)
 
-__all__ = ['generate_1_problem_with_folds',
-            'generate_problems_with_folds',
+__all__ = ['generate_1_problem_with_evaluations',
+            'generate_problems_with_evaluations',
             'add_bounds_to_problems']
 
 def add_bounds_to_problems(problems,
@@ -49,7 +49,7 @@ def add_bounds_to_problems(problems,
 
     return problems
 
-def generate_1_problem_with_folds(*,
+def generate_1_problem_with_evaluations(*,
                                     n_repeats=1,
                                     n_folds=1,
                                     random_repeats=True,
@@ -81,29 +81,33 @@ def generate_1_problem_with_folds(*,
         folds = determine_fold_configurations(p, n, n_folds, n_repeats, folding)
         problem = {'p': p, 'n': n, 'n_folds': n_folds, 'n_repeats': n_repeats}
 
+    #total_tp = 0
+    #total_tn = 0
     for fold in folds:
         fold['tp'] = random_state.randint(1, fold['p'])
         fold['tn'] = random_state.randint(1, fold['n'])
+        #total_tp += fold['tp']
+        #total_tn += fold['tn']
 
-    problem_with_figures = {'p': p, 'n': n, 'folds': folds}
+    problem_with_figures = {'p': p, 'n': n, 'folds': folds}#, 'tp': total_tp, 'tn': total_tn}
 
     return problem_with_figures, problem
 
-def generate_problems_with_folds(n_problems=1,
+def generate_problems_with_evaluations(n_problems=1,
                                 n_repeats=1,
                                 n_folds=5,
                                 random_repeats=True,
                                 random_folds=True,
                                 max_p=1000,
                                 max_n=1000,
-                                random_seed=None,
+                                random_state=None,
                                 folding='stratified_sklearn'):
-    if random_seed is None or isinstance(random_seed, int):
-        random_state = np.random.RandomState(random_seed)
+    if random_state is None or isinstance(random_state, int):
+        random_state = np.random.RandomState(random_state)
     else:
-        random_state = random_seed
+        random_state = random_state
 
-    with_figures, problems = list(zip(*[generate_1_problem_with_folds(n_repeats=n_repeats,
+    with_figures, problems = list(zip(*[generate_1_problem_with_evaluations(n_repeats=n_repeats,
                                                     n_folds=n_folds,
                                                     random_repeats=random_repeats,
                                                     random_folds=random_folds,

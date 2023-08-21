@@ -3,15 +3,13 @@ This module implements some dataset loaders
 """
 
 import os
-import json
-
-from importlib.resources import files
 
 __all__ = ['dataset_statistics',
-            'load_json',
             'load_ml_datasets',
             'lookup_dataset',
             '_resolve_pn']
+
+from ..core import load_json
 
 dataset_statistics = {}
 
@@ -34,30 +32,35 @@ def _resolve_pn(dataset_conf):
             result['p'] = tmp['p']
             result['n'] = tmp['n']
     elif isinstance(dataset_conf, list):
-        result = [_resolve_p_n(dataset) for dataset in dataset_conf]
+        result = [_resolve_pn(dataset) for dataset in dataset_conf]
 
     return result
 
 def lookup_dataset(dataset):
+    """
+    Look up a dataset
+
+    Args:
+        dataset (str): the dataset to look up
+
+    Returns:
+        dict: the count statistics of the dataset
+    """
     if dataset not in dataset_statistics:
         raise ValueError(f"No statistics about dataset {dataset} are available. "\
                             "Didn't you forget to identify like 'common_datasets.ecoli1'?")
     return dataset_statistics[dataset]
 
-def load_json(directory, file):
-    sio = files('mlscorecheck').joinpath(os.path.join('datasets', directory, file)).read_text()
-
-    data = json.loads(sio)
-
-    return data
-
 def load_ml_datasets():
-    data = load_json('machine_learning', 'sklearn.json')
+    """
+    Load the ML datasets
+    """
+    data = load_json(os.path.join('datasets', 'machine_learning'), 'sklearn.json')
 
     for entry in data['datasets']:
         dataset_statistics['sklearn.' + entry['name']] = {'p': entry['p'], 'n': entry['n']}
 
-    data = load_json('machine_learning', 'common_datasets.json')
+    data = load_json(os.path.join('datasets', 'machine_learning'), 'common_datasets.json')
 
     for entry in data['datasets']:
         dataset_statistics['common_datasets.' + entry['name']] = {'p': entry['p'], 'n': entry['n']}
