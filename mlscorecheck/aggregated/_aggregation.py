@@ -127,14 +127,6 @@ def create_lp_problem_inner(pulp_problem,
             factor = 1.0 / len(variables)
             total_sum = sum(conf[key] for conf in variables)
             total_variables[key] = factor * total_sum
-    elif strategy == 'wmor':
-        # the weighted MoR case
-        for key in lp_scores:
-            factor = 1.0 / sum(conf['p'] + conf['n'] for conf in variables)
-            total_sum = sum(conf[key] * (conf['p'] + conf['n'])
-                                                    for conf in variables)
-        total_variables[key] = factor * total_sum
-
 
     # adding the bounds
     add_bounds(pulp_problem, total_variables, dataset.get('score_bounds'))
@@ -149,7 +141,7 @@ def create_target(total_variables,
 
     Args:
         total_variables (dict): the total sums and averages
-        strategy ('rom'/'mor'/'wmor'): the aggregation strategy
+        strategy ('rom'/'mor'): the aggregation strategy
 
     Returns:
         dict: the constructions to be matched with the scores
@@ -159,8 +151,8 @@ def create_target(total_variables,
         sums = {key: sum(conf[key] for conf in total_variables)
                 for key in ['tp', 'tn', 'p', 'n']}
 
-        return calculate_scores_lp(**sums)
-    elif strategy == 'mor':
+        scores = calculate_scores_lp(**sums)
+    if strategy == 'mor':
         # the mean of ratios variation
         scores = {}
         for key in lp_scores:
@@ -169,16 +161,7 @@ def create_target(total_variables,
             total_sum = sum(conf[key] for conf in total_variables)
             scores[key] = factor * total_sum
 
-        return scores
-    elif strategy == 'wmor':
-        # the weighted mean of ratios variation
-        scores = {}
-        for key in lp_scores:
-            factor = 1.0 / sum(conf['p'] + conf['n'] for conf in total_variables)
-            total_sum = sum(conf[key] * (conf['p'] + conf['n']) for conf in total_variables)
-            scores[key] = factor * total_sum
-
-        return scores
+    return scores
 
 def populate_solution(pulp_problem, problems, strategy, calculate_scores=True):
     """
@@ -187,7 +170,7 @@ def populate_solution(pulp_problem, problems, strategy, calculate_scores=True):
     Args:
         pulp_problem (pl.LpProblem): a solved problem
         problems (list(dict)): the original problems
-        strategy (list('mor'/'rom'/'wmor')): the list of aggregation strategies
+        strategy (list('mor'/'rom')): the list of aggregation strategies
 
     Returns:
         list(dict): the problems with the variable values and scores populated
@@ -200,28 +183,53 @@ def populate_solution(pulp_problem, problems, strategy, calculate_scores=True):
         solutions[problem_idx]['folds'][fold_idx][name] = variable.varValue
 
     if calculate_scores:
-        calculate_scores_datasets(solutions, strategy=strategy, populate_original=True)
+        solutions = calculate_scores_datasets(solutions,
+                                                strategy=strategy,
+                                                return_populated=True)[1]
 
     return solutions
 
 def _check_bounds(problem):
+    """
+    Checking the bounds specified in the problem
+
+    Args:
+        problem (dict): a problem (dataset/fold) specification
+
+    Returns:
+        bool: True if the conditions are met
+    """
     flag = True
     if 'score_bounds' in problem:
         problem['score_bounds_check'] = True
         for key, bounds in problem['score_bounds'].items():
-            key_flag = (problem[key] >= bounds[0] and problem[key] <= bounds[1])
+            key_flag = bounds[0] <= problem[key] <= bounds[1]
             problem['score_bounds_check'] = problem['score_bounds_check'] and key_flag
             flag = flag and key_flag
     if 'tptn_bounds' in problem:
         problem['tptn_bounds_check'] = True
         for key, bounds in problem['tptn_bounds'].items():
-            key_flag = (problem[key] >= bounds[0] and problem[key] <= bounds[1])
+            key_flag = bounds[0] <= problem[key] <= bounds[1]
             problem['tptn_bounds_check'] = problem['tptn_bounds_check'] and key_flag
             flag = flag and key_flag
     return flag
 
 def _check_results(pulp_problem, problems, strategy):
-    solution = populate_solution(pulp_problem, problems, strategy, pulp_problem.status==1)
+    """
+    Checking all the bound conditions in the results
+
+    Args:
+        pulp_problem (pl.LpProblem): the pl linear programming problem
+        problems (list): problem/dataset specifications
+        strategy (tuple(str)): the inner and outer aggregation strategies,
+                                'mor'/'rom'
+    Returns:
+        dict: a summary of the results
+    """
+    solution = populate_solution(pulp_problem,
+                                    problems,
+                                    strategy,
+                                    pulp_problem.status==1)
 
     if pulp_problem.status == 1:
         overall_check = True
@@ -234,9 +242,9 @@ def _check_results(pulp_problem, problems, strategy):
     else:
         overall_check = False
 
-    return {'consistency': (pulp_problem.status == 1) and overall_check,
+    return {'inconsistency': (pulp_problem.status != 1) or not overall_check,
             'pulp_solution': pulp_problem.status == 1,
-            'condition_checks': overall_check,
+            'bound_inconsistency': not overall_check,
             'configuration': solution}
 
 def check_aggregated_scores(scores, eps, datasets, *, strategy, return_details=False):
@@ -247,7 +255,7 @@ def check_aggregated_scores(scores, eps, datasets, *, strategy, return_details=F
         scores (dict): the aggregated scores
         eps (dict/float): the numerical uncertainty
         datasets (list(dict)): the dataset specification to check against the scores
-        strategy (list('mor'/'rom'/'wmor')): the list of aggregation strategies
+        strategy (list('mor'/'rom')): the list of aggregation strategies
         return_details (bool): whether to return the details of the check
 
     Returns:
@@ -264,9 +272,9 @@ def check_aggregated_scores(scores, eps, datasets, *, strategy, return_details=F
 
     for idx, problem in enumerate(datasets):
         # adding each dataset to the lp problem
-        var, tvar = create_lp_problem_inner(pulp_problem, problem, idx, strategy[1])
-        variables.append(var)
-        total_variables.append(tvar)
+        tmp = create_lp_problem_inner(pulp_problem, problem, idx, strategy[1])
+        variables.append(tmp[0])
+        total_variables.append(tmp[1])
 
     # creating the constructions to be matched with the published scores
     targets = create_target(total_variables, strategy[0])
@@ -287,5 +295,5 @@ def check_aggregated_scores(scores, eps, datasets, *, strategy, return_details=F
     details = _check_results(pulp_problem, datasets, strategy)
 
     # returning the results
-    return ((details['consistency'], details) if return_details else
-            details['consistency'])
+    return ((details['inconsistency'], details) if return_details else
+            details['inconsistency'])

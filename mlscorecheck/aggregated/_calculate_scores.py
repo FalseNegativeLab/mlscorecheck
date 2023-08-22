@@ -8,6 +8,8 @@ from ..individual import (calculate_scores,
                             round_scores)
 from ..scores import score_functions_with_solutions
 
+from ._folds import _expand_datasets
+
 __all__ = ['calculate_scores_list',
             'calculate_scores_dataset',
             'calculate_scores_datasets']
@@ -16,26 +18,23 @@ def calculate_scores_list(problems,
                                 *,
                                 strategy,
                                 rounding_decimals=None,
-                                populate_original=False):
+                                return_populated=False):
     """
     Calculates the aggregated scores for a set of problems
 
     Args:
         problems (list(dict)): the specification of problems
-        strategy (str): 'mor'/'rom'/'wmor' specifying the mode of aggregation,
+        strategy (str): 'mor'/'rom' specifying the mode of aggregation,
                         'mor' standing for the 'mean of ratios' and
-                        'rom' standing for the 'ratio of means' and
-                        'wmor' standing for the weighted mean of reatios
+                        'rom' standing for the 'ratio of means'
         rounding_decimals (None/int): the number of digits to round the scores to
-        populate_original (bool): whether to populate the original structure with
-                                    partial results
+        return_populated (bool): whether to return the populated structure
 
     Returns:
         dict: the scores and the total figures
     """
 
-    if not populate_original:
-        problems = copy.deepcopy(problems)
+    problems = copy.deepcopy(problems)
 
     figures = {'tp': 0, 'tn': 0, 'p': 0, 'n': 0}
 
@@ -45,40 +44,52 @@ def calculate_scores_list(problems,
 
     if strategy == 'rom':
         scores = calculate_scores(figures, scores_only=True)
-    elif strategy in ('mor', 'wmor'):
+    elif strategy == 'mor':
         scores = {key: 0.0 for key in score_functions_with_solutions}
-
         for key in scores:
             total_weight = 0.0
             for problem in problems:
-                if strategy == 'mor':
-                    scores[key] += problem[key] if problem[key] is not None else 0
-                    total_weight += 1
-                elif strategy == 'wmor':
-                    scores[key] += problem[key] * (problem['p'] + problem['n']) if problem[key] is not None else 0
-                    total_weight += (problem['p'] + problem['n'])
+                scores[key] += problem[key] if problem[key] is not None else 0
+                total_weight += 1
+
             scores[key] = scores[key] / total_weight
 
     scores = round_scores(scores, rounding_decimals)
+    scores = {**figures, **scores}
 
-    return {**figures, **scores}
+    return (scores, problems) if return_populated else scores
 
 def calculate_scores_dataset(dataset,
                                 strategy,
                                 rounding_decimals=None,
-                                populate_original=False,
                                 return_populated=False):
-    if not populate_original:
-        dataset = copy.deepcopy(dataset)
+    """
+    Calculates all scores for a dataset
+
+    dataset (dict): the specification of a dataset
+    strategy (str): 'mor'/'rom' specifying the mode
+                            of aggregation for each level,
+                            'mor' standing for the 'mean of ratios' and
+                            'rom' standing for the 'ratio of means'
+    rounding_decimals (None/int): the number of digits to round the scores to
+    return_populated (bool): if True, returns the dataset structure populated
+                                with figures
+
+    Returns:
+        dict (, list): the scores and optionally the populated dataset structure
+    """
+    dataset = copy.deepcopy(dataset)
+
+    dataset = _expand_datasets(dataset)
 
     for fold in dataset['folds']:
         scores = calculate_scores(fold)
         for key in scores:
             fold[key] = scores[key]
 
-    total_scores = calculate_scores_list(dataset['folds'],
-                                            strategy=strategy,
-                                            populate_original=populate_original)
+    total_scores, dataset['folds'] = calculate_scores_list(dataset['folds'],
+                                                            strategy=strategy,
+                                                            return_populated=True)
     for key in total_scores:
         dataset[key] = total_scores[key]
 
@@ -90,38 +101,35 @@ def calculate_scores_datasets(datasets,
                                     *,
                                     strategy,
                                     rounding_decimals=None,
-                                    populate_original=False,
                                     return_populated=False
                                     ):
     """
     Calculates scores for multiple datasets
 
     Args:
-        problems (list(dict)): the specification of problems
-        strategy (str, str): 2-item iterable of 'mor'/'rom'/'wmor' specifying the mode of
-                                aggregation for each level,
+        datasets (list(dict)): the specifications of datasets
+        strategy (str, str): 2-item iterable of 'mor'/'rom' specifying the mode
+                                of aggregation for each level,
                                 'mor' standing for the 'mean of ratios' and
-                                'rom' standing for the 'ratio of means' and
-                                'wmor' standing for the 'weighted mean of ratios'
+                                'rom' standing for the 'ratio of means'
         rounding_decimals (None/int): the number of digits to round the scores to
-        populate_original (bool): whether to populate the original structure with
-                                    partial results
-        return_populated (bool): if True, returns the problem structure populated with figures
+        return_populated (bool): if True, returns the dataset structures populated
+                                    with figures
 
     Returns:
-        dict (, list): the scores and optionally the populated problem structure
+        dict (, list): the scores and optionally the populated datasets structures
     """
-    if not populate_original:
-        datasets = copy.deepcopy(datasets)
+    datasets = copy.deepcopy(datasets)
 
-    for dataset in datasets:
-        calculate_scores_dataset(dataset,
-                                    strategy=strategy[1],
-                                    populate_original=True)
+    datasets = _expand_datasets(datasets)
 
-    scores = calculate_scores_list(datasets,
-                                    strategy=strategy[0],
-                                    populate_original=populate_original)
+    datasets = [calculate_scores_dataset(dataset,
+                                            strategy=strategy[1],
+                                            return_populated=True)[1] for dataset in datasets]
+
+    scores, datasets = calculate_scores_list(datasets,
+                                                strategy=strategy[0],
+                                                return_populated=True)
 
     scores = round_scores(scores, rounding_decimals)
 

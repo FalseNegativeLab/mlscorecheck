@@ -7,13 +7,13 @@ import os
 __all__ = ['dataset_statistics',
             'load_ml_datasets',
             'lookup_dataset',
-            '_resolve_pn']
+            'resolve_pn']
 
 from ..core import load_json
 
 dataset_statistics = {}
 
-def _resolve_pn(dataset_conf):
+def resolve_pn(dataset_conf):
     """
     Resolve the dataset configuration from the integrated statistics
 
@@ -32,7 +32,7 @@ def _resolve_pn(dataset_conf):
             result['p'] = tmp['p']
             result['n'] = tmp['n']
     elif isinstance(dataset_conf, list):
-        result = [_resolve_pn(dataset) for dataset in dataset_conf]
+        result = [resolve_pn(dataset) for dataset in dataset_conf]
 
     return result
 

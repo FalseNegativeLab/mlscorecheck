@@ -10,7 +10,7 @@ from importlib.resources import files
 import pytest
 
 from mlscorecheck.datasets import (lookup_dataset,
-                                    _resolve_pn)
+                                    resolve_pn)
 
 def test_lookup_dataset():
     """
@@ -35,11 +35,11 @@ def test_exception():
     with pytest.raises(ValueError):
         lookup_dataset('dummy')
 
-def test_resolve_pn():
+def testresolve_pn():
     """
     Testing the resolution of p and n figures
     """
 
-    assert 'p' in _resolve_pn({'dataset': 'common_datasets.ADA'})
-    assert len(_resolve_pn([{'dataset': 'common_datasets.ADA'},
+    assert 'p' in resolve_pn({'dataset': 'common_datasets.ADA'})
+    assert len(resolve_pn([{'dataset': 'common_datasets.ADA'},
                             {'dataset': 'common_datasets.ecoli1'}])) == 2
