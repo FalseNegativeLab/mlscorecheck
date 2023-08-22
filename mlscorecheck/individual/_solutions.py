@@ -15,26 +15,8 @@ from ._expression import Expression
 
 __all__ = ['load_solutions',
             'Solution',
-            'Solutions']
-
-def load_solutions():
-    """
-    Load the solutions
-
-    Returns:
-        dict: the dictionary of the solutions
-    """
-    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
-
-    solutions = json.loads(sio)
-
-    results = {}
-
-    for sol in solutions['solutions']:
-        scores = list(sol['scores'])
-        results[tuple(sorted(scores))] = Solutions(**sol)
-
-    return results
+            'Solutions',
+            'solution_specifications']
 
 class Solution:
     """
@@ -228,3 +210,24 @@ class Solutions:
             results.append({**res})
 
         return results
+
+def load_solutions():
+    """
+    Load the solutions
+
+    Returns:
+        dict: the dictionary of the solutions
+    """
+    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
+
+    solutions_dict = json.loads(sio)
+
+    results = {}
+
+    for sol in solutions_dict['solutions']:
+        scores = list(sol['scores'])
+        results[tuple(sorted(scores))] = Solutions(**sol)
+
+    return results
+
+solution_specifications = load_solutions()

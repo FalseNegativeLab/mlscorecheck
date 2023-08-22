@@ -5,7 +5,8 @@ This module implements the interval arithmetics
 import numpy as np
 
 __all__ = ['Interval',
-            'IntervalUnion']
+            'IntervalUnion',
+            'sqrt']
 
 def sqrt(obj):
     """

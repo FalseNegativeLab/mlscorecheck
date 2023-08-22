@@ -73,12 +73,14 @@ __all__ = ['score_functions_with_solutions',
             'score_functions_standardized_with_complements',
             'score_function_aliases',
             'score_function_complements',
-            'score_specifications']
+            'score_specifications',
+            'score_functions_all',
+            'score_functions_standardized_all']
 
 # the score specifications
 score_specifications = load_json('scores', 'scores.json')['scores']
 
-all_score_functions = {'acc': accuracy,
+score_functions_all = {'acc': accuracy,
                 'sens': sensitivity,
                 'spec': specificity,
                 'npv': negative_predictive_value,
@@ -107,7 +109,7 @@ all_score_functions = {'acc': accuracy,
                 'fnr': false_negative_rate,
                 'fpr': false_positive_rate}
 
-all_score_functions_standardized = {'acc': accuracy_standardized,
+score_functions_standardized_all = {'acc': accuracy_standardized,
                 'sens': sensitivity_standardized,
                 'spec': specificity_standardized,
                 'npv': negative_predictive_value_standardized,
@@ -138,17 +140,17 @@ all_score_functions_standardized = {'acc': accuracy_standardized,
 
 # scores with solutions
 score_functions_with_solutions = \
-    {key: all_score_functions[key]
+    {key: score_functions_all[key]
         for key in ['acc', 'sens', 'spec', 'npv', 'ppv', 'bacc', 'f1p', 'fm']}
 
 # complement functions
 score_function_complement_functions = \
-    {key: all_score_functions[key]
+    {key: score_functions_all[key]
         for key in ['err', 'fdr', 'for_', 'fnr', 'fpr']}
 
 # all score functions without complements
 score_functions_without_complements = \
-    {key: all_score_functions[key] for key in
+    {key: score_functions_all[key] for key in
                     ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1m',
                     'fbp', 'fbm', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
                     'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}
@@ -159,12 +161,12 @@ score_functions_with_complements = \
 
 # standardized complements
 score_function_standardized_complement_functions = \
-    {key: all_score_functions_standardized[key]
+    {key: score_functions_standardized_all[key]
         for key in ['err', 'fdr', 'for_', 'fnr', 'fpr']}
 
 # all standardized score functions without complements
 score_functions_standardized_without_complements = \
-    {key: all_score_functions_standardized[key] for key in
+    {key: score_functions_standardized_all[key] for key in
                     ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1m',
                     'fbp', 'fbm', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
                     'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}

@@ -10,8 +10,7 @@ from mlscorecheck.individual import (generate_problems,
                                 calculate_scores,
                                 round_scores)
 from mlscorecheck.aggregated import (generate_problems_with_evaluations,
-                                        calculate_scores_dataset,
-                                        calculate_scores_datasets)
+                                        calculate_scores_dataset)
 
 def test_round_scores():
     """
@@ -68,7 +67,7 @@ def test_calculate_scores():
 
     scores = calculate_scores_dataset({'folds': [{'p': 10, 'n': 20, 'tp': 5, 'tn': 8},
                                 {'p': 12, 'n': 26, 'tp': 5, 'tn': 8}], 'p': 22, 'n': 46},
-                                strategy=('mor'))
+                                strategy='mor')
 
     assert len(scores) > 0
 
@@ -77,24 +76,24 @@ def test_generate_problems():
     Testing the problem generation
     """
 
-    evaluation, problem = generate_problems(random_state=np.random.RandomState(5))
+    evaluation, _ = generate_problems(random_state=np.random.RandomState(5))
 
-    evaluation, problems = generate_problems(n_problems=5)
-    assert len(problems) == 5
+    evaluation, _ = generate_problems(n_problems=5)
+    assert len(evaluation) == 5
 
-    evaluation, problem = generate_problems(add_complements=True)
+    evaluation, _ = generate_problems(add_complements=True)
     assert 'fn' in evaluation
 
-    evaluation, problem = generate_problems(zeros=['tp'])
+    evaluation, _ = generate_problems(zeros=['tp'])
     assert evaluation['tp'] == 0
 
-    evaluation, problem = generate_problems(zeros=['tn'])
+    evaluation, _ = generate_problems(zeros=['tn'])
     assert evaluation['tn'] == 0
 
-    evaluation, problem = generate_problems(zeros=['fp'])
+    evaluation, _ = generate_problems(zeros=['fp'])
     assert evaluation['tn'] == evaluation['n']
 
-    evaluation, problem = generate_problems(zeros=['fn'])
+    evaluation, _ = generate_problems(zeros=['fn'])
     assert evaluation['tp'] == evaluation['p']
 
 def test_generate_problems_with_folds():

@@ -7,56 +7,71 @@ import pytest
 from mlscorecheck.core import safe_call
 from mlscorecheck.individual import (load_solutions,
                                 Solution,
-                                Solutions,
                                 Interval,
-                                IntervalUnion)
+                                IntervalUnion,
+                                sqrt)
 
 from mlscorecheck.scores import (score_functions_without_complements,
                                     score_functions_standardized_without_complements,
                                     score_specifications)
 
-from mlscorecheck.individual import (generate_problems)
+from mlscorecheck.individual import (generate_1_problem)
 
 solutions = load_solutions()
 scores = score_specifications
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
 
+def check_tptn(tp, tn, result, eps=1e-5):
+    """
+    Checks the tp and tn values against the results
+
+    Args:
+        tp (int): the original tp value
+        tn (int): the original tn value
+        res (list(dict)): the results of the solution
+        eps (float): the tolerance
+
+    Returns:
+        bool: whether the scores match
+    """
+
+    flags = []
+
+    for res in result:
+        if res.get('message') is not None:
+            continue
+
+        flags.append(abs(tp - res['tp']) < eps and abs(tn - res['tn']) < eps)
+
+    return len(flags) == 0, not any(flags)
+
+def adjust_evaluation(evaluation):
+    """
+    Making the evaluation inconsistent
+
+    Args:
+        evaluation (dict): the evaluation to be rendered inconsistent
+    """
+    if evaluation['tn'] != 0:
+        evaluation['tn'] = evaluation['tn'] * 10 + 5
+    elif evaluation['tp'] != 0:
+        evaluation['tp'] = evaluation['tp'] * 10 + 5
+
 @pytest.mark.parametrize("sol", list(solutions.keys()))
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn']])
-def test_solution(sol, zeros):
+@pytest.mark.parametrize("random_state", [3, 5, 7])
+def test_solution(sol, zeros, random_state):
     """
     Testing a particular solution
     """
 
-    evaluation, problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
+    evaluation, _ = generate_1_problem(zeros=zeros,
+                                        add_complements=True,
+                                        random_state=random_state)
     evaluation['beta_plus'] = 2
     evaluation['beta_minus'] = 2
-
-    """
-    nans0 = scores[sol[0]].get('nans')
-    nans1 = scores[sol[1]].get('nans')
-
-    if nans0 is not None:
-        for item in nans0:
-            flag = True
-            for key in item:
-                flag = flag and item[key] == evaluation[key]
-            if flag:
-                return
-    if nans1 is not None:
-        for item in nans1:
-            flag = True
-            for key in item:
-                flag = flag and item[key] == evaluation[key]
-            if flag:
-                return
-
-    print(sol, evaluation)
-    """
-
-    #score0 = functions[sol[0]](**{key: value for key, value in evaluation.items() if key in scores[sol[0]]['args']})
-    #score1 = functions[sol[1]](**{key: value for key, value in evaluation.items() if key in scores[sol[1]]['args']})
+    evaluation['sqrt'] = sqrt
 
     score0 = safe_call(functions[sol[0]], evaluation, scores[sol[0]].get('nans'))
     score1 = safe_call(functions[sol[1]], evaluation, scores[sol[1]].get('nans'))
@@ -68,71 +83,38 @@ def test_solution(sol, zeros):
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
 
-    print(score0, score1)
-
-    flags = []
-
-    for res in result:
-        print(res)
-
-        if res.get('message') is not None:
-            continue
-        tp = res['tp']
-        tn = res['tn']
-
-        flags.append(abs(tp - evaluation['tp']) < 1e-5 and abs(tn - evaluation['tn']) < 1e-5)
-
-    assert len(flags) == 0 or any(flags)
+    solvable, failed = check_tptn(evaluation['tp'], evaluation['tn'], result)
+    assert solvable or not failed
 
 @pytest.mark.parametrize("sol", list(solutions.keys()))
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn']])
-def test_solution_failure(sol, zeros):
+@pytest.mark.parametrize("random_state", [3, 5, 7])
+def test_solution_failure(sol, zeros, random_state):
     """
     Testing a particular solution
     """
 
-    evaluation, problem = generate_problems(n_problems=1, zeros=zeros, add_complements=True)
+    evaluation, _ = generate_1_problem(zeros=zeros,
+                                        add_complements=True,
+                                        random_state=random_state)
     evaluation['beta_plus'] = 2
     evaluation['beta_minus'] = 2
+    evaluation['sqrt'] = sqrt
 
-    nans0 = scores[sol[0]].get('nans')
-    nans1 = scores[sol[1]].get('nans')
+    score0 = safe_call(functions[sol[0]], evaluation, scores[sol[0]].get('nans'))
+    score1 = safe_call(functions[sol[1]], evaluation, scores[sol[1]].get('nans'))
 
-    if nans0 is not None:
-        for item in nans0:
-            flag = True
-            for key in item:
-                flag = flag and item[key] == evaluation[key]
-            if flag:
-                return
-    if nans1 is not None:
-        for item in nans1:
-            flag = True
-            for key in item:
-                flag = flag and item[key] == evaluation[key]
-            if flag:
-                return
+    if score0 is None or score1 is None:
+        return
 
-    score0 = functions[sol[0]](**{key: value for key, value in evaluation.items() if key in scores[sol[0]]['args']})
-    score1 = functions[sol[1]](**{key: value for key, value in evaluation.items() if key in scores[sol[1]]['args']})
-
-    evaluation['tp'] = evaluation['tp'] * 10 + 5
+    adjust_evaluation(evaluation)
 
     result = solutions[sol].evaluate({**evaluation,
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
 
-    flags = []
-
-    for res in result:
-        if res.get('message') is not None:
-            continue
-        tp = res['tp']
-        tn = res['tn']
-
-        flags.append(abs(tp - evaluation['tp']) < 1e-5 and abs(tn - evaluation['tn']) < 1e-5)
-
-    assert len(flags) == 0 or not any(flags)
+    solvable, failed = check_tptn(evaluation['tp'], evaluation['tn'], result)
+    assert solvable or failed
 
 def test_solution_object():
     """
