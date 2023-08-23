@@ -4,14 +4,15 @@ This module implements some functionalities related to fold structures
 
 import numpy as np
 
-from ..datasets import resolve_pn
+from ..experiments import resolve_pn
 
 __all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations',
             '_create_folds',
             '_expand_datasets',
             'random_folds',
-            'random_configurations']
+            'random_configurations',
+            '_create_folds_pure']
 
 def stratified_configurations_sklearn(p, n, n_splits):
     """
@@ -130,6 +131,49 @@ def determine_fold_configurations(p, n, n_folds, n_repeats, folding='stratified_
         raise ValueError(f'folding strategy {folding} is not supported yet')
 
     return results
+
+def _create_folds_pure(p,
+                        n,
+                        n_folds,
+                        n_repeats,
+                        folding,
+                        score_bounds=None,
+                        tptn_bounds=None,
+                        id=None):
+    """
+    Given a dataset, adds folds to it
+
+    Args:
+        dataset (dict): a dataset specification
+
+    Returns:
+        dict: the dataset specification with folds
+    """
+
+    if n_folds is None:
+        n_folds = 1
+    if n_repeats is None:
+        n_repeats = 1
+
+    folds = determine_fold_configurations(p,
+                                    n,
+                                    n_folds,
+                                    n_repeats,
+                                    folding)
+    n_fold = 0
+    n_repeat = 0
+    for idx, fold in enumerate(folds):
+        if score_bounds is not None:
+            fold['score_bounds'] = {**score_bounds}
+        if tptn_bounds is not None:
+            fold['tptn_bounds'] = {**tptn_bounds}
+        fold['id'] = f'{id}_{n_repeat}_{n_fold}'
+        n_fold += 1
+        if n_fold % n_folds == 0:
+            n_fold = 0
+            n_repeat += 1
+
+    return folds
 
 def _create_folds(dataset):
     """

@@ -9,14 +9,14 @@ from importlib.resources import files
 
 import pytest
 
-from mlscorecheck.datasets import (lookup_dataset,
+from mlscorecheck.experiments import (lookup_dataset,
                                     resolve_pn)
 
 def test_lookup_dataset():
     """
     Testing the lookup dataset functionality
     """
-    path = os.path.join('datasets', 'machine_learning', 'common_datasets.json')
+    path = os.path.join('experiments', 'machine_learning', 'common_datasets.json')
     sio = files('mlscorecheck').joinpath(path).read_text()
 
     data = json.loads(sio)

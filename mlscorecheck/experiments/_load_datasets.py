@@ -55,12 +55,12 @@ def load_ml_datasets():
     """
     Load the ML datasets
     """
-    data = load_json(os.path.join('datasets', 'machine_learning'), 'sklearn.json')
+    data = load_json(os.path.join('experiments', 'machine_learning'), 'sklearn.json')
 
     for entry in data['datasets']:
         dataset_statistics['sklearn.' + entry['name']] = {'p': entry['p'], 'n': entry['n']}
 
-    data = load_json(os.path.join('datasets', 'machine_learning'), 'common_datasets.json')
+    data = load_json(os.path.join('experiments', 'machine_learning'), 'common_datasets.json')
 
     for entry in data['datasets']:
         dataset_statistics['common_datasets.' + entry['name']] = {'p': entry['p'], 'n': entry['n']}

@@ -10,7 +10,8 @@ from ..scores import score_functions_with_solutions
 from ..scores import score_specifications
 
 __all__ = ['round_scores',
-            'calculate_scores']
+            'calculate_scores',
+            'calculate_scores_for_lp']
 
 def round_scores(scores, rounding_decimals=None):
     """
@@ -28,6 +29,12 @@ def round_scores(scores, rounding_decimals=None):
 
     return {key: np.round(score, rounding_decimals)
                     for key, score in scores.items()}
+
+def calculate_scores_for_lp(problem):
+    return {'acc': (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n'])),
+            'sens': (problem['tp']) * (1.0 / problem['p']),
+            'spec': (problem['tn']) * (1.0 / problem['n']),
+            'bacc': ((problem['tp'] * (1.0 / problem['p'])) + (problem['tn'] * (1.0 / problem['n']))) / 2}
 
 def calculate_scores(problem,
                     *,
