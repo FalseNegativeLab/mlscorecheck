@@ -138,7 +138,6 @@ def _create_folds_pure(p,
                         n_repeats,
                         folding,
                         score_bounds=None,
-                        tptn_bounds=None,
                         id=None):
     """
     Given a dataset, adds folds to it
@@ -165,8 +164,6 @@ def _create_folds_pure(p,
     for idx, fold in enumerate(folds):
         if score_bounds is not None:
             fold['score_bounds'] = {**score_bounds}
-        if tptn_bounds is not None:
-            fold['tptn_bounds'] = {**tptn_bounds}
         fold['id'] = f'{id}_{n_repeat}_{n_fold}'
         n_fold += 1
         if n_fold % n_folds == 0:

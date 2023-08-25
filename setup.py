@@ -68,6 +68,6 @@ setup(name=DISTNAME,
         packages=find_packages(exclude=[]),
         package_data={'mlscorecheck': [os.path.join('individual', 'solutions.json'),
                                         os.path.join('scores', 'scores.json'),
-                                        os.path.join('datasets', 'machine_learning', 'common_datasets.json'),
-                                        os.path.join('datasets', 'machine_learning', 'sklearn.json')]},
+                                        os.path.join('experiments', 'machine_learning', 'common_datasets.json'),
+                                        os.path.join('experiments', 'machine_learning', 'sklearn.json')]},
         include_package_data=True)
