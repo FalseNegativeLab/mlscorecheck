@@ -12,7 +12,7 @@ __all__ = ['add_bounds',
             'create_lp_target',
             'check_bounds']
 
-def check_bounds(scores, bounds):
+def check_bounds(scores, bounds, tolerance=1e-5):
     """
     Checks the bounds for the scores
 
@@ -31,9 +31,9 @@ def check_bounds(scores, bounds):
     flag = True
     for key in bounds:
         if bounds[key][0] is not None and not np.isnan(bounds[key][0]):
-            flag = flag and (bounds[key][0] <= scores[key])
+            flag = flag and (bounds[key][0]-tolerance <= scores[key])
         if bounds[key][1] is not None and not np.isnan(bounds[key][1]):
-            flag = flag and (scores[key] <= bounds[key][1])
+            flag = flag and (scores[key] <= bounds[key][1]+tolerance)
 
     return flag
 

@@ -14,7 +14,7 @@ from ._linear_programming import add_bounds, check_bounds
 __all__ = ['Experiment',
             'generate_experiment_specification']
 
-def generate_experiment_specification(max_datasets=10,
+def generate_experiment_specification(max_n_datasets=10,
                                         max_p=1000,
                                         max_n=1000,
                                         max_n_folds=10,
@@ -23,7 +23,7 @@ def generate_experiment_specification(max_datasets=10,
     if random_state is None or not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 
-    n_datasets = random_state.randint(1, max_datasets+1)
+    n_datasets = random_state.randint(1, max_n_datasets+1)
     datasets = [generate_dataset_specification(max_p=max_p,
                                                 max_n=max_n,
                                                 max_n_folds=max_n_folds,
@@ -51,6 +51,10 @@ class Experiment:
         """
         self.id = id
         self.datasets = datasets
+
+        if aggregation not in {'rom', 'mor'}:
+            raise ValueError(f'aggregation {aggregation} is not supported yet')
+
         self.aggregation = aggregation
 
         self.linear_programming = None
@@ -171,13 +175,10 @@ class Experiment:
         if isinstance(score_bounds, dict):
             score_bounds = [score_bounds] * len(self.datasets)
 
-        datasets = [dataset.to_dict(problem_only=True) for dataset in self.datasets]
-        for fold, sb in zip(datasets, score_bounds):
-            fold['score_bounds'] = sb
-        params = self.to_dict()
-        params['datasets'] = datasets
-
-        return Experiment(**params)
+        return Experiment(id=self.id,
+                            aggregation=self.aggregation,
+                            datasets=[dataset.add_bounds(s_bounds).to_dict(problem_only=False)
+                                    for dataset, s_bounds in zip(self.datasets, score_bounds)])
 
     def init_lp(self, lp_problem):
         """
@@ -198,7 +199,8 @@ class Experiment:
                                     'n': sum(dataset.linear_programming['n'] for dataset in self.datasets)}
 
         if self.aggregation == 'rom':
-            self.linear_programming = calculate_scores_for_lp({**self.linear_programming})
+            self.linear_programming = {**self.linear_programming,
+                                       **calculate_scores_for_lp({**self.linear_programming})}
 
         elif self.aggregation == 'mor':
             for key in ['acc', 'sens', 'spec', 'bacc']:

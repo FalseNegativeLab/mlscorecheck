@@ -265,7 +265,7 @@ class Dataset:
         scores = self.calculate_scores(score_subset)
 
         if feasible:
-            score_bounds = {key: (scores[key] - 1e-3, scores[key] + 1e-3) for key in scores}
+            score_bounds = {key: (scores[key] - 2*1e-1, scores[key] + 2*1e-1) for key in scores}
         else:
             score_bounds = {}
             for key in scores:
