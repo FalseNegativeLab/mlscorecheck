@@ -7,32 +7,12 @@ from ..aggregated import (_expand_datasets, check_aggregated_scores)
 
 __all__ = ['check_scores',
             'check_kfold_rom_scores',
-            'check_multiple_datasets_rom_scores',
-            'check_multiple_datasets_rom_kfold_rom_scores',
+            'check_datasets_rom_scores',
+            'check_datasets_rom_kfold_rom_scores',
             'check_kfold_mor_scores',
-            'check_multiple_datasets_mor_scores',
-            'check_multiple_datasets_mor_kfold_rom_scores',
-            'check_multiple_datasets_mor_kfold_mor_scores',
-            '_check_problem_specification',
-            'validate_problem_specification']
-
-def _check_problem_specification(problem):
-    """
-    Check the problem specification
-    """
-    if isinstance(problem, dict):
-        if not (('p' in problem and 'n' in problem) or ('dataset' in problem) or ('folds' in problem)):
-            return False
-        if 'folds' in problem:
-            if not all('p' in fold and 'n' in fold for fold in problem['folds']):
-                return False
-        return True
-
-    return all(_check_problem_specification(prob) for prob in problem)
-
-def validate_problem_specification(problem):
-    if not _check_problem_specification(problem):
-        raise ValueError('the problem specification is incorrect')
+            'check_datasets_mor_scores',
+            'check_datasets_mor_kfold_rom_scores',
+            'check_datasets_mor_kfold_mor_scores']
 
 def check_scores(scores,
                     eps,
