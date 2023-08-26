@@ -39,4 +39,3 @@ def test_add_bounds():
     problem = pl.LpProblem('dummy')
     problem = add_bounds(problem, {'tn': pl.LpVariable('tn')}, {'tn': (None, 10)}, label='tn')
     assert len(problem.constraints) == 1
-

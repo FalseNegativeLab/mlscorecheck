@@ -3,3 +3,6 @@ good-names=p4,p,n,tp,tn,fp,fn
 
 [TYPECHECK]
 ignored-modules = numpy
+
+# Minimum lines number of a similarity.
+min-similarity-lines=15

@@ -49,7 +49,8 @@ def test_fold_creation():
     fold2 = Fold(**fold1.to_dict(problem_only=False))
     assert fold1.figures == fold2.figures
     assert fold1.calculate_scores() == fold2.calculate_scores()
-    assert fold1.calculate_scores(rounding_decimals=4) == fold2.calculate_scores(rounding_decimals=4)
+    assert fold1.calculate_scores(rounding_decimals=4) \
+                == fold2.calculate_scores(rounding_decimals=4)
 
     fold = Fold(p=5, n=10,
                 score_bounds={key: (0, 1) for key in ['acc', 'sens', 'spec', 'bacc']})

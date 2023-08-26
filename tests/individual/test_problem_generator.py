@@ -2,8 +2,6 @@
 This module tests the problem generator
 """
 
-import pytest
-
 import numpy as np
 
 from mlscorecheck.individual import (generate_problems,

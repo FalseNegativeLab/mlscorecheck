@@ -2,11 +2,6 @@
 This module implements some loader functions for the scores
 """
 
-import os
-import json
-
-from importlib.resources import files
-
 from ._scores import (accuracy,
                         sensitivity,
                         specificity,

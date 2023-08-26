@@ -70,7 +70,7 @@ def create_lp_target(obj, scores, eps, lp_problem):
 
     return lp_problem
 
-def solve(obj, scores, eps, others=None, solver=None, solver_name='PULP_CBC_CMD', timeout=None):
+def solve(obj, scores, eps, solver=None):
     """
     Solving a problem.
 
@@ -94,7 +94,6 @@ def solve(obj, scores, eps, others=None, solver=None, solver_name='PULP_CBC_CMD'
 
     lp_program = create_lp_target(obj, scores, eps, lp_program)
 
-    #lp_program += obj.linear_programming['objective']
     lp_program += 1
 
     lp_program.solve(solver=solver)

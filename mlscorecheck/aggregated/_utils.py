@@ -91,9 +91,9 @@ def create_bounds(scores, feasible=True):
 
     score_bounds = {}
     for key in scores:
-        if scores[key] > 0.5:
-            score_bounds[key] = (0.0, max(scores[key] - 1*1e-3, 0))
+        if scores[key] > 0.7:
+            score_bounds[key] = (0.0, 0.1)
         else:
-            score_bounds[key] = (scores[key] + 1*1e-2, 1.0)
+            score_bounds[key] = (0.9, 1.0)
 
     return score_bounds

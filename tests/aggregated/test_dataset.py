@@ -4,6 +4,8 @@ This module tests the dataset
 The test cases with complicated bound structures are executed
 with timeout to prevent hanging.
 
+It is expected, depending on the solver, that some tests times out.
+
 When failure with bounds is tested, the rounding precision is
 not tested with 2 decimals, since accidentally with whatever
 bounds it is likely to become feasible.
@@ -14,20 +16,16 @@ import pytest
 
 import pulp as pl
 
-import numpy as np
-
 from mlscorecheck.aggregated import (Dataset,
-                                        Fold,
                                         solve,
                                         generate_dataset_specification,
                                         compare_scores)
 
-preferred_solver = 'PULP_CBC_CMD'
+PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
-if preferred_solver not in solvers:
-    preferred_solver = solvers[0]
-solver = pl.getSolver(preferred_solver)
-solver_timeout = pl.getSolver(preferred_solver, timeLimit=2)
+PREFERRED_SOLVER = PREFERRED_SOLVER if PREFERRED_SOLVER in solvers else solvers[0]
+solver = pl.getSolver(PREFERRED_SOLVER)
+solver_timeout = pl.getSolver(PREFERRED_SOLVER, timeLimit=2)
 
 two_combs = [['acc', 'sens'], ['acc', 'spec'], ['acc', 'bacc'],
             ['sens', 'spec'], ['sens', 'bacc'], ['spec', 'bacc']]
@@ -43,7 +41,7 @@ def test_dataset_creation(random_state):
     Testing the dataset creation
     """
 
-    dataset = Dataset(**generate_dataset_specification(random_state=random_state))
+    dataset = Dataset(**generate_dataset_specification(random_state=random_state)) # pylint: disable=missing-kwoa
 
     assert dataset is not None
 
@@ -52,7 +50,7 @@ def test_dataset_copy():
     Testing the copying of datasets
     """
 
-    dataset = Dataset(**generate_dataset_specification(random_state=5))
+    dataset = Dataset(**generate_dataset_specification(random_state=5)) # pylint: disable=missing-kwoa
 
     assert dataset.to_dict() == Dataset(**dataset.to_dict()).to_dict()
 
@@ -77,7 +75,7 @@ def test_solving_success(score_subset, rounding_decimals, random_state, aggregat
     """
     problem = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem)
+    problem = Dataset(**problem) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
@@ -109,7 +107,7 @@ def test_solving_success_with_bounds(score_subset, rounding_decimals, random_sta
     """
     problem = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem)
+    problem = Dataset(**problem) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
@@ -133,7 +131,10 @@ def test_solving_success_with_bounds(score_subset, rounding_decimals, random_sta
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('random_state', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-def test_solving_success_with_fold_bounds(score_subset, rounding_decimals, random_state, aggregation):
+def test_solving_success_with_fold_bounds(score_subset,
+                                            rounding_decimals,
+                                            random_state,
+                                            aggregation):
     """
     Testing the solving capabilities with bounds on folds, successful case
 
@@ -145,7 +146,7 @@ def test_solving_success_with_fold_bounds(score_subset, rounding_decimals, rando
     """
     problem_spec = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem_spec)
+    problem = Dataset(**problem_spec) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
@@ -181,7 +182,7 @@ def test_solving_failure(score_subset, rounding_decimals, random_state, aggregat
     """
     problem = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem)
+    problem = Dataset(**problem) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
@@ -211,7 +212,7 @@ def test_solving_failure_with_bounds(score_subset, rounding_decimals, random_sta
     """
     problem = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem)
+    problem = Dataset(**problem) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
@@ -227,7 +228,10 @@ def test_solving_failure_with_bounds(score_subset, rounding_decimals, random_sta
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 @pytest.mark.parametrize('random_state', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-def test_solving_failure_with_fold_bounds(score_subset, rounding_decimals, random_state, aggregation):
+def test_solving_failure_with_fold_bounds(score_subset,
+                                            rounding_decimals,
+                                            random_state,
+                                            aggregation):
     """
     Testing the solving capabilities with bounds on folds, failure case
 
@@ -239,7 +243,7 @@ def test_solving_failure_with_fold_bounds(score_subset, rounding_decimals, rando
     """
     problem = generate_dataset_specification(random_state=random_state,
                                                 aggregation=aggregation)
-    problem = Dataset(**problem)
+    problem = Dataset(**problem) # pylint: disable=missing-kwoa
 
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)

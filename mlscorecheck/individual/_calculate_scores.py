@@ -45,7 +45,8 @@ def calculate_scores_for_lp(problem, score_subset=None):
     scores = {'acc': (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n'])),
             'sens': (problem['tp']) * (1.0 / problem['p']),
             'spec': (problem['tn']) * (1.0 / problem['n']),
-            'bacc': ((problem['tp'] * (1.0 / problem['p'])) + (problem['tn'] * (1.0 / problem['n']))) / 2}
+            'bacc': ((problem['tp'] * (1.0 / problem['p'])) \
+                        + (problem['tn'] * (1.0 / problem['n']))) / 2}
 
     if score_subset is None:
         return scores
