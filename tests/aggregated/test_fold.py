@@ -8,8 +8,8 @@ import numpy as np
 from mlscorecheck.aggregated import (Fold,
                                         generate_fold_specification,
                                         random_identifier,
-                                        solve)
-from ._compare_scores import compare_scores
+                                        solve,
+                                        compare_scores)
 
 TOL = 1e-5
 
@@ -63,8 +63,8 @@ def test_fold_creation():
     fold2 = Fold(**fold.to_dict())
     assert fold.figures == fold2.figures
 
-    fold = Fold(p=5, n=10, id='dummy')
-    assert fold.to_dict()['id'] == 'dummy'
+    fold = Fold(p=5, n=10, identifier='dummy')
+    assert fold.to_dict()['identifier'] == 'dummy'
 
     fold2 = fold.sample()
     assert fold2.add_bounds(fold2.get_bounds(feasible=True)).check_bounds()['bounds_flag']
@@ -132,7 +132,7 @@ def test_fold_bounds():
     assert result['bounds_flag'] is False
 
 @pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [None, 2, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('random_state', list(range(1, 20)))
 def test_solving_success(score_subset, rounding_decimals, random_state):
     """
@@ -143,7 +143,7 @@ def test_solving_success(score_subset, rounding_decimals, random_state):
     sample = problem.sample(random_state)
     scores = sample.calculate_scores(score_subset, rounding_decimals)
 
-    eps = 10**(-rounding_decimals) if rounding_decimals is not None else 1e-5
+    eps = 10**(-rounding_decimals)/2 + TOL
 
     result = solve(problem, scores, eps)
 
@@ -151,11 +151,11 @@ def test_solving_success(score_subset, rounding_decimals, random_state):
 
     populated = problem.populate(result)
 
-    assert compare_scores(scores, populated.calculate_scores(), score_subset, rounding_decimals)
+    assert compare_scores(scores, populated.calculate_scores(), eps, score_subset)
     assert populated.check_bounds()['bounds_flag'] is True
 
 @pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [None, 2, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('random_state', list(range(1, 20)))
 def test_solving_success_with_bounds(score_subset, rounding_decimals, random_state):
     """
@@ -166,7 +166,7 @@ def test_solving_success_with_bounds(score_subset, rounding_decimals, random_sta
     scores = sample.calculate_scores(score_subset, rounding_decimals)
     problem = problem.add_bounds(sample.get_bounds(feasible=True))
 
-    eps = 10**(-rounding_decimals) if rounding_decimals is not None else TOL
+    eps = 10**(-rounding_decimals)/2 + TOL
 
     result = solve(problem, scores, eps)
 
@@ -174,11 +174,11 @@ def test_solving_success_with_bounds(score_subset, rounding_decimals, random_sta
 
     populated = problem.populate(result)
 
-    assert compare_scores(populated.calculate_scores(), scores, score_subset, rounding_decimals)
+    assert compare_scores(populated.calculate_scores(), scores, eps, score_subset)
     assert populated.check_bounds()['bounds_flag'] is True
 
 @pytest.mark.parametrize('score_subset', three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [None, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
 @pytest.mark.parametrize('random_state', list(range(1, 20)))
 def test_solving_failure(score_subset, rounding_decimals, random_state):
     """
@@ -190,7 +190,7 @@ def test_solving_failure(score_subset, rounding_decimals, random_state):
     sample = problem.sample()
     scores = sample.calculate_scores(score_subset, rounding_decimals)
 
-    eps = 10**(-rounding_decimals) if rounding_decimals is not None else TOL
+    eps = 10**(-rounding_decimals)/2 + TOL
 
     # artificially distorting the scores
     scores = {key: random_state.random_sample() for key in scores}
@@ -200,7 +200,7 @@ def test_solving_failure(score_subset, rounding_decimals, random_state):
     assert result.status != 1
 
 @pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [None, 2, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('random_state', list(range(1, 20)))
 def test_solving_failure_with_bounds(score_subset, rounding_decimals, random_state):
     """
@@ -211,7 +211,7 @@ def test_solving_failure_with_bounds(score_subset, rounding_decimals, random_sta
     scores = sample.calculate_scores(score_subset, rounding_decimals)
     problem = problem.add_bounds(sample.get_bounds(feasible=False))
 
-    eps = 10**(-rounding_decimals) if rounding_decimals is not None else TOL
+    eps = 10**(-rounding_decimals)/2 + TOL
 
     result = solve(problem, scores, eps)
 

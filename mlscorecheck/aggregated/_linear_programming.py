@@ -7,35 +7,11 @@ import numpy as np
 
 from ..core import logger
 
+from ._utils import random_identifier
+
 __all__ = ['add_bounds',
             'solve',
-            'create_lp_target',
-            'check_bounds']
-
-def check_bounds(scores, bounds, tolerance=1e-5):
-    """
-    Checks the bounds for the scores
-
-    Args:
-        scores (dict(str,float/int)): a dictionary of scores
-        bounds (dict(str,tuple(float/int,float/int))): the dictionary of bounds
-
-    Returns:
-        None/bool: None if the bounds are not specified, otherwise a flag
-                    if the scores are within the bounds
-    """
-
-    if bounds is None:
-        return None
-
-    flag = True
-    for key in bounds:
-        if bounds[key][0] is not None and not np.isnan(bounds[key][0]):
-            flag = flag and (bounds[key][0]-tolerance <= scores[key])
-        if bounds[key][1] is not None and not np.isnan(bounds[key][1]):
-            flag = flag and (scores[key] <= bounds[key][1]+tolerance)
-
-    return flag
+            'create_lp_target']
 
 def add_bounds(lp_problem, variables, bounds, label):
     """
@@ -57,15 +33,16 @@ def add_bounds(lp_problem, variables, bounds, label):
     for variable in bounds:
 
         if bounds[variable][0] is not None and not np.isnan(bounds[variable][0]):
-            logger.info(f'{label}: adding lower bound {bounds[variable][0]} for {variable}')
+            logger.info('%s: adding lower bound %s for %s',
+                        label, str(bounds[variable][0]), variable)
             lp_problem += bounds[variable][0] <= variables[variable]
         else:
-            logger.info(f'{label}: No upper bound for variable {variable}')
+            logger.info('%s: No lower bound for variable %s', label, variable)
         if bounds[variable][1] is not None and not np.isnan(bounds[variable][1]):
-            logger.info(f'{label}: adding upper bound {bounds[variable][1]} for {variable}')
+            logger.info('%s: adding upper bound %s for %s', label, bounds[variable][1], variable)
             lp_problem += variables[variable] <= bounds[variable][1]
         else:
-            logger.info(f'{label}: No upper bound for variable {variable}')
+            logger.info('%s: No upper bound for variable %s', label, variable)
 
     return lp_problem
 
@@ -84,15 +61,16 @@ def create_lp_target(obj, scores, eps, lp_problem):
     """
     for key in scores:
         if key in ['acc', 'sens', 'spec', 'bacc']:
-            logger.info(f'{obj.id}: adding condition {key} >= {scores[key] - eps[key]}')
+            logger.info('%s: adding condition %s >= %f',
+                        obj.identifier, key, scores[key] - eps[key])
             lp_problem += (obj.linear_programming[key] >= (scores[key] - eps[key]))
-            logger.info(f'{obj.id}: adding condition {key} <= {scores[key] + eps[key]}')
+            logger.info('%s: adding condition %s <= %f',
+                        obj.identifier, key, scores[key] + eps[key])
             lp_problem += (obj.linear_programming[key] <= (scores[key] + eps[key]))
 
     return lp_problem
 
-
-def solve(obj, scores, eps):
+def solve(obj, scores, eps, others=None, solver=None, solver_name='PULP_CBC_CMD', timeout=None):
     """
     Solving a problem.
 
@@ -100,6 +78,9 @@ def solve(obj, scores, eps):
         obj (object): an object to solve
         scores (dict(str,float)): the scores to match
         eps (dict(str,float)/float): the numerical uncertainty
+        solver_name (str): the name of the pulp solver to be used, check
+                            pl.listSolvers(onlyAvailable=True) for the options
+        timeout (int): the time limit in seconds
 
     Returns:
         pl.LpProblem: the solved linear programming problem
@@ -107,14 +88,15 @@ def solve(obj, scores, eps):
     if not isinstance(eps, dict):
         eps = {key: eps for key in ['acc', 'sens', 'spec', 'bacc']}
 
-    lp_program = pl.LpProblem('feasibility')
+    lp_program = pl.LpProblem('feasibility_' + random_identifier(8))
 
-    lp_program = obj.init_lp(lp_program)
+    lp_program = obj.init_lp(lp_program, scores)
 
     lp_program = create_lp_target(obj, scores, eps, lp_program)
 
-    lp_program += obj.linear_programming['tp']
+    #lp_program += obj.linear_programming['objective']
+    lp_program += 1
 
-    lp_program.solve()
+    lp_program.solve(solver=solver)
 
     return lp_program

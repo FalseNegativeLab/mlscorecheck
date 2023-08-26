@@ -3,53 +3,74 @@ This module implements an abstraction for an experiment
 """
 
 import numpy as np
+import pulp as pl
 
-from ..core import logger
+from ..core import init_random_state, dict_mean, round_scores, dict_minmax
 from ..individual import calculate_scores_for_lp
 
 from ._dataset import (Dataset,
                         generate_dataset_specification)
-from ._linear_programming import add_bounds, check_bounds
+from ._utils import aggregated_scores
 
 __all__ = ['Experiment',
             'generate_experiment_specification']
 
-def generate_experiment_specification(max_n_datasets=10,
+def generate_experiment_specification(*,
+                                        max_n_datasets=10,
                                         max_p=1000,
                                         max_n=1000,
                                         max_n_folds=10,
                                         max_n_repeats=5,
-                                        random_state=None):
-    if random_state is None or not isinstance(random_state, np.random.RandomState):
-        random_state = np.random.RandomState(random_state)
+                                        random_state=None,
+                                        aggregation=None,
+                                        aggregation_ds=None):
+    """
+    Generate a random experiment specification
+
+    Args:
+        max_n_datasets (int): the maximum number of datasets
+        max_p (int): the maximum number of positives
+        max_n (int): the maximum number of negatives
+        max_n_folds (int): the maximum number of folds
+        max_n_repeats (int): the maximum number of repeats
+        random_state (int/np.random.RandomState/None): the random state to use
+        aggregation (str/None): 'mor'/'rom' - the aggregation of the experiment
+        aggregation_ds (str/None): 'mor'/'rom' - the aggregation in the datasets
+    """
+    random_state = init_random_state(random_state)
 
     n_datasets = random_state.randint(1, max_n_datasets+1)
     datasets = [generate_dataset_specification(max_p=max_p,
                                                 max_n=max_n,
                                                 max_n_folds=max_n_folds,
                                                 max_n_repeats=max_n_repeats,
-                                                random_state=random_state)
+                                                random_state=random_state,
+                                                aggregation=aggregation_ds)
                 for _ in range(n_datasets)]
-    aggregation = random_state.choice(['rom', 'mor'])
+    aggregation = (random_state.choice(['rom', 'mor'])
+                    if aggregation is None else aggregation)
 
     return {'aggregation': aggregation,
             'datasets': datasets}
 
 class Experiment:
+    """
+    The experiment class represents an experiment involving multiple datasets
+    """
     def __init__(self,
                     *,
                     aggregation,
-                    id=None,
-                    datasets=None):
+                    datasets=None,
+                    identifier=None):
         """
         Constructor of the experiment object
 
         Args:
-            aggregation (str): the aggregation strategy
-            id (None/str): the id of the experiment
+            aggregation (str): 'mor'/'rom' - the aggregation strategy
             datasets (list(dict)): the dataset specifications
+            identifier (None/str): the id of the experiment
         """
-        self.id = id
+        self.identifier = identifier
         self.datasets = datasets
 
         if aggregation not in {'rom', 'mor'}:
@@ -72,7 +93,7 @@ class Experiment:
         Returns:
             dict: the dict representation
         """
-        return {'id': self.id,
+        return {'identifier': self.identifier,
                     'aggregation': self.aggregation,
                     'datasets': [dataset.to_dict(problem_only) for dataset in self.datasets]}
 
@@ -102,85 +123,130 @@ class Experiment:
         Returns:
             self: the sampled dataset
         """
-        if random_state is None or not isinstance(random_state, np.random.RandomState):
-            random_state = np.random.RandomState(random_state)
+        random_state = init_random_state(random_state)
 
-        datasets = [dataset.sample(random_state=random_state).to_dict(problem_only=False) for dataset in self.datasets]
-        params = self.to_dict(problem_only=True)
-        params['datasets'] = datasets
-
-        return Experiment(**params)
+        return Experiment(identifier=self.identifier,
+                    aggregation=self.aggregation,
+                    datasets=[dataset.sample(random_state=random_state).to_dict(problem_only=False)
+                                for dataset in self.datasets])
 
     def calculate_figures(self):
+        """
+        Calculates the raw figures tp, tn, p and n
+
+        Returns:
+            dict: the raw figures
+        """
         figures = {'tp': 0, 'tn': 0, 'p': 0, 'n': 0}
+
         for dataset in self.datasets:
             tmp = dataset.calculate_figures()
-            figures['tp'] += tmp['tp']
-            figures['tn'] += tmp['tn']
-            figures['p'] += tmp['p']
-            figures['n'] += tmp['n']
+            for key in figures:
+                figures[key] += tmp[key]
+
         return figures
 
     def calculate_scores(self, score_subset=None, rounding_decimals=None):
         """
         Calculates all scores for the fold
 
+        Args:
+            score_subset (None/list): the subset of scores to calculate
+            rounding_decimals (None/float): how many digits to round the decimals to
+
         Returns:
             dict(str,float): the scores
-            rounding_decimals (None/float): how many digits to round the decimals to
         """
 
-        score_subset = ['acc', 'sens', 'spec', 'bacc'] if score_subset is None else score_subset
+        score_subset = aggregated_scores if score_subset is None else score_subset
 
         figures = self.calculate_figures()
 
         if self.aggregation == 'rom':
-            scores = calculate_scores_for_lp(figures)
-            scores = {key: scores[key] for key in score_subset}
+            scores = calculate_scores_for_lp(figures, score_subset)
         else:
-            scores = {key: 0.0 for key in score_subset}
-            for dataset in self.datasets:
-                dataset_scores = dataset.calculate_scores(score_subset)
-                for key in dataset_scores:
-                    scores[key] += dataset_scores[key]
+            scores = dict_mean([dataset.calculate_scores(score_subset)
+                                        for dataset in self.datasets])
 
-            for key in scores:
-                scores[key] /= len(self.datasets)
+        return round_scores(scores, rounding_decimals)
 
-        if rounding_decimals is not None:
-            self.scores = {key: np.round(value, rounding_decimals)
-                            for key, value in scores.items()}
+    def get_minmax_bounds(self, score_subset=None):
+        """
+        Extract min-max bounds for scores in the datasets
 
-        return scores
+        Args:
+            score_subset (list/None): the subset of scores to extract bounds for
 
-    def get_bounds(self, score_subset=None, feasible=True):
-        scores = self.calculate_scores(score_subset)
+        Returns:
+            dict (str,list(float,float)): the minimum and maximum values
+        """
 
-        if feasible:
-            score_bounds = {key: (scores[key] - 1e-3, scores[key] + 1e-3) for key in scores}
-        else:
-            score_bounds = {}
-            for key in scores:
-                if scores[key] > 0.2:
-                    score_bounds[key] = (0.0, max(scores[key] - 2*1e-2, 0))
-                else:
-                    score_bounds[key] = (scores[key] + 2*1e-2, 1.0)
+        score_bounds = dict_minmax([dataset.calculate_scores(score_subset)
+                                    for dataset in self.datasets])
 
-        return score_bounds
+        return {key: [value[0] - 1e-3, value[1] + 1e-3] for key, value in score_bounds.items()}
 
     def get_dataset_bounds(self, score_subset=None, feasible=True):
+        """
+        Extract bounds for the datasets
+
+        Args:
+            score_subset (list/None): the subset of scores to extract bounds for
+            feasible (bool): if True, the bounds will be feasible, else unfeasible
+
+        Returns:
+            list(dict): the list of bounds
+        """
         return [dataset.get_bounds(score_subset, feasible) for dataset in self.datasets]
 
+    def get_dataset_fold_bounds(self, score_subset, feasible=True):
+        """
+        Extract bounds for the folds of the datasets
+
+        Args:
+            score_subset (list/None): the subset of scores to extract bounds for
+            feasible (bool): if True, the bounds will be feasible, else unfeasible
+
+        Returns:
+            list(list(dict)): the list of bounds
+        """
+        return [[fold.get_bounds(score_subset, feasible) for fold in dataset.folds]
+                                                        for dataset in self.datasets]
+
+    def add_dataset_fold_bounds(self, score_bounds):
+        """
+        Adds bounds to each fold of the datasets
+
+        Args:
+            score_bounds (list(list(dict))): the list of bounds
+
+        Returns:
+            Experiment: the updated experiment object
+        """
+        return Experiment(identifier=self.identifier,
+                            aggregation=self.aggregation,
+                            datasets=[dataset.add_fold_bounds(bounds).to_dict(problem_only=False)
+                                        for dataset, bounds in zip(self.datasets, score_bounds)])
+
     def add_dataset_bounds(self, score_bounds):
+        """
+        Adds bounds to each dataset
+
+        Args:
+            score_bounds (dict/list(dict)): the bounds to add
+
+        Returns:
+            Experiment: the updated experiment object
+        """
         if isinstance(score_bounds, dict):
             score_bounds = [score_bounds] * len(self.datasets)
 
-        return Experiment(id=self.id,
+        return Experiment(identifier=self.identifier,
                             aggregation=self.aggregation,
                             datasets=[dataset.add_bounds(s_bounds).to_dict(problem_only=False)
                                     for dataset, s_bounds in zip(self.datasets, score_bounds)])
 
-    def init_lp(self, lp_problem):
+    def init_lp(self, lp_problem, scores):
         """
         Initializes the linear programming problem for the dataset
 
@@ -191,20 +257,33 @@ class Experiment:
             pl.LpProblem: the updated linear programming problem
         """
         for dataset in self.datasets:
-            dataset.init_lp(lp_problem)
+            dataset.init_lp(lp_problem, scores)
 
-        self.linear_programming = {'tp': sum(dataset.linear_programming['tp'] for dataset in self.datasets),
-                                    'tn': sum(dataset.linear_programming['tn'] for dataset in self.datasets),
-                                    'p': sum(dataset.linear_programming['p'] for dataset in self.datasets),
-                                    'n': sum(dataset.linear_programming['n'] for dataset in self.datasets)}
+        self.linear_programming = {'tp': pl.lpSum(dataset.linear_programming['tp']
+                                                    for dataset in self.datasets),
+                                    'tn': pl.lpSum(dataset.linear_programming['tn']
+                                                    for dataset in self.datasets),
+                                    'p': sum(dataset.linear_programming['p']
+                                                for dataset in self.datasets),
+                                    'n': sum(dataset.linear_programming['n']
+                                                for dataset in self.datasets),
+                                    'objective': self.datasets[0].linear_programming['objective']}
+
+        min_p = np.inf
+        for dataset in self.datasets:
+            if dataset.linear_programming['objective_p'] < min_p:
+                min_p = dataset.linear_programming['objective_p']
+                self.linear_programming['objective'] = dataset.linear_programming['objective']
 
         if self.aggregation == 'rom':
             self.linear_programming = {**self.linear_programming,
                                        **calculate_scores_for_lp({**self.linear_programming})}
 
         elif self.aggregation == 'mor':
-            for key in ['acc', 'sens', 'spec', 'bacc']:
-                self.linear_programming[key] = sum(dataset.linear_programming[key] for dataset in self.datasets) * (1.0 / len(self.datasets))
+            norm = 1.0 / len(self.datasets)
+            for key in aggregated_scores:
+                self.linear_programming[key] = (pl.lpSum(dataset.linear_programming[key]
+                                                         for dataset in self.datasets) * norm)
 
         return lp_problem
 
@@ -221,8 +300,9 @@ class Experiment:
             self: the updated object
         """
         return Experiment(aggregation=self.aggregation,
-                            id=self.id,
-                            datasets=[dataset.populate(lp_problem).to_dict(problem_only=False) for dataset in self.datasets])
+                            identifier=self.identifier,
+                            datasets=[dataset.populate(lp_problem).to_dict(problem_only=False)
+                                        for dataset in self.datasets])
 
     def check_bounds(self):
         """
@@ -237,7 +317,7 @@ class Experiment:
         downstream = [dataset.check_bounds() for dataset in self.datasets]
         flag = all(tmp['bounds_flag'] for tmp in downstream)
 
-        return {'id': self.id,
+        return {'identifier': self.identifier,
                 'figures': self.calculate_figures(),
                 'scores': self.calculate_scores(),
                 'bounds_flag': flag,

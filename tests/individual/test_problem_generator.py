@@ -9,8 +9,6 @@ import numpy as np
 from mlscorecheck.individual import (generate_problems,
                                 calculate_scores,
                                 round_scores)
-from mlscorecheck.aggregated import (generate_problems_with_evaluations,
-                                        calculate_scores_dataset)
 
 def test_round_scores():
     """
@@ -30,46 +28,6 @@ def test_calculate_all_scores():
 
     scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15}, scores_only=True)
     assert 'tp' not in scores
-
-def test_calculate_scores_rom():
-    """
-    Testing the calculation of scores in RoM manner
-    """
-
-    scores = calculate_scores_dataset({'folds': [{'p': 10, 'n': 20, 'tp': 5, 'tn': 8},
-                                        {'p': 12, 'n': 26, 'tp': 5, 'tn': 8}]},
-                                            strategy='rom')
-
-    assert scores['sens'] == 10/22
-
-def test_calculate_scores_mor():
-    """
-    Testing the calculation of scores in the MoR manner
-    """
-
-    scores = calculate_scores_dataset({'folds': [{'p': 10, 'n': 20, 'tp': 5, 'tn': 8},
-                                        {'p': 12, 'n': 26, 'tp': 5, 'tn': 8}]},
-                                            strategy='mor')
-
-    assert scores['sens'] == (5/10 + 5/12) / 2.0
-
-def test_calculate_scores():
-    """
-    Testing the score calculation
-    """
-
-    with pytest.raises(Exception):
-        calculate_scores([[{}]])
-
-    with pytest.raises(Exception):
-        calculate_scores_dataset([{'p': 10, 'tp': 5, 'n': 20, 'tn': 15}], strategy='dummy')
-
-
-    scores = calculate_scores_dataset({'folds': [{'p': 10, 'n': 20, 'tp': 5, 'tn': 8},
-                                {'p': 12, 'n': 26, 'tp': 5, 'tn': 8}], 'p': 22, 'n': 46},
-                                strategy='mor')
-
-    assert len(scores) > 0
 
 def test_generate_problems():
     """
@@ -95,11 +53,3 @@ def test_generate_problems():
 
     evaluation, _ = generate_problems(zeros=['fn'])
     assert evaluation['tp'] == evaluation['p']
-
-def test_generate_problems_with_folds():
-    """
-    Testing the generation of problems with fold structure
-    """
-
-    evals, problems = generate_problems_with_evaluations(n_problems=2)
-    assert len(evals) == len(problems)

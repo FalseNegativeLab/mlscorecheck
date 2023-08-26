@@ -6,8 +6,8 @@ import copy
 
 import pulp as pl
 
-from ._calculate_scores import calculate_scores_datasets
-from ._folds import _expand_datasets
+from ..mlscorecheck.aggregated._calculate_scores import calculate_scores_datasets
+from ..mlscorecheck.aggregated._folding import _expand_datasets
 
 __all__ = ['add_bounds',
             'calculate_scores_lp',

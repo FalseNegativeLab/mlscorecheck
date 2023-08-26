@@ -30,11 +30,26 @@ def round_scores(scores, rounding_decimals=None):
     return {key: np.round(score, rounding_decimals)
                     for key, score in scores.items()}
 
-def calculate_scores_for_lp(problem):
-    return {'acc': (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n'])),
+def calculate_scores_for_lp(problem, score_subset=None):
+    """
+    Calculate scores for a linear programming problem
+
+    Args:
+        problem (dict): the raw figures tp, tn, p and n
+        score_subset (list/None): the list of scores to compute
+
+    Returns:
+        dict(str,float): the calculated scores
+    """
+
+    scores = {'acc': (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n'])),
             'sens': (problem['tp']) * (1.0 / problem['p']),
             'spec': (problem['tn']) * (1.0 / problem['n']),
             'bacc': ((problem['tp'] * (1.0 / problem['p'])) + (problem['tn'] * (1.0 / problem['n']))) / 2}
+
+    if score_subset is None:
+        return scores
+    return {key: scores[key] for key in score_subset}
 
 def calculate_scores(problem,
                     *,
