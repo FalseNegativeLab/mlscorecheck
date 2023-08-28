@@ -41,6 +41,7 @@ def generate_fold_specification(max_p=100,
     n = random_state.randint(1, max_n)
 
     return {'p': p, 'n': n}
+
 class Fold:
     """
     An abstraction for a fold
@@ -129,6 +130,12 @@ class Fold:
                     identifier=self.identifier,
                     figures={'tp': int(random_state.randint(self.p+1)),
                                 'tn': int(random_state.randint(self.n+1))})
+
+    def has_bounds(self):
+        """
+        Checks if the fold has score bounds specified
+        """
+        return self.score_bounds is not None
 
     def calculate_scores(self, score_subset=None, rounding_decimals=None):
         """

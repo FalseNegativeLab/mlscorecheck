@@ -1,15 +1,18 @@
 """
-This module provides a high level interface to the underlying structures
+This module provides a high level interface to the underlying aggregated
+calculation structures
 """
 
-from ..aggregated import compare_scores
+import pulp as pl
+
 from ..core import logger
+from ..individual import resolve_aliases_and_complements
 
 from ._experiment import Experiment
 from ._linear_programming import solve
+from ._utils import compare_scores, aggregated_scores
 
-__all__ = ['validate_experiment_specification',
-            'check_aggregated_scores']
+__all__ = ['check_aggregated_scores']
 
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
@@ -19,13 +22,12 @@ def check_aggregated_scores(experiment,
                             eps,
                             *,
                             solver_name=None,
-                            timeout=None,
-                            return_details=True):
+                            timeout=None):
     """
     Check aggregated scores
 
     Args:
-        experiment (dict): the experiment specification
+        experiment (dict/Experiment): the experiment specification
         scores (dict): the scores to match
         eps (dict/float): the numerical uncertainty
         solver_name (str): the name of the solver to be used, check
@@ -37,29 +39,47 @@ def check_aggregated_scores(experiment,
         bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
                         and optionally the details in a dictionary
     """
-    experiment = Experiment(**experiment)
+    scores = resolve_aliases_and_complements(scores)
+
+    if all(score not in aggregated_scores for score in scores):
+        logger.info('there are no scores suitable for aggregated checks')
+        return {'inconsistency': False,
+                'message': 'no scores suitable for aggregated consistency checks'}
+
+    experiment = Experiment(**experiment) if isinstance(experiment, dict) else experiment
 
     solver_name = PREFERRED_SOLVER if solver_name is None else solver_name
     if solver_name not in solvers:
         logger.info('solver %s not available, using %s', solver_name, solvers[0])
+        solver_name = solvers[0]
 
     solver = pl.getSolver(solver_name, timeLimit=timeout)
 
     result = solve(experiment, scores, eps, solver)
 
+    populated = experiment.populate(result)
+    configuration_details = populated.check_bounds()
+
     details = {}
 
     if result.status == 1:
-        flag = False
-        populated = experiment.populate(result)
+        # the problem is feasible
         comp_flag = compare_scores(scores, populated.calculate_scores(), eps)
-        details = populated.check_bounds()
-        bounds_flag = details['bounds_flag']
+        bounds_flag = configuration_details['bounds_flag']
+        details = {'inconsistency': False,
+                    'lp_status': 'feasible',
+                    'lp_configuration_scores_match': comp_flag,
+                    'lp_configuration_bounds_match': bounds_flag,
+                    'lp_configuration': configuration_details}
     elif result.status == 0:
-        flag = False
         # timed out
+        details = {'inconsistency': False,
+                    'lp_status': 'timeout',
+                    'lp_configuration': configuration_details}
     else:
-        flag = True
-        # unsolvable
+        # infeasible
+        details = {'inconsistency': True,
+                    'lp_status': 'infeasible',
+                    'lp_configuration': configuration_details}
 
-    return (flag, details) if return_details else flag
+    return details

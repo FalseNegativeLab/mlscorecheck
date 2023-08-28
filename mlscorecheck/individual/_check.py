@@ -16,7 +16,7 @@ from ..scores import (score_functions_without_complements,
 from ._interval import Interval, IntervalUnion, sqrt
 from ..core import safe_call, logger
 
-__all__ = ['check',
+__all__ = ['check_individual_scores',
             'check_2v1',
             'create_intervals',
             'create_problems_2',
@@ -25,7 +25,8 @@ __all__ = ['check',
             'check_negative_base',
             'check_empty_interval',
             'check_intersection',
-            'determine_edge_cases']
+            'determine_edge_cases',
+            'resolve_aliases_and_complements']
 
 solutions = solution_specifications
 score_descriptors = score_specifications
@@ -34,6 +35,32 @@ aliases = score_function_aliases
 complementers = score_function_complements
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
+
+def resolve_aliases_and_complements(scores):
+    """
+    Standardizing the scores by resolving aliases and complements
+
+    Args:
+        scores (dict(str,float)): the dictionary of scores
+
+    Returns:
+        dict(str,float): the resolved scores
+    """
+    aliased = {}
+    for key, val in scores.items():
+        if key in score_function_aliases:
+            aliased[score_function_aliases[key]] = val
+        else:
+            aliased[key] = val
+
+    complemented = {}
+    for key, val in aliased.items():
+        if key in score_function_complements:
+            complemented[score_function_complements[key]] = 1.0 - val
+        else:
+            complemented[key] = val
+
+    return complemented
 
 def determine_edge_cases(score, p, n):
     """
@@ -69,6 +96,7 @@ def create_intervals(scores, eps):
     Returns:
         dict: the score intervals
     """
+
     # turning the uncertainty into a score specific dictionary if it isnt that
     if not isinstance(eps, dict):
         eps = {key: eps for key in scores}
@@ -76,33 +104,17 @@ def create_intervals(scores, eps):
     # creating the intervals
     intervals = {key: Interval(val - eps[key], val + eps[key]) for key, val in scores.items()}
 
-    # replacing the aliases
-    aliased = {}
-    for key, val in intervals.items():
-        if key in aliases:
-            aliased[aliases[key]] = val
-        else:
-            aliased[key] = val
-
-    # replacing the complements
-    complemented = {}
-    for key, val in aliased.items():
-        if key in complementers:
-            complemented[complementers[key]] = 1.0 - val
-        else:
-            complemented[key] = val
-
     # trimming the intervals into the domains of the scores
     # for example, to prevent acc - eps < 0 implying a negative subinterval for
     # accuracy
-    for key in complemented:
+    for key in intervals:
         if key in score_descriptors:
             lower_bound = score_descriptors[key].get('lower_bound', -np.inf)
             upper_bound = score_descriptors[key].get('upper_bound', np.inf)
 
-            complemented[key] = complemented[key].intersection(Interval(lower_bound, upper_bound))
+            intervals[key] = intervals[key].intersection(Interval(lower_bound, upper_bound))
 
-    return complemented
+    return intervals
 
 def create_problems_2(scores):
     """
@@ -298,7 +310,7 @@ def check_2v1(scores,
                                     for tmp in output),
             'inconsistency': all(tmp['inconsistency'] for tmp in output)}
 
-def check(scores, p, n, eps):
+def check_individual_scores(scores, p, n, eps):
     """
     The main check functionality
 
@@ -313,6 +325,8 @@ def check(scores, p, n, eps):
                 overall decision, the 'succeeded' and 'failed' lists contain
                 the details of the individual tests
     """
+    scores = resolve_aliases_and_complements(scores)
+
     scores = {key: value for key, value in scores.items() if key in supported_scores}
 
     problems = create_problems_2(list(scores.keys()))
@@ -331,9 +345,9 @@ def check(scores, p, n, eps):
             succeeded.append(result)
 
     return {
-        'no_inconsistency': succeeded,
-        'inconsistency': failed,
+        'tests_succeeded': succeeded,
+        'tests_failed': failed,
         'underdetermined': len(failed) == 0 and all(tmp['underdetermined'] for tmp in succeeded),
         'edge_scores': edge_scores,
-        'consistency': len(failed) == 0
+        'inconsistency': len(failed) > 0
         }

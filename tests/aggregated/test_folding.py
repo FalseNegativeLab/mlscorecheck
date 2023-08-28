@@ -15,12 +15,20 @@ def test_create_folds():
     """
     Testing the creation of folds
     """
-    folds = _create_folds(5, 10, score_bounds={'acc': (0.0, 1.0)})
+    folds = _create_folds(5, 10, score_bounds={'acc': (0.0, 1.0)},
+                            n_repeats=1, n_folds=1)
     assert len(folds) == 1
 
-    folds = _create_folds(5, 10,
+    folds = _create_folds(p=5, n=10,
                             n_folds=2,
                             n_repeats=2,
+                            score_bounds={'acc': (0.0, 1.0)})
+    assert len(folds) == 1
+
+    folds = _create_folds(p=5, n=10,
+                            n_folds=2,
+                            n_repeats=2,
+                            folding='stratified_sklearn',
                             score_bounds={'acc': (0.0, 1.0)})
     assert len(folds) == 4
 

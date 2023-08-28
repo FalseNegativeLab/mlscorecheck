@@ -1,6 +1,8 @@
 """
 This module implements an abstraction for a dataset
 """
+# disabling pylint false positives
+#pylint: disable=no-member
 
 import numpy as np
 import pulp as pl
@@ -17,7 +19,8 @@ from ._utils import check_bounds, aggregated_scores, create_bounds
 from ..experiments import dataset_statistics
 
 __all__ = ['Dataset',
-            'generate_dataset_specification']
+            'generate_dataset_specification',
+            'create_folds_for_dataset']
 
 def generate_dataset_pn(max_p,
                         max_n,
@@ -44,7 +47,8 @@ def generate_dataset_pn(max_p,
 
     return {'p': p, 'n': n,
             'n_folds': n_folds,
-            'n_repeats': n_repeats}
+            'n_repeats': n_repeats,
+            'folding': 'stratified_sklearn' if n_folds > 1 else None}
 
 def generate_dataset_name(max_n_folds,
                             max_n_repeats,
@@ -69,7 +73,8 @@ def generate_dataset_name(max_n_folds,
 
     return {'name': name,
             'n_folds': n_folds,
-            'n_repeats': n_repeats}
+            'n_repeats': n_repeats,
+            'folding': 'stratified_sklearn' if n_folds > 1 else None}
 
 def generate_dataset_folds(max_n_folds,
                             max_n_repeats,
@@ -138,86 +143,92 @@ def generate_dataset_specification(*,
 
     return dataset
 
-def check_valid_parameterization(*,
-                                    p,
-                                    n,
-                                    n_folds,
-                                    n_repeats,
-                                    folds,
-                                    name):
+def create_folds_for_dataset(*,
+                            p,
+                            n,
+                            n_folds,
+                            n_repeats,
+                            folds,
+                            folding,
+                            fold_score_bounds,
+                            aggregation,
+                            name,
+                            identifier):
     """
-    Checks if the parameterization is consistent
+    Checks if the parameterization of the dataset is correct and creates
+    the folds accordingly.
 
     Args:
-        name (None/str): the name of the dataset to look-up
         p (None/int): the number of positives
         n (None/int): the number of negatives
         n_folds (None/int): the number of folds
         n_repeats (None/int): the number of repetitions
+        folds (None/list): the list of fold specifications
         folding (str): the folding strategy
-
-    Returns:
-        list(dict): the folds
+        fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
+                                                    the folds
+        aggregation (str): 'rom'/'mor - the aggregation strategy
+        name (None/str): the name of the dataset to look-up
+        identifier (None/str): the identifier
     """
-    # checking if the dataset is specified properly
-    folds_provided = folds is not None
-    pn_provided = p is not None and n is not None
-    folds_repeats_provided = n_folds is not None and n_repeats is not None
-    name_provided = name is not None
+    if aggregation not in ('mor', 'rom'):
+        raise ValueError(f'aggregation {aggregation} is not supported')
 
-    if not ((folds_provided and
-            not folds_repeats_provided and
-            not name_provided and
-            not pn_provided)\
-        or (pn_provided and not folds_provided and not name_provided)\
-        or (name_provided and not folds_provided and not pn_provided)):
-        raise ValueError('Please specify folds (without p, n, n_folds, n_repeats, name) '\
-                            'or p and n (without folds, name) '\
-                            'or name (without p, n, folds)')
+    if (p is None and n is not None) or (p is not None and n is None):
+        raise ValueError('either specify both p and n or neither of them')
 
-def determine_folds(*,
-                    identifier,
-                    name,
-                    p,
-                    n,
-                    n_folds,
-                    n_repeats,
-                    folding,
-                    fold_score_bounds):
-    """
-    Creates the folds
+    if p is not None and name is not None:
+        raise ValueError('either specify p and n or the name of the dataset')
 
-    Args:
-            identifier (None/str): the identifier
-            name (None/str): the name of the dataset to look-up
-            p (None/int): the number of positives
-            n (None/int): the number of negatives
-            n_folds (None/int): the number of folds
-            n_repeats (None/int): the number of repetitions
-            folding (str): the folding strategy
-            fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
-                                                        the folds
+    if p is not None and folds is not None:
+        raise ValueError('either specify (p and n or the name of the dataset) '\
+                        'or the list of fold specifications')
 
-    Returns:
-        list(dict): the folds
-    """
+    if (n_folds is not None or n_repeats is not None) and folds is not None:
+        raise ValueError('n_folds, n_repeats and folding cannot be specified '\
+                        'together with the list of fold specifications')
 
-    # the folds are generated
-    if name is not None:
-        logger.info('querying p and n from looking up the dataset')
-        tmp = lookup_dataset(name)
-        p, n = tmp['p'], tmp['n']
-    logger.info('creating a folding based on the specification')
-    return _create_folds(p, n,
-                            n_folds=n_folds,
-                            n_repeats=n_repeats,
-                            folding=folding,
-                            score_bounds=fold_score_bounds,
-                            identifier=identifier)
+    if name is not None and folds is not None:
+        raise ValueError('either specify the name of the dataset or the list '\
+                        'of fold specifications')
+
+    if p is None and name is None and folds is None:
+        raise ValueError('at least the p,n or the name of the dataset or the '\
+                        'list of fold specifications needs to be specified')
+
+    if folds is None:
+        n_folds = n_folds if n_folds is not None else 1
+        n_repeats = n_repeats if n_repeats is not None else 1
+
+        if p is None:
+            dataset = lookup_dataset(name)
+            p = dataset['p']
+            n = dataset['n']
+
+        if n_folds > 1 and folding is None and aggregation == 'mor':
+            raise ValueError('for mean of ratios aggregation the folding needs '\
+                                'to be specified if n_folds > 1')
+
+        if n_folds > 1 and folding is None and fold_score_bounds is not None:
+            raise ValueError('for fold score bounds to be set folding needs to '\
+                                'be specified if n_folds > 1')
+
+        return _create_folds(p=p,
+                                n=n,
+                                n_folds=n_folds,
+                                n_repeats=n_repeats,
+                                folding=folding,
+                                score_bounds=fold_score_bounds,
+                                identifier=identifier)
+
+    return ([fold | {'score_bounds': {**fold_score_bounds}} for fold in folds]
+            if fold_score_bounds is not None else folds)
+
 class Dataset:
     """
     An abstraction for a dataset
     """
+
     def __init__(self,
                     *,
                     aggregation,
@@ -228,7 +239,7 @@ class Dataset:
                     folds=None,
                     n_folds=None,
                     n_repeats=None,
-                    folding='stratified_sklearn',
+                    folding=None,
                     score_bounds=None,
                     fold_score_bounds=None):
         """
@@ -255,20 +266,7 @@ class Dataset:
             score_bounds (None/dict(str,tuple)): the bound specification for scores
             fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
                                                         the folds
-            figures (None/dict(str,int)): the already computed p, n, tp, and tn figures
         """
-
-        check_valid_parameterization(p=p, n=n,
-                                        n_folds=n_folds,
-                                        n_repeats=n_repeats,
-                                        folds=folds,
-                                        name=name)
-
-        # checking if the aggregation is specified properly
-        if aggregation in ('rom', 'mor'):
-            self.aggregation = aggregation
-        else:
-            raise ValueError(f'aggregation {aggregation} is not supported yet')
 
         # the id of the dataset is set to the name or a random id is generated
         if identifier is None and name is not None:
@@ -279,17 +277,18 @@ class Dataset:
             logger.info('generating a random id for the dataset')
             self.identifier = random_identifier(16)
 
-        if folds is None:
-            self.folds = determine_folds(identifier=self.identifier,
-                                            name=name,
-                                            p=p,
-                                            n=n,
-                                            n_folds=n_folds,
-                                            n_repeats=n_repeats,
-                                            folding=folding,
-                                            fold_score_bounds=fold_score_bounds)
-        else:
-            self.folds = folds
+        self.folds = create_folds_for_dataset(p=p,
+                                                n=n,
+                                                n_folds=n_folds,
+                                                n_repeats=n_repeats,
+                                                folds=folds,
+                                                folding=folding,
+                                                fold_score_bounds=fold_score_bounds,
+                                                aggregation=aggregation,
+                                                name=name,
+                                                identifier=self.identifier)
+
+        self.aggregation = aggregation
 
         self.score_bounds = score_bounds
 
@@ -304,7 +303,7 @@ class Dataset:
 
         Args:
             problem_only (bool): whether to return the problem only (True) or add the
-                                figuress and scores (False)
+                                figures and scores (False)
 
         Returns:
             dict: the dict representation
@@ -323,6 +322,12 @@ class Dataset:
             str: the string representation
         """
         return str(self.to_dict())
+
+    def has_downstream_bounds(self):
+        """
+        Checks if the dataset has score bounds specified
+        """
+        return any(fold.has_bounds() for fold in self.folds)
 
     def initialize_folds(self):
         """
@@ -356,13 +361,18 @@ class Dataset:
         Returns:
             dict(str,int): the tp, tn, p and n scores
         """
-        figures = {'tp': 0, 'tn': 0, 'p': 0, 'n': 0}
+        figures = {'p': 0, 'n': 0}
 
         for fold in self.folds:
-            figures['tp'] += fold.figures['tp']
-            figures['tn'] += fold.figures['tn']
             figures['p'] += fold.p
             figures['n'] += fold.n
+
+        if self.folds[0].figures is not None:
+            figures['tp'] = 0
+            figures['tn'] = 0
+            for fold in self.folds:
+                figures['tp'] += fold.figures['tp']
+                figures['tn'] += fold.figures['tn']
 
         return figures
 

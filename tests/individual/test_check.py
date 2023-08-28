@@ -5,7 +5,7 @@ Testing the check functionality
 import pytest
 
 from mlscorecheck.core import safe_call
-from mlscorecheck.individual import (check,
+from mlscorecheck.individual import (check_individual_scores,
                                 check_2v1,
                                 create_intervals,
                                 create_problems_2,
@@ -15,13 +15,22 @@ from mlscorecheck.individual import (check,
                                 Interval,
                                 sqrt,
                                 generate_1_problem,
-                                determine_edge_cases)
+                                determine_edge_cases,
+                                resolve_aliases_and_complements)
 from mlscorecheck.scores import (score_functions_with_solutions,
                                     score_specifications)
 
 scores = score_specifications
 functions = score_functions_with_solutions
 solutions = load_solutions()
+
+def test_resolve_aliases_and_complements():
+    """
+    Resolve the score aliases and complemnets
+    """
+
+    assert resolve_aliases_and_complements({'err': 0.4, 'f1': 0.8, 'sens': 0.3})\
+            == {'acc': 0.6, 'f1p': 0.8, 'sens': 0.3}
 
 def test_check_negative_base():
     """
@@ -53,13 +62,15 @@ def test_create_intervals():
     """
     Testing the create intervals function
     """
-    intervals = create_intervals({'acc': 0.6, 'tpr': 0.4, 'fnr': 0.6}, eps=1e-4)
+    scores_ = resolve_aliases_and_complements({'acc': 0.6, 'tpr': 0.4, 'fnr': 0.6})
+    intervals = create_intervals(scores_, eps=1e-4)
     assert abs(intervals['acc'].lower_bound - 0.5999) < 1e-8
     assert abs(intervals['acc'].upper_bound - 0.6001) < 1e-8
     assert abs(intervals['sens'].lower_bound - 0.3999) < 1e-8
     assert abs(intervals['sens'].upper_bound - 0.4001) < 1e-8
 
-    intervals = create_intervals({'fnr': 0.6}, eps=1e-4)
+    scores_ = resolve_aliases_and_complements({'fnr': 0.6})
+    intervals = create_intervals(scores_, eps=1e-4)
     assert abs(intervals['sens'].lower_bound - 0.3999) < 1e-8
     assert abs(intervals['sens'].upper_bound - 0.4001) < 1e-8
 
@@ -163,7 +174,7 @@ def test_check_false_2v1(problem, zeros, random_state):
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'],
                                     ['tp', 'tn'], ['fp', 'fn'], ['tp', 'fp'], ['tn', 'fn']])
 @pytest.mark.parametrize("random_state", [3, 5, 6])
-def test_check(zeros, random_state):
+def test_check_individual_scores(zeros, random_state):
     """
     Testing the check function
     """
@@ -177,7 +188,7 @@ def test_check(zeros, random_state):
                     for key in functions}
     score_values = {key: value for key, value in score_values.items() if value is not None}
 
-    result = check(score_values, evaluation['p'], evaluation['n'], eps=1e-4)
+    result = check_individual_scores(score_values, evaluation['p'], evaluation['n'], eps=1e-4)
 
     assert result['underdetermined'] or not result['inconsistency']
 
@@ -198,7 +209,10 @@ def test_check_failure(zeros, random_state):
                     for key in functions}
     score_values = {key: value for key, value in score_values.items() if value is not None}
 
-    result = check(score_values, evaluation['p']*2, evaluation['n']+50, eps=1e-4)
+    result = check_individual_scores(score_values,
+                                        evaluation['p']*2,
+                                        evaluation['n']+50,
+                                        eps=1e-4)
 
     # at least two non-edge cases are needed to ensure the discovery of inconsistency
     edges = (len(score_values) - len(result['edge_scores'])) < 2

@@ -73,7 +73,7 @@ def _create_folds(p,
                     *,
                     n_folds=None,
                     n_repeats=None,
-                    folding='stratified_sklearn',
+                    folding=None,
                     score_bounds=None,
                     identifier=None):
     """
@@ -92,16 +92,17 @@ def _create_folds(p,
         list(dict): the list of fold specifications
     """
 
-    if n_folds is None:
-        n_folds = 1
-    if n_repeats is None:
-        n_repeats = 1
+    if n_folds == 1:
+        return [{'p': p, 'n': n} for _ in range(n_repeats)]
+
+    if folding is None:
+        return [{'p': p * n_repeats, 'n': n * n_repeats}]
 
     folds = determine_fold_configurations(p,
-                                    n,
-                                    n_folds,
-                                    n_repeats,
-                                    folding)
+                                            n,
+                                            n_folds,
+                                            n_repeats,
+                                            folding)
     n_fold = 0
     n_repeat = 0
     for _, fold in enumerate(folds):

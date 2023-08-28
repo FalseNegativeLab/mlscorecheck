@@ -19,7 +19,8 @@ import pulp as pl
 from mlscorecheck.aggregated import (Dataset,
                                         solve,
                                         generate_dataset_specification,
-                                        compare_scores)
+                                        compare_scores,
+                                        create_folds_for_dataset)
 
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
@@ -44,6 +45,118 @@ def test_dataset_creation(random_state):
     dataset = Dataset(**generate_dataset_specification(random_state=random_state)) # pylint: disable=missing-kwoa
 
     assert dataset is not None
+
+def test_exceptions():
+    """
+    Testing the exceptions at dataset creation
+    """
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=None,
+                                    n=None,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='dummy',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=2,
+                                    n=None,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=2,
+                                    n=3,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name='name',
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=2,
+                                    n=3,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=[],
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=None,
+                                    n=None,
+                                    n_folds=3,
+                                    n_repeats=None,
+                                    folds=[],
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=None,
+                                    n=None,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=[],
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name='name',
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=None,
+                                    n=None,
+                                    n_folds=None,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=3,
+                                    n=5,
+                                    n_folds=2,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds=None,
+                                    aggregation='mor',
+                                    name=None,
+                                    identifier='identifier')
+
+    with pytest.raises(ValueError):
+        create_folds_for_dataset(p=3,
+                                    n=5,
+                                    n_folds=2,
+                                    n_repeats=None,
+                                    folds=None,
+                                    folding=None,
+                                    fold_score_bounds={},
+                                    aggregation='rom',
+                                    name=None,
+                                    identifier='identifier')
 
 def test_dataset_copy():
     """

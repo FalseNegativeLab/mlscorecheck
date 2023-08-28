@@ -106,6 +106,13 @@ class Experiment:
         """
         return str(self.to_dict())
 
+    def has_downstream_bounds(self):
+        """
+        Checks if the experiment has score bounds specified
+        """
+        return any(dataset.has_downstream_bounds() or dataset.score_bounds is not None
+                    for dataset in self.datasets)
+
     def initialize_datasets(self):
         """
         Initialize all datasets
@@ -137,9 +144,9 @@ class Experiment:
         Returns:
             dict: the raw figures
         """
-        figures = {'tp': 0, 'tn': 0, 'p': 0, 'n': 0}
+        figures = self.datasets[0].calculate_figures()
 
-        for dataset in self.datasets:
+        for dataset in self.datasets[1:]:
             tmp = dataset.calculate_figures()
             for key in figures:
                 figures[key] += tmp[key]
@@ -199,7 +206,7 @@ class Experiment:
         """
         return [dataset.get_bounds(score_subset, feasible) for dataset in self.datasets]
 
-    def get_dataset_fold_bounds(self, score_subset, feasible=True):
+    def get_dataset_fold_bounds(self, score_subset=None, feasible=True):
         """
         Extract bounds for the folds of the datasets
 

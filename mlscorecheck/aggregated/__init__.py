@@ -8,3 +8,4 @@ from ._dataset import *
 from ._experiment import *
 from ._linear_programming import *
 from ._utils import *
+from ._check_aggregated_scores import *

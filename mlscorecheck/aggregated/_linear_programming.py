@@ -88,7 +88,7 @@ def solve(obj, scores, eps, solver=None):
     if not isinstance(eps, dict):
         eps = {key: eps for key in ['acc', 'sens', 'spec', 'bacc']}
 
-    lp_program = pl.LpProblem('feasibility_' + random_identifier(8))
+    lp_program = pl.LpProblem(f'feasibility_{random_identifier(8)}')
 
     lp_program = obj.init_lp(lp_program, scores)
 
