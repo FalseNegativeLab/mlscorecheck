@@ -356,7 +356,7 @@ class SympyAlgebra(Algebra):
 
 class SageAlgebra(Algebra):
     """
-    The required algebra driven by sympy
+    The required algebra driven by sage
     """
     def __init__(self):
         """
