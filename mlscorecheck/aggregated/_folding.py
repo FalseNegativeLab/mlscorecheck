@@ -96,25 +96,27 @@ def _create_folds(p,
     """
 
     if n_folds == 1:
-        return [{'p': p, 'n': n} for _ in range(n_repeats)]
+        folds = [{'p': p, 'n': n} for _ in range(n_repeats)]
 
-    if folding is None:
-        return [{'p': p * n_repeats, 'n': n * n_repeats}]
+    elif folding is None:
+        folds = [{'p': p * n_repeats, 'n': n * n_repeats}]
+    else:
+        folds = determine_fold_configurations(p,
+                                                n,
+                                                n_folds,
+                                                n_repeats,
+                                                folding)
+        n_fold = 0
+        n_repeat = 0
+        for _, fold in enumerate(folds):
+            fold['identifier'] = f'{identifier}_{n_repeat}_{n_fold}'
+            n_fold += 1
+            if n_fold % n_folds == 0:
+                n_fold = 0
+                n_repeat += 1
 
-    folds = determine_fold_configurations(p,
-                                            n,
-                                            n_folds,
-                                            n_repeats,
-                                            folding)
-    n_fold = 0
-    n_repeat = 0
     for _, fold in enumerate(folds):
         if score_bounds is not None:
             fold['score_bounds'] = {**score_bounds}
-        fold['identifier'] = f'{identifier}_{n_repeat}_{n_fold}'
-        n_fold += 1
-        if n_fold % n_folds == 0:
-            n_fold = 0
-            n_repeat += 1
 
     return folds

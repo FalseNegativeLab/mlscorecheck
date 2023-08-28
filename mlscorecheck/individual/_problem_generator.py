@@ -4,8 +4,44 @@ This module implements a random problem generator
 
 import numpy as np
 
+from ._calculate_scores import calculate_scores
+
 __all__ = ['generate_problems',
-            'generate_1_problem']
+            'generate_1_problem',
+            'generate_problem_and_scores']
+
+def generate_problem_and_scores(*,
+                                max_p=1000,
+                                max_n=1000,
+                                zeros=None,
+                                add_complements=None,
+                                score_subset=None,
+                                rounding_decimals=None,
+                                random_state=None):
+    """
+    Generates a random problem and random but feasible scores
+
+    Args:
+        max_p (int): the maximum number of positives
+        max_n (int): the maximum number of negatives
+        zeros (None/list): the list of items to set to zero
+        add_complements (bool): whether to add the complements
+        score_subset (list/None): the subset of scores to compute
+        rounding_decimals (int): the number of decimals to round to
+        random_state (int, optional): the random seed to use
+
+    Returns:
+        dict, dict: the problem and the scores
+    """
+    evaluation, problem = generate_1_problem(max_p=max_p,
+                                                max_n=max_n,
+                                                zeros=zeros,
+                                                add_complements=add_complements,
+                                                random_state=random_state)
+    scores = calculate_scores(evaluation, rounding_decimals=rounding_decimals)
+    if score_subset is not None:
+        scores = {key: value for key, value in scores.items() if key in score_subset}
+    return problem, scores
 
 def generate_1_problem(*,
                         max_p=1000,

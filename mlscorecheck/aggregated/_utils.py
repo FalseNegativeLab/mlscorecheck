@@ -72,7 +72,8 @@ def compare_scores(scores0, scores1, eps, subset=None, tolerance=1e-5):
     if not isinstance(eps, dict):
         eps = {key: eps for key in scores0}
 
-    return all(abs(scores0[key] - scores1[key]) <= eps[key] + tolerance for key in scores0)
+    return all(abs(scores0[key] - scores1[key]) <= eps[key] + tolerance
+                for key in scores1 if key in scores0)
 
 def create_bounds(scores, feasible=True):
     """

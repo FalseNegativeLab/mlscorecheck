@@ -7,7 +7,7 @@ This module implements an abstraction for a dataset
 import numpy as np
 import pulp as pl
 
-from ..individual import calculate_scores_for_lp
+from ..individual import calculate_scores_for_lp, calculate_scores
 from ..core import logger, init_random_state, dict_mean, round_scores, dict_minmax
 from ..experiments import lookup_dataset
 
@@ -20,7 +20,8 @@ from ..experiments import dataset_statistics
 
 __all__ = ['Dataset',
             'generate_dataset_specification',
-            'create_folds_for_dataset']
+            'create_folds_for_dataset',
+            'generate_dataset_and_scores']
 
 def generate_dataset_pn(max_p,
                         max_n,
@@ -45,10 +46,14 @@ def generate_dataset_pn(max_p,
     n_folds = random_state.randint(1, min(p+1, n+1, max_n_folds))
     n_repeats = random_state.randint(1, max_n_repeats+1)
 
-    return {'p': p, 'n': n,
-            'n_folds': n_folds,
-            'n_repeats': n_repeats,
-            'folding': 'stratified_sklearn' if n_folds > 1 else None}
+    dataset = {'p': p,
+                'n': n,
+                'n_folds': n_folds,
+                'n_repeats': n_repeats}
+    if n_folds > 1:
+        dataset['folding'] = 'stratified_sklearn'
+
+    return dataset
 
 def generate_dataset_name(max_n_folds,
                             max_n_repeats,
@@ -71,10 +76,13 @@ def generate_dataset_name(max_n_folds,
     n_folds = random_state.randint(1, min(p+1, n+1, max_n_folds))
     n_repeats = random_state.randint(1, max_n_repeats+1)
 
-    return {'name': name,
-            'n_folds': n_folds,
-            'n_repeats': n_repeats,
-            'folding': 'stratified_sklearn' if n_folds > 1 else None}
+    dataset = {'name': name,
+                'n_folds': n_folds,
+                'n_repeats': n_repeats}
+    if n_folds > 1:
+        dataset['folding'] = 'stratified_sklearn'
+
+    return dataset
 
 def generate_dataset_folds(max_n_folds,
                             max_n_repeats,
@@ -142,6 +150,57 @@ def generate_dataset_specification(*,
     dataset['identifier'] = random_state.choice([None, random_identifier(8)])
 
     return dataset
+
+def generate_dataset_and_scores(*,
+                                score_subset=None,
+                                rounding_decimals=None,
+                                fold_bounds=False,
+                                feasible_bounds=True,
+                                max_p=1000,
+                                max_n=1000,
+                                max_n_folds=10,
+                                max_n_repeats=5,
+                                random_state=None,
+                                aggregation=None):
+    """
+    Generate a dataset and scores from a sample
+
+    Args:
+        score_subset(list/None): the list of scores to calculate
+        rounding_decimals (ident/None): the number of decimal places to round to
+        fold_bounds (bool): whether to add fold bounds
+        feasible_bounds (bool): whether the fold bounds should be feasible
+        max_p (int): the maximum number of positives
+        max_n (int): the maximum number of negatives
+        max_n_folds (int): the maximum number of n_folds
+        max_n_repeats (int): the maximum number of n_repeats
+        random_state (int/np.random.RandomState/None): the random state/seed to use
+        aggregation (None/str): 'mor'/'rom' - the aggregation to use if specified
+
+    Returns:
+        dict, dict: the dataset specification and the scores
+    """
+    dataset_spec = generate_dataset_specification(max_p=max_p,
+                                                max_n=max_n,
+                                                max_n_folds=max_n_folds,
+                                                max_n_repeats=max_n_repeats,
+                                                random_state=random_state,
+                                                aggregation=aggregation)
+    dataset = Dataset(**dataset_spec)
+    sample = dataset.sample(random_state)
+    if dataset.aggregation == 'rom':
+        scores = calculate_scores(sample.calculate_figures(), rounding_decimals=rounding_decimals)
+    else:
+        scores = sample.calculate_scores(rounding_decimals=rounding_decimals)
+    scores = scores if score_subset is None else {key: value for key, value in scores.items()
+                                                if key in score_subset}
+    if fold_bounds:
+        dataset_spec['fold_score_bounds'] = sample.get_fold_bounds(feasible=feasible_bounds)
+
+    del dataset_spec['identifier']
+    del dataset_spec['aggregation']
+
+    return dataset_spec, scores
 
 def create_folds_for_dataset(*,
                             p,

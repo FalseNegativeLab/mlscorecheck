@@ -16,7 +16,8 @@ def check_1_dataset_kfold_rom_scores(scores,
                                         eps,
                                         dataset,
                                         solver_name=None,
-                                        timeout=None):
+                                        timeout=None,
+                                        verbosity=1):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
@@ -28,6 +29,7 @@ def check_1_dataset_kfold_rom_scores(scores,
         dataset (dict): the dataset specification
         solver_name (None/str): the solver to use
         timeout (None/int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity level of the pulp solver (0: silent, non-0: verbose)
 
     Returns:
         dict: the dictionary of the results of the analysis, the
@@ -114,7 +116,8 @@ def check_1_dataset_kfold_rom_scores(scores,
                                         scores=scores,
                                         eps=eps,
                                         solver_name=solver_name,
-                                        timeout=timeout)
+                                        timeout=timeout,
+                                        verbosity=verbosity)
 
     result['aggregated_results'] = agg_results
     result['inconsistency'] = result['inconsistency'] or agg_results['inconsistency']
