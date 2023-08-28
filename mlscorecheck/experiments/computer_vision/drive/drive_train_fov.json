@@ -1,0 +1,25 @@
+{
+    "identifier": "drive_train_fov",
+    "datasets": [
+        {"identifier": "21", "folds": [{"p": 24650, "n": 200950}]},
+        {"identifier": "22", "folds": [{"p": 29800, "n": 197886}]},
+        {"identifier": "23", "folds": [{"p": 21714, "n": 206473}]},
+        {"identifier": "24", "folds": [{"p": 38215, "n": 189511}]},
+        {"identifier": "25", "folds": [{"p": 31664, "n": 195698}]},
+        {"identifier": "26", "folds": [{"p": 27496, "n": 197596}]},
+        {"identifier": "27", "folds": [{"p": 29071, "n": 198755}]},
+        {"identifier": "28", "folds": [{"p": 32209, "n": 195118}]},
+        {"identifier": "29", "folds": [{"p": 27738, "n": 199571}]},
+        {"identifier": "30", "folds": [{"p": 25877, "n": 201382}]},
+        {"identifier": "31", "folds": [{"p": 19897, "n": 207804}]},
+        {"identifier": "32", "folds": [{"p": 26956, "n": 197988}]},
+        {"identifier": "33", "folds": [{"p": 26679, "n": 201059}]},
+        {"identifier": "34", "folds": [{"p": 32287, "n": 194255}]},
+        {"identifier": "35", "folds": [{"p": 28612, "n": 199034}]},
+        {"identifier": "36", "folds": [{"p": 35884, "n": 191333}]},
+        {"identifier": "37", "folds": [{"p": 28841, "n": 198345}]},
+        {"identifier": "38", "folds": [{"p": 28477, "n": 197747}]},
+        {"identifier": "39", "folds": [{"p": 28348, "n": 199112}]},
+        {"identifier": "40", "folds": [{"p": 25000, "n": 201974}]}
+    ]
+}

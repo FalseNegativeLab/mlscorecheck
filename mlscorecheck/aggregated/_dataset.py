@@ -232,8 +232,6 @@ def create_folds_for_dataset(*,
     Returns:
         list(dict): the list of fold specifications
     """
-    if aggregation not in ('mor', 'rom'):
-        raise ValueError(f'aggregation {aggregation} is not supported')
 
     if (p is None and n is not None) or (p is not None and n is None):
         raise ValueError('either specify both p and n or neither of them')
@@ -256,6 +254,16 @@ def create_folds_for_dataset(*,
     if p is None and name is None and folds is None:
         raise ValueError('at least the p,n or the name of the dataset or the '\
                         'list of fold specifications needs to be specified')
+
+    if ((p is not None or name is not None)
+        and ((n_folds is None or n_folds == 1) and aggregation is None)):
+        # if the dataset is specified by p, n or the dataset name and
+        # the number of folds is not specified or it is one, then the
+        # aggregation can be anything
+        aggregation = 'rom'
+
+    if aggregation not in ('mor', 'rom'):
+        raise ValueError(f'aggregation {aggregation} is not supported')
 
     if folds is None:
         n_folds = n_folds if n_folds is not None else 1
@@ -292,7 +300,7 @@ class Dataset:
 
     def __init__(self,
                     *,
-                    aggregation,
+                    aggregation=None,
                     identifier=None,
                     name=None,
                     p=None,

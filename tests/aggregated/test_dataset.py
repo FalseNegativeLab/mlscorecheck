@@ -185,10 +185,11 @@ def test_dataset_copy():
 
     assert dataset.to_dict() == Dataset(**dataset.to_dict()).to_dict()
 
-def test_dataset_sampling_and_evaluation():
+def test_dataset_creation_without_aggregation():
     """
-    Testing the dataset sampling and evaluation
+    Testing the dataset creation without aggregation
     """
+    assert Dataset(p=5, n=10) is not None
 
 @pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])

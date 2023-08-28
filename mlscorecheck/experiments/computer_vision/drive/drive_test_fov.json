@@ -1,0 +1,25 @@
+{
+    "identifier": "drive_test_fov",
+    "datasets": [
+        {"identifier": "01", "folds": [{"p": 29412, "n": 194965}]},
+        {"identifier": "02", "folds": [{"p": 33723, "n": 191364}]},
+        {"identifier": "03", "folds": [{"p": 32886, "n": 192841}]},
+        {"identifier": "04", "folds": [{"p": 30343, "n": 197234}]},
+        {"identifier": "05", "folds": [{"p": 30898, "n": 196795}]},
+        {"identifier": "06", "folds": [{"p": 32105, "n": 195394}]},
+        {"identifier": "07", "folds": [{"p": 30144, "n": 197531}]},
+        {"identifier": "08", "folds": [{"p": 28311, "n": 196937}]},
+        {"identifier": "09", "folds": [{"p": 26740, "n": 200920}]},
+        {"identifier": "10", "folds": [{"p": 27152, "n": 200180}]},
+        {"identifier": "11", "folds": [{"p": 29533, "n": 198281}]},
+        {"identifier": "12", "folds": [{"p": 28490, "n": 199115}]},
+        {"identifier": "13", "folds": [{"p": 32252, "n": 195248}]},
+        {"identifier": "14", "folds": [{"p": 26631, "n": 199223}]},
+        {"identifier": "15", "folds": [{"p": 23612, "n": 203782}]},
+        {"identifier": "16", "folds": [{"p": 29791, "n": 197903}]},
+        {"identifier": "17", "folds": [{"p": 27851, "n": 198033}]},
+        {"identifier": "18", "folds": [{"p": 26144, "n": 201468}]},
+        {"identifier": "19", "folds": [{"p": 27367, "n": 200021}]},
+        {"identifier": "20", "folds": [{"p": 24264, "n": 203259}]}
+    ]
+}
