@@ -15,13 +15,18 @@ __all__ = ['check_1_dataset_kfold_rom_scores']
 def check_1_dataset_kfold_rom_scores(scores,
                                         eps,
                                         dataset,
+                                        *,
                                         solver_name=None,
                                         timeout=None,
                                         verbosity=1):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
-    over the folds in the ratio of means fashion.
+    over the folds in the ratio of means fashion. All pairs of
+    the supported individual scores are checked against all other as in
+    the 1_dataset_no_kfold case, however, additionally, if score_bounds
+    are specified in the folds, the aggregated check is also executed
+    on the supported acc, bacc, sens and spec scores.
 
     Args:
         scores (dict(str,float)): the scores to check
@@ -36,38 +41,51 @@ def check_1_dataset_kfold_rom_scores(scores,
                 'inconsistency' entry indicates if inconsistencies have
                 been found. The aggregated_results entry is empty if
                 the execution of the linear programming based check was
-                unnecessary.
+                unnecessary. The result contains two more keys. Under the key
+                'individual_results' one finds a structure similar to that of
+                the 1_dataset_no_kfold output, summarizing the findings of
+                checking the consistency of each pair of scores against a third
+                score. Additionally, the key 'aggregated_results' is available
+                if score_bounds are specified and the aggregated checks are
+                executed. In the aggregated_results one finds again the
+                'inconsistency' flag, the status of the linear programming solver
+                ('lp_status') and under the 'lp_configuration' key one finds
+                the actual configuration of tp and tn variables with all
+                scores calculated and the score_bounds checked where they
+                were specified. Also, under the 'lp_status' key one finds the
+                status message of the linear solver, and in the as a double check, the
+                flag under the key 'lp_configuration_scores_match' indicates if the
+                scores of the final configuration match the specified ones, similarly,
+                the 'lp_configuration_bounds_match' indicates if all bounds are
+                satisfied.
 
-    Example:
-        check_1_dataset_kfold_rom_scores(
-            scores = {'acc': 0.954, 'sens': 0.934, 'spec': 0.98},
-            eps = 1e-3,
-            dataset = {'p': 5, 'n': 70, 'n_folds': 3, 'n_repeats': 10}
-        )
+    Examples:
+        dataset = {'folds': [{'p': 16, 'n': 99},
+                            {'p': 81, 'n': 69},
+                            {'p': 83, 'n': 2},
+                            {'p': 52, 'n': 19},
+                            {'p': 28, 'n': 14}]}
+        scores = {'acc': 0.428, 'npv': 0.392, 'bacc': 0.442, 'f1p': 0.391}
 
-        check_1_dataset_kfold_rom_scores(
-            scores = {'acc': 0.954, 'sens': 0.934, 'spec': 0.98},
-            eps = 1e-3,
-            dataset = {'name': 'common_datasets.ADA',
-                        'n_folds': 1}
-        )
+        result = check_1_dataset_kfold_rom_scores(scores=scores,
+                                                    eps=1e-3,
+                                                    dataset=dataset)
+        result['inconsistency']
 
-        check_1_dataset_kfold_rom_scores(
-            scores = {'acc': 0.954, 'sens': 0.934, 'spec': 0.98},
-            eps = 1e-3,
-            dataset = {'name': 'common_datasets.ADA',
-                        'n_folds': 3,
-                        'n_repeats': 1,
-                        'folding': 'stratified_sklearn'}
-        )
+        >> False
 
-        check_1_dataset_kfold_rom_scores(
-            scores = {'acc': 0.954, 'sens': 0.934, 'spec': 0.98},
-            eps = 1e-3,
-            dataset = {'folds': [{'p': 2, 'n': 20},
-                                    {'p': 2, 'n': 30},
-                                    {'p': 1, 'n': 20}]}
-        )
+        dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
+                    'n_folds': 4,
+                    'n_repeats': 2,
+                    'folding': 'stratified_sklearn'}
+        scores = {'acc': 0.9, 'npv': 0.9, 'sens': 0.6, 'f1p': 0.95}
+
+        result = check_1_dataset_kfold_rom_scores(scores=scores,
+                                                    eps=1e-2,
+                                                    dataset=dataset)
+        result['inconsistency']
+
+        >> True
     """
     if dataset.get('aggregation', 'rom') != 'rom':
         raise ValueError(f'the aggregation {dataset.get("aggregation")} specified '\

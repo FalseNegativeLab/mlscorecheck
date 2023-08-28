@@ -23,7 +23,8 @@ from mlscorecheck.aggregated import (Experiment,
                                         solve,
                                         generate_experiment_specification,
                                         generate_dataset_specification,
-                                        compare_scores)
+                                        compare_scores,
+                                        generate_datasets_and_scores)
 
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
@@ -38,6 +39,29 @@ three_combs = [['acc', 'sens', 'spec'], ['acc', 'sens', 'bacc'],
 four_combs = [['acc', 'sens', 'spec', 'bacc']]
 
 random_seeds = list(range(20))
+
+def test_generate_datasets_and_scores():
+    """
+    Testing the datasets and scores generation
+    """
+
+    datasets, scores = generate_datasets_and_scores(random_state=5,
+                                                    aggregation='rom',
+                                                    fold_score_bounds=True,
+                                                    ds_score_bounds=True)
+    assert 'f1p' in scores
+    assert 'score_bounds' in datasets[0]
+    assert 'fold_score_bounds' in datasets[0] \
+        or ('folds' in datasets[0] and 'score_bounds' in datasets[0]['folds'][0])
+
+    datasets, scores = generate_datasets_and_scores(random_state=5,
+                                                    aggregation='mor',
+                                                    fold_score_bounds=True,
+                                                    ds_score_bounds=True)
+    assert 'f1p' not in scores
+    assert 'score_bounds' in datasets[0]
+    assert 'fold_score_bounds' in datasets[0] \
+        or ('folds' in datasets[0] and 'score_bounds' in datasets[0]['folds'][0])
 
 def evaluate_timeout(result, problem, scores, eps, score_subset):
     """

@@ -63,8 +63,6 @@ def check_aggregated_scores(*,
     populated = experiment.populate(result)
     configuration_details = populated.check_bounds()
 
-    details = {}
-
     if result.status == 1:
         # the problem is feasible
         comp_flag = compare_scores(scores, populated.calculate_scores(), eps)
@@ -74,14 +72,13 @@ def check_aggregated_scores(*,
                 'lp_configuration_scores_match': comp_flag,
                 'lp_configuration_bounds_match': bounds_flag,
                 'lp_configuration': configuration_details}
-    elif result.status == 0:
+    if result.status == 0:
         # timed out
         return {'inconsistency': False,
                 'lp_status': 'timeout',
                 'lp_configuration': configuration_details}
-    else:
-        # infeasible
-        return {'inconsistency': True,
-                'lp_status': 'infeasible',
-                'lp_configuration': configuration_details}
 
+    # infeasible
+    return {'inconsistency': True,
+            'lp_status': 'infeasible',
+            'lp_configuration': configuration_details}

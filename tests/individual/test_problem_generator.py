@@ -6,7 +6,21 @@ import numpy as np
 
 from mlscorecheck.individual import (generate_problems,
                                 calculate_scores,
-                                round_scores)
+                                round_scores,
+                                generate_problem_and_scores)
+
+def test_generate_problem_and_scores():
+    """
+    Testing the joint problem and score sampling
+    """
+    _, scores = generate_problem_and_scores(random_state=5,
+                                            rounding_decimals=3)
+    assert len(scores) > 0
+
+    _, scores = generate_problem_and_scores(random_state=5,
+                                            rounding_decimals=3,
+                                            score_subset=['acc'])
+    assert len(scores) == 1
 
 def test_round_scores():
     """

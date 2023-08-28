@@ -4,7 +4,6 @@ This module implements an abstraction for a dataset
 # disabling pylint false positives
 # pylint: disable=no-member
 
-import numpy as np
 import pulp as pl
 
 from ..individual import calculate_scores_for_lp, calculate_scores
@@ -154,8 +153,8 @@ def generate_dataset_specification(*,
 def generate_dataset_and_scores(*,
                                 score_subset=None,
                                 rounding_decimals=None,
-                                fold_bounds=False,
-                                feasible_bounds=True,
+                                fold_score_bounds=False,
+                                feasible_score_bounds=True,
                                 max_p=1000,
                                 max_n=1000,
                                 max_n_folds=10,
@@ -168,8 +167,8 @@ def generate_dataset_and_scores(*,
     Args:
         score_subset(list/None): the list of scores to calculate
         rounding_decimals (ident/None): the number of decimal places to round to
-        fold_bounds (bool): whether to add fold bounds
-        feasible_bounds (bool): whether the fold bounds should be feasible
+        fold_score_bounds (bool): whether to add fold bounds
+        feasible_score_bounds (bool): whether the fold bounds should be feasible
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of n_folds
@@ -186,7 +185,7 @@ def generate_dataset_and_scores(*,
                                                 max_n_repeats=max_n_repeats,
                                                 random_state=random_state,
                                                 aggregation=aggregation)
-    dataset = Dataset(**dataset_spec)
+    dataset = Dataset(**dataset_spec) # pylint: disable=missing-kwoa
     sample = dataset.sample(random_state)
     if dataset.aggregation == 'rom':
         scores = calculate_scores(sample.calculate_figures(), rounding_decimals=rounding_decimals)
@@ -194,8 +193,8 @@ def generate_dataset_and_scores(*,
         scores = sample.calculate_scores(rounding_decimals=rounding_decimals)
     scores = scores if score_subset is None else {key: value for key, value in scores.items()
                                                 if key in score_subset}
-    if fold_bounds:
-        dataset_spec['fold_score_bounds'] = sample.get_fold_bounds(feasible=feasible_bounds)
+    if fold_score_bounds:
+        dataset_spec['fold_score_bounds'] = sample.get_fold_bounds(feasible=feasible_score_bounds)
 
     del dataset_spec['identifier']
     del dataset_spec['aggregation']

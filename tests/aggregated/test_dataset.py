@@ -20,7 +20,8 @@ from mlscorecheck.aggregated import (Dataset,
                                         solve,
                                         generate_dataset_specification,
                                         compare_scores,
-                                        create_folds_for_dataset)
+                                        create_folds_for_dataset,
+                                        generate_dataset_and_scores)
 
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
@@ -35,6 +36,23 @@ three_combs = [['acc', 'sens', 'spec'], ['acc', 'sens', 'bacc'],
 four_combs = [['acc', 'sens', 'spec', 'bacc']]
 
 random_seeds = list(range(20))
+
+def test_generate_dataset_and_scores():
+    """
+    Testing the joint generation of dataset and scores
+    """
+    dataset, scores = generate_dataset_and_scores(random_state=5,
+                                                    aggregation='rom')
+    assert len(scores) > 0
+
+    dataset, scores = generate_dataset_and_scores(random_state=5,
+                                                    aggregation='mor')
+    assert len(scores) > 0
+
+    dataset, scores = generate_dataset_and_scores(random_state=5,
+                                                    fold_score_bounds=True,
+                                                    aggregation='mor')
+    assert 'fold_score_bounds' in dataset
 
 @pytest.mark.parametrize('random_state', random_seeds)
 def test_dataset_creation(random_state):

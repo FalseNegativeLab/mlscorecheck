@@ -2,18 +2,18 @@
 This module implements an abstraction for an experiment
 """
 
-import numpy as np
 import pulp as pl
 
 from ..core import init_random_state, dict_mean, round_scores, dict_minmax
-from ..individual import calculate_scores_for_lp
+from ..individual import calculate_scores_for_lp, calculate_scores
 
 from ._dataset import (Dataset,
                         generate_dataset_specification)
 from ._utils import aggregated_scores
 
 __all__ = ['Experiment',
-            'generate_experiment_specification']
+            'generate_experiment_specification',
+            'generate_datasets_and_scores']
 
 def generate_experiment_specification(*,
                                         max_n_datasets=10,
@@ -52,6 +52,75 @@ def generate_experiment_specification(*,
 
     return {'aggregation': aggregation,
             'datasets': datasets}
+
+def generate_datasets_and_scores(*, # pylint: disable=too-many-locals
+                                score_subset=None,
+                                rounding_decimals=None,
+                                fold_score_bounds=False,
+                                feasible_fold_score_bounds=True,
+                                ds_score_bounds=False,
+                                feasible_ds_score_bounds=True,
+                                max_n_datasets=10,
+                                max_p=1000,
+                                max_n=1000,
+                                max_n_folds=10,
+                                max_n_repeats=5,
+                                random_state=None,
+                                aggregation=None,
+                                aggregation_ds=None):
+    """
+    Generate a set of random datasets and the corrsponding scores
+
+    Args:
+        score_subset(list/None): the list of scores to calculate
+        rounding_decimals (ident/None): the number of decimal places to round to
+        fold_score_bounds (bool): whether to add fold bounds
+        feasible_fold_score_bounds (bool): whether the fold bounds should be feasible
+        ds_score_bounds (bool): whether to add score bounds to the datasets
+        feasible_ds_score_bounds (bool): whether the score bounds should be feasible
+        max_n_datasets (int): the maximum number of datasets
+        max_p (int): the maximum number of positives
+        max_n (int): the maximum number of negatives
+        max_n_folds (int): the maximum number of folds
+        max_n_repeats (int): the maximum number of repeats
+        random_state (int/np.random.RandomState/None): the random state to use
+        aggregation (str/None): 'mor'/'rom' - the aggregation of the experiment
+        aggregation_ds (str/None): 'mor'/'rom' - the aggregation in the datasets
+
+    Returns:
+        list, dict: the list of dataset specifications and the corresponding random scores
+    """
+    experiment_spec = generate_experiment_specification(max_n_datasets=max_n_datasets,
+                                                        max_p=max_p,
+                                                        max_n=max_n,
+                                                        max_n_folds=max_n_folds,
+                                                        max_n_repeats=max_n_repeats,
+                                                        random_state=random_state,
+                                                        aggregation=aggregation,
+                                                        aggregation_ds=aggregation_ds)
+    experiment = Experiment(**experiment_spec)
+    sample = experiment.sample(random_state)
+    if experiment.aggregation == 'rom':
+        scores = calculate_scores(sample.calculate_figures(), rounding_decimals=rounding_decimals)
+    else:
+        scores = sample.calculate_scores(rounding_decimals=rounding_decimals)
+    scores = scores if score_subset is None else {key: value for key, value in scores.items()
+                                                if key in score_subset}
+
+    if fold_score_bounds:
+        fold_bounds = sample.get_dataset_fold_bounds(feasible=feasible_fold_score_bounds)
+        for dataset, bound in zip(experiment_spec['datasets'], fold_bounds):
+            dataset['fold_score_bounds'] = bound
+    if ds_score_bounds:
+        score_bounds = sample.get_dataset_bounds(feasible=feasible_ds_score_bounds)
+        for dataset, bound in zip(experiment_spec['datasets'], score_bounds):
+            dataset['score_bounds'] = bound
+
+    for dataset in experiment_spec['datasets']:
+        del dataset['identifier']
+        del dataset['aggregation']
+
+    return experiment_spec['datasets'], scores
 
 class Experiment:
     """
