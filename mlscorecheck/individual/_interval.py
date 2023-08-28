@@ -317,6 +317,9 @@ class Interval:
     def __neg__(self):
         """
         The negation operator
+
+        Returns:
+            Interval: the negated interval
         """
         return (-1)*self
 
@@ -352,7 +355,8 @@ class IntervalUnion:
         Constructor of the object
 
         Args:
-            intervals (list(Interval)): a list of intervals
+            intervals (Interval/tuple/list(Interval)): a specification of one interval
+                                                        or a list of intervals
         """
         if isinstance(intervals, Interval):
             self.intervals = [intervals]
@@ -631,6 +635,9 @@ class IntervalUnion:
     def __neg__(self):
         """
         The negation operator
+
+        Returns:
+            IntervalUnion: the negated interval union
         """
         return (-1)*self
 

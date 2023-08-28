@@ -78,9 +78,7 @@ def solve(obj, scores, eps, solver=None):
         obj (object): an object to solve
         scores (dict(str,float)): the scores to match
         eps (dict(str,float)/float): the numerical uncertainty
-        solver_name (str): the name of the pulp solver to be used, check
-                            pl.listSolvers(onlyAvailable=True) for the options
-        timeout (int): the time limit in seconds
+        solver (obj): the solver object to use
 
     Returns:
         pl.LpProblem: the solved linear programming problem
@@ -94,6 +92,7 @@ def solve(obj, scores, eps, solver=None):
 
     lp_program = create_lp_target(obj, scores, eps, lp_program)
 
+    # adding the objective
     lp_program += 1
 
     lp_program.solve(solver=solver)

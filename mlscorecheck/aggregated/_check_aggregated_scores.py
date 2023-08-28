@@ -17,12 +17,13 @@ __all__ = ['check_aggregated_scores']
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
 
-def check_aggregated_scores(experiment,
+def check_aggregated_scores(*,
+                            experiment,
                             scores,
                             eps,
-                            *,
                             solver_name=None,
-                            timeout=None):
+                            timeout=None,
+                            verbosity=1):
     """
     Check aggregated scores
 
@@ -33,7 +34,9 @@ def check_aggregated_scores(experiment,
         solver_name (str): the name of the solver to be used, check
                             pulp.listSolvers(onlyAvailable) for the available list
         timeout (int): the number of seconds to time out
-        return_details (bool): whether to return the details
+        verbosity (int): controls the verbosity level of the pulp based
+                            linear programming solver. 0: no output; non-zero:
+                            print output
 
     Returns:
         bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
@@ -53,7 +56,7 @@ def check_aggregated_scores(experiment,
         logger.info('solver %s not available, using %s', solver_name, solvers[0])
         solver_name = solvers[0]
 
-    solver = pl.getSolver(solver_name, timeLimit=timeout)
+    solver = pl.getSolver(solver_name, timeLimit=timeout, msg=verbosity)
 
     result = solve(experiment, scores, eps, solver)
 
@@ -66,20 +69,19 @@ def check_aggregated_scores(experiment,
         # the problem is feasible
         comp_flag = compare_scores(scores, populated.calculate_scores(), eps)
         bounds_flag = configuration_details['bounds_flag']
-        details = {'inconsistency': False,
-                    'lp_status': 'feasible',
-                    'lp_configuration_scores_match': comp_flag,
-                    'lp_configuration_bounds_match': bounds_flag,
-                    'lp_configuration': configuration_details}
+        return {'inconsistency': False,
+                'lp_status': 'feasible',
+                'lp_configuration_scores_match': comp_flag,
+                'lp_configuration_bounds_match': bounds_flag,
+                'lp_configuration': configuration_details}
     elif result.status == 0:
         # timed out
-        details = {'inconsistency': False,
-                    'lp_status': 'timeout',
-                    'lp_configuration': configuration_details}
+        return {'inconsistency': False,
+                'lp_status': 'timeout',
+                'lp_configuration': configuration_details}
     else:
         # infeasible
-        details = {'inconsistency': True,
-                    'lp_status': 'infeasible',
-                    'lp_configuration': configuration_details}
+        return {'inconsistency': True,
+                'lp_status': 'infeasible',
+                'lp_configuration': configuration_details}
 
-    return details

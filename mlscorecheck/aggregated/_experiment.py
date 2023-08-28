@@ -94,8 +94,8 @@ class Experiment:
             dict: the dict representation
         """
         return {'identifier': self.identifier,
-                    'aggregation': self.aggregation,
-                    'datasets': [dataset.to_dict(problem_only) for dataset in self.datasets]}
+                'aggregation': self.aggregation,
+                'datasets': [dataset.to_dict(problem_only) for dataset in self.datasets]}
 
     def __repr__(self):
         """
@@ -109,6 +109,10 @@ class Experiment:
     def has_downstream_bounds(self):
         """
         Checks if the experiment has score bounds specified
+
+        Returns:
+            bool: a flag indicating if the experiment has score bounds specified on
+                    datasets or folds
         """
         return any(dataset.has_downstream_bounds() or dataset.score_bounds is not None
                     for dataset in self.datasets)
@@ -259,6 +263,8 @@ class Experiment:
 
         Args:
             lp_problem (pl.LpProblem): a linear programming problem by pulp
+            scores (dict(str,float)): the scores are passed to provide a bases
+                                        for the initial values of the variables
 
         Returns:
             pl.LpProblem: the updated linear programming problem
@@ -273,14 +279,7 @@ class Experiment:
                                     'p': sum(dataset.linear_programming['p']
                                                 for dataset in self.datasets),
                                     'n': sum(dataset.linear_programming['n']
-                                                for dataset in self.datasets),
-                                    'objective': self.datasets[0].linear_programming['objective']}
-
-        min_p = np.inf
-        for dataset in self.datasets:
-            if dataset.linear_programming['objective_p'] < min_p:
-                min_p = dataset.linear_programming['objective_p']
-                self.linear_programming['objective'] = dataset.linear_programming['objective']
+                                                for dataset in self.datasets)}
 
         if self.aggregation == 'rom':
             self.linear_programming = {**self.linear_programming,

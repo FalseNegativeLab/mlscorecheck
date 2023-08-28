@@ -2,7 +2,7 @@
 This module implements an abstraction for a dataset
 """
 # disabling pylint false positives
-#pylint: disable=no-member
+# pylint: disable=no-member
 
 import numpy as np
 import pulp as pl
@@ -170,6 +170,9 @@ def create_folds_for_dataset(*,
         aggregation (str): 'rom'/'mor - the aggregation strategy
         name (None/str): the name of the dataset to look-up
         identifier (None/str): the identifier
+
+    Returns:
+        list(dict): the list of fold specifications
     """
     if aggregation not in ('mor', 'rom'):
         raise ValueError(f'aggregation {aggregation} is not supported')
@@ -248,11 +251,6 @@ class Dataset:
         format like 'common_datasets.ADA'. Alternatively, one can pass
         a list of fold specifications.
 
-        Examples:
-            ds0 = Dataset(p=5, n=10, aggregation='rom')
-            ds1 = Dataset(name='common_datasets.ADA', aggregation='mor')
-            ds2 = Dataset(folds=[{p=5, n=10}, {p=2, n=8}], aggregation='rom')
-
         Args:
             aggregation (str): 'rom'/'mor - the aggregation strategy
             identifier (None/str): the identifier
@@ -266,6 +264,11 @@ class Dataset:
             score_bounds (None/dict(str,tuple)): the bound specification for scores
             fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
                                                         the folds
+
+        Examples:
+            ds0 = Dataset(p=5, n=10, aggregation='rom')
+            ds1 = Dataset(name='common_datasets.ADA', aggregation='mor')
+            ds2 = Dataset(folds=[{p=5, n=10}, {p=2, n=8}], aggregation='rom')
         """
 
         # the id of the dataset is set to the name or a random id is generated
@@ -294,7 +297,6 @@ class Dataset:
 
         self.linear_programming = None
 
-        # initializing the folds
         self.initialize_folds()
 
     def to_dict(self, problem_only=False):
@@ -326,6 +328,9 @@ class Dataset:
     def has_downstream_bounds(self):
         """
         Checks if the dataset has score bounds specified
+
+        Returns:
+            bool: a flag indicating if downstream score bounds are specified
         """
         return any(fold.has_bounds() for fold in self.folds)
 
@@ -407,7 +412,7 @@ class Dataset:
 
         Args:
             lp_problem (pl.LpProblem): a linear programming problem by pulp
-            scores (dict): the scores intended to match is used to find
+            scores (dict(str,float)): the scores intended to match is used to find
                             suitable initial values for the free variables
 
         Returns:
@@ -424,13 +429,6 @@ class Dataset:
                                                     for fold in self.folds),
                                     'p': sum(fold.p for fold in self.folds),
                                     'n': sum(fold.n for fold in self.folds)}
-
-        min_p = np.inf
-        for fold in self.folds:
-            if fold.p < min_p:
-                min_p = fold.p
-                self.linear_programming['objective'] = fold.linear_programming['objective']
-                self.linear_programming['objective_p'] = min_p
 
         if self.aggregation == 'rom':
             self.linear_programming = {**self.linear_programming,
@@ -463,6 +461,12 @@ class Dataset:
     def add_bounds(self, score_bounds):
         """
         Adding bounds to the dataset
+
+        Args:
+            score_bounds (dict(str,tuple(float,float))): the score bounds to add
+
+        Returns:
+            Dataset: a new dataset object with the score bounds
         """
         return Dataset(identifier=self.identifier,
                         aggregation=self.aggregation,
@@ -496,7 +500,7 @@ class Dataset:
             score_bounds (dict/list): a bound set or a list of bounds
 
         Returns:
-            Dataset: the updated dataset
+            Dataset: the updated new dataset
         """
         if isinstance(score_bounds, dict):
             score_bounds = [score_bounds] * len(self.folds)

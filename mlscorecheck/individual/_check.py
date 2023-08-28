@@ -65,6 +65,14 @@ def resolve_aliases_and_complements(scores):
 def determine_edge_cases(score, p, n):
     """
     Determining the edge cases of a score
+
+    Args:
+        scores (dict(str,float)): the dictionary of scores
+        p (int): the number of positives
+        n (int): the number of negatives
+
+    Returns:
+        list(float): the list of edge case values the score can take
     """
     edge_cases = set()
 
@@ -255,12 +263,12 @@ def check_2v1(scores,
     Check one particular problem
 
     Args:
-        intervals (dict): all score intervals
+        scores (dict(str,float)): the scores
+        eps (float/dict(str,float)): the numerical uncertainty(ies)
         problem (tuple(str,str,str)): the problem specification in the form
                                         (base_score0, base_score1, target_score)
         p (int): the number of positives
         n (int): the number of negatives
-        edge_flags (dict): a dictionary of edge score flags
 
     Returns:
         dict: the result of the evaluation
@@ -304,8 +312,8 @@ def check_2v1(scores,
     # there can be multiple solutions to a problem, if one of them is consistent,
     # the triplet is considered consistent
     return {'details': output,
-            'edge_scores': {key for key in [score0, score1]
-                            if scores[key] in determine_edge_cases(key, p, n)},
+            'edge_scores': list({key for key in [score0, score1]
+                            if scores[key] in determine_edge_cases(key, p, n)}),
             'underdetermined': all(tmp.get('message') == 'zero division'
                                     for tmp in output),
             'inconsistency': all(tmp['inconsistency'] for tmp in output)}
@@ -338,7 +346,7 @@ def check_individual_scores(scores, p, n, eps):
     edge_scores = set()
 
     for result in results:
-        edge_scores = edge_scores.union(result['edge_scores'])
+        edge_scores = edge_scores.union(set(result['edge_scores']))
         if result['inconsistency']:
             failed.append(result)
         else:
@@ -348,6 +356,6 @@ def check_individual_scores(scores, p, n, eps):
         'tests_succeeded': succeeded,
         'tests_failed': failed,
         'underdetermined': len(failed) == 0 and all(tmp['underdetermined'] for tmp in succeeded),
-        'edge_scores': edge_scores,
+        'edge_scores': list(edge_scores),
         'inconsistency': len(failed) > 0
         }

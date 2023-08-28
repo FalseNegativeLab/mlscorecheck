@@ -16,9 +16,9 @@ def test_check_aggregated_scores_feasible():
     sample = experiment.sample(random_state=5)
     scores = sample.calculate_scores(rounding_decimals=3)
 
-    details = check_aggregated_scores(experiment_spec,
-                                            scores,
-                                            1e-3)
+    details = check_aggregated_scores(experiment=experiment_spec,
+                                            scores=scores,
+                                            eps=1e-3)
 
     assert not details['inconsistency']
     assert details['lp_status'] == 'feasible'
@@ -36,9 +36,9 @@ def test_check_aggregated_scores_feasible_custom_solver():
     sample = experiment.sample(random_state=5)
     scores = sample.calculate_scores(rounding_decimals=3)
 
-    details = check_aggregated_scores(experiment_spec,
-                                        scores,
-                                        1e-3,
+    details = check_aggregated_scores(experiment=experiment_spec,
+                                        scores=scores,
+                                        eps=1e-3,
                                         solver_name='dummy')
 
     assert not details['inconsistency']
@@ -63,9 +63,9 @@ def test_check_aggregated_scores_infeasible():
     final = experiment.add_dataset_fold_bounds(bounds)
     final_spec = final.to_dict()
 
-    details = check_aggregated_scores(final_spec,
-                                        scores,
-                                        1e-4)
+    details = check_aggregated_scores(experiment=final_spec,
+                                        scores=scores,
+                                        eps=1e-4)
 
     assert details['inconsistency']
     assert details['lp_status'] == 'infeasible'
@@ -95,9 +95,9 @@ def test_check_aggregated_scores_timeout():
     bounds = sample.get_dataset_bounds(['acc', 'sens', 'spec', 'bacc'], True)
     experiment = experiment.add_dataset_bounds(bounds)
 
-    details = check_aggregated_scores(experiment.to_dict(problem_only=True),
-                                        scores,
-                                        1e-7,
+    details = check_aggregated_scores(experiment=experiment.to_dict(problem_only=True),
+                                        scores=scores,
+                                        eps=1e-7,
                                         timeout=0.1)
 
     assert not details['inconsistency']

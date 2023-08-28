@@ -55,6 +55,9 @@ def determine_fold_configurations(p,
         n_folds (int): the number of folds
         n_repeats (int): the number of repeats
         folding (str): 'stratified_sklearn' - the folding strategy
+
+    Returns:
+        list(dict): the list of folds
     """
     if folding == 'stratified_sklearn':
         confs = stratified_configurations_sklearn(p=p, n=n, n_splits=n_folds)

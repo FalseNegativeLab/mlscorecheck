@@ -75,7 +75,8 @@ def generate_problems(*,
         random_state (int, optional): the random seed to use
 
     Returns:
-        dict/list(dict): the problem or multiple problems
+        dict,dict/list(dict),list(dict): the evaluation and the problem or
+                                            a list of evaluations and corresponding problems
     """
 
     if random_state is None or isinstance(random_state, int):

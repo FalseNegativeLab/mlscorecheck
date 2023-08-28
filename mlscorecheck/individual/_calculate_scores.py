@@ -55,8 +55,7 @@ def calculate_scores_for_lp(problem, score_subset=None):
 def calculate_scores(problem,
                     *,
                     rounding_decimals=None,
-                    additional_symbols=None,
-                    scores_only=False):
+                    additional_symbols=None):
     """
     Calculates all scores with solutions
 
@@ -64,7 +63,6 @@ def calculate_scores(problem,
         problem (dict): a problem to calculate the scores for (containing 'p', 'n', 'tp', 'tn')
         rounding_decimals (None/int): the decimal places to round to
         additional_symbols (None/dict): additional symbols for the substitution
-        scores_only (bool): whether to return the scores only
 
     Returns:
         dict: the calculated scores
@@ -86,4 +84,4 @@ def calculate_scores(problem,
 
     results = round_scores(results, rounding_decimals)
 
-    return results if scores_only else {**results, **problem}
+    return results

@@ -35,6 +35,7 @@ def check_bounds(scores, bounds, tolerance=1e-5):
     Args:
         scores (dict(str,float/int)): a dictionary of scores
         bounds (dict(str,tuple(float/int,float/int))): the dictionary of bounds
+        tolerance (float): the tolerance for the check
 
     Returns:
         None/bool: None if the bounds are not specified, otherwise a flag

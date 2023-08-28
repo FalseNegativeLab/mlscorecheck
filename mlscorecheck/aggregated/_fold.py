@@ -47,9 +47,9 @@ class Fold:
     An abstraction for a fold
     """
     def __init__(self,
+                    *,
                     p,
                     n,
-                    *,
                     score_bounds=None,
                     identifier=None,
                     figures=None):
@@ -63,7 +63,6 @@ class Fold:
                                                 'acc', 'sens', 'spec', 'bacc'
             identifier (None/str): the identifier of the fold
             figures (dict(str,int)): a figures (tp and tn values)
-            scores (dict(str,float)): the scores of the fold
         """
         self.p = p
         self.n = n
@@ -134,6 +133,9 @@ class Fold:
     def has_bounds(self):
         """
         Checks if the fold has score bounds specified
+
+        Returns:
+            bool: a flag indicating if the fold has score bounds specified
         """
         return self.score_bounds is not None
 
@@ -141,9 +143,12 @@ class Fold:
         """
         Calculates all scores for the fold
 
+        Args:
+            score_subset (list): the list of scores to compute
+            rounding_decimals (None/float): how many digits to round the decimals to
+
         Returns:
             dict(str,float): the scores
-            rounding_decimals (None/float): how many digits to round the decimals to
         """
         if self.figures is None:
             raise ValueError('Call "sample" or "populate" first or specify '\
@@ -164,6 +169,8 @@ class Fold:
 
         Args:
             lp_problem (pl.LpProblem): a linear programming problem by pulp
+            scores (dict(str,float)): the scores to match are used to find
+                                        suitable initial values for the variables
 
         Returns:
             pl.LpProblem: the updated linear programming problem
@@ -171,7 +178,6 @@ class Fold:
         self.linear_programming = \
             {'tp': pl.LpVariable(self.variable_names['tp'], 0, self.p, pl.LpInteger),
                 'tn': pl.LpVariable(self.variable_names['tn'], 0, self.n, pl.LpInteger)}
-        self.linear_programming['objective'] = self.linear_programming['tp']
 
         if 'acc' in scores:
             tp_init = scores['acc'] * self.p
@@ -205,6 +211,7 @@ class Fold:
         Sets the score bounds according to the feasibility flag
 
         Args:
+            scores_subset (None/list): the list of scores to get bounds for
             feasible (bool): if True, sets feasible score bounds, sets infeasible score
                                 bounds otherwise
 

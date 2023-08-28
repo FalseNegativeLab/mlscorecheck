@@ -18,7 +18,7 @@ def round_scores(to_round, rounding_decimals=None):
         float/dict: the founded scores
     """
     if rounding_decimals is None:
-        return to_round
+        return {**to_round}
 
     if not isinstance(to_round, dict):
         return np.round(to_round, rounding_decimals)

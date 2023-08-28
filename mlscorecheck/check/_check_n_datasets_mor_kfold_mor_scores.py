@@ -12,7 +12,8 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
                                             eps,
                                             datasets,
                                             solver_name=None,
-                                            timeout=None):
+                                            timeout=None,
+                                            verbosity=1):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
@@ -52,4 +53,5 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
                                         scores=scores,
                                         eps=eps,
                                         solver_name=solver_name,
-                                        timeout=timeout)
+                                        timeout=timeout,
+                                        verbosity=verbosity)

@@ -24,9 +24,6 @@ def test_calculate_all_scores():
     scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15})
     assert scores['acc'] == 20/30
 
-    scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15}, scores_only=True)
-    assert 'tp' not in scores
-
 def test_generate_problems():
     """
     Testing the problem generation
