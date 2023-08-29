@@ -67,15 +67,35 @@ Installing sage into a conda environment needs adding the `conda-forge` channel:
 Use cases
 =========
 
-Specifying a dataset
---------------------
+Specifying datasets
+-------------------
+
+Specifying one testset
+^^^^^^^^^^^^^^^^^^^^^^
+
+There are multiple ways to specify datasets and entire experiments consisting of multiple datasets evaluated in differing ways of cross-validations.
+
+A simple binary classification test-set consisting of `p` positive samples (usually labelled 1) and `n` negative samples (usually labelled 0) can be specified as
 
 .. code-block:: python
 
     # one test dataset
     dataset = {"p": 10, "n": 20}
-    dataset = {"dataset": "common_datasets.ADA"}
+    dataset = {"name": "common_datasets.ADA"}
 
+Note that in the second case the name of the dataset is specified. ADA is one commonly used dataset in the field of imbalanced learning. In order to prevent the user looking up the details of commonly used datasets, the statistics of many datasets are collected in the package. To see the list of supported datasets and corresponding statistics, issue
+
+.. code-block:: python
+
+    from mlscorecheck.experiments import dataset_statistics
+    print(dataset_statistics)
+
+When the name of a dataset is specified, the package looks up the `p` and `n` statistics and substitutes it.
+
+Specifying a dataset with folding
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Besi
     # one dataset kfold ratio of means
     dataset = {"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3}
     dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 5, "n_folds": 3}
