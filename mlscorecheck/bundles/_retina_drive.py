@@ -48,6 +48,9 @@ def filter_drive(data, subset=None):
 
     Returns:
         list(dict): the filtered dataset
+
+    Raises:
+        ValueError: if the filtering results an empty set
     """
     if subset is None:
         return data
@@ -74,6 +77,9 @@ def drive_aggregated(scores, eps, bundle, subset=None):
 
     Returns:
         dict: the result of the analysis
+
+    Raises:
+        ValueError: if the filtering results an empty set
 
     Examples:
         drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
@@ -125,6 +131,9 @@ def drive_image(scores, eps, bundle, identifier):
     Returns:
         dict: the result of the analysis
 
+    Raises:
+        ValueError: if the specified image cannot be found
+
     Examples:
         drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
                             'f1p': 0.9801, 'ppv': 0.8543},
@@ -156,6 +165,9 @@ def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
         dict: the result of the analysis, the 'inconsistency' flag
                 shows if inconsistency has been found, under the remaining
                 keys the details of the analysis can be found
+
+    Raises:
+        ValueError: if the filtering results an empty set
 
     Examples:
         result = drive_aggregated_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
@@ -189,6 +201,9 @@ def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
                 shows if inconsistency has been found, under the remaining
                 keys the details of the analysis can be found
 
+    Raises:
+        ValueError: if the filtering results an empty set
+
     Examples:
         result = drive_aggregated_no_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                                         eps=1e-4,
@@ -221,6 +236,9 @@ def drive_image_fov(scores, eps, bundle, identifier):
                 keys contain the the details of the analysis, for the
                 interpretation see the documentation of the
                 check_1_dataset_no_kfold_scores function.
+
+    Raises:
+        ValueError: if the specified image cannot be found
 
     Examples:
         result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
@@ -257,6 +275,9 @@ def drive_image_no_fov(scores, eps, bundle, identifier):
                 keys contain the the details of the analysis, for the
                 interpretation see the documentation of the
                 check_1_dataset_no_kfold_scores function.
+
+    Raises:
+        ValueError: if the specified image cannot be found
 
     Examples:
         result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,

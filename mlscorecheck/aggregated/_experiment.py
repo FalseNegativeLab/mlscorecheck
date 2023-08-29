@@ -139,6 +139,10 @@ class Experiment:
             aggregation (str): 'mor'/'rom' - the aggregation strategy
             datasets (list(dict)): the dataset specifications
             identifier (None/str): the id of the experiment
+
+        Raises:
+            ValueError: if the specification is inconsistent or the aggregation
+                        is not properly specified
         """
         self.identifier = identifier
         self.datasets = datasets

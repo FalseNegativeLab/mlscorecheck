@@ -58,6 +58,9 @@ def determine_fold_configurations(p,
 
     Returns:
         list(dict): the list of folds
+
+    Raises:
+        ValueError: if the folding is not supported
     """
     if folding == 'stratified_sklearn':
         confs = stratified_configurations_sklearn(p=p, n=n, n_splits=n_folds)
@@ -93,6 +96,9 @@ def _create_folds(p,
 
     Returns:
         list(dict): the list of fold specifications
+
+    Raises:
+        ValueError: if the folding is not supported
     """
 
     if n_folds == 1:

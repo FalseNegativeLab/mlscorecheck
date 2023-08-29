@@ -149,6 +149,9 @@ class Fold:
 
         Returns:
             dict(str,float): the scores
+
+        Raises:
+            ValueError: if the fold instances is neither sampled nor populated
         """
         if self.figures is None:
             raise ValueError('Call "sample" or "populate" first or specify '\
@@ -268,6 +271,9 @@ class Fold:
 
         Returns:
             dict: a summary of the evaluation of the boundary conditions
+
+        Raises:
+            ValueError: if the fold instance is neither sampled nor populated
         """
         if self.figures is None:
             raise ValueError('Call "sample" or "populate" first or specify '\

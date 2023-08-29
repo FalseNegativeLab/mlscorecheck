@@ -65,6 +65,9 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                 the 'lp_configuration_bounds_match' indicates if all bounds are
                 satisfied.
 
+    Raises:
+        ValueError: if the problem is not specified properly
+
     Example:
         datasets = [{'p': 389,
                         'n': 630,

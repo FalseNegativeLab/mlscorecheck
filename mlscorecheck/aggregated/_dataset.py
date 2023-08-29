@@ -232,6 +232,9 @@ def create_folds_for_dataset(*,
 
     Returns:
         list(dict): the list of fold specifications
+
+    Raises:
+        ValueError: if the dataset specification is inconsistent
     """
 
     if (p is None and n is not None) or (p is not None and n is None):
@@ -336,6 +339,9 @@ class Dataset:
             ds0 = Dataset(p=5, n=10, aggregation='rom')
             ds1 = Dataset(name='common_datasets.ADA', aggregation='mor')
             ds2 = Dataset(folds=[{p=5, n=10}, {p=2, n=8}], aggregation='rom')
+
+        Raises:
+            ValueError: if the dataset specification/parametrization is inconsistent
         """
 
         # the id of the dataset is set to the name or a random id is generated

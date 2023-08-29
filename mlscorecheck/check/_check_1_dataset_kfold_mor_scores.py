@@ -55,6 +55,9 @@ def check_1_dataset_kfold_mor_scores(scores,
                 'lp_configuration' contains the actual configuration of the
                 linear programming solver.
 
+    Raises:
+        ValueError: if the problem is not specified properly
+
     Examples:
         dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
         scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}

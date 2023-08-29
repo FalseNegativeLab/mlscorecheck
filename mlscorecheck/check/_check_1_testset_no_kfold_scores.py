@@ -52,6 +52,9 @@ def check_1_testset_no_kfold_scores(scores,
                 underdetermined, the values of the scores do not allow the checks to be
                 executed.
 
+    Raises:
+        ValueError: if the problem is not specified properly
+
     Examples:
         Specify a testset either by the 'p' and 'n' scores, or the
         name of the dataset. For the list of supported datasets see

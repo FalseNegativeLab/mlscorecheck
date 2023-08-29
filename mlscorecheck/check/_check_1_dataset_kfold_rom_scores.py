@@ -65,6 +65,9 @@ def check_1_dataset_kfold_rom_scores(scores,
                 the 'lp_configuration_bounds_match' indicates if all bounds are
                 satisfied.
 
+    Raises:
+        ValueError: if the problem is not specified properly
+
     Examples:
         dataset = {'folds': [{'p': 16, 'n': 99},
                             {'p': 81, 'n': 69},
