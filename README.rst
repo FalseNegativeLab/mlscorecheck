@@ -179,7 +179,6 @@ Numerous scenarios are supported by the package in which performance scores of b
 This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` scores. The test scenario is having one single test set to which the classifier is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
 .. code-block::python
-
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
     result = check_1_testset_no_kfold_scores(
