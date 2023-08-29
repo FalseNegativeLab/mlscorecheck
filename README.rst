@@ -80,8 +80,8 @@ A simple binary classification test-set consisting of `p` positive samples (usua
 .. code-block:: python
 
     # one test dataset
-    dataset = {"p": 10, "n": 20}
-    dataset = {"name": "common_datasets.ADA"}
+    testset = {"p": 10, "n": 20}
+    testset = {"name": "common_datasets.ADA"}
 
 Note that in the second case the name of the dataset is specified. ADA is one commonly used dataset in the field of imbalanced learning. In order to prevent the user looking up the details of commonly used datasets, the statistics of many datasets are collected in the package. To see the list of supported datasets and corresponding statistics, issue
 
@@ -95,42 +95,18 @@ When the name of a dataset is specified, the package looks up the `p` and `n` st
 Specifying a dataset with folding
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Besi
-    # one dataset kfold ratio of means
-    dataset = {"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3}
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 5, "n_folds": 3}
-    dataset = {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]
+There are multiple ways to specify a dataset with some folding structure, either by specifying the parameters of the folding (if it is following a well known strategy, like stratification), or specifying the folds themselves. If `n_repeats` or `n_folds` are not specified, they are considered to be 1. If there is 1 fold, there is no need to specify the folding strategy (`folding`), otherwise the folding strategy needs to be specified. If the `folds` are specified explicitly, there is no need to specify any other parameter (like `p`, `n`, `n_folds`, `n_repeats`). If the `name` of the dataset is specified, `p` and `n` are looked up. For the folds it is possible to specify additional constraints on the `acc`, `sens`, `spec` or `bacc` scores, either by adding the `score_bounds` key to the fold (when `folds` are specified), or setting the `fold_score_bounds` key at the dataset level. Some examples:
 
-    # multiple dataset ratio of means
-    datasets = [{"p": 10, "n": 20},
-                {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}]]
+.. code-block:: python
 
-    # multiple dataset ratio of means with kfold ratio of means
-    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3},
-                {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]]
+    # one dataset kfold with 2 repetitions of stratified folding of 3 folds
+    dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
+    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
+    dataset = {"fold_configuration": [{"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}, {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
 
-    # one dataset kfold mean of ratios
-    dataset = {"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"}
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"}
-    dataset = {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]
-    # additionally score_bounds and tptn_bounds for each fold
+With score bounds on the folds. Given the score bounds, in the below example, it is a requirement that the accuracy and sensitivity scores both should fall in the range (0.8, 1):
 
-    # multiple dataset mean of ratios
-    datasets = [{"p": 10, "n": 20},
-                {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}]}]
-    # additionally score_bounds and tptn_bounds for each dataset
+.. code-block:: python
 
-    # multiple dataset mean of ratios kfold ratio of means
-    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3},
-                {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]}]
-    # additionally score_bounds and tptn_bounds for each dataset
-
-    # multiple dataset mean of ratios kfold mean of ratios
-    datasets = [{"p": 10, "n": 20, "n_repeats": 5, "n_folds": 3, "folding": "stratified-sklearn"},
-                {"dataset": "common_datasets.ecoli1"},
-                {"fold_configuration": [{"p": 10, "n": 5}, {"p": 5, "n": 20}]}]
-    # additionally score_bounds and tptn_bounds for each dataset and/or fold
+    dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn",
+                "fold_score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}}
