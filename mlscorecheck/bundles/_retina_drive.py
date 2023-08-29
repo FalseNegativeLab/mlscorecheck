@@ -18,7 +18,7 @@ __all__ = ['drive_aggregated_fov',
 
 def _drive_aggregated_test_scores(data, scores, eps, aggregation):
     """
-    Checking the consistency of the a dataset
+    Checking the consistency of the a dataset.
 
     Args:
         data (list(dict)): the datasets
@@ -51,22 +51,37 @@ def filter_drive(data, subset=None):
     """
     if subset is None:
         return data
-    return [dataset for dataset in data if dataset['identifier'] in subset]
+    result = [dataset for dataset in data if dataset['identifier'] in subset]
+    if len(result) == 0:
+        raise ValueError('There is no images remaining. Please check if the bundle '\
+                        '("train"/"test") and the image identifiers are specified properly')
 
 def drive_aggregated(scores, eps, bundle, subset=None):
     """
     Testing the consistency of DRIVE scores with multiple
     aggregation techniques and with the field of view (FoV)
-    and without the field of view (no FoV).
+    and without the field of view (no FoV). The aggregated
+    check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float/dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve
+        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+                            note that the identifiers need to be in accordance
+                            with the bundle
 
     Returns:
         dict: the result of the analysis
+
+    Examples:
+        drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                            eps=1e-4,
+                            bundle='test')
+        >> {'mor_fov_inconsistency': True,
+            'mor_no_fov_inconsistency': True,
+            'rom_fov_inconsistency': True,
+            'rom_no_fov_inconsistency': True}
     """
     results_fov_mor = drive_aggregated_fov(scores=scores,
                                         eps=eps,
@@ -102,10 +117,20 @@ def drive_image(scores, eps, bundle, identifier):
         scores (dict(str,float)): the scores to check
         eps (float/dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve
+        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+                            note that the identifiers need to be in accordance
+                            with the bundle
 
     Returns:
         dict: the result of the analysis
+
+    Examples:
+        drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
+                            'f1p': 0.9801, 'ppv': 0.8543},
+                    eps=1e-4,
+                    bundle='test',
+                    identifier='01')
+        >> {'fov_inconsistency': True, 'no_fov_inconsistency': True}
     """
     results_fov = drive_image_fov(scores, eps, bundle, identifier)
     results_no_fov = drive_image_no_fov(scores, eps, bundle, identifier)
@@ -115,17 +140,28 @@ def drive_image(scores, eps, bundle, identifier):
 def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
     """
     Testing the consistency of DRIVE scores with the field of view (FoV).
+    The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float/dict(str,float)): the numerical uncertainty
         aggregation (str): the aggregation technique ('mor'/'rom')
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve
+        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+                            note that the identifiers need to be in accordance
+                            with the bundle
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found
+                shows if inconsistency has been found, under the remaining
+                keys the details of the analysis can be found
+
+    Examples:
+        result = drive_aggregated_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                                        eps=1e-4,
+                                        bundle='test')
+        result['inconsistency']
+        >> True
     """
     assert bundle in ('train', 'test')
     assert aggregation in ('mor', 'rom')
@@ -138,6 +174,7 @@ def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
 def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
     """
     Testing the consistency of DRIVE scores with no field of view (no FoV).
+    The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
 
     Args:
         scores (dict(str,float)): the scores to check
@@ -148,7 +185,15 @@ def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found
+                shows if inconsistency has been found, under the remaining
+                keys the details of the analysis can be found
+
+    Examples:
+        result = drive_aggregated_no_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                                        eps=1e-4,
+                                        bundle='test')
+        result['inconsistency']
+        >> True
     """
     assert bundle in ('train', 'test')
     assert aggregation in ('mor', 'rom')
@@ -160,8 +205,8 @@ def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
 
 def drive_image_fov(scores, eps, bundle, identifier):
     """
-    Testing the consistency of DRIVE a drive image scores with multiple
-    with the field of view (FoV) and with the field of view (FoV).
+    Testing the consistency of DRIVE a drive image scores with the field of
+    view (FoV).
 
     Args:
         scores (dict(str,float)): the scores to check
@@ -171,7 +216,19 @@ def drive_image_fov(scores, eps, bundle, identifier):
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found
+                shows if inconsistency has been found, the rest of the
+                keys contain the the details of the analysis, for the
+                interpretation see the documentation of the
+                check_1_dataset_no_kfold_scores function.
+
+    Examples:
+        result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+                                        'f1p': 0.9801, 'ppv': 0.8543},
+                                eps=1e-4,
+                                bundle='test',
+                                identifier='01')
+        result['inconsistency']
+        >> True
     """
     assert bundle in ('train', 'test')
 
@@ -184,8 +241,8 @@ def drive_image_fov(scores, eps, bundle, identifier):
 
 def drive_image_no_fov(scores, eps, bundle, identifier):
     """
-    Testing the consistency of DRIVE a drive image scores with multiple
-    with the field of view (FoV) and without the field of view (no FoV).
+    Testing the consistency of DRIVE a drive image scores
+    without the field of view (no FoV).
 
     Args:
         scores (dict(str,float)): the scores to check
@@ -195,7 +252,19 @@ def drive_image_no_fov(scores, eps, bundle, identifier):
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found
+                shows if inconsistency has been found, the rest of the
+                keys contain the the details of the analysis, for the
+                interpretation see the documentation of the
+                check_1_dataset_no_kfold_scores function.
+
+    Examples:
+        result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+                                        'f1p': 0.9801, 'ppv': 0.8543},
+                                eps=1e-4,
+                                bundle='test',
+                                identifier='01')
+        result['inconsistency']
+        >> True
     """
     assert bundle in ('train', 'test')
 
