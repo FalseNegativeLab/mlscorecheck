@@ -5,4 +5,4 @@ good-names=p4,p,n,tp,tn,fp,fn
 ignored-modules = numpy
 
 # Minimum lines number of a similarity.
-min-similarity-lines=25
+min-similarity-lines=30

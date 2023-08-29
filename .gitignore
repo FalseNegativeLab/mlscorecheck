@@ -4,3 +4,4 @@
 .vscode/*
 .coverage
 *.pickle
+docs/_build/*

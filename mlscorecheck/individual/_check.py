@@ -297,12 +297,9 @@ def check_2v1(scores,
                                     eps,
                                     numerical_tolerance=numerical_tolerance)
 
-    # querying the solution
-    solution = solutions[tuple(sorted([score0, score1]))]
-
     # evaluating the solution
-    results = solution.evaluate({**intervals,
-                                 **{'p': p, 'n': n}})
+    results = solutions[tuple(sorted([score0, score1]))].evaluate({**intervals,
+                                                                     **{'p': p, 'n': n}})
 
     output = []
 

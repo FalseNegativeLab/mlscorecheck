@@ -23,5 +23,5 @@ def test_update_uncertainty():
     Testing the updating of the uncertainty
     """
 
-    assert abs(update_uncertainty(1e-2, 1e-3) - (1e-2 - 1e-3)) <= 1e-5
-    assert abs(update_uncertainty({'acc': 1e-2}, 1e-3)['acc'] - (1e-2 - 1e-3)) <= 1e-5
+    assert abs(update_uncertainty(1e-2, 1e-3) - (1e-2 + 1e-3)) <= 1e-5
+    assert abs(update_uncertainty({'acc': 1e-2}, 1e-3)['acc'] - (1e-2 + 1e-3)) <= 1e-5
