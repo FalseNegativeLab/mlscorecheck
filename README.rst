@@ -493,6 +493,26 @@ Check bundles
 Retinal vessel segmentation
 ---------------------------
 
+.. code-block:: Python
+
+    drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                        eps=1e-4,
+                        bundle='test')
+    >> {'mor_fov_inconsistency': True,
+        'mor_no_fov_inconsistency': True,
+        'rom_fov_inconsistency': True,
+        'rom_no_fov_inconsistency': True}
+
+.. code-block:: Python
+
+    drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
+                              'f1p': 0.9801, 'ppv': 0.8543},
+                      eps=1e-4,
+                      bundle='test',
+                      identifier='01')
+    >> {'fov_inconsistency': True, 'no_fov_inconsistency': True}
+
+
 
 EHG classification
 ------------------
