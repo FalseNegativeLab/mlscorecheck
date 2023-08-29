@@ -32,10 +32,38 @@
 mlscorecheck: testing the consistency of binary classification performance scores
 *********************************************************************************
 
+Latest news
+===========
+
+* the 0.0.1 version of the package is released
+* the paper describing the implemented technique is available as a preprint at:
+
+Citation
+========
+
+If you use the package, please consider citing the following paper:
+
+.. code-block:: BibTex
+
+  @article{mlscorecheck,
+    author={Gy\"orgy Kov\'acs and Attila Fazekas},
+    title={Checking the internal consistency of reported performance scores in binary classification},
+    year={2023}
+  }
+
 Introduction
 ============
 
-Binary classification is one of the most basic tasts in machine learning. The evaluation of the performance of a binary classification technique (whether it is original theoretical development or application to a specific field) is driven by performance scores.
+Binary classification is one of the most basic tasts in machine learning. The evaluation of the performance of binary classification techniques (whether it is original theoretical development or application to a specific field) is driven by performance scores (https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). In practice, one of the main challenges of machine learning research is the replication crisis (https://en.wikipedia.org/wiki/Replication_crisis). Despite performance scores provide the basis to estimate the value of a reasearch/study, the reported scores usually suffer from methodological problems, typos and the insufficient description of experimental settings. As the reported scores are usually used to compare and rank techniques, the issues can skew entire fields as pointed out in [RV]_ and [EHG]_.
+
+Most of the performance score are functions of the values of the binary confusion matrix (with four entries: true positives, true negatives, false positives, false negatives). Consequently, the main idea behind the package is that the performance scores cannot take any values independently. For example, the accuracy is the weighted average of the sensitivity and specificity, hence, knowing the statistics of the dataset (number of positives `p` and `n`), these scores can take only specific values simultaneously.
+
+Based on these relations, if at least 3 performance scores are reported, one can construct intervals into which a score given two other score values needs to fall, and can test the internal consistency of the reported figures, given the assumptions on the statistics of the dataset (`p`, `n`) and the evaluation methodology (number of folds and repetitions).
+
+For further documentation, see
+
+* ReadTheDocs full documentation:
+* The preprint:
 
 Installation
 ============
@@ -66,6 +94,20 @@ Installing sage into a conda environment needs adding the `conda-forge` channel:
 
 Use cases
 =========
+
+In general, there are three inputs to the consistency checking functions:
+
+* the specification of the dataset(s) involved, specified in the form discussed in the previous section;
+* the collection of performance scores published: the currently supported performance scores are with their codes in paranthesis (for their specifications see https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers):
+
+  * accuracy (`acc`)
+  * sensitivity (`sens`)
+  * specificity (`spec`)
+  * positive predictive value (`ppv`)
+  * negative predictive value (`npv`)
+  * F1-score (`f1`)
+  * Fowlkes-Mallows index (`fm`)
+* and the estimated numerical uncertainty: the performance scores are usually shared with some finite precision, and are usually rounded/ceiled/floored to `k` digits. Namely, having the accuracy score 0.9489 published, one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-k)/2). To be more conservative, one can assume that the score was ceiled or follored. In this case the numerical uncertainty becomes 0.0001 (10^(-k)). In both cases, the numerical uncertainty estimates how far the observed score is from the real score.
 
 Specifying datasets
 -------------------
@@ -101,8 +143,10 @@ There are multiple ways to specify a dataset with some folding structure, either
 
     # one dataset kfold with 2 repetitions of stratified folding of 3 folds
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
-    dataset = {"fold_configuration": [{"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}, {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
+    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3,
+                "folding": "stratified_sklearn"}
+    dataset = {"fold_configuration": [{"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6},
+                {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
 
 With score bounds on the folds. Given the score bounds, in the below example, it is a requirement that the accuracy and sensitivity scores both should fall in the range (0.8, 1):
 
@@ -110,3 +154,104 @@ With score bounds on the folds. Given the score bounds, in the below example, it
 
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn",
                 "fold_score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}}
+
+    dataset = {"fold_configuration": [{"p": 3, "n": 7,
+                                      "score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)},
+                                      {"p": 3, "n": 7}, {"p": 4, "n": 6}]
+
+The validity of a particular dataset specification can be tested by trying to instantiate a Dataset object:
+
+.. code-block:: python
+    from mlscorecheck.aggregated import Dataset
+    dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
+    Dataset(**dataset)
+
+If the instantiation is successful, the dataset is specified correctly. Otherwise verbose exceptions will point the user to the inconsistency or lacking parameters.
+
+Checking the consistency of performance scores
+----------------------------------------------
+
+Numerous scenarios are supported by the package in which performance scores of binary classification can be produced. In this section we go through them one by one giving some examples of possible use cases.
+
+1 testset with no kfold
+^^^^^^^^^^^^^^^^^^^^^^^
+
+This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` scores. The test scenario is having one single test set to which the classifier is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
+
+.. code-block::python
+    from mlscorecheck.check import check_1_testset_no_kfold_scores
+
+    result = check_1_testset_no_kfold_scores(
+            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
+            eps=1e-2,
+            testset={'p': 530, 'n': 902}
+        )
+    result['inconsistency']
+    >> False
+
+    result = check_1_testset_no_kfold_scores(
+        scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
+        eps=1e-3,
+        testset={'name': 'common_datasets.ADA'}
+    )
+    result['inconsistency']
+    >> True
+
+
+
+1 dataset with kfold ratio-of-means (RoM)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+1 dataset with kfold mean-of-ratios (MoR)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+n datasets with k-folds, RoM over datasets and RoM over folds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+n datasets with k-folds, MoR over datasets and RoM over folds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+n datasets with k-folds, MoR over datasets and MoR over folds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Interpreting the results
+------------------------
+
+Individual score check
+^^^^^^^^^^^^^^^^^^^^^^
+
+Aggregated score check
+^^^^^^^^^^^^^^^^^^^^^^
+
+Check bundles
+=============
+
+Retinal vessel segmentation
+---------------------------
+
+
+EHG classification
+------------------
+
+
+Contribution
+============
+
+
+References
+**********
+
+.. [RV] Kovács, G. and Fazekas, A.: "A new baseline for retinal vessel segmentation: Numerical identification and correction of methodological inconsistencies affecting 100+ papers", Medical Image Analysis, 2022(1), pp. 102300
+
+.. [EHG] Vandewiele, G. and Dehaene, I. and Kovács, G. and Sterckx L. and Janssens, O. and Ongenae, F. and Backere, F. D. and Turck, F. D. and Roelens, K. and Decruyenaere J. and Hoecke, S. V., and Demeester, T.: "Overly optimistic prediction results on imbalanced data: a case study of flaws and benefits when applying over-sampling", Artificial Intelligence in Medicine, 2021(1), pp. 101987
