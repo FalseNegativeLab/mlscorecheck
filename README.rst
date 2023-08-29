@@ -1,70 +1,74 @@
 .. -*- mode: rst -*-
 
-..
-  |CircleCI|_
-
 |GitHub|_ |Codecov|_ |pylint|_ |ReadTheDocs|_ |PythonVersion|_ |PyPi|_ |License|_ |Gitter|_
 
 
-..
-  .. |CircleCI| image:: https://circleci.com/gh/analyticalmindsltd/smote_variants.svg?style=svg
-  .. _CircleCI: https://circleci.com/gh/analyticalmindsltd/smote_variants
+.. |GitHub| image:: https://github.com/gykovacs/mlscorecheck/workflows/Python%20package/badge.svg?branch=main
+.. _GitHub: https://github.com/gykovacs/mlscorecheck/workflows/Python%20package/badge.svg?branch=main
 
-.. |GitHub| image:: https://github.com/analyticalmindsltd/smote_variants/workflows/Python%20package/badge.svg?branch=master
-.. _GitHub: https://github.com/analyticalmindsltd/smote_variants/workflows/Python%20package/badge.svg?branch=master
-
-.. |Codecov| image:: https://codecov.io/gh/analyticalmindsltd/smote_variants/branch/master/graph/badge.svg?token=GQNNasvi4z
-.. _Codecov: https://codecov.io/gh/analyticalmindsltd/smote_variants
+.. |Codecov| image:: https://codecov.io/gh/gykovacs/mlscorecheck/branch/master/graph/badge.svg?token=GQNNasvi4z
+.. _Codecov: https://codecov.io/gh/gykovacs/mlscorecheck
 
 .. |pylint| image:: https://img.shields.io/badge/pylint-10.0-brightgreen
 .. _pylint: https://img.shields.io/badge/pylint-10.0-brightgreen
 
-.. |ReadTheDocs| image:: https://readthedocs.org/projects/smote-variants/badge/?version=latest
-.. _ReadTheDocs: https://smote-variants.readthedocs.io/en/latest/?badge=latest
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/mlscorecheck/badge/?version=latest
+.. _ReadTheDocs: https://mlscorecheck.readthedocs.io/en/latest/?badge=latest
 
-.. |PythonVersion| image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-brightgreen
-.. _PythonVersion: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-brightgreen
+.. |PythonVersion| image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-brightgreen
+.. _PythonVersion: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-brightgreen
 
-.. |PyPi| image:: https://badge.fury.io/py/smote-variants.svg
-.. _PyPi: https://badge.fury.io/py/smote-variants
+.. |PyPi| image:: https://badge.fury.io/py/mlscorecheck.svg
+.. _PyPi: https://badge.fury.io/py/mlscorecheck
 
 .. |License| image:: https://img.shields.io/badge/license-MIT-brightgreen
 .. _License: https://img.shields.io/badge/license-MIT-brightgreen
 
-.. |Gitter| image:: https://badges.gitter.im/smote_variants.svg
-.. _Gitter: https://gitter.im/smote_variants?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. |Gitter| image:: https://badges.gitter.im/mlscorecheck.svg
+.. _Gitter: https://gitter.im/mlscorecheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 ::
 
 mlscorecheck: testing the consistency of machine learning performance scores
-============================================================================
+****************************************************************************
+
+Introduction
+============
 
 Installation
-------------
+============
 
 The package has only basic requirements when used for consistency checking.
 
 * `numpy`
 * `pulp`
 
-When one wants to reproduce the formulas used in the package for the reconstruction of
-scores, one of the currently supported two symbolic computation systems also needs to
-be installed:
+.. code-block:: bash
 
-* `sympy`
-* `sage`
+    > pip install numpy pulp
 
-Installing sage into a conda environment:
+In order to execute the tests, one needs `scikit-learn`, in order to test the computer algebra components, one of `sympy` or `sage` needs to be installed. If one wants to reproduce the score-pair solutions, `sympy` or `sage` needs to be installed.
 
-.. code-block::
+Installing `sympy` can happen from the usual sources
 
-    conda config --add channels conda-forge
-    conda install sage
+.. code-block:: bash
 
-Introduction
-------------
+    > pip install sympy
 
-.. code-block::
+Installing sage into a conda environment needs adding the `conda-forge` channel:
+
+.. code-block:: bash
+
+    > conda config --add channels conda-forge
+    > conda install sage
+
+Use cases
+=========
+
+Specifying a dataset
+--------------------
+
+.. code-block:: python
 
     # one test dataset
     dataset = {"p": 10, "n": 20}

@@ -1,6 +1,7 @@
 numpy
 pandas
 pulp
+scikit-learn
 pytest-cov
 esbonio
 sphinx
