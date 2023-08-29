@@ -60,6 +60,8 @@ Most of the performance score are functions of the values of the binary confusio
 
 Based on these relations, if at least 3 performance scores are reported, one can construct intervals into which a score given two other score values needs to fall, and can test the internal consistency of the reported figures, given the assumptions on the statistics of the dataset (`p`, `n`) and the evaluation methodology (number of folds and repetitions).
 
+We highlight that the developed tests cannot provide guarantees that the evaluation protocols and figures are correct, however, if inconsistencies are detected, it means that the tests do not follow the assumed protocols with certainty. In this sense, the specificity of the test is 1.
+
 For further documentation, see
 
 * ReadTheDocs full documentation:
@@ -174,6 +176,8 @@ Checking the consistency of performance scores
 
 Numerous scenarios are supported by the package in which performance scores of binary classification can be produced. In this section we go through them one by one giving some examples of possible use cases.
 
+We highlight again that the tests detect inconsistencies. If the resulting `inconsistency` flag is `False`, the scores can still be inconsistent, however, if the `inconsistency` flag is `True`, that is, inconsistencies are detected, then the reported scores with the assumptions are inconsistent with certainty.
+
 1 testset with no kfold
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -184,9 +188,9 @@ This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` 
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
     result = check_1_testset_no_kfold_scores(
-            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
-            eps=1e-2,
-            testset={'p': 530, 'n': 902}
+            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}, # the published scores
+            eps=1e-2, # the numerical uncertainty
+            testset={'p': 530, 'n': 902} # the statistics of the dataset
         )
     result['inconsistency']
     >> False
@@ -199,33 +203,280 @@ This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` 
     result['inconsistency']
     >> True
 
-
+In the first example, inconsistencies have not been detected, however, in the second example, the scores are inconsistent with certainty.
 
 1 dataset with kfold ratio-of-means (RoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: Python
 
+    from mlscorecheck.check import check_1_dataset_kfold_rom_scores
+
+    dataset = {'folds': [{'p': 16, 'n': 99},
+                        {'p': 81, 'n': 69},
+                        {'p': 83, 'n': 2},
+                        {'p': 52, 'n': 19},
+                        {'p': 28, 'n': 14}]}
+    scores = {'acc': 0.428, 'npv': 0.392, 'bacc': 0.442, 'f1p': 0.391}
+
+    result = check_1_dataset_kfold_rom_scores(scores=scores,
+                                                eps=1e-3,
+                                                dataset=dataset)
+    result['inconsistency']
+
+    >> False
+
+    dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
+                'n_folds': 4,
+                'n_repeats': 2,
+                'folding': 'stratified_sklearn'}
+    scores = {'acc': 0.9, 'npv': 0.9, 'sens': 0.6, 'f1p': 0.95}
+
+    result = check_1_dataset_kfold_rom_scores(scores=scores,
+                                                eps=1e-2,
+                                                dataset=dataset)
+    result['inconsistency']
+
+    >> True
 
 
 1 dataset with kfold mean-of-ratios (MoR)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: Python
 
+    from mlscorecheck.check import check_1_dataset_kfold_mor_scores
+
+    dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
+    scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
+
+    result = check_1_dataset_kfold_mor_scores(scores=scores,
+                                                eps=1e-3,
+                                                dataset=dataset)
+    result['inconsistency']
+
+    >> False
+
+    dataset = {'p': 398,
+                'n': 569,
+                'n_folds': 4,
+                'n_repeats': 2,
+                'folding': 'stratified_sklearn'}
+    scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
+
+    result = check_1_dataset_kfold_mor_scores(scores=scores,
+                                                eps=1e-2,
+                                                dataset=dataset)
+    result['inconsistency']
+
+    >> True
+
+    dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
+                'n_folds': 4,
+                'n_repeats': 2,
+                'folding': 'stratified_sklearn',
+                'fold_score_bounds': {'acc': (0.8, 1.0)}}
+    scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
+
+    result = check_1_dataset_kfold_mor_scores(scores=scores,
+                                                eps=1e-2,
+                                                dataset=dataset)
+    result['inconsistency']
+
+    >> True
 
 
 n datasets with k-folds, RoM over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: Python
 
+    from mlscorecheck.check import check_n_datasets_mor_kfold_mor_scores
+
+    datasets = [{'p': 389,
+                    'n': 630,
+                    'n_folds': 6,
+                    'n_repeats': 3,
+                    'folding': 'stratified_sklearn',
+                    'fold_score_bounds': {'acc': (0, 1)}},
+                {'name': 'common_datasets.saheart',
+                    'n_folds': 2,
+                    'n_repeats': 5,
+                    'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.467, 'sens': 0.432, 'spec': 0.488, 'f1p': 0.373}
+
+    result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                            datasets=datasets,
+                                            eps=1e-3)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'folds': [{'p': 98, 'n': 8},
+                    {'p': 68, 'n': 25},
+                    {'p': 92, 'n': 19},
+                    {'p': 78, 'n': 61},
+                    {'p': 76, 'n': 67}]},
+        {'name': 'common_datasets.zoo-3',
+            'n_folds': 3,
+            'n_repeats': 4,
+            'folding': 'stratified_sklearn'},
+        {'name': 'common_datasets.winequality-red-3_vs_5',
+            'n_folds': 5,
+            'n_repeats': 5,
+            'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.4532, 'sens': 0.6639, 'npv': 0.9129, 'f1p': 0.2082}
+
+    result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                    datasets=datasets,
+                                    eps=1e-4)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'folds': [{'p': 98, 'n': 8},
+                    {'p': 68, 'n': 25},
+                    {'p': 92, 'n': 19},
+                    {'p': 78, 'n': 61},
+                    {'p': 76, 'n': 67}]},
+                {'name': 'common_datasets.zoo-3',
+                    'n_folds': 3,
+                    'n_repeats': 4,
+                    'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.9, 'spec': 0.85, 'ppv': 0.7}
+
+    result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                    datasets=datasets,
+                                    eps=1e-4)
+    result['inconsistency']
+
+    >> True
 
 n datasets with k-folds, MoR over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: Python
 
+    from mlscorecheck.check import check_n_datasets_mor_kfold_rom_scores
+
+    datasets = [{'p': 39,
+                'n': 822,
+                'n_folds': 8,
+                'n_repeats': 4,
+                'folding': 'stratified_sklearn'},
+                {'name': 'common_datasets.winequality-white-3_vs_7',
+                'n_folds': 3,
+                'n_repeats': 3,
+                'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
+
+    result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                            eps=1e-3,
+                                            scores=scores)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'folds': [{'p': 22, 'n': 90},
+                            {'p': 51, 'n': 45},
+                            {'p': 78, 'n': 34},
+                            {'p': 33, 'n': 89}]},
+                {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
+                'n_folds': 8,
+                'n_repeats': 4,
+                'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+
+    result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                            eps=1e-3,
+                                            scores=scores)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'folds': [{'p': 22, 'n': 90},
+                    {'p': 51, 'n': 45},
+                    {'p': 78, 'n': 34},
+                    {'p': 33, 'n': 89}],
+                'fold_score_bounds': {'acc': (0.8, 1.0)},
+                'score_bounds': {'acc': (0.8, 1.0)}
+                },
+                {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
+                'n_folds': 8,
+                'n_repeats': 4,
+                'folding': 'stratified_sklearn',
+                'fold_score_bounds': {'acc': (0.8, 1.0)},
+                'score_bounds': {'acc': (0.8, 1.0)}
+                }]
+    scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+
+    result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                            eps=1e-3,
+                                            scores=scores)
+    result['inconsistency']
+
+    >> True
 
 n datasets with k-folds, MoR over datasets and MoR over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: Python
+
+    from mlscorecheck.check import check_n_datasets_mor_kfold_mor_scores
+
+    datasets = [{'folds': [{'p': 22, 'n': 23},
+                            {'p': 96, 'n': 72}]},
+                {'p': 781, 'n': 423, 'n_folds': 1, 'n_repeats': 3},
+                {'name': 'common_datasets.glass_0_6_vs_5',
+                'n_folds': 6,
+                'n_repeats': 1,
+                'folding': 'stratified_sklearn'}]
+    scores = {'acc': 0.541, 'sens': 0.32, 'spec': 0.728, 'bacc': 0.524}
+
+    result = check_n_datasets_mor_kfold_mor_scores(datasets=datasets,
+                                                    scores=scores,
+                                                    eps=1e-3)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'name': 'common_datasets.ecoli_0_2_3_4_vs_5',
+                'n_folds': 4,
+                'n_repeats': 3,
+                'folding': 'stratified_sklearn',
+                'score_bounds': {'sens': (0.33, 0.74)}},
+                {'p': 355,
+                'n': 438,
+                'n_folds': 1,
+                'n_repeats': 3,
+                'score_bounds': {'spec': (0.49, 0.90)}}]
+    scores = {'acc': 0.532, 'sens': 0.417, 'spec': 0.622, 'bacc': 0.519}
+
+    result = check_n_datasets_mor_kfold_mor_scores(datasets=datasets,
+                                            scores=scores,
+                                            eps=1e-3)
+    result['inconsistency']
+
+    >> False
+
+    datasets = [{'name': 'common_datasets.ecoli_0_2_3_4_vs_5',
+                'n_folds': 4,
+                'n_repeats': 3,
+                'folding': 'stratified_sklearn',
+                'score_bounds': {'sens': (0.8, 1.0)}},
+                {'p': 355,
+                'n': 438,
+                'n_folds': 1,
+                'n_repeats': 3,
+                'score_bounds': {'spec': (0.8, 1.0)}}]
+    scores = {'acc': 0.532, 'sens': 0.417, 'spec': 0.622, 'bacc': 0.519}
+
+    result = check_n_datasets_mor_kfold_mor_scores(datasets=datasets,
+                                            scores=scores,
+                                            eps=1e-3)
+    result['inconsistency']
+
+    >> True
 
 Interpreting the results
 ------------------------
