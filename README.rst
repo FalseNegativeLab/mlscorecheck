@@ -119,7 +119,7 @@ There are multiple ways to specify datasets and entire experiments consisting of
 
 A simple binary classification test-set consisting of `p` positive samples (usually labelled 1) and `n` negative samples (usually labelled 0) can be specified as
 
-.. code-block:: python
+.. code-block:: Python
 
     # one test dataset
     testset = {"p": 10, "n": 20}
@@ -127,7 +127,7 @@ A simple binary classification test-set consisting of `p` positive samples (usua
 
 Note that in the second case the name of the dataset is specified. ADA is one commonly used dataset in the field of imbalanced learning. In order to prevent the user looking up the details of commonly used datasets, the statistics of many datasets are collected in the package. To see the list of supported datasets and corresponding statistics, issue
 
-.. code-block:: python
+.. code-block:: Python
 
     from mlscorecheck.experiments import dataset_statistics
     print(dataset_statistics)
@@ -139,7 +139,7 @@ Specifying a dataset with folding
 
 There are multiple ways to specify a dataset with some folding structure, either by specifying the parameters of the folding (if it is following a well known strategy, like stratification), or specifying the folds themselves. If `n_repeats` or `n_folds` are not specified, they are considered to be 1. If there is 1 fold, there is no need to specify the folding strategy (`folding`), otherwise the folding strategy needs to be specified. If the `folds` are specified explicitly, there is no need to specify any other parameter (like `p`, `n`, `n_folds`, `n_repeats`). If the `name` of the dataset is specified, `p` and `n` are looked up. For the folds it is possible to specify additional constraints on the `acc`, `sens`, `spec` or `bacc` scores, either by adding the `score_bounds` key to the fold (when `folds` are specified), or setting the `fold_score_bounds` key at the dataset level. Some examples:
 
-.. code-block:: python
+.. code-block:: Python
 
     # one dataset kfold with 2 repetitions of stratified folding of 3 folds
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
@@ -150,7 +150,7 @@ There are multiple ways to specify a dataset with some folding structure, either
 
 With score bounds on the folds. Given the score bounds, in the below example, it is a requirement that the accuracy and sensitivity scores both should fall in the range (0.8, 1):
 
-.. code-block:: python
+.. code-block:: Python
 
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn",
                 "fold_score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}}
@@ -161,7 +161,8 @@ With score bounds on the folds. Given the score bounds, in the below example, it
 
 The validity of a particular dataset specification can be tested by trying to instantiate a Dataset object:
 
-.. code-block:: python
+.. code-block:: Python
+
     from mlscorecheck.aggregated import Dataset
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
     Dataset(**dataset)
@@ -178,7 +179,8 @@ Numerous scenarios are supported by the package in which performance scores of b
 
 This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` scores. The test scenario is having one single test set to which the classifier is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
-.. code-block::python
+.. code-block:: Python
+
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
     result = check_1_testset_no_kfold_scores(
