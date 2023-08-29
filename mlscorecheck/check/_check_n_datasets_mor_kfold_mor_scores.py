@@ -5,6 +5,7 @@ in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 """
 
 from ..aggregated import check_aggregated_scores, Experiment
+from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_kfold_mor_scores']
 
@@ -14,7 +15,8 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
                                             *,
                                             solver_name=None,
                                             timeout=None,
-                                            verbosity=1):
+                                            verbosity=1,
+                                            numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
@@ -29,6 +31,11 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
         timeout (None/int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the pulp linear programming solver,
                             0: silent, non-zero: verbose
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the dictionary of the results of the analysis, the
@@ -115,4 +122,5 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
                                         eps=eps,
                                         solver_name=solver_name,
                                         timeout=timeout,
-                                        verbosity=verbosity)
+                                        verbosity=verbosity,
+                                        numerical_tolerance=numerical_tolerance)

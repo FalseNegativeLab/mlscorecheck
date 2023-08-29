@@ -2,6 +2,8 @@
 Testing the retina drive check bundle
 """
 
+import pytest
+
 from mlscorecheck.bundles import (drive_aggregated,
                                     drive_image,
                                     filter_drive)
@@ -17,6 +19,9 @@ def test_filter():
 
     assert len(filter_drive(data, ['01', '02'])) == 2
     assert filter_drive(data) == data
+
+    with pytest.raises(ValueError):
+        filter_drive(data, ['dummy'])
 
 def test_aggregated():
     """

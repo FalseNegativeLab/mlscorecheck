@@ -8,3 +8,4 @@ from ._load_json import *
 from ._random_state import *
 from ._dict import *
 from ._rounding import *
+from ._numerical_tolerance import *

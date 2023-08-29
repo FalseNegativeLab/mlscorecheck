@@ -14,7 +14,7 @@ from ..scores import (score_functions_without_complements,
                             score_specifications,
                             score_functions_standardized_all)
 from ._interval import Interval, IntervalUnion, sqrt
-from ..core import safe_call, logger
+from ..core import safe_call, logger, check_uncertainty_and_tolerance, NUMERICAL_TOLERANCE
 
 __all__ = ['check_individual_scores',
             'check_2v1',
@@ -90,7 +90,7 @@ def determine_edge_cases(score, p, n):
 
     return list(edge_cases)
 
-def create_intervals(scores, eps):
+def create_intervals(scores, eps, numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Turns the scores into intervals using the uncertainty specifications,
     the interval for a score will be (score - eps, score + eps).
@@ -100,6 +100,11 @@ def create_intervals(scores, eps):
     Args:
         scores (dict): the scores to be turned into intervals
         eps (float/dict): the numerical uncertainty
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the score intervals
@@ -110,7 +115,9 @@ def create_intervals(scores, eps):
         eps = {key: eps for key in scores}
 
     # creating the intervals
-    intervals = {key: Interval(val - eps[key], val + eps[key]) for key, val in scores.items()}
+    intervals = {key: Interval(val - eps[key] - numerical_tolerance,
+                                val + eps[key] + numerical_tolerance)
+                    for key, val in scores.items()}
 
     # trimming the intervals into the domains of the scores
     # for example, to prevent acc - eps < 0 implying a negative subinterval for
@@ -258,7 +265,9 @@ def check_2v1(scores,
                 eps,
                 problem,
                 p,
-                n):
+                n,
+                *,
+                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Check one particular problem
 
@@ -269,6 +278,11 @@ def check_2v1(scores,
                                         (base_score0, base_score1, target_score)
         p (int): the number of positives
         n (int): the number of negatives
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the result of the evaluation
@@ -279,7 +293,9 @@ def check_2v1(scores,
     logger.info('checking %s and %s against %s', score0, score1, target)
 
     intervals = create_intervals({key: scores[key] for key in scores
-                                    if key in problem}, eps)
+                                    if key in problem},
+                                    eps,
+                                    numerical_tolerance=numerical_tolerance)
 
     # querying the solution
     solution = solutions[tuple(sorted([score0, score1]))]
@@ -318,7 +334,7 @@ def check_2v1(scores,
                                     for tmp in output),
             'inconsistency': all(tmp['inconsistency'] for tmp in output)}
 
-def check_individual_scores(scores, p, n, eps):
+def check_individual_scores(scores, p, n, eps, numerical_tolerance=1e-6):
     """
     The main check functionality
 
@@ -327,19 +343,28 @@ def check_individual_scores(scores, p, n, eps):
         p (int): the number of positives
         n (int): the number of negatives
         eps (float/dict): the numerical uncertainty of the scores
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the result of the check. The 'consistency' flag contains the
                 overall decision, the 'succeeded' and 'failed' lists contain
                 the details of the individual tests
     """
+    check_uncertainty_and_tolerance(eps, numerical_tolerance)
+
     scores = resolve_aliases_and_complements(scores)
 
     scores = {key: value for key, value in scores.items() if key in supported_scores}
 
     problems = create_problems_2(list(scores.keys()))
 
-    results = [check_2v1(scores, eps, problem, p, n) for problem in problems]
+    results = [check_2v1(scores, eps, problem, p, n,
+                            numerical_tolerance=numerical_tolerance)
+                for problem in problems]
 
     succeeded = []
     failed = []

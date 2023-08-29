@@ -5,7 +5,8 @@ calculation structures
 
 import pulp as pl
 
-from ..core import logger
+from ..core import (logger, NUMERICAL_TOLERANCE, check_uncertainty_and_tolerance,
+                    update_uncertainty)
 from ..individual import resolve_aliases_and_complements
 
 from ._experiment import Experiment
@@ -23,7 +24,8 @@ def check_aggregated_scores(*,
                             eps,
                             solver_name=None,
                             timeout=None,
-                            verbosity=1):
+                            verbosity=1,
+                            numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Check aggregated scores
 
@@ -37,11 +39,19 @@ def check_aggregated_scores(*,
         verbosity (int): controls the verbosity level of the pulp based
                             linear programming solver. 0: no output; non-zero:
                             print output
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
                         and optionally the details in a dictionary
     """
+    check_uncertainty_and_tolerance(eps, numerical_tolerance)
+    eps = update_uncertainty(eps, numerical_tolerance)
+
     scores = resolve_aliases_and_complements(scores)
 
     if all(score not in aggregated_scores for score in scores):
@@ -65,7 +75,7 @@ def check_aggregated_scores(*,
 
     if result.status == 1:
         # the problem is feasible
-        comp_flag = compare_scores(scores, populated.calculate_scores(), eps)
+        comp_flag = compare_scores(scores, populated.calculate_scores(), eps+numerical_tolerance)
         bounds_flag = configuration_details['bounds_flag']
         return {'inconsistency': False,
                 'lp_status': 'feasible',

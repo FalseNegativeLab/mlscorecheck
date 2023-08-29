@@ -55,6 +55,7 @@ def filter_drive(data, subset=None):
     if len(result) == 0:
         raise ValueError('There is no images remaining. Please check if the bundle '\
                         '("train"/"test") and the image identifiers are specified properly')
+    return result
 
 def drive_aggregated(scores, eps, bundle, subset=None):
     """

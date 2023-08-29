@@ -7,7 +7,8 @@ This module implements an abstraction for a dataset
 import pulp as pl
 
 from ..individual import calculate_scores_for_lp, calculate_scores
-from ..core import logger, init_random_state, dict_mean, round_scores, dict_minmax
+from ..core import (logger, init_random_state, dict_mean, round_scores, dict_minmax,
+                    NUMERICAL_TOLERANCE)
 from ..experiments import lookup_dataset
 
 from ._fold import (Fold, random_identifier, generate_fold_specification)
@@ -595,11 +596,14 @@ class Dataset:
                         folds=[fold.populate(lp_problem).to_dict(problem_only=False)
                                 for fold in self.folds])
 
-    def check_bounds(self):
+    def check_bounds(self, numerical_tolerance=NUMERICAL_TOLERANCE):
         """
         Checks if the boundary conditions hold and returns a summary.
         The 'all_bounds' flag indicates the result of bound checks
         for each fold and the dataset.
+
+        Args:
+            numerical_tolerance (float): the numerical tolerance
 
         Returns:
             dict: a summary of the evaluation of the boundary conditions
@@ -607,9 +611,9 @@ class Dataset:
         scores = self.calculate_scores()
         figures = self.calculate_figures()
 
-        downstream = [fold.check_bounds() for fold in self.folds]
+        downstream = [fold.check_bounds(numerical_tolerance) for fold in self.folds]
         flag = all(tmp['bounds_flag'] for tmp in downstream)
-        check_score_bounds = check_bounds(scores, self.score_bounds)
+        check_score_bounds = check_bounds(scores, self.score_bounds, numerical_tolerance)
 
         all_bounds = (flag
                         and (check_score_bounds is None or check_score_bounds))

@@ -11,7 +11,7 @@ import copy
 
 import pulp as pl
 
-from ..core import logger, init_random_state, round_scores
+from ..core import (logger, init_random_state, round_scores, NUMERICAL_TOLERANCE)
 from ..individual import calculate_scores_for_lp
 
 from ._linear_programming import add_bounds
@@ -259,9 +259,12 @@ class Fold:
 
         return Fold(**self.to_dict(problem_only=True), figures=figures)
 
-    def check_bounds(self):
+    def check_bounds(self, numerical_tolerance=NUMERICAL_TOLERANCE):
         """
         Checks if the boundary conditions hold and returns a summary
+
+        Args:
+            numerical_tolerance (float): the numerical tolerance
 
         Returns:
             dict: a summary of the evaluation of the boundary conditions
@@ -272,7 +275,7 @@ class Fold:
 
         scores = self.calculate_scores()
 
-        score_flag = check_bounds(scores, self.score_bounds)
+        score_flag = check_bounds(scores, self.score_bounds, numerical_tolerance)
         bounds_flag = True
         bounds_flag = bounds_flag if score_flag is None else bounds_flag and score_flag
 

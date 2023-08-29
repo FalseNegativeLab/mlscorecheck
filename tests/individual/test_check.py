@@ -4,7 +4,7 @@ Testing the check functionality
 
 import pytest
 
-from mlscorecheck.core import safe_call
+from mlscorecheck.core import safe_call, NUMERICAL_TOLERANCE
 from mlscorecheck.individual import (check_individual_scores,
                                 check_2v1,
                                 create_intervals,
@@ -64,19 +64,19 @@ def test_create_intervals():
     """
     scores_ = resolve_aliases_and_complements({'acc': 0.6, 'tpr': 0.4, 'fnr': 0.6})
     intervals = create_intervals(scores_, eps=1e-4)
-    assert abs(intervals['acc'].lower_bound - 0.5999) < 1e-8
-    assert abs(intervals['acc'].upper_bound - 0.6001) < 1e-8
-    assert abs(intervals['sens'].lower_bound - 0.3999) < 1e-8
-    assert abs(intervals['sens'].upper_bound - 0.4001) < 1e-8
+    assert abs(intervals['acc'].lower_bound - 0.5999) <= 1.1 * NUMERICAL_TOLERANCE
+    assert abs(intervals['acc'].upper_bound - 0.6001) <= 1.1 * NUMERICAL_TOLERANCE
+    assert abs(intervals['sens'].lower_bound - 0.3999) <= 1.1 * NUMERICAL_TOLERANCE
+    assert abs(intervals['sens'].upper_bound - 0.4001) <= 1.1 * NUMERICAL_TOLERANCE
 
     scores_ = resolve_aliases_and_complements({'fnr': 0.6})
     intervals = create_intervals(scores_, eps=1e-4)
-    assert abs(intervals['sens'].lower_bound - 0.3999) < 1e-8
-    assert abs(intervals['sens'].upper_bound - 0.4001) < 1e-8
+    assert abs(intervals['sens'].lower_bound - 0.3999) <= 1.1 * NUMERICAL_TOLERANCE
+    assert abs(intervals['sens'].upper_bound - 0.4001) <= 1.1 * NUMERICAL_TOLERANCE
 
     intervals = create_intervals({'kappa': 0.5}, eps=1e-4)
-    assert abs(intervals['kappa'].lower_bound - 0.4999) < 1e-8
-    assert abs(intervals['kappa'].upper_bound - 0.5001) < 1e-8
+    assert abs(intervals['kappa'].lower_bound - 0.4999) <= 1.1 * NUMERICAL_TOLERANCE
+    assert abs(intervals['kappa'].upper_bound - 0.5001) <= 1.1 * NUMERICAL_TOLERANCE
 
 def test_create_problems_2():
     """
@@ -161,7 +161,8 @@ def test_check_false_2v1(problem, zeros, random_state):
     # generating a completely random new configuration
     evaluation, _ = generate_1_problem(random_state=(random_state + 1), add_complements=True)
 
-    result = check_2v1(scores_dict, 1e-8, problem, evaluation['p'], evaluation['n'])
+    result = check_2v1(scores_dict, 1e-8, problem, evaluation['p'], evaluation['n'],
+                        numerical_tolerance=5*1e-10)
 
     # checking if the new setup has edge case scores
     edges_new = len(result['edge_scores']) > 0

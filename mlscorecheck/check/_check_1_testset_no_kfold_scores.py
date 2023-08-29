@@ -5,7 +5,7 @@ scores calculated from raw figures
 
 import warnings
 
-from ..core import logger
+from ..core import logger, NUMERICAL_TOLERANCE
 from ..individual import check_individual_scores
 from ..experiments import dataset_statistics
 
@@ -13,7 +13,9 @@ __all__ = ['check_1_testset_no_kfold_scores']
 
 def check_1_testset_no_kfold_scores(scores,
                                     eps,
-                                    testset):
+                                    testset,
+                                    *,
+                                    numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Use this check if the scores are calculated on one single test set
     with no kfolding or aggregation over multiple datasets.
@@ -23,6 +25,11 @@ def check_1_testset_no_kfold_scores(scores,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm')
         eps (float/dict(str,float)): the numerical uncertainty (potentially for each score)
         testset (dict): the specification of a testset with p, n or its name
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: a dictionary containing the details of the analysis,

@@ -98,7 +98,8 @@ def test_check_aggregated_scores_timeout():
     details = check_aggregated_scores(experiment=experiment.to_dict(problem_only=True),
                                         scores=scores,
                                         eps=1e-7,
-                                        timeout=0.1)
+                                        timeout=0.1,
+                                        numerical_tolerance=1e-9)
 
     assert not details['inconsistency']
     assert details['lp_status'] == 'timeout'

@@ -4,7 +4,8 @@ This module implements an abstraction for an experiment
 
 import pulp as pl
 
-from ..core import init_random_state, dict_mean, round_scores, dict_minmax
+from ..core import (init_random_state, dict_mean, round_scores, dict_minmax,
+                    NUMERICAL_TOLERANCE)
 from ..individual import calculate_scores_for_lp, calculate_scores
 
 from ._dataset import (Dataset,
@@ -379,17 +380,21 @@ class Experiment:
                             datasets=[dataset.populate(lp_problem).to_dict(problem_only=False)
                                         for dataset in self.datasets])
 
-    def check_bounds(self):
+    def check_bounds(self, numerical_tolerance=NUMERICAL_TOLERANCE):
         """
         Checks if the boundary conditions hold and returns a summary.
         The 'all_bounds' flag indicates the result of bound checks
         for each dataset.
 
+        Args:
+            numerical_tolerance (float): the numerical tolerance
+
         Returns:
             dict: a summary of the evaluation of the boundary conditions
+
         """
 
-        downstream = [dataset.check_bounds() for dataset in self.datasets]
+        downstream = [dataset.check_bounds(numerical_tolerance) for dataset in self.datasets]
         flag = all(tmp['bounds_flag'] for tmp in downstream)
 
         return {'identifier': self.identifier,

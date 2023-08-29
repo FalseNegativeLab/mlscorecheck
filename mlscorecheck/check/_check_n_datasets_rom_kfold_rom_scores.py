@@ -6,7 +6,7 @@ in a kfold scenario on one single dataset.
 
 import warnings
 
-from ..core import logger
+from ..core import logger, NUMERICAL_TOLERANCE
 from ..individual import check_individual_scores
 from ..aggregated import check_aggregated_scores, Experiment
 
@@ -18,7 +18,8 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                                             *,
                                             solver_name=None,
                                             timeout=None,
-                                            verbosity=1):
+                                            verbosity=1,
+                                            numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
@@ -35,6 +36,11 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
         timeout (None/int): the timeout for the linear programming solver in seconds
         verbosity (int): verbosity of the pulp linear programming solver
                             0: silent, non-zero: verbose
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the dictionary of the results of the analysis, the
@@ -163,7 +169,8 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                                         eps=eps,
                                         solver_name=solver_name,
                                         timeout=timeout,
-                                        verbosity=verbosity)
+                                        verbosity=verbosity,
+                                        numerical_tolerance=numerical_tolerance)
 
     result['aggregated_results'] = agg_results
     result['inconsistency'] = result['inconsistency'] or agg_results['inconsistency']
