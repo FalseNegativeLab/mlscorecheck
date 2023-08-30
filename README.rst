@@ -278,6 +278,42 @@ In the example below, a consistent set of figures is generated and tested:
 
     # False
 
+As one can from the output flag, there are no inconsistencies identified. The `result` dict contains some further entries to find further details of the test. Most importantly, under the key `lp_status` one can find the status of the linear programming solver, and under the key `lp_configuration`, one can find the values of all `tp` and `tn` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
+
+.. code-block:: bash
+
+    {'id': 'monjhyriadkqzmza',
+    'figures': {'p': 126, 'n': 131, 'tp': 93.0, 'tn': 49.0},
+    'scores': {'acc': 0.572689127483648,
+    'sens': 0.7684511434511435,
+    'spec': 0.5556354226566993,
+    'bacc': 0.6620432830539213},
+    'score_bounds': None,
+    'score_bounds_flag': None,
+    'bounds_flag': True,
+    'folds': [{'identifier': 'pwjncyepgdalgccc',
+    'figures': {'tn': 13.0, 'tp': 49.0},
+    'scores': {'acc': 0.4246575342465753,
+        'sens': 0.9423076923076924,
+        'spec': 0.13829787234042554,
+        'bacc': 0.5403027823240589},
+    'score_bounds': None,
+    'score_bounds_flag': None,
+    'bounds_flag': True},
+    {'identifier': 'nibjsmoafamcpezu',
+    'figures': {'tn': 36.0, 'tp': 44.0},
+    'scores': {'acc': 0.7207207207207207,
+        'sens': 0.5945945945945946,
+        'spec': 0.972972972972973,
+        'bacc': 0.7837837837837838},
+    'score_bounds': None,
+    'score_bounds_flag': None,
+    'bounds_flag': True}]}
+
+As one can observe, the top level scores match the ones reported to the accuracy of the numerical uncertainty.
+
+As the following example shows, a hand-crafted and insatisfiable set of scores (accuracy must always be between sensitivity ans specificity) leads to the discovery of inconsistency:
+
 .. code-block:: Python
 
     dataset = {'p': 398,
@@ -285,7 +321,7 @@ In the example below, a consistent set of figures is generated and tested:
                 'n_folds': 4,
                 'n_repeats': 2,
                 'folding': 'stratified_sklearn'}
-    scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
+    scores = {'acc': 0.91, 'spec': 0.9, 'sens': 0.6}
 
     result = check_1_dataset_kfold_mor_scores(scores=scores,
                                                 eps=1e-2,
@@ -293,6 +329,10 @@ In the example below, a consistent set of figures is generated and tested:
     result['inconsistency']
 
     >> True
+
+Finally, we mention that if there are hints for bounds on the scores in the folds (for example, the minimum and maximum scores across the folds are reported), one can add these figures to strengthen the test. In the next example, the same score bounds on the accuracy have been added to each fold, with the interpretation that beyond matching the overall reported scores, we also require that the accuracy in each fold should be in the range [0.8, 1.0], which becomes unfeasible:
+
+.. code-block:: Python
 
     dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
                 'n_folds': 4,
@@ -308,6 +348,7 @@ In the example below, a consistent set of figures is generated and tested:
 
     >> True
 
+Note that in this example, although `f1` is provided, it is completely ignored as the aggregated tests work only for the four completely linear scores.
 
 
 1 dataset with kfold ratio-of-means (RoM)
