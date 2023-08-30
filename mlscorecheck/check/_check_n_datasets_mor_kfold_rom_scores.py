@@ -112,6 +112,7 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
         result['inconsistency']
 
         >> True
+
     """
     if any(dataset.get('aggregation', 'rom') != 'rom' for dataset in datasets):
         raise ValueError('the aggregation specified in each dataset must be "rom" or nothing.')

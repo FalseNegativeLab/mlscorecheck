@@ -8,18 +8,22 @@ Welcome to mlscorecheck's documentation!
 
 .. toctree::
     :maxdepth: 2
-    :caption: Getting started
+    :caption: Introduction
 
     introduction
+
+.. toctree::
+    :maxdepth: 2
+
     installation
 
 .. toctree::
     :maxdepth: 2
-    :caption: Use cases
+    :caption: Consistency testing
 
-    specifying_datasets
     use_cases
-    interpretation_of_results
+    specifying_datasets
+    consistency_checking
 
 .. toctree::
     :maxdepth: 2
@@ -39,6 +43,12 @@ Welcome to mlscorecheck's documentation!
     :caption: Contribution
 
     contribution
+
+.. toctree::
+    :maxdepth: 2
+    :caption: References
+
+    references
 
 Indices and tables
 ==================

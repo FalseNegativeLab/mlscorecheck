@@ -107,6 +107,7 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
         result['inconsistency']
 
         >> True
+
     """
     if any(dataset.get('aggregation', 'mor') != 'mor' for dataset in datasets):
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')

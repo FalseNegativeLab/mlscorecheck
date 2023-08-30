@@ -95,6 +95,7 @@ def check_1_dataset_kfold_rom_scores(scores,
         result['inconsistency']
 
         >> True
+
     """
     if dataset.get('aggregation', 'rom') != 'rom':
         raise ValueError(f'the aggregation {dataset.get("aggregation")} specified '\

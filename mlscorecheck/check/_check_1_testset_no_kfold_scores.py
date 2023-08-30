@@ -21,9 +21,10 @@ def check_1_testset_no_kfold_scores(scores,
     with no kfolding or aggregation over multiple datasets.
 
     Args:
+
         scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm')
-        eps (float/dict(str,float)): the numerical uncertainty (potentially for each score)
+        eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)
         testset (dict): the specification of a testset with p, n or its name
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -32,49 +33,50 @@ def check_1_testset_no_kfold_scores(scores,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a dictionary containing the details of the analysis,
-                the boolean 'inconsistency' attribute indicates if inconsistency
-                was found. Additionally, the result contains four more keys describing
-                all details of the consistency check.
-                Under the key 'tests_succeeded' one finds the list of all tests
-                (comparing the consistency of one score against two others) that passed.
-                Under the key 'tests_failed' one finds the list of all tests
-                that failed. Consistency is identified if any of the tests fails.
-                Both lists contain entries describing the details of the test, e.g.,
-                what were the assumptions on the intervals of the given scores,
-                which formulas were applied and what was the reconstructed interval of
-                the target score.
-                Beyond the individual test cases, one finds two more keys, the
-                edge_cases contains the list of all scores which are edge cases
-                and might lead to underdetermined systems (by edge cases we mean the score
-                took its minimum or maximum value, which usually turns the tests ineffective).
-                The final key is 'underdetermined', which is true if the system is
-                underdetermined, the values of the scores do not allow the checks to be
-                executed.
+
+        dict:   a dictionary containing the details of the analysis, the boolean 'inconsistency'
+        attribute indicates if inconsistency was found. Additionally, the result contains
+        four more keys describing all details of the consistency check.
+        Under the key 'tests_succeeded' one finds the list of all tests
+        (comparing the consistency of one score against two others) that passed.
+        Under the key 'tests_failed' one finds the list of all tests
+        that failed. Consistency is identified if any of the tests fails.
+        Both lists contain entries describing the details of the test, e.g.,
+        what were the assumptions on the intervals of the given scores,
+        which formulas were applied and what was the reconstructed interval of
+        the target score.
+        Beyond the individual test cases, one finds two more keys, the
+        edge_cases contains the list of all scores which are edge cases
+        and might lead to underdetermined systems (by edge cases we mean the score
+        took its minimum or maximum value, which usually turns the tests ineffective).
+        The final key is 'underdetermined', which is true if the system is
+        underdetermined, the values of the scores do not allow the checks to be
+        executed.
 
     Raises:
+
         ValueError: if the problem is not specified properly
 
     Examples:
+
         Specify a testset either by the 'p' and 'n' scores, or the
         name of the dataset. For the list of supported datasets see
         mlscorecheck.experiments.dataset_statistics.
 
-        result = check_1_testset_no_kfold_scores(
-            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
-            eps=1e-2,
-            testset={'p': 530, 'n': 902}
-        )
-        result['inconsistency']
-        >> False
+        >>> result = check_1_testset_no_kfold_scores(
+                        scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
+                        eps=1e-2,
+                        testset={'p': 530, 'n': 902})
+        >>> result['inconsistency']
+        # False
 
-        result = check_1_testset_no_kfold_scores(
-            scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
-            eps=1e-3,
-            testset={'name': 'common_datasets.ADA'}
-        )
-        result['inconsistency']
-        >> True
+        >>> result = check_1_testset_no_kfold_scores(
+                        scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
+                        eps=1e-3,
+                        testset={'name': 'common_datasets.ADA'})
+        >>> result['inconsistency']
+        # True
+
     """
     logger.info('Use this function if the scores originate from the '\
                 'tp and tn statistics calculated on one test set with '\

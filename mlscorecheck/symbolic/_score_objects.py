@@ -81,7 +81,7 @@ class Score: # pylint: disable=too-many-instance-attributes
         self.complement = descriptor.get('complement', None)
         self.args = descriptor.get('args_standardized')
         self.range = (descriptor.get('lower_bound', -np.inf),
-                        descriptor.get('upper_bound', -np.inf))
+                        descriptor.get('upper_bound', np.inf))
         self.sqrt = descriptor.get('sqrt', False)
 
         # setting the base kit of symbols
@@ -90,8 +90,9 @@ class Score: # pylint: disable=too-many-instance-attributes
 
         # setting the symbol
         kwargs = {}
-        if self.range[0] > -np.inf and self.range[1] < np.inf:
+        if self.range[0] > -np.inf:
             kwargs['lower_bound'] = self.range[0]
+        if self.range[1] < np.inf:
             kwargs['upper_bound'] = self.range[1]
         self.symbol = self.symbols.algebra.create_symbol(self.abbreviation, real=True, **kwargs)
 

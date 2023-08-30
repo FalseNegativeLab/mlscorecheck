@@ -1,39 +1,18 @@
 Installation
-************
-
-Prerequisites
-=============
-
-The following packages are requirements:
-
-    * ``numpy``
-    * ``pandas``
-    * ``sklearn``
-    * ``pulp``
-
-Installation
 ============
 
-Install from PyPi
-^^^^^^^^^^^^^^^^^
+The package has only basic requirements when used for consistency checking.
+
+* ``numpy``
+* ``pulp``
 
 .. code-block:: bash
 
-    > pip install mlscorecheck
+    > pip install numpy pulp
 
-Clone from GitHub
-^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-    > git clone git@github.com:gykovacs/mlscorecheck.git
-    > cd mlscorecheck
-    > pip install .
-
-Install directly from GitHub
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. In order to install ``sage`` into a conda environment one needs adding the ``conda-forge`` channel first:
 
 .. code-block:: bash
 
-    > pip install git+https://github.com:gykovacs/mlscorecheck.git
-
+    > conda config --add channels conda-forge
+    > conda install sage

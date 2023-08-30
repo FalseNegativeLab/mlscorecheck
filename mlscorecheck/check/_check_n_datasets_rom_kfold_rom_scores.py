@@ -29,6 +29,7 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
     executed to see if the bound conditions can be satisfied.
 
     Args:
+
         scores (dict(str,float)): the scores to check
         eps (float/dict(str,float)): the numerical uncertainty(ies) of the scores
         datasets (list[dict]): the dataset specification
@@ -43,6 +44,7 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
+
         dict: the dictionary of the results of the analysis, the
                 'inconsistency' entry indicates if inconsistencies have
                 been found. The aggregated_results entry is empty if
@@ -66,9 +68,11 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                 satisfied.
 
     Raises:
+
         ValueError: if the problem is not specified properly
 
-    Example:
+    Examples:
+
         datasets = [{'p': 389,
                         'n': 630,
                         'n_folds': 6,
@@ -127,6 +131,7 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
         result['inconsistency']
 
         >> True
+
     """
     if any(dataset.get('aggregation', 'rom') != 'rom' for dataset in datasets):
         raise ValueError('the aggregation specifications cannot be anything else '\
