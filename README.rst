@@ -32,6 +32,11 @@
 mlscorecheck: testing the consistency of binary classification performance scores
 *********************************************************************************
 
+In a nutshell
+=============
+
+One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the `mlscorecheck` package one can test if the scores with the presumed way of calculation are inconsistent with each other. The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
+
 Latest news
 ===========
 
@@ -465,40 +470,54 @@ The last supported scenario is when scores are calculated in the MoR manner for 
 
 Being an aggregated test, again, the details of the analysis are accessible under the `lp_status` and `lp_configuration` keys.
 
+Not knowing the mode of aggregation
+-----------------------------------
+
+The biggest challenge with aggregated scores is that the ways of aggregation at the dataset and experiment level are rarely disclosed explicitly. Even in this case the tools presented in the previous section can be used since there are hardly any further ways of meaningful averaging than (MoR on folds, MoR on datasets), (RoM on folds, MoR on datasets), (RoM on folds, RoM on datasets), hence, if a certain set of scores is inconsistent with each of these possibilities, one can safely say that the results do not satisfy the reasonable expectations.
+
 Test bundles
-=============
+============
+
+Certain fields have unique, systematic and recurring problems in terms of evaluation methodologies. The aim of this part of the package is to provide bundles of consistency tests for the most typical scenarios of a field.
+
+Experts in various fields are kindly invited to contribute further test bundles to the package.
+
 
 Retinal vessel segmentation
 ---------------------------
+
+One such field is the segmentation of retinal vessels [RV]_, where the authors have the freedom of either include or exclude certain parts of the images (the pixels outside the Field-of-View) from the evaluation, rendering the reported scores incomparable. In order to facilitate the objective comparison, evaluation and interpretation of reported scores, we provide two functions to check the internal consistency of scores reported for the DRIVE retinal vessel segmentation dataset.
+
+The first function enables the testing of performance scores reported for certain test images, the two tests executed assume the use of the FoV mask (excluding the pixels outside the FoV) and the neglection of the FoV mask (including the pixels outside the FoV). As the following example shows, one simply supplies the scores and specifies the images (whether it is from the 'test' or 'train' subset and the identifier of the image) and gets back if inconsistency is identified with any of the two assumptions.
+
+.. code-block:: Python
+
+    drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
+                        eps=1e-4,
+                        bundle='test',
+                        identifier='01')
+    # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
+
+The interpretation of these results is that the reported scores are inconsistent with any of the reasonable evaluation methodolgoies.
+
+A similar functionality is provided for the aggregated scores calculated on the DRIVE images, in this case the two assumptions of using the pixels outside the FoV is extended with two assumptions on the way of aggregation.
 
 .. code-block:: Python
 
     drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                         eps=1e-4,
                         bundle='test')
-    >> {'mor_fov_inconsistency': True,
-        'mor_no_fov_inconsistency': True,
-        'rom_fov_inconsistency': True,
-        'rom_no_fov_inconsistency': True}
+    # {'mor_fov_inconsistency': True,
+    #   'mor_no_fov_inconsistency': True,
+    #   'rom_fov_inconsistency': True,
+    #   'rom_no_fov_inconsistency': True}
 
-.. code-block:: Python
-
-    drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
-                              'f1p': 0.9801, 'ppv': 0.8543},
-                      eps=1e-4,
-                      bundle='test',
-                      identifier='01')
-    >> {'fov_inconsistency': True, 'no_fov_inconsistency': True}
-
-
-
-EHG classification
-------------------
-
+The results here show that the reported scores could not be the result of any aggregation of any evaluation methodologies.
 
 Contribution
 ============
 
+We kindly encourage any experts to provide further, field specific dataset and experiment specifications and test bundles to facilitate the reporting of clean and reproducible results in anything related to binary classification!
 
 References
 **********
