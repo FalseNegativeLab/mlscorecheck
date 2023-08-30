@@ -35,7 +35,7 @@ mlscorecheck: testing the consistency of binary classification performance score
 In a nutshell
 =============
 
-One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the `mlscorecheck` package one can test if the scores with the presumed way of calculation are inconsistent with each other. The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
+One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores with the presumed way of calculation are inconsistent with each other. The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
 
 Latest news
 ===========
@@ -75,14 +75,14 @@ Installation
 
 The package has only basic requirements when used for consistency checking.
 
-* `numpy`
-* `pulp`
+* ``numpy``
+* ``pulp``
 
 .. code-block:: bash
 
     > pip install numpy pulp
 
-In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the solutions, either `sympy` or `sage` needs to be installed. The installation of `sympy` can be done in the usual way. In order to install `sage`` into a conda environment one needs adding the `conda-forge` channel first:
+In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. In order to install ``sage```` into a conda environment one needs adding the ``conda-forge`` channel first:
 
 .. code-block:: bash
 
@@ -97,14 +97,14 @@ In general, there are three inputs to the consistency checking functions:
 * the specification of the dataset(s) involved;
 * the collection of available performance scores. The currently supported scores with their abbreviations in paranthesis are:
 
-  * accuracy (`acc`),
-  * sensitivity (`sens`),
-  * specificity (`spec`),
-  * positive predictive value (`ppv`),
-  * negative predictive value (`npv`),
-  * F1-score (`f1`),
-  * Fowlkes-Mallows index (`fm`);
-* the estimated numerical uncertainty: the performance scores are usually shared with some finite precision, being rounded/ceiled/floored to `k` decimal places. The numerical uncertainty estimates the maximum difference of the reported score and its true value. For example, having the accuracy score 0.9489 published (4 decimal places), one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-4)/2). To be more conservative, one can assume that the score was ceiled or floored. In this case the numerical uncertainty becomes 0.0001 (10^(-4)).
+  * accuracy (``acc``),
+  * sensitivity (``sens``),
+  * specificity (``spec``),
+  * positive predictive value (``ppv``),
+  * negative predictive value (``npv``),
+  * F1-score (``f1``),
+  * Fowlkes-Mallows index (``fm``);
+* the estimated numerical uncertainty: the performance scores are usually shared with some finite precision, being rounded/ceiled/floored to ``k`` decimal places. The numerical uncertainty estimates the maximum difference of the reported score and its true value. For example, having the accuracy score 0.9489 published (4 decimal places), one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-4)/2). To be more conservative, one can assume that the score was ceiled or floored. In this case the numerical uncertainty becomes 0.0001 (10^(-4)).
 
 Specifying datasets
 -------------------
@@ -116,13 +116,13 @@ Specifying one testset
 
 There are multiple ways to specify datasets and entire experiments consisting of multiple datasets evaluated in differing ways of cross-validations.
 
-A simple binary classification test-set consisting of `p` positive samples (usually labelled 1) and `n` negative samples (usually labelled 0) can be specified as
+A simple binary classification test-set consisting of ``p`` positive samples (usually labelled 1) and ``n`` negative samples (usually labelled 0) can be specified as
 
 .. code-block:: Python
 
     testset = {"p": 10, "n": 20}
 
-One can also specify a commonly used dataset by its name and the package will look up the `p` and `n` statistics of the datasets from its internal registry:
+One can also specify a commonly used dataset by its name and the package will look up the ``p`` and ``n`` statistics of the datasets from its internal registry:
 
 .. code-block:: Python
 
@@ -138,7 +138,7 @@ To see the list of supported datasets and corresponding statistics, issue
 Specifying a dataset with folding
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are multiple ways to specify a dataset with some folding structure, either by specifying the parameters of the folding (if it is following a well known strategy, like stratification), or specifying the folds themselves. If `n_repeats` or `n_folds` are not specified, they are considered to be 1. If there is 1 fold, there is no need to specify the folding strategy (`folding`), otherwise the folding strategy needs to be specified. If the `folds` are specified explicitly, there is no need to specify any other parameter (like `p`, `n`, `n_folds`, `n_repeats`). It is possible to specify additional constraints on the `acc`, `sens`, `spec` or `bacc` scores, either by adding the `score_bounds` key to the fold (when `folds` are specified), or setting the `fold_score_bounds` key at the dataset level. For example, multiple ways of specifying datasets with 2 times repeated stratified 3-fold folding structure:
+There are multiple ways to specify a dataset with some folding structure, either by specifying the parameters of the folding (if it is following a well known strategy, like stratification), or specifying the folds themselves. If ``n_repeats`` or ``n_folds`` are not specified, they are considered to be 1. If there is 1 fold, there is no need to specify the folding strategy (``folding``), otherwise the folding strategy needs to be specified. If the ``folds`` are specified explicitly, there is no need to specify any other parameter (like ``p``, ``n``, ``n_folds``, ``n_repeats``). It is possible to specify additional constraints on the ``acc``, ``sens``, ``spec`` or ``bacc`` scores, either by adding the ``score_bounds`` key to the fold (when ``folds`` are specified), or setting the ``fold_score_bounds`` key at the dataset level. For example, multiple ways of specifying datasets with 2 times repeated stratified 3-fold folding structure:
 
 .. code-block:: Python
 
@@ -168,7 +168,7 @@ Checking the consistency of performance scores
 
 Numerous experimental protocols are supported by the package in which performance scores of binary classification can be produced. In this section we go through them one by one giving some examples of possible use cases.
 
-We highlight again that the tests detect inconsistencies. If the resulting `inconsistency` flag is `False`, the scores can still be inconsistent, however, if the `inconsistency` flag is `True`, that is, inconsistencies are detected, then the reported scores with the assumptions are inconsistent with certainty.
+We highlight again that the tests detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be inconsistent, however, if the ``inconsistency`` flag is ``True``, that is, inconsistencies are detected, then the reported scores with the assumptions are inconsistent with certainty.
 
 A note on the Ratio-of-Means and Mean-of-Ratios aggregations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -178,17 +178,17 @@ Most of the performance scores are some sorts of ratios. When it comes to the ag
 The two types of tests
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Having one single testset, or a RoM type of aggregation (leading to one confusion matrix) and at least 3 performance scores reported, one can pick two scores and solve the system for the confusion matrix (`tp`, `tn`) also accounting for the numerical uncertainty of potential rounding/ceiling/flooring, and use the reconstructed confusion matrix to estimate an interval for the third score and check if it is contained in it. This test supports the performance scores `acc`, `sens`, `spec`, `bacc`, `npv`, `ppv`, `f1p`, `fm`.
+Having one single testset, or a RoM type of aggregation (leading to one confusion matrix) and at least 3 performance scores reported, one can pick two scores and solve the system for the confusion matrix (``tp``, ``tn``) also accounting for the numerical uncertainty of potential rounding/ceiling/flooring, and use the reconstructed confusion matrix to estimate an interval for the third score and check if it is contained in it. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``bacc``, ``npv``, ``ppv``, ``f1p``, ``fm``.
 
-With a MoR type of aggregation, only the averages of scores over folds or datasets are available. In this case the reconstruction of fold level or dataset level confusion matrices is possible only for the linear scores `acc`, `sens`, `spec` and `bacc` using linear programming. Based on the reported scores and the folding structures, these tests formulate a linear (integer) program of all confusion matrix entries and checks if the program is feasible to result in the reported values with the estimated numerical uncertainties.
+With a MoR type of aggregation, only the averages of scores over folds or datasets are available. In this case the reconstruction of fold level or dataset level confusion matrices is possible only for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear programming. Based on the reported scores and the folding structures, these tests formulate a linear (integer) program of all confusion matrix entries and checks if the program is feasible to result in the reported values with the estimated numerical uncertainties.
 
 
 1 testset with no kfold
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This test assumes that at least three of the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` scores are reported. A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
+This test assumes that at least three of the ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``f1``, ``fm`` scores are reported. A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
-In the example below, the scores are generated to be consistent, and accordingly, the test did not identify inconsistencies at the `1e-2` level of numerical uncertainty.
+In the example below, the scores are generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
 
 .. code-block:: Python
 
@@ -203,7 +203,7 @@ In the example below, the scores are generated to be consistent, and accordingly
 
     # False
 
-The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus `0.01` could be the result of a real evaluation. In the `result` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys `tests_succeeded` and `tests_failed` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry (`result['tests_succeeded'][0]`) of the succeeded list reads as
+The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus ``0.01`` could be the result of a real evaluation. In the ``result`` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys ``tests_succeeded`` and ``tests_failed`` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry (``result['tests_succeeded'][0]``) of the succeeded list reads as
 
 .. code-block:: bash
 
@@ -224,7 +224,7 @@ The interpretation of the outcome is that given a testset containing 530 positiv
     'underdetermined': False,
     'inconsistency': False}
 
-From the output structure one can read that the accuracy and sensitivity scores are used to reconstruct the interval for specificity (`target_interval_reconstructed`) using the formulas for `tp` and `tn` under the `solution` key. Then, comparing the reconstructed interval with the actual known interval for specificity, one can conclude that they do intersect, hence, the accuracy, sensitivity and specificity scores are not inconsistent.
+From the output structure one can read that the accuracy and sensitivity scores are used to reconstruct the interval for specificity (``target_interval_reconstructed``) using the formulas for ``tp`` and ``tn`` under the ``solution`` key. Then, comparing the reconstructed interval with the actual known interval for specificity, one can conclude that they do intersect, hence, the accuracy, sensitivity and specificity scores are not inconsistent.
 
 In the next example, a consistent set of scores was adjusted randomly to turn them into inconsistent.
 
@@ -239,7 +239,7 @@ In the next example, a consistent set of scores was adjusted randomly to turn th
 
     # True
 
-As the `inconsistency` flag shows, here inconsistencies were identified. Looking into the details of the first failed test (`result['tests_failed'][0]`) one can see that
+As the ``inconsistency`` flag shows, here inconsistencies were identified. Looking into the details of the first failed test (``result['tests_failed'][0]``) one can see that
 
 .. code-block:: bash
 
@@ -260,12 +260,12 @@ As the `inconsistency` flag shows, here inconsistencies were identified. Looking
     'underdetermined': False,
     'inconsistency': True}
 
-The interpretation of the output is that given the accuracy and sensitivity scores (and the `p` and `n` statistics of the dataset), the specificity must fall into the interval `target_interval_reconstructed`, however, as one can observe the supplied specificity score, it does not, which indicates an inconsistency among the scores.
+The interpretation of the output is that given the accuracy and sensitivity scores (and the ``p`` and ``n`` statistics of the dataset), the specificity must fall into the interval ``target_interval_reconstructed``, however, as one can observe the supplied specificity score, it does not, which indicates an inconsistency among the scores.
 
 1 dataset with kfold mean-of-ratios (MoR)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is the most common in the applications and research of machine learning. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (`acc`, `sens`, `spec`, `bacc`) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the `tp` and `tn` parameters of all folds and checks its feasibility.
+This scenario is the most common in the applications and research of machine learning. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the ``tp`` and ``tn`` parameters of all folds and checks its feasibility.
 
 In the example below, a consistent set of figures is generated and tested:
 
@@ -283,7 +283,7 @@ In the example below, a consistent set of figures is generated and tested:
 
     # False
 
-As one can from the output flag, there are no inconsistencies identified. The `result` dict contains some further entries to find further details of the test. Most importantly, under the key `lp_status` one can find the status of the linear programming solver, and under the key `lp_configuration`, one can find the values of all `tp` and `tn` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
+As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further entries to find further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
 
 .. code-block:: bash
 
@@ -353,14 +353,14 @@ Finally, we mention that if there are hints for bounds on the scores in the fold
 
     >> True
 
-Note that in this example, although `f1` is provided, it is completely ignored as the aggregated tests work only for the four completely linear scores.
+Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four completely linear scores.
 
 1 dataset with kfold ratio-of-means (RoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When the scores are calculated in the Ratio-of-Means (RoM) manner in a k-fold scenario, it means that the total confusion matrix (`tp` and `tn` values) of all folds is calculated first, and then some of the formulas (`acc`, `sens`, `spec`, `npv`, `ppv`, `f1`, `fm`) are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the `p` and `n` statistics of the dataset, but the actual structure of the folds is irrelevant. The details of the analysis are structured similarly and are accessible under the `individual_results` key of the resulting dictionary.
+When the scores are calculated in the Ratio-of-Means (RoM) manner in a k-fold scenario, it means that the total confusion matrix (``tp`` and ``tn`` values) of all folds is calculated first, and then some of the formulas (``acc``, ``sens``, ``spec``, ``npv``, ``ppv``, ``f1``, ``fm``) are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The details of the analysis are structured similarly and are accessible under the ``individual_results`` key of the resulting dictionary.
 
-However, having the fold structure enables the testing of the four linear scores (`acc`, `sens`, `spec` and `bacc`) with potential bounds using linear programming. If any of the four linear scores are supplied and at least one bound is specified, then a linear programming based check similar to the one in the "1 dataset with kfold MoR" scenario is executed. The details of the analysis are structured similarly, and appear under the `aggregated_results` key of the resulting dictionary.
+However, having the fold structure enables the testing of the four linear scores (``acc``, ``sens``, ``spec`` and ``bacc``) with potential bounds using linear programming. If any of the four linear scores are supplied and at least one bound is specified, then a linear programming based check similar to the one in the "1 dataset with kfold MoR" scenario is executed. The details of the analysis are structured similarly, and appear under the ``aggregated_results`` key of the resulting dictionary.
 
 In the following example an inconsistent scenario is prepared, and due to the fold level score bounds besides the testing of the individual results, the linear programming based test is also executed.
 
@@ -385,7 +385,7 @@ For further details of the analysis the user can access both the details of the 
 n datasets with k-folds, RoM over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is very similar to the "1 dataset k-fold RoM" scenario, except there is another level of aggregation over datasets, however, still one single confusion matrix is determined first for the entire experiment and the 8 supported scores are calculated from it. In this scenario a list of datasets needs to be specified potentially with folds. If there are score bounds specified for the folds, besides the testing of the individual figures, the aggregated check is also executed. The output of the test is structured similarly as in the "1 dataset k-fold RoM" case, there is a top level `inconsistency` flag indicating if inconsistency has been detected. In the following example a consistent case is prepared with two datasets and some mild score bounds.
+This scenario is very similar to the "1 dataset k-fold RoM" scenario, except there is another level of aggregation over datasets, however, still one single confusion matrix is determined first for the entire experiment and the 8 supported scores are calculated from it. In this scenario a list of datasets needs to be specified potentially with folds. If there are score bounds specified for the folds, besides the testing of the individual figures, the aggregated check is also executed. The output of the test is structured similarly as in the "1 dataset k-fold RoM" case, there is a top level ``inconsistency`` flag indicating if inconsistency has been detected. In the following example a consistent case is prepared with two datasets and some mild score bounds.
 
 .. code-block:: Python
 
@@ -408,13 +408,13 @@ This scenario is very similar to the "1 dataset k-fold RoM" scenario, except the
 
     >> False
 
-The results show that the scores are consistent. Further details are available under the keys `individual_results` and `aggregated_results`. We mention that score bounds at the dataset level could also be specified by adding the `score_bounds` key to the dataset specifications.
+The results show that the scores are consistent. Further details are available under the keys ``individual_results`` and ``aggregated_results``. We mention that score bounds at the dataset level could also be specified by adding the ``score_bounds`` key to the dataset specifications.
 
 
 n datasets with k-folds, MoR over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is about performance scores calculated for each dataset individually by the RoM aggregation in any k-folding strategy, and then the scores are aggregated across the datasets in the MoR manner. Because of the overall averaging, one cannot do inference about the non-linear scores, only the four linear scores are supported (`acc`, `sens`, `spec`, `bacc`), and the scores are checked by linear programming. Similarly as before, the specification of a list of datasets is needed. In the following example an inconsistent scenario is checked:
+This scenario is about performance scores calculated for each dataset individually by the RoM aggregation in any k-folding strategy, and then the scores are aggregated across the datasets in the MoR manner. Because of the overall averaging, one cannot do inference about the non-linear scores, only the four linear scores are supported (``acc``, ``sens``, ``spec``, ``bacc``), and the scores are checked by linear programming. Similarly as before, the specification of a list of datasets is needed. In the following example an inconsistent scenario is checked:
 
 .. code-block:: Python
 
@@ -441,12 +441,12 @@ This scenario is about performance scores calculated for each dataset individual
 
     # True
 
-The output is structured similarly to the '1 dataset k-folds MoR' case, one can query the status of the solver by the key `lp_status` and the actual configuration of the variables by the `lp_configuration` key. In this example dataset specification one can observe bounds both at the fold and the dataset level, which must simultaniously hold.
+The output is structured similarly to the '1 dataset k-folds MoR' case, one can query the status of the solver by the key ``lp_status`` and the actual configuration of the variables by the ``lp_configuration`` key. In this example dataset specification one can observe bounds both at the fold and the dataset level, which must simultaniously hold.
 
 n datasets with k-folds, MoR over datasets and MoR over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The last supported scenario is when scores are calculated in the MoR manner for each dataset, and then aggregated again across the datasets. Again, because of the averaging, only the four linear scores (`acc`, `sens`, `spec`, `bacc`) are supported. Again, the list of datasets involved in the experiment must be specified. In the following example a consistent scenario is checked with three datasets and without score bounds specified at any level:
+The last supported scenario is when scores are calculated in the MoR manner for each dataset, and then aggregated again across the datasets. Again, because of the averaging, only the four linear scores (``acc``, ``sens``, ``spec``, ``bacc``) are supported. Again, the list of datasets involved in the experiment must be specified. In the following example a consistent scenario is checked with three datasets and without score bounds specified at any level:
 
 .. code-block:: Python
 
@@ -468,7 +468,7 @@ The last supported scenario is when scores are calculated in the MoR manner for 
 
     >> False
 
-Being an aggregated test, again, the details of the analysis are accessible under the `lp_status` and `lp_configuration` keys.
+Being an aggregated test, again, the details of the analysis are accessible under the ``lp_status`` and ``lp_configuration`` keys.
 
 Not knowing the mode of aggregation
 -----------------------------------
