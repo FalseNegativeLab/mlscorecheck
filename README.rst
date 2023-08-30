@@ -35,7 +35,9 @@ mlscorecheck: testing the consistency of binary classification performance score
 In a nutshell
 =============
 
-One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores with the presumed way of calculation are inconsistent with each other. The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
+One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores are consistent with each other and the assumptions on the experimental setup.
+
+The consistency tests are numerical and **not** statistical: if inconsistencies are identified, it means that either the assumptions on the evaluation protocol or the reported scores are incorrect.
 
 Latest news
 ===========
@@ -144,10 +146,11 @@ There are multiple ways to specify a dataset with some folding structure, either
 
     # kfold with 2 repetitions of stratified folding of 3 folds
     dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3,
-                "folding": "stratified_sklearn"}
+
+    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
+
     dataset = {"folds": [{"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6},
-                {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
+                            {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
 
 Score bounds can be added in multiple ways:
 
@@ -195,9 +198,9 @@ In the example below, the scores are generated to be consistent, and accordingly
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
     result = check_1_testset_no_kfold_scores(
-            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}, # the published scores
-            eps=1e-2, # the numerical uncertainty
-            testset={'p': 530, 'n': 902} # the statistics of the dataset
+            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
+            eps=1e-2,
+            testset={'p': 530, 'n': 902}
         )
     result['inconsistency']
 
@@ -205,21 +208,21 @@ In the example below, the scores are generated to be consistent, and accordingly
 
 The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus ``0.01`` could be the result of a real evaluation. In the ``result`` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys ``tests_succeeded`` and ``tests_failed`` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry (``result['tests_succeeded'][0]``) of the succeeded list reads as
 
-.. code-block:: bash
+.. code-block:: json
 
     {'details': [{'score_0': 'acc',
-    'score_0_interval': (0.6099979999999999, 0.6300020000000001),
-    'score_1': 'sens',
-    'score_1_interval': (0.209998, 0.230002),
-    'target_score': 'spec',
-    'target_interval': (0.8499979999999999, 0.870002),
-    'solution': {'tp': (111.29894, 121.90106),
-        'tn': (751.6160759999999, 790.8639240000001),
-        'tp_formula': 'p*sens',
-        'tn_formula': 'acc*n + acc*p - p*sens'},
-    'inconsistency': False,
-    'explanation': 'the target score interval ((0.8499979999999999, 0.870002)) and the reconstructed intervals ((0.8332772461197339, 0.8767892727272728)) do intersect',
-    'target_interval_reconstructed': (0.8332772461197339, 0.8767892727272728)}],
+                'score_0_interval': (0.6099979999999999, 0.6300020000000001),
+                'score_1': 'sens',
+                'score_1_interval': (0.209998, 0.230002),
+                'target_score': 'spec',
+                'target_interval': (0.8499979999999999, 0.870002),
+                'solution': {'tp': (111.29894, 121.90106),
+                            'tn': (751.6160759999999, 790.8639240000001),
+                            'tp_formula': 'p*sens',
+                            'tn_formula': 'acc*n + acc*p - p*sens'},
+                'inconsistency': False,
+                'explanation': 'the target score interval ((0.8499979999999999, 0.870002)) and the reconstructed intervals ((0.8332772461197339, 0.8767892727272728)) do intersect',
+                'target_interval_reconstructed': (0.8332772461197339, 0.8767892727272728)}],
     'edge_scores': [],
     'underdetermined': False,
     'inconsistency': False}
@@ -241,21 +244,21 @@ In the next example, a consistent set of scores was adjusted randomly to turn th
 
 As the ``inconsistency`` flag shows, here inconsistencies were identified. Looking into the details of the first failed test (``result['tests_failed'][0]``) one can see that
 
-.. code-block:: bash
+.. code-block:: json
 
     {'details': [{'score_0': 'acc',
-    'score_0_interval': (0.9529979999999999, 0.955002),
-    'score_1': 'sens',
-    'score_1_interval': (0.932998, 0.9350020000000001),
-    'target_score': 'spec',
-    'target_interval': (0.9839979999999999, 0.986002),
-    'solution': {'tp': (960.054942, 962.1170580000002),
-        'tn': (2989.965647999999, 3000.3383520000007),
-        'tp_formula': 'p*sens',
-        'tn_formula': 'acc*n + acc*p - p*sens'},
-    'inconsistency': True,
-    'explanation': 'the target score interval ((0.9839979999999999, 0.986002)) and the reconstructed intervals ((0.9589370262989092, 0.9622637434252729)) do not intersect',
-    'target_interval_reconstructed': (0.9589370262989092, 0.9622637434252729)}],
+                'score_0_interval': (0.9529979999999999, 0.955002),
+                'score_1': 'sens',
+                'score_1_interval': (0.932998, 0.9350020000000001),
+                'target_score': 'spec',
+                'target_interval': (0.9839979999999999, 0.986002),
+                'solution': {'tp': (960.054942, 962.1170580000002),
+                            'tn': (2989.965647999999, 3000.3383520000007),
+                            'tp_formula': 'p*sens',
+                            'tn_formula': 'acc*n + acc*p - p*sens'},
+                'inconsistency': True,
+                'explanation': 'the target score interval ((0.9839979999999999, 0.986002)) and the reconstructed intervals ((0.9589370262989092, 0.9622637434252729)) do not intersect',
+                'target_interval_reconstructed': (0.9589370262989092, 0.9622637434252729)}],
     'edge_scores': [],
     'underdetermined': False,
     'inconsistency': True}
@@ -285,32 +288,32 @@ In the example below, a consistent set of figures is generated and tested:
 
 As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further entries to find further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
 
-.. code-block:: bash
+.. code-block:: json
 
     {'id': 'monjhyriadkqzmza',
     'figures': {'p': 126, 'n': 131, 'tp': 93.0, 'tn': 49.0},
     'scores': {'acc': 0.572689127483648,
-    'sens': 0.7684511434511435,
-    'spec': 0.5556354226566993,
-    'bacc': 0.6620432830539213},
+                'sens': 0.7684511434511435,
+                'spec': 0.5556354226566993,
+                'bacc': 0.6620432830539213},
     'score_bounds': None,
     'score_bounds_flag': None,
     'bounds_flag': True,
     'folds': [{'identifier': 'pwjncyepgdalgccc',
     'figures': {'tn': 13.0, 'tp': 49.0},
     'scores': {'acc': 0.4246575342465753,
-        'sens': 0.9423076923076924,
-        'spec': 0.13829787234042554,
-        'bacc': 0.5403027823240589},
+                'sens': 0.9423076923076924,
+                'spec': 0.13829787234042554,
+                'bacc': 0.5403027823240589},
     'score_bounds': None,
     'score_bounds_flag': None,
     'bounds_flag': True},
     {'identifier': 'nibjsmoafamcpezu',
     'figures': {'tn': 36.0, 'tp': 44.0},
     'scores': {'acc': 0.7207207207207207,
-        'sens': 0.5945945945945946,
-        'spec': 0.972972972972973,
-        'bacc': 0.7837837837837838},
+                'sens': 0.5945945945945946,
+                'spec': 0.972972972972973,
+                'bacc': 0.7837837837837838},
     'score_bounds': None,
     'score_bounds_flag': None,
     'bounds_flag': True}]}
