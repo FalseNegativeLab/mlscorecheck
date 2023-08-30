@@ -35,7 +35,11 @@ mlscorecheck: testing the consistency of binary classification performance score
 In a nutshell
 =============
 
-One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores with the presumed way of calculation are inconsistent with each other. The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
+One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores with the presumed way of calculation are inconsistent with each other.
+
+.. note::
+
+    The inconsistencies identified are **not statistical** but numerical, they hold with certainty.
 
 Latest news
 ===========
