@@ -183,6 +183,8 @@ We highlight again that the tests detect inconsistencies. If the resulting `inco
 
 This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` scores. The test scenario is having one single test set to which the classifier is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
+In this next example, the scores are generated to be consistent, and accordingly, the test did not identify inconsistencies at the `1e-2` level of numerical uncertainty.
+
 .. code-block:: Python
 
     from mlscorecheck.check import check_1_testset_no_kfold_scores
@@ -195,6 +197,35 @@ This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` 
     result['inconsistency']
     >> False
 
+The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus `0.01` could be the result of a real evaluation. In the `result` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys `tests_succeeded` and `tests_failed` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry of the succeeded list reads as
+
+.. code-block:: Python
+
+    result['tests_succeeded'][0]
+
+    >> {'details': [{'score_0': 'acc',
+        'score_0_interval': (0.6099979999999999, 0.6300020000000001),
+        'score_1': 'sens',
+        'score_1_interval': (0.209998, 0.230002),
+        'target_score': 'spec',
+        'target_interval': (0.8499979999999999, 0.870002),
+        'solution': {'tp': (111.29894, 121.90106),
+            'tn': (751.6160759999999, 790.8639240000001),
+            'tp_formula': 'p*sens',
+            'tn_formula': 'acc*n + acc*p - p*sens'},
+        'inconsistency': False,
+        'explanation': 'the target score interval ((0.8499979999999999, 0.870002)) and the reconstructed intervals ((0.8332772461197339, 0.8767892727272728)) do intersect',
+        'target_interval_reconstructed': (0.8332772461197339, 0.8767892727272728)}],
+        'edge_scores': [],
+        'underdetermined': False,
+        'inconsistency': False}
+
+From the output structure one can read that the pair of scores used as basis are the accuracy and sensitivity and they are used to reconstruct the interval for specificity (`target_interval_reconstructed`) using the formulas for `tp` and `tn` under the `solution` key. Then, comparing the reconstructed interval for `spec` with the actual interval which is known, one can conclude that they do intersect, hence, the accuracy, sensitivity and specificity scores are not inconsistent.
+
+In the next example, a consistent set of scores was adjusted randomly to turn them into inconsistent.
+
+.. code-block:: Python
+
     result = check_1_testset_no_kfold_scores(
         scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
         eps=1e-3,
@@ -203,10 +234,35 @@ This test supports checking the `acc`, `sens`, `spec`, `ppv`, `npv`, `f1`, `fm` 
     result['inconsistency']
     >> True
 
-In the first example, inconsistencies have not been detected, however, in the second example, the scores are inconsistent with certainty.
+As the `inconsistency` flag shows, here inconsistencies were identified. Looking into the details one can see that
+
+.. code-block:: Python
+
+    >> result['tests_failed'][0]
+
+    {'details': [{'score_0': 'acc',
+        'score_0_interval': (0.9529979999999999, 0.955002),
+        'score_1': 'sens',
+        'score_1_interval': (0.932998, 0.9350020000000001),
+        'target_score': 'spec',
+        'target_interval': (0.9839979999999999, 0.986002),
+        'solution': {'tp': (960.054942, 962.1170580000002),
+            'tn': (2989.965647999999, 3000.3383520000007),
+            'tp_formula': 'p*sens',
+            'tn_formula': 'acc*n + acc*p - p*sens'},
+        'inconsistency': True,
+        'explanation': 'the target score interval ((0.9839979999999999, 0.986002)) and the reconstructed intervals ((0.9589370262989092, 0.9622637434252729)) do not intersect',
+        'target_interval_reconstructed': (0.9589370262989092, 0.9622637434252729)}],
+        'edge_scores': [],
+        'underdetermined': False,
+        'inconsistency': True}
+
+The interpretation of the output is that given the accuracy and sensitivity scores (and the `p` and `n` statistics of the dataset), the specificity must fall into the interval `target_interval_reconstructed`, however, as one can observe the specificity supplied score, it does not, which indicates an inconsistency among the scores. Either the score values, or the testset's statistics are incorrect.
 
 1 dataset with kfold ratio-of-means (RoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this section we introduce the inconsistency test for repeated k-fold cross-validation, when the scores are calculated in the Ratio-of-Means (RoM) manner. As discussed above, the RoM calculation means that first the total number of true negatives, true positives, etc. are determined, and then score formulas are applied. Essencially, the only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the `p` and `n` statistics of the dataset, the actual structure of the folds is irrelevant. However, having the fold structure, one can specify bounds on four scores, which can then be checked by an additional test using linear programming. In the first example, the vanilla case is illustrated, a consistent set of scores with a dataset with known fold structure:
 
 .. code-block:: Python
 
@@ -226,19 +282,25 @@ In the first example, inconsistencies have not been detected, however, in the se
 
     >> False
 
-    dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
-                'n_folds': 4,
-                'n_repeats': 2,
-                'folding': 'stratified_sklearn'}
-    scores = {'acc': 0.9, 'npv': 0.9, 'sens': 0.6, 'f1p': 0.95}
+Similar details as in the "1 testset no kfold" scenario can be found under the `individual_results` key of the `result` dictionary. In the second example below, the dataset is specified through its name, and additional score bounds are set for each fold. Given that some of the linear scores `acc`, `sens`, `spec` and `bacc` are present, a linear programming check is also executed to see if the boundary conditions can be satistfied.
 
-    result = check_1_dataset_kfold_rom_scores(scores=scores,
+.. code-block:: Python
+
+    >> dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
+            'n_folds': 4,
+            'n_repeats': 2,
+            'folding': 'stratified_sklearn',
+            'fold_score_bounds': {'acc': (0.8, 1.0)}}
+    >> scores = {'acc': 0.9, 'npv': 0.9, 'sens': 0.6, 'f1p': 0.95, 'spec': 0.8}
+
+    >> result = check_1_dataset_kfold_rom_scores(scores=scores,
                                                 eps=1e-2,
                                                 dataset=dataset)
-    result['inconsistency']
+    >> result['inconsistency']
 
-    >> True
+    True
 
+The results show that there are inconsistencies. Beyond the details of individually testing each pair of scores against each other, the result and the details of the aggregated testing are also available under the `aggregated_results` key. The most important details are the status of the linear programming solver `lp_status` and the configuration `lp_configuration` which provides the various `tp` and `tn` values at the termination of the linear programming solution, enabling the checking of the results. For example,
 
 1 dataset with kfold mean-of-ratios (MoR)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
