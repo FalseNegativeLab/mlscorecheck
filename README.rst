@@ -208,7 +208,7 @@ In the example below, the scores are generated to be consistent, and accordingly
 
 The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus ``0.01`` could be the result of a real evaluation. In the ``result`` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys ``tests_succeeded`` and ``tests_failed`` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry (``result['tests_succeeded'][0]``) of the succeeded list reads as
 
-.. code-block:: JSON
+.. code-block:: bash
 
     {'details': [{'score_0': 'acc',
                 'score_0_interval': (0.6099979999999999, 0.6300020000000001),
@@ -244,7 +244,7 @@ In the next example, a consistent set of scores was adjusted randomly to turn th
 
 As the ``inconsistency`` flag shows, here inconsistencies were identified. Looking into the details of the first failed test (``result['tests_failed'][0]``) one can see that
 
-.. code-block:: JSON
+.. code-block:: bash
 
     {'details': [{'score_0': 'acc',
                 'score_0_interval': (0.9529979999999999, 0.955002),
@@ -288,7 +288,7 @@ In the example below, a consistent set of figures is generated and tested:
 
 As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further entries to find further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
 
-.. code-block:: JSON
+.. code-block:: bash
 
     {'id': 'monjhyriadkqzmza',
     'figures': {'p': 126, 'n': 131, 'tp': 93.0, 'tn': 49.0},
