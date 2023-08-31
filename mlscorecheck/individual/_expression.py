@@ -19,7 +19,7 @@ class Expression:
         Args:
             expression (str): the formal expression
             symbols (list(str)): the symbols in the expression
-            functional_symbols (list(str)/None): the function symbols
+            functional_symbols (list(str)|None): the function symbols
         """
         if functional_symbols is None:
             self.functional_symbols = {'sqrt': sqrt}
@@ -35,7 +35,7 @@ class Expression:
             subs (dict(str,key)): the substitution
 
         Returns:
-            numeric/Interval/IntervalUnion: the result of the evaluation
+            numeric|Interval|IntervalUnion: the result of the evaluation
         """
         subs = {**{symbol: subs[symbol] for symbol in self.symbols},
                 'sqrt': sqrt}

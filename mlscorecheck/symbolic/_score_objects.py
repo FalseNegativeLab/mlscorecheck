@@ -68,9 +68,9 @@ class Score: # pylint: disable=too-many-instance-attributes
             symbols (Symbol): A Symbols object representing the base kit of symbols to use
             descriptor (dict): a dictionary descriptor of the score
             function (callable): the functional form
-            expression (sympy/sage/None): the expression of the score
-            equation (sympy/sage/None): the equation form
-            equation_polynomial (sympy/sage/None): the equation in polynomial form
+            expression (sympy_obj|sage_obj/None): the expression of the score
+            equation (sympy_obj|sage_obj/None): the equation form
+            equation_polynomial (sympy_obj|sage_obj/None): the equation in polynomial form
         """
         self.descriptor = descriptor
 

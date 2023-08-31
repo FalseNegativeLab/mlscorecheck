@@ -33,7 +33,7 @@ def generate_1_problem_with_evaluations(*,
         random_folds (bool): whether to consider n_folds as the upper bound for randomization
         max_p (int): the maximum p value
         max_n (int): the maximum n_value
-        random_state (None/int/np.random.RandomState): the random state or seed to be used
+        random_state (None|int/np.random.RandomState): the random state or seed to be used
         folding (str): 'stratified_sklearn'/'random' - the folding strategy
 
     Returns:
@@ -96,7 +96,7 @@ def generate_problems_with_evaluations(n_problems=1,
         random_folds (bool): whether to consider n_folds as the upper bound for randomization
         max_p (int): the maximum p value
         max_n (int): the maximum n_value
-        random_state (None/int/np.random.RandomState): the random state or seed to be used
+        random_state (None|int/np.random.RandomState): the random state or seed to be used
         folding (str): 'stratified_sklearn'/'random' - the folding strategy
 
     Returns:

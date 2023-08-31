@@ -1,5 +1,5 @@
-Checking the consistency of performance scores
-----------------------------------------------
+Testing the consistency of performance scores
+---------------------------------------------
 
 Numerous experimental protocols are supported by the package in which performance scores of binary classification can be produced. In this section we go through them one by one giving some examples of possible use cases.
 
@@ -21,7 +21,7 @@ With a MoR type of aggregation, only the averages of scores over folds or datase
 1 testset with no kfold
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This test assumes that at least three of the ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``f1``, ``fm`` scores are reported. A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
+This test assumes that at least three of the ``acc``, ``sens``, ``spec``, ``bacc``, ``ppv``, ``npv``, ``f1``, ``fm`` scores are reported. A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
 In the example below, the scores are generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
 

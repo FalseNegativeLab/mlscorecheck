@@ -11,11 +11,11 @@ def round_scores(to_round, rounding_decimals=None):
     Rounds the scores
 
     Args:
-        to_round (float/dict): the score(s) to round
-        rounding_decimals (int/None): the number of decimal places to round to
+        to_round (float|dict): the score(s) to round
+        rounding_decimals (int|None): the number of decimal places to round to
 
     Returns:
-        float/dict: the founded scores
+        float|dict: the founded scores
     """
     if rounding_decimals is None:
         return {**to_round}

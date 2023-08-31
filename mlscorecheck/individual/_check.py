@@ -99,7 +99,7 @@ def create_intervals(scores, eps, numerical_tolerance=NUMERICAL_TOLERANCE):
 
     Args:
         scores (dict): the scores to be turned into intervals
-        eps (float/dict): the numerical uncertainty
+        eps (float|dict): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -160,7 +160,7 @@ def check_zero_division(result):
         result (dict): the dictionary of results
 
     Returns:
-        None/dict: None if there is no zero division, some explanation otherwise
+        None|dict: None if there is no zero division, some explanation otherwise
     """
     if result.get('message', None) == 'zero division':
         return {'inconsistency': False,
@@ -175,7 +175,7 @@ def check_negative_base(result):
         result (dict): the dictionary of results
 
     Returns:
-        None/dict: None if there is no negative base, some explanation otherwise
+        None|dict: None if there is no negative base, some explanation otherwise
     """
     if result.get('message', None) == 'negative base':
         return {'inconsistency': True,
@@ -187,11 +187,11 @@ def check_empty_interval(interval, name):
     Check if the interval is empty
 
     Args:
-        interval (Interval/IntervalUnion): the interval
+        interval (Interval|IntervalUnion): the interval
         name (str): name of the variable the interval is determined for
 
     Returns:
-        None/dict: None if the interval is not empty, some explanation otherwise
+        None|dict: None if the interval is not empty, some explanation otherwise
     """
     if interval.is_empty():
         return {'inconsistency': True,
@@ -203,8 +203,8 @@ def check_intersection(target, reconstructed):
     Checks the intersection of the target score and the reconstructed interval
 
     Args:
-        target (Interval/IntervalUnion): the interval
-        reconstructed (Interval/IntervalUnion): the reconstructed interval
+        target (Interval|IntervalUnion): the interval
+        reconstructed (Interval|IntervalUnion): the reconstructed interval
 
     Returns:
         dict: a dictionary containing the consistency decision and the explanation
@@ -227,7 +227,7 @@ def evaluate_1_solution(target_interval, result, p, n, score_function):
     Carry out the evaluation for 1 particular solution
 
     Args:
-        target_interval (Interval/IntervalUnion): the interval of the target score
+        target_interval (Interval|IntervalUnion): the interval of the target score
         result (dict): the result of the evaluation
         p (int): the number of positives
         n (int): the number of negatives
@@ -273,7 +273,7 @@ def check_2v1(scores,
 
     Args:
         scores (dict(str,float)): the scores
-        eps (float/dict(str,float)): the numerical uncertainty(ies)
+        eps (float|dict(str,float)): the numerical uncertainty(ies)
         problem (tuple(str,str,str)): the problem specification in the form
                                         (base_score0, base_score1, target_score)
         p (int): the number of positives
@@ -339,7 +339,7 @@ def check_individual_scores(scores, p, n, eps, numerical_tolerance=1e-6):
         scores (dict): the scores to check
         p (int): the number of positives
         n (int): the number of negatives
-        eps (float/dict): the numerical uncertainty of the scores
+        eps (float|dict): the numerical uncertainty of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -348,8 +348,8 @@ def check_individual_scores(scores, p, n, eps, numerical_tolerance=1e-6):
 
     Returns:
         dict: the result of the check. The 'consistency' flag contains the
-                overall decision, the 'succeeded' and 'failed' lists contain
-                the details of the individual tests
+        overall decision, the 'succeeded' and 'failed' lists contain
+        the details of the individual tests
     """
     check_uncertainty_and_tolerance(eps, numerical_tolerance)
 

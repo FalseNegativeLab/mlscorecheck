@@ -34,9 +34,12 @@ def generate_experiment_specification(*,
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of folds
         max_n_repeats (int): the maximum number of repeats
-        random_state (int/np.random.RandomState/None): the random state to use
-        aggregation (str/None): 'mor'/'rom' - the aggregation of the experiment
-        aggregation_ds (str/None): 'mor'/'rom' - the aggregation in the datasets
+        random_state (int|np.random.RandomState|None): the random state to use
+        aggregation (str|None): 'mor'/'rom' - the aggregation of the experiment
+        aggregation_ds (str|None): 'mor'/'rom' - the aggregation in the datasets
+
+    Returns:
+        dict: the experiment specification
     """
     random_state = init_random_state(random_state)
 
@@ -73,8 +76,8 @@ def generate_datasets_and_scores(*, # pylint: disable=too-many-locals
     Generate a set of random datasets and the corrsponding scores
 
     Args:
-        score_subset(list/None): the list of scores to calculate
-        rounding_decimals (ident/None): the number of decimal places to round to
+        score_subset(list|None): the list of scores to calculate
+        rounding_decimals (int|None): the number of decimal places to round to
         fold_score_bounds (bool): whether to add fold bounds
         feasible_fold_score_bounds (bool): whether the fold bounds should be feasible
         ds_score_bounds (bool): whether to add score bounds to the datasets
@@ -84,9 +87,9 @@ def generate_datasets_and_scores(*, # pylint: disable=too-many-locals
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of folds
         max_n_repeats (int): the maximum number of repeats
-        random_state (int/np.random.RandomState/None): the random state to use
-        aggregation (str/None): 'mor'/'rom' - the aggregation of the experiment
-        aggregation_ds (str/None): 'mor'/'rom' - the aggregation in the datasets
+        random_state (int|np.random.RandomState|None): the random state to use
+        aggregation (str|None): 'mor'/'rom' - the aggregation of the experiment
+        aggregation_ds (str|None): 'mor'/'rom' - the aggregation in the datasets
 
     Returns:
         list, dict: the list of dataset specifications and the corresponding random scores
@@ -138,7 +141,7 @@ class Experiment:
         Args:
             aggregation (str): 'mor'/'rom' - the aggregation strategy
             datasets (list(dict)): the dataset specifications
-            identifier (None/str): the id of the experiment
+            identifier (None|str): the id of the experiment
 
         Raises:
             ValueError: if the specification is inconsistent or the aggregation
@@ -186,7 +189,7 @@ class Experiment:
 
         Returns:
             bool: a flag indicating if the experiment has score bounds specified on
-                    datasets or folds
+            datasets or folds
         """
         return any(dataset.has_downstream_bounds() or dataset.score_bounds is not None
                     for dataset in self.datasets)
@@ -203,7 +206,7 @@ class Experiment:
         Samples the problem, that is, generates random (but physical) tp and tn values
 
         Args:
-            random_state (None/int/np.random.RandomState): the random state to use
+            random_state (None|int|np.random.RandomState): the random state to use
 
         Returns:
             self: the sampled dataset
@@ -236,8 +239,8 @@ class Experiment:
         Calculates all scores for the fold
 
         Args:
-            score_subset (None/list): the subset of scores to calculate
-            rounding_decimals (None/float): how many digits to round the decimals to
+            score_subset (None|list): the subset of scores to calculate
+            rounding_decimals (None|float): how many digits to round the decimals to
 
         Returns:
             dict(str,float): the scores
@@ -260,7 +263,7 @@ class Experiment:
         Extract min-max bounds for scores in the datasets
 
         Args:
-            score_subset (list/None): the subset of scores to extract bounds for
+            score_subset (list|None): the subset of scores to extract bounds for
 
         Returns:
             dict (str,list(float,float)): the minimum and maximum values
@@ -276,7 +279,7 @@ class Experiment:
         Extract bounds for the datasets
 
         Args:
-            score_subset (list/None): the subset of scores to extract bounds for
+            score_subset (list|None): the subset of scores to extract bounds for
             feasible (bool): if True, the bounds will be feasible, else unfeasible
 
         Returns:
@@ -289,7 +292,7 @@ class Experiment:
         Extract bounds for the folds of the datasets
 
         Args:
-            score_subset (list/None): the subset of scores to extract bounds for
+            score_subset (list|None): the subset of scores to extract bounds for
             feasible (bool): if True, the bounds will be feasible, else unfeasible
 
         Returns:
@@ -318,7 +321,7 @@ class Experiment:
         Adds bounds to each dataset
 
         Args:
-            score_bounds (dict/list(dict)): the bounds to add
+            score_bounds (dict|list(dict)): the bounds to add
 
         Returns:
             Experiment: the updated experiment object

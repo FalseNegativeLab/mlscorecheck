@@ -29,12 +29,11 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
     executed to see if the bound conditions can be satisfied.
 
     Args:
-
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty(ies) of the scores
+        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         datasets (list[dict]): the dataset specification
-        solver_name (None/str): the solver to use
-        timeout (None/int): the timeout for the linear programming solver in seconds
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): verbosity of the pulp linear programming solver
                             0: silent, non-zero: verbose
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
@@ -44,93 +43,81 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-
         dict: the dictionary of the results of the analysis, the
-                'inconsistency' entry indicates if inconsistencies have
-                been found. The aggregated_results entry is empty if
-                the execution of the linear programming based check was
-                unnecessary. The result contains two more keys. Under the key
-                'individual_results' one finds a structure similar to that of
-                the 1_dataset_no_kfold output, summarizing the findings of
-                checking the consistency of each pair of scores against a third
-                score. Additionally, the key 'aggregated_results' is available
-                if score_bounds are specified and the aggregated checks are
-                executed. In the aggregated_results one finds again the
-                'inconsistency' flag, the status of the linear programming solver
-                ('lp_status') and under the 'lp_configuration' key one finds
-                the actual configuration of tp and tn variables with all
-                scores calculated and the score_bounds checked where they
-                were specified. Also, under the 'lp_status' key one finds the
-                status message of the linear solver, and in the as a double check, the
-                flag under the key 'lp_configuration_scores_match' indicates if the
-                scores of the final configuration match the specified ones, similarly,
-                the 'lp_configuration_bounds_match' indicates if all bounds are
-                satisfied.
+        ``inconsistency`` entry indicates if inconsistencies have
+        been found. The aggregated_results entry is empty if
+        the execution of the linear programming based check was
+        unnecessary. The result contains two more keys. Under the key
+        ``individual_results`` one finds a structure similar to that of
+        the 1_dataset_no_kfold output, summarizing the findings of
+        checking the consistency of each pair of scores against a third
+        score. Additionally, the key ``aggregated_results`` is available
+        if score_bounds are specified and the aggregated checks are
+        executed. In the aggregated_results one finds again the
+        ``inconsistency`` flag, the status of the linear programming solver
+        (``lp_status``) and under the ``lp_configuration`` key one finds
+        the actual configuration of tp and tn variables with all
+        scores calculated and the score_bounds checked where they
+        were specified. Also, under the ``lp_status`` key one finds the
+        status message of the linear solver, and in the as a double check, the
+        flag under the key ``lp_configuration_scores_match`` indicates if the
+        scores of the final configuration match the specified ones, similarly,
+        the ``lp_configuration_bounds_match`` indicates if all bounds are
+        satisfied.
 
     Raises:
-
         ValueError: if the problem is not specified properly
 
     Examples:
-
-        datasets = [{'p': 389,
-                        'n': 630,
-                        'n_folds': 6,
-                        'n_repeats': 3,
+        >>> datasets = [{'p': 389, 'n': 630,
+                        'n_folds': 6, 'n_repeats': 3,
                         'folding': 'stratified_sklearn',
                         'fold_score_bounds': {'acc': (0, 1)}},
                     {'name': 'common_datasets.saheart',
-                        'n_folds': 2,
-                        'n_repeats': 5,
+                        'n_folds': 2, 'n_repeats': 5,
                         'folding': 'stratified_sklearn'}]
-        scores = {'acc': 0.467, 'sens': 0.432, 'spec': 0.488, 'f1p': 0.373}
+        >>> scores = {'acc': 0.467, 'sens': 0.432, 'spec': 0.488, 'f1p': 0.373}
+        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                                            datasets=datasets,
+                                                            eps=1e-3)
+        >>> result['inconsistency']
+        # False
 
-        result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
-                                                datasets=datasets,
-                                                eps=1e-3)
-        result['inconsistency']
+        >>> datasets = [{'folds': [{'p': 98, 'n': 8},
+                                    {'p': 68, 'n': 25},
+                                    {'p': 92, 'n': 19},
+                                    {'p': 78, 'n': 61},
+                                    {'p': 76, 'n': 67}]},
+                        {'name': 'common_datasets.zoo-3',
+                            'n_folds': 3,
+                            'n_repeats': 4,
+                            'folding': 'stratified_sklearn'},
+                        {'name': 'common_datasets.winequality-red-3_vs_5',
+                            'n_folds': 5,
+                            'n_repeats': 5,
+                            'folding': 'stratified_sklearn'}]
+        >>> scores = {'acc': 0.4532, 'sens': 0.6639, 'npv': 0.9129, 'f1p': 0.2082}
+        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                                            datasets=datasets,
+                                                            eps=1e-4)
+        >>> result['inconsistency']
+        # False
 
-        >> False
-
-        datasets = [{'folds': [{'p': 98, 'n': 8},
-                        {'p': 68, 'n': 25},
-                        {'p': 92, 'n': 19},
-                        {'p': 78, 'n': 61},
-                        {'p': 76, 'n': 67}]},
-            {'name': 'common_datasets.zoo-3',
-                'n_folds': 3,
-                'n_repeats': 4,
-                'folding': 'stratified_sklearn'},
-            {'name': 'common_datasets.winequality-red-3_vs_5',
-                'n_folds': 5,
-                'n_repeats': 5,
-                'folding': 'stratified_sklearn'}]
-        scores = {'acc': 0.4532, 'sens': 0.6639, 'npv': 0.9129, 'f1p': 0.2082}
-
-        result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
-                                        datasets=datasets,
-                                        eps=1e-4)
-        result['inconsistency']
-
-        >> False
-
-        datasets = [{'folds': [{'p': 98, 'n': 8},
-                        {'p': 68, 'n': 25},
-                        {'p': 92, 'n': 19},
-                        {'p': 78, 'n': 61},
-                        {'p': 76, 'n': 67}]},
-                    {'name': 'common_datasets.zoo-3',
-                        'n_folds': 3,
-                        'n_repeats': 4,
-                        'folding': 'stratified_sklearn'}]
-        scores = {'acc': 0.9, 'spec': 0.85, 'ppv': 0.7}
-
-        result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
-                                        datasets=datasets,
-                                        eps=1e-4)
-        result['inconsistency']
-
-        >> True
+        >>> datasets = [{'folds': [{'p': 98, 'n': 8},
+                                    {'p': 68, 'n': 25},
+                                    {'p': 92, 'n': 19},
+                                    {'p': 78, 'n': 61},
+                                    {'p': 76, 'n': 67}]},
+                        {'name': 'common_datasets.zoo-3',
+                            'n_folds': 3,
+                            'n_repeats': 4,
+                            'folding': 'stratified_sklearn'}]
+        >>> scores = {'acc': 0.9, 'spec': 0.85, 'ppv': 0.7}
+        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                                            datasets=datasets,
+                                                            eps=1e-4)
+        >>> result['inconsistency']
+        # True
 
     """
     if any(dataset.get('aggregation', 'rom') != 'rom' for dataset in datasets):

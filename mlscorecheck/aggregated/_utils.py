@@ -33,13 +33,13 @@ def check_bounds(scores, bounds, tolerance=1e-5):
     Checks the bounds for the scores
 
     Args:
-        scores (dict(str,float/int)): a dictionary of scores
-        bounds (dict(str,tuple(float/int,float/int))): the dictionary of bounds
+        scores (dict(str,float|int)): a dictionary of scores
+        bounds (dict(str,tuple(float|int,float|int))): the dictionary of bounds
         tolerance (float): the tolerance for the check
 
     Returns:
         None/bool: None if the bounds are not specified, otherwise a flag
-                    if the scores are within the bounds
+        if the scores are within the bounds
     """
 
     if bounds is None:
@@ -61,7 +61,7 @@ def compare_scores(scores0, scores1, eps, subset=None, tolerance=1e-5):
     Args:
         scores0 (dict(str,float)): the first set of scores
         scores1 (dict(str,float)): the second set of scores
-        eps (float/dict(str,float)): the eps value(s)
+        eps (float|dict(str,float)): the eps value(s)
         subset (list(str)): the subset to compare
         tolerance (float): the additional tolerance for numerical uncertainty
     """

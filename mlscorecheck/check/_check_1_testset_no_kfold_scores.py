@@ -21,7 +21,6 @@ def check_1_testset_no_kfold_scores(scores,
     with no kfolding or aggregation over multiple datasets.
 
     Args:
-
         scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm')
         eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)
@@ -33,32 +32,29 @@ def check_1_testset_no_kfold_scores(scores,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-
         dict:   a dictionary containing the details of the analysis, the boolean 'inconsistency'
         attribute indicates if inconsistency was found. Additionally, the result contains
         four more keys describing all details of the consistency check.
-        Under the key 'tests_succeeded' one finds the list of all tests
+        Under the key ``tests_succeeded`` one finds the list of all tests
         (comparing the consistency of one score against two others) that passed.
-        Under the key 'tests_failed' one finds the list of all tests
+        Under the key ``tests_failed`` one finds the list of all tests
         that failed. Consistency is identified if any of the tests fails.
         Both lists contain entries describing the details of the test, e.g.,
         what were the assumptions on the intervals of the given scores,
         which formulas were applied and what was the reconstructed interval of
         the target score.
         Beyond the individual test cases, one finds two more keys, the
-        edge_cases contains the list of all scores which are edge cases
+        ``edge_cases`` contains the list of all scores which are edge cases
         and might lead to underdetermined systems (by edge cases we mean the score
         took its minimum or maximum value, which usually turns the tests ineffective).
-        The final key is 'underdetermined', which is true if the system is
+        The final key is ``underdetermined``, which is true if the system is
         underdetermined, the values of the scores do not allow the checks to be
         executed.
 
     Raises:
-
         ValueError: if the problem is not specified properly
 
     Examples:
-
         Specify a testset either by the 'p' and 'n' scores, or the
         name of the dataset. For the list of supported datasets see
         mlscorecheck.experiments.dataset_statistics.

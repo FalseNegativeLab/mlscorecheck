@@ -4,6 +4,7 @@ scores calculated by the mean-of-ratios aggregation
 in a kfold scenario on one single dataset.
 """
 
+from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import check_aggregated_scores, Experiment
 
 __all__ = ['check_1_dataset_kfold_mor_scores']
@@ -15,7 +16,7 @@ def check_1_dataset_kfold_mor_scores(scores,
                                     solver_name=None,
                                     timeout=None,
                                     verbosity=1,
-                                    numerical_tolerance=1e-6):
+                                    numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
@@ -30,10 +31,10 @@ def check_1_dataset_kfold_mor_scores(scores,
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty(ies) of the scores
+        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         dataset (dict): the dataset specification
-        solver_name (None/str): the solver to use
-        timeout (None/int): the timeout for the linear programming solver in seconds
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
                             0: silent, non-zero: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
@@ -44,58 +45,52 @@ def check_1_dataset_kfold_mor_scores(scores,
 
     Returns:
         dict: the dictionary of the results of the analysis, the
-                'inconsistency' entry indicates if inconsistencies have
-                been found. The aggregated_results entry is empty if
-                the execution of the linear programming based check was
-                unnecessary. The result has four more keys. Under 'lp_status'
-                one finds the status of the lp solver, under 'lp_configuration_scores_match'
-                one finds a flag indicating if the scores from the lp configuration
-                match the scores provided, 'lp_configuration_bounds_match' indicates
-                if the specified bounds match the actual figures and finally
-                'lp_configuration' contains the actual configuration of the
-                linear programming solver.
+        ``inconsistency`` entry indicates if inconsistencies have
+        been found. The aggregated_results entry is empty if
+        the execution of the linear programming based check was
+        unnecessary. The result has four more keys. Under ``lp_status``
+        one finds the status of the lp solver, under ``lp_configuration_scores_match``
+        one finds a flag indicating if the scores from the lp configuration
+        match the scores provided, ``lp_configuration_bounds_match`` indicates
+        if the specified bounds match the actual figures and finally
+        ``lp_configuration`` contains the actual configuration of the
+        linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly
 
     Examples:
-        dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
-        scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-
-        result = check_1_dataset_kfold_mor_scores(scores=scores,
+        >>> dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
+        >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
+        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
                                                     eps=1e-3,
                                                     dataset=dataset)
-        result['inconsistency']
+        >>> result['inconsistency']
+        # False
 
-        >> False
-
-        dataset = {'p': 398,
-                    'n': 569,
-                    'n_folds': 4,
-                    'n_repeats': 2,
-                    'folding': 'stratified_sklearn'}
-        scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-
-        result = check_1_dataset_kfold_mor_scores(scores=scores,
+        >>> dataset = {'p': 398,
+                        'n': 569,
+                        'n_folds': 4,
+                        'n_repeats': 2,
+                        'folding': 'stratified_sklearn'}
+        >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
+        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
                                                     eps=1e-2,
                                                     dataset=dataset)
-        result['inconsistency']
+        >>> result['inconsistency']
+        # True
 
-        >> True
-
-        dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
-                    'n_folds': 4,
-                    'n_repeats': 2,
-                    'folding': 'stratified_sklearn',
-                    'fold_score_bounds': {'acc': (0.8, 1.0)}}
-        scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
-
-        result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                    eps=1e-2,
-                                                    dataset=dataset)
-        result['inconsistency']
-
-        >> True
+        >>> dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
+                        'n_folds': 4,
+                        'n_repeats': 2,
+                        'folding': 'stratified_sklearn',
+                        'fold_score_bounds': {'acc': (0.8, 1.0)}}
+        >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
+        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
+                                                        eps=1e-2,
+                                                        dataset=dataset)
+        >>> result['inconsistency']
+        # True
 
     """
     if dataset.get('aggregation', 'mor') != 'mor':

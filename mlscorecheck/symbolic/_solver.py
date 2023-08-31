@@ -14,7 +14,7 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
     Recursive core of collecting all denominators and bases
 
     Args:
-        expression (sympy/sage): an expression
+        expression (sympy_obj|sage_obj): an expressio
         denoms (list): the list of already collected denominators
         bases (list): the list of already collected bases
         algebra (Algebra): the algebra to be used
@@ -46,7 +46,7 @@ def collect_denominators_and_bases(expression, algebra):
     Top level function for recursively collecting all denominators and bases
 
     Args:
-        expression (sympy/sage): the expression to process
+        expression (sympy_obj|sage_obj): the expression to process
         algebra (Algebra): the algebra to be used
 
     Returns:
@@ -67,8 +67,8 @@ class ProblemSolver:
         The constructor of the object
 
         Args:
-            score0 (ScoreObject): the first score object
-            score1 (ScoreObject): the second score object
+            score0 (Score): the first score object
+            score1 (Score): the second score object
         """
         self.score0 = score0
         self.score1 = score1

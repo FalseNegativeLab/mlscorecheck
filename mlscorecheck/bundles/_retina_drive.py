@@ -23,11 +23,11 @@ def _drive_aggregated_test_scores(data, scores, eps, aggregation):
     Args:
         data (list(dict)): the datasets
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the mode of aggregation ('mor'/'rom')
 
     Returns:
-        dict: the results of the analysis, the attribute 'inconsistency'
+        dict: the results of the analysis, the attribute ``inconsistency``
                 shows if inconsistency has been found
     """
     if aggregation == 'mor':
@@ -44,7 +44,7 @@ def filter_drive(data, subset=None):
 
     Args:
         data (list(dict)): a list of datasets
-        subset (list/None): the list of identifiers
+        subset (list|None): the list of identifiers
 
     Returns:
         list(dict): the filtered dataset
@@ -69,9 +69,9 @@ def drive_aggregated(scores, eps, bundle, subset=None):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
                             with the bundle
 
@@ -82,10 +82,10 @@ def drive_aggregated(scores, eps, bundle, subset=None):
         ValueError: if the filtering results an empty set
 
     Examples:
-        drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+        >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                             eps=1e-4,
                             bundle='test')
-        >> {'mor_fov_inconsistency': True,
+        # {'mor_fov_inconsistency': True,
             'mor_no_fov_inconsistency': True,
             'rom_fov_inconsistency': True,
             'rom_no_fov_inconsistency': True}
@@ -122,9 +122,9 @@ def drive_image(scores, eps, bundle, identifier):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
                             with the bundle
 
@@ -135,12 +135,12 @@ def drive_image(scores, eps, bundle, identifier):
         ValueError: if the specified image cannot be found
 
     Examples:
-        drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
-                            'f1p': 0.9801, 'ppv': 0.8543},
-                    eps=1e-4,
-                    bundle='test',
-                    identifier='01')
-        >> {'fov_inconsistency': True, 'no_fov_inconsistency': True}
+        >>> drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
+                                'f1p': 0.9801, 'ppv': 0.8543},
+                        eps=1e-4,
+                        bundle='test',
+                        identifier='01')
+        # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
     """
     results_fov = drive_image_fov(scores, eps, bundle, identifier)
     results_no_fov = drive_image_no_fov(scores, eps, bundle, identifier)
@@ -154,27 +154,27 @@ def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the aggregation technique ('mor'/'rom')
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve, e.g. ['01', '02']
+        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
                             with the bundle
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found, under the remaining
-                keys the details of the analysis can be found
+        shows if inconsistency has been found, under the remaining
+        keys the details of the analysis can be found
 
     Raises:
         ValueError: if the filtering results an empty set
 
     Examples:
-        result = drive_aggregated_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
-                                        eps=1e-4,
-                                        bundle='test')
-        result['inconsistency']
-        >> True
+        >>> result = drive_aggregated_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                                            eps=1e-4,
+                                            bundle='test')
+        >>> result['inconsistency']
+        # True
     """
     assert bundle in ('train', 'test')
     assert aggregation in ('mor', 'rom')
@@ -191,25 +191,25 @@ def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the aggregation technique ('mor'/'rom')
         bundle (str): the image bundle to test ('train'/'test')
-        subset (list/None): the list of identifiers to involve
+        subset (list|None): the list of identifiers to involve
 
     Returns:
-        dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found, under the remaining
-                keys the details of the analysis can be found
+        dict: the result of the analysis, the ``inconsistency`` flag
+        shows if inconsistency has been found, under the remaining
+        keys the details of the analysis can be found
 
     Raises:
         ValueError: if the filtering results an empty set
 
     Examples:
-        result = drive_aggregated_no_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
-                                        eps=1e-4,
-                                        bundle='test')
-        result['inconsistency']
-        >> True
+        >>> result = drive_aggregated_no_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+                                            eps=1e-4,
+                                            bundle='test')
+        >>> result['inconsistency']
+        # True
     """
     assert bundle in ('train', 'test')
     assert aggregation in ('mor', 'rom')
@@ -226,28 +226,28 @@ def drive_image_fov(scores, eps, bundle, identifier):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
         identifier (str): the identifier of the image (like '01' or '22')
 
     Returns:
-        dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found, the rest of the
-                keys contain the the details of the analysis, for the
-                interpretation see the documentation of the
-                check_1_dataset_no_kfold_scores function.
+        dict: the result of the analysis, the ``inconsistency`` flag
+        shows if inconsistency has been found, the rest of the
+        keys contain the the details of the analysis, for the
+        interpretation see the documentation of the
+        check_1_dataset_no_kfold_scores function.
 
     Raises:
         ValueError: if the specified image cannot be found
 
     Examples:
-        result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
-                                        'f1p': 0.9801, 'ppv': 0.8543},
-                                eps=1e-4,
-                                bundle='test',
-                                identifier='01')
-        result['inconsistency']
-        >> True
+        >>> result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+                                            'f1p': 0.9801, 'ppv': 0.8543},
+                                    eps=1e-4,
+                                    bundle='test',
+                                    identifier='01')
+        >>> result['inconsistency']
+        # True
     """
     assert bundle in ('train', 'test')
 
@@ -265,28 +265,28 @@ def drive_image_no_fov(scores, eps, bundle, identifier):
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty
+        eps (float|dict(str,float)): the numerical uncertainty
         bundle (str): the image bundle to test ('train'/'test')
         identifier (str): the identifier of the image (like '01' or '22')
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
-                shows if inconsistency has been found, the rest of the
-                keys contain the the details of the analysis, for the
-                interpretation see the documentation of the
-                check_1_dataset_no_kfold_scores function.
+        shows if inconsistency has been found, the rest of the
+        keys contain the the details of the analysis, for the
+        interpretation see the documentation of the
+        check_1_dataset_no_kfold_scores function.
 
     Raises:
         ValueError: if the specified image cannot be found
 
     Examples:
-        result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
-                                        'f1p': 0.9801, 'ppv': 0.8543},
-                                eps=1e-4,
-                                bundle='test',
-                                identifier='01')
-        result['inconsistency']
-        >> True
+        >>> result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+                                            'f1p': 0.9801, 'ppv': 0.8543},
+                                    eps=1e-4,
+                                    bundle='test',
+                                    identifier='01')
+        >>> result['inconsistency']
+        # True
     """
     assert bundle in ('train', 'test')
 

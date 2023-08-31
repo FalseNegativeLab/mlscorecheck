@@ -24,9 +24,9 @@ def generate_problem_and_scores(*,
     Args:
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
-        zeros (None/list): the list of items to set to zero
+        zeros (None|list): the list of items to set to zero
         add_complements (bool): whether to add the complements
-        score_subset (list/None): the subset of scores to compute
+        score_subset (list|None): the subset of scores to compute
         rounding_decimals (int): the number of decimals to round to
         random_state (int, optional): the random seed to use
 
@@ -55,7 +55,7 @@ def generate_1_problem(*,
     Args:
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
-        zeros (None/list): the list of items to set to zero
+        zeros (None|list): the list of items to set to zero
         add_complements (bool): whether to add the complements
         random_state (int, optional): the random seed to use
 
@@ -106,13 +106,13 @@ def generate_problems(*,
     Args:
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
-        zeros (None/list): the list of items to set to zero
+        zeros (None|list): the list of items to set to zero
         add_complements (bool): whether to add the complements
         random_state (int, optional): the random seed to use
 
     Returns:
-        dict,dict/list(dict),list(dict): the evaluation and the problem or
-                                            a list of evaluations and corresponding problems
+        dict,dict|list(dict),list(dict): the evaluation and the problem or
+        a list of evaluations and corresponding problems
     """
 
     if random_state is None or isinstance(random_state, int):

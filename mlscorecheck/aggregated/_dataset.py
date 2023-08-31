@@ -36,7 +36,7 @@ def generate_dataset_pn(max_p,
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of n_folds
         max_n_repeats (int): the maximum number of n_repeats
-        random_state (int/np.random.RandomState/None): the random state/seed to use
+        random_state (int|np.random.RandomState|None): the random state/seed to use
 
     Returns:
         dict: a random dataset specification
@@ -64,7 +64,7 @@ def generate_dataset_name(max_n_folds,
     Args:
         max_n_folds (int): the maximum number of n_folds
         max_n_repeats (int): the maximum number of n_repeats
-        random_state (int/np.random.RandomState/None): the random state/seed to use
+        random_state (int|np.random.RandomState|None): the random state/seed to use
 
     Returns:
         dict: a random dataset specification
@@ -93,7 +93,7 @@ def generate_dataset_folds(max_n_folds,
     Args:
         max_n_folds (int): the maximum number of n_folds
         max_n_repeats (int): the maximum number of n_repeats
-        random_state (int/np.random.RandomState/None): the random state/seed to use
+        random_state (int|np.random.RandomState|None): the random state/seed to use
 
     Returns:
         dict: a random dataset specification
@@ -118,8 +118,8 @@ def generate_dataset_specification(*,
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of n_folds
         max_n_repeats (int): the maximum number of n_repeats
-        random_state (int/np.random.RandomState/None): the random state/seed to use
-        aggregation (None/str): 'mor'/'rom' - the aggregation to use if specified
+        random_state (int|np.random.RandomState|None): the random state/seed to use
+        aggregation (None|str): 'mor'/'rom' - the aggregation to use if specified
 
     Returns:
         dict: a random dataset specification
@@ -166,16 +166,16 @@ def generate_dataset_and_scores(*,
     Generate a dataset and scores from a sample
 
     Args:
-        score_subset(list/None): the list of scores to calculate
-        rounding_decimals (ident/None): the number of decimal places to round to
+        score_subset (list|None): the list of scores to calculate
+        rounding_decimals (ident|None): the number of decimal places to round to
         fold_score_bounds (bool): whether to add fold bounds
         feasible_score_bounds (bool): whether the fold bounds should be feasible
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
         max_n_folds (int): the maximum number of n_folds
         max_n_repeats (int): the maximum number of n_repeats
-        random_state (int/np.random.RandomState/None): the random state/seed to use
-        aggregation (None/str): 'mor'/'rom' - the aggregation to use if specified
+        random_state (int|np.random.RandomState|None): the random state/seed to use
+        aggregation (None|str): 'mor'/'rom' - the aggregation to use if specified
 
     Returns:
         dict, dict: the dataset specification and the scores
@@ -218,17 +218,17 @@ def create_folds_for_dataset(*,
     the folds accordingly.
 
     Args:
-        p (None/int): the number of positives
-        n (None/int): the number of negatives
-        n_folds (None/int): the number of folds
-        n_repeats (None/int): the number of repetitions
-        folds (None/list): the list of fold specifications
+        p (None|int): the number of positives
+        n (None|int): the number of negatives
+        n_folds (None|int): the number of folds
+        n_repeats (None|int): the number of repetitions
+        folds (None|list): the list of fold specifications
         folding (str): the folding strategy
-        fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
+        fold_score_bounds (None|dict(str,tuple)): the bound specification for scores in
                                                     the folds
         aggregation (str): 'rom'/'mor - the aggregation strategy
-        name (None/str): the name of the dataset to look-up
-        identifier (None/str): the identifier
+        name (None|str): the name of the dataset to look-up
+        identifier (None|str): the identifier
 
     Returns:
         list(dict): the list of fold specifications
@@ -323,16 +323,16 @@ class Dataset:
 
         Args:
             aggregation (str): 'rom'/'mor - the aggregation strategy
-            identifier (None/str): the identifier
-            name (None/str): the name of the dataset to look-up
-            p (None/int): the number of positives
-            n (None/int): the number of negatives
-            folds (None/list): the list of fold specifications
-            n_folds (None/int): the number of folds
-            n_repeats (None/int): the number of repetitions
+            identifier (None|str): the identifier
+            name (None|str): the name of the dataset to look-up
+            p (None|int): the number of positives
+            n (None|int): the number of negatives
+            folds (None|list): the list of fold specifications
+            n_folds (None|int): the number of folds
+            n_repeats (None|int): the number of repetitions
             folding (str): the folding strategy
-            score_bounds (None/dict(str,tuple)): the bound specification for scores
-            fold_score_bounds (None/dict(str,tuple)): the bound specification for scores in
+            score_bounds (None|dict(str,tuple)): the bound specification for scores
+            fold_score_bounds (None|dict(str,tuple)): the bound specification for scores in
                                                         the folds
 
         Examples:
@@ -419,7 +419,7 @@ class Dataset:
         Samples the problem, that is, generates random (but physical) tp and tn values
 
         Args:
-            random_state (None/int/np.random.RandomState): the random state to use
+            random_state (None|int|np.random.RandomState): the random state to use
 
         Returns:
             Dataset: the sampled dataset
@@ -459,9 +459,9 @@ class Dataset:
         Calculates all scores for the fold
 
         Args:
-            score_subset (None/list): the list of scores to calculate (subset of
+            score_subset (None|list): the list of scores to calculate (subset of
                                         'acc', 'sens', 'spec', 'bacc')
-            rounding_decimals (None/float): how many digits to round the decimals to
+            rounding_decimals (None|float): how many digits to round the decimals to
 
         Returns:
             dict(str,float): the scores
@@ -524,7 +524,7 @@ class Dataset:
         Extracts bounds according to the feasibility flag
 
         Args:
-            score_subset (list/None): the list of scores to return bounds for
+            score_subset (list|None): the list of scores to return bounds for
             feasibility (bool): if True, the bounds will be feasible, otherwise infeasible
         """
         scores = self.calculate_scores(score_subset)
@@ -551,7 +551,7 @@ class Dataset:
         Extracts reasonable bounds from each fold
 
         Args:
-            score_subset (None/list): the scores to extracts bounds for
+            score_subset (None|list): the scores to extracts bounds for
             feasible (bool): whether the bounds should lead to feasible problems
 
         Returns:
@@ -570,7 +570,7 @@ class Dataset:
         Adds bounds to each fold
 
         Args:
-            score_bounds (dict/list): a bound set or a list of bounds
+            score_bounds (dict|list): a bound set or a list of bounds
 
         Returns:
             Dataset: the updated new dataset

@@ -13,10 +13,10 @@ def sqrt(obj):
     Square root of an interval or interval union
 
     Args:
-        obj (Interval/IntervalUnion/numeric): the object to take the square root of
+        obj (Interval|IntervalUnion|numeric): the object to take the square root of
 
     Returns:
-        Interval/IntervalUnion/numeric: the square root of the parameter
+        Interval|IntervalUnion|numeric: the square root of the parameter
     """
     return obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else np.sqrt(obj)
 
@@ -29,8 +29,8 @@ class Interval:
         Constructor of the interval
 
         Args:
-            lower_bound (int/float): the lower bound
-            upper_bound (int/float): the upper bound
+            lower_bound (int|float): the lower bound
+            upper_bound (int|float): the upper bound
         """
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
@@ -57,7 +57,7 @@ class Interval:
         Check if the interval contains the value
 
         Args:
-            value (float/int): the value to check
+            value (float|int): the value to check
 
         Returns:
             bool: True if the interval contains the value, otherwise False
@@ -129,7 +129,7 @@ class Interval:
         The addition operator
 
         Args:
-            other (int/float/Interval): an object to add
+            other (int|float|Interval): an object to add
 
         Returns:
             Interval: the sum
@@ -149,7 +149,7 @@ class Interval:
         The right hand addition
 
         Args:
-            other (int/float/Interval): an object to add
+            other (int|float|Interval): an object to add
 
         Returns:
             Interval: the sum
@@ -161,7 +161,7 @@ class Interval:
         The subtraction operator
 
         Args:
-            other (int/float/Interval): an object to subtract
+            other (int|float|Interval): an object to subtract
 
         Returns:
             Interval: the difference
@@ -181,7 +181,7 @@ class Interval:
         The right hand subtraction
 
         Args:
-            other (int/float/Interval): an object to subtract from
+            other (int|float|Interval): an object to subtract from
 
         Returns:
             Interval: the difference
@@ -193,7 +193,7 @@ class Interval:
         The multiplication operator
 
         Args:
-            other (int/float/Interval): an object to multiply
+            other (int|float|Interval): an object to multiply
 
         Returns:
             Interval: the product
@@ -218,7 +218,7 @@ class Interval:
         The right hand multiplication operator
 
         Args:
-            other (int/float/Interval): an object to multiply
+            other (int|float|Interval): an object to multiply
 
         Returns:
             Interval: the product
@@ -230,7 +230,7 @@ class Interval:
         The division operator
 
         Args:
-            other (int/float/Interval): an object to divide with
+            other (int|float|Interval): an object to divide with
 
         Returns:
             Interval: the ratio
@@ -269,7 +269,7 @@ class Interval:
         The right hand division operator
 
         Args:
-            other (int/float/Interval): an object to divide
+            other (int|float|Interval): an object to divide
 
         Returns:
             Interval: the ratio
@@ -355,7 +355,7 @@ class IntervalUnion:
         Constructor of the object
 
         Args:
-            intervals (Interval/tuple/list(Interval)): a specification of one interval
+            intervals (Interval|tuple|list(Interval)): a specification of one interval
                                                         or a list of intervals
         """
         if isinstance(intervals, Interval):
@@ -424,7 +424,7 @@ class IntervalUnion:
         Check if the interval contains the value
 
         Args:
-            value (float/int): the value to check
+            value (float|int): the value to check
 
         Returns:
             bool: True if the interval contains the value, otherwise False
@@ -436,11 +436,11 @@ class IntervalUnion:
         Returns the intersection of two intervals
 
         Args:
-            other (Interval/IntervalUnion): the other interval
+            other (Interval|IntervalUnion): the other interval
 
         Returns:
             IntervalUnion: the intersection, empty interval union if the intersection
-                            is empty
+            is empty
         """
         if isinstance(other, Interval):
             new_intervals = [other.intersection(interval) for interval in self.intervals]
@@ -491,7 +491,7 @@ class IntervalUnion:
         The addition operator
 
         Args:
-            other (int/float/Interval/IntervalUnion): an object to add
+            other (int|float|Interval|IntervalUnion): an object to add
 
         Returns:
             IntervalUnion: the sum
@@ -510,7 +510,7 @@ class IntervalUnion:
         The right hand addition
 
         Args:
-            other (int/float/Interval/IntervalUnion): an object to add
+            other (int|float|Interval|IntervalUnion): an object to add
 
         Returns:
             IntervalUnion: the sum
@@ -522,7 +522,7 @@ class IntervalUnion:
         The subtraction operator
 
         Args:
-            other (int/float/Interval/IntervalUnion): an object to subtract
+            other (int|float|Interval|IntervalUnion): an object to subtract
 
         Returns:
             IntervalUnion: the difference
@@ -542,7 +542,7 @@ class IntervalUnion:
         The right hand subtraction
 
         Args:
-            other (int/float/IntervalUnion): an object to subtract from
+            other (int|float|IntervalUnion): an object to subtract from
 
         Returns:
             IntervalUnion: the difference
@@ -554,7 +554,7 @@ class IntervalUnion:
         The multiplication operator
 
         Args:
-            other (int/float/IntervalUnion): an object to multiply
+            other (int|float|IntervalUnion): an object to multiply
 
         Returns:
             IntervalUnion: the product
@@ -575,7 +575,7 @@ class IntervalUnion:
         The right hand multiplication operator
 
         Args:
-            other (int/float/IntervalUnion): an object to multiply
+            other (int|float|IntervalUnion): an object to multiply
 
         Returns:
             IntervalUnion: the product
@@ -587,7 +587,7 @@ class IntervalUnion:
         The division operator
 
         Args:
-            other (int/float/IntervalUnion): an object to divide with
+            other (int|float|IntervalUnion): an object to divide with
 
         Returns:
             IntervalUnion: the ratio
@@ -619,7 +619,7 @@ class IntervalUnion:
         The right hand division operator
 
         Args:
-            other (int/float/IntervalUnion): an object to divide
+            other (int|float|IntervalUnion): an object to divide
 
         Returns:
             IntervalUnion: the ratio

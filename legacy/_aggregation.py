@@ -45,8 +45,8 @@ def calculate_scores_lp(*, tp, tn, p, n):
     Args:
         tp (pulp.LpVariable): the variable for true positives
         tn (pulp.LpVariable): the variable for true negatives
-        p (int/float): the number of positives
-        n (int/float): the number of negatives
+        p (int|float): the number of positives
+        n (int|float): the number of negatives
 
     Returns:
         dict: the calculated scores

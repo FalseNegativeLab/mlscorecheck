@@ -19,7 +19,7 @@ def round_scores(scores, rounding_decimals=None):
 
     Args:
         scores (dict): the dictionary of scores to round
-        rounding_decimals (None/int): the decimal places to round to
+        rounding_decimals (None|int): the decimal places to round to
 
     Returns:
         dict: a dictionary with the rounded scores
@@ -36,7 +36,7 @@ def calculate_scores_for_lp(problem, score_subset=None):
 
     Args:
         problem (dict): the raw figures tp, tn, p and n
-        score_subset (list/None): the list of scores to compute
+        score_subset (list|None): the list of scores to compute
 
     Returns:
         dict(str,float): the calculated scores
@@ -61,8 +61,8 @@ def calculate_scores(problem,
 
     Args:
         problem (dict): a problem to calculate the scores for (containing 'p', 'n', 'tp', 'tn')
-        rounding_decimals (None/int): the decimal places to round to
-        additional_symbols (None/dict): additional symbols for the substitution
+        rounding_decimals (None|int): the decimal places to round to
+        additional_symbols (None|dict): additional symbols for the substitution
 
     Returns:
         dict: the calculated scores

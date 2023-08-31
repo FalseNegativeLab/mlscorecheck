@@ -27,7 +27,7 @@ def calculate_scores_list(problems,
         strategy (str): 'mor'/'rom' specifying the mode of aggregation,
                         'mor' standing for the 'mean of ratios' and
                         'rom' standing for the 'ratio of means'
-        rounding_decimals (None/int): the number of digits to round the scores to
+        rounding_decimals (None|int): the number of digits to round the scores to
         return_populated (bool): whether to return the populated structure
 
     Returns:
@@ -71,7 +71,7 @@ def calculate_scores_dataset(dataset,
                             of aggregation for each level,
                             'mor' standing for the 'mean of ratios' and
                             'rom' standing for the 'ratio of means'
-    rounding_decimals (None/int): the number of digits to round the scores to
+    rounding_decimals (None|int): the number of digits to round the scores to
     return_populated (bool): if True, returns the dataset structure populated
                                 with figures
 
@@ -112,7 +112,7 @@ def calculate_scores_datasets(datasets,
                                 of aggregation for each level,
                                 'mor' standing for the 'mean of ratios' and
                                 'rom' standing for the 'ratio of means'
-        rounding_decimals (None/int): the number of digits to round the scores to
+        rounding_decimals (None|int): the number of digits to round the scores to
         return_populated (bool): if True, returns the dataset structures populated
                                     with figures
 

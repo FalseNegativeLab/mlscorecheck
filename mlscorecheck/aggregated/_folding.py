@@ -89,10 +89,10 @@ def _create_folds(p,
         p (int): the number of positives
         n (int): the number of negatives
         n_folds (int/None): the number of folds (defaults to 1)
-        n_repeats (int/None): the number of repeats (defaults to 1)
+        n_repeats (int|None): the number of repeats (defaults to 1)
         folding (str): the folding strategy ('stratified_sklearn')
         score_bounds (dict(str,tuple(float,float))): the score bounds
-        identifier (str/None): the identifier
+        identifier (str|None): the identifier
 
     Returns:
         list(dict): the list of fold specifications

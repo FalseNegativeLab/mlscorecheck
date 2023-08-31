@@ -16,10 +16,10 @@ def mock_function(*, a):
     A mock function doubling its parameter
 
     Args:
-        a (int/float): a number
+        a (int|float): a number
 
     Returns:
-        int/float: the double of the parameter
+        int|float: the double of the parameter
     """
     return a*2
 

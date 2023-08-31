@@ -26,10 +26,10 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
 
     Args:
         scores (dict(str,float)): the scores to check
-        eps (float/dict(str,float)): the numerical uncertainty(ies) of the scores
+        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         datasets (list): the dataset specification
-        solver_name (None/str): the solver to use
-        timeout (None/int): the timeout for the linear programming solver in seconds
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
                             0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
@@ -40,78 +40,69 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
 
     Returns:
         dict: the dictionary of the results of the analysis, the
-                'inconsistency' entry indicates if inconsistencies have
-                been found. The aggregated_results entry is empty if
-                the execution of the linear programming based check was
-                unnecessary. The result has four more keys. Under 'lp_status'
-                one finds the status of the lp solver, under 'lp_configuration_scores_match'
-                one finds a flag indicating if the scores from the lp configuration
-                match the scores provided, 'lp_configuration_bounds_match' indicates
-                if the specified bounds match the actual figures and finally
-                'lp_configuration' contains the actual configuration of the
-                linear programming solver.
+        ``inconsistency`` entry indicates if inconsistencies have
+        been found. The aggregated_results entry is empty if
+        the execution of the linear programming based check was
+        unnecessary. The result has four more keys. Under ``lp_status``
+        one finds the status of the lp solver, under ``lp_configuration_scores_match``
+        one finds a flag indicating if the scores from the lp configuration
+        match the scores provided, ``lp_configuration_bounds_match`` indicates
+        if the specified bounds match the actual figures and finally
+        ``lp_configuration`` contains the actual configuration of the
+        linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly
 
     Examples:
-        datasets = [{'p': 39,
-                    'n': 822,
-                    'n_folds': 8,
-                    'n_repeats': 4,
-                    'folding': 'stratified_sklearn'},
-                    {'name': 'common_datasets.winequality-white-3_vs_7',
-                    'n_folds': 3,
-                    'n_repeats': 3,
-                    'folding': 'stratified_sklearn'}]
-        scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
+        >>> datasets = [{'p': 39, 'n': 822, 'n_folds': 8, 'n_repeats': 4,
+                        'folding': 'stratified_sklearn'},
+                        {'name': 'common_datasets.winequality-white-3_vs_7',
+                        'n_folds': 3,
+                        'n_repeats': 3,
+                        'folding': 'stratified_sklearn'}]
+        >>> scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
+        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                                            eps=1e-3,
+                                                            scores=scores)
+        >>> result['inconsistency']
+        # False
 
-        result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                eps=1e-3,
-                                                scores=scores)
-        result['inconsistency']
+        >>> datasets = [{'folds': [{'p': 22, 'n': 90},
+                                    {'p': 51, 'n': 45},
+                                    {'p': 78, 'n': 34},
+                                    {'p': 33, 'n': 89}]},
+                        {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
+                        'n_folds': 8,
+                        'n_repeats': 4,
+                        'folding': 'stratified_sklearn'}]
+        >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                                            eps=1e-3,
+                                                            scores=scores)
+        >>> result['inconsistency']
+        # False
 
-        >> False
-
-        datasets = [{'folds': [{'p': 22, 'n': 90},
-                                {'p': 51, 'n': 45},
-                                {'p': 78, 'n': 34},
-                                {'p': 33, 'n': 89}]},
-                    {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
-                    'n_folds': 8,
-                    'n_repeats': 4,
-                    'folding': 'stratified_sklearn'}]
-        scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
-
-        result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                eps=1e-3,
-                                                scores=scores)
-        result['inconsistency']
-
-        >> False
-
-        datasets = [{'folds': [{'p': 22, 'n': 90},
-                        {'p': 51, 'n': 45},
-                        {'p': 78, 'n': 34},
-                        {'p': 33, 'n': 89}],
-                    'fold_score_bounds': {'acc': (0.8, 1.0)},
-                    'score_bounds': {'acc': (0.8, 1.0)}
-                    },
-                    {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
-                    'n_folds': 8,
-                    'n_repeats': 4,
-                    'folding': 'stratified_sklearn',
-                    'fold_score_bounds': {'acc': (0.8, 1.0)},
-                    'score_bounds': {'acc': (0.8, 1.0)}
-                    }]
-        scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
-
-        result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                eps=1e-3,
-                                                scores=scores)
-        result['inconsistency']
-
-        >> True
+        >>> datasets = [{'folds': [{'p': 22, 'n': 90},
+                                    {'p': 51, 'n': 45},
+                                    {'p': 78, 'n': 34},
+                                    {'p': 33, 'n': 89}],
+                        'fold_score_bounds': {'acc': (0.8, 1.0)},
+                        'score_bounds': {'acc': (0.8, 1.0)}
+                        },
+                        {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
+                        'n_folds': 8,
+                        'n_repeats': 4,
+                        'folding': 'stratified_sklearn',
+                        'fold_score_bounds': {'acc': (0.8, 1.0)},
+                        'score_bounds': {'acc': (0.8, 1.0)}
+                        }]
+        >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+                                                            eps=1e-3,
+                                                            scores=scores)
+        >>> result['inconsistency']
+        # True
 
     """
     if any(dataset.get('aggregation', 'rom') != 'rom' for dataset in datasets):

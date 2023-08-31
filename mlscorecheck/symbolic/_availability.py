@@ -18,7 +18,7 @@ def check_importability(package):
         str: the name of the package
 
     Returns:
-        str/None: the name of the package if importable or None if not importable
+        str|None: the name of the package if importable or None if not importable
     """
     try:
         _ = importlib.import_module(package)

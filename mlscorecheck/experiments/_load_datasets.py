@@ -18,7 +18,7 @@ def resolve_pn(dataset_conf):
     Resolve the dataset configuration from the integrated statistics
 
     Args:
-        dataset_conf (dict/list(dict)): one or multiple dataset specification(s)
+        dataset_conf (dict|list(dict)): one or multiple dataset specification(s)
                                 with 'dataset' field(s) containing the name of
                                 the dataset(s)
 

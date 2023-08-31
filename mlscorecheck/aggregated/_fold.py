@@ -30,7 +30,7 @@ def generate_fold_specification(max_p=100,
     Args:
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
-        random_state (None/int/np.random.RandomState): the random state/seed to use
+        random_state (None|int/np.random.RandomState): the random state/seed to use
 
     Returns:
         Fold: the fold object
@@ -59,9 +59,9 @@ class Fold:
         Args:
             p (int): the number of positives
             n (int): the number of negatives
-            scores_bounds (None/dict(str,tuple)): a dictionary of bounds on the scores
+            scores_bounds (None|dict(str,tuple)): a dictionary of bounds on the scores
                                                 'acc', 'sens', 'spec', 'bacc'
-            identifier (None/str): the identifier of the fold
+            identifier (None|str): the identifier of the fold
             figures (dict(str,int)): a figures (tp and tn values)
         """
         self.p = p
@@ -116,7 +116,7 @@ class Fold:
         Samples the problem, that is, generates random (but physical) tp and tn values
 
         Args:
-            random_state (None/int/np.random.RandomState): the random state to use
+            random_state (None|int|np.random.RandomState): the random state to use
 
         Returns:
             self: the sampled fold
@@ -145,7 +145,7 @@ class Fold:
 
         Args:
             score_subset (list): the list of scores to compute
-            rounding_decimals (None/float): how many digits to round the decimals to
+            rounding_decimals (None|float): how many digits to round the decimals to
 
         Returns:
             dict(str,float): the scores
@@ -214,7 +214,7 @@ class Fold:
         Sets the score bounds according to the feasibility flag
 
         Args:
-            scores_subset (None/list): the list of scores to get bounds for
+            scores_subset (None|list): the list of scores to get bounds for
             feasible (bool): if True, sets feasible score bounds, sets infeasible score
                                 bounds otherwise
 

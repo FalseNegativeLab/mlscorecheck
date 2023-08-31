@@ -11,7 +11,7 @@ def init_random_state(random_state=None):
     Initializes a random state
 
     Args:
-        random_state (int/np.random.RandomState/None): the random state/seed to initialize
+        random_state (int|np.random.RandomState|None): the random state/seed to initialize
 
     Returns:
         np.random.RandomState: the initialized random state

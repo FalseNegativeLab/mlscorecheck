@@ -20,7 +20,7 @@ def add_bounds(lp_problem, variables, bounds, label):
     Args:
         lp_problem (pl.LpProblem): the linear programming problem
         variables (dict(str,pl.LpVariable)): the variables to add bounds to
-        bounds (dict(str,tuple(float/int,float/int))): the bounds to add
+        bounds (dict(str,tuple(float|int,float|int))): the bounds to add
         label (str): the label of the entity containing the variables
                         bounds are added to
 
@@ -53,7 +53,7 @@ def create_lp_target(obj, scores, eps, lp_problem):
     Args:
         obj (object): the object to create the target conditions for
         scores (dict(str,float)): the scores to match
-        eps (dict(str,float)/float): the numerical uncertainty
+        eps (dict(str,float)|float): the numerical uncertainty
         lp_problem (pl.LpProblem): the linear programming problem
 
     Returns:
@@ -77,7 +77,7 @@ def solve(obj, scores, eps, solver=None):
     Args:
         obj (object): an object to solve
         scores (dict(str,float)): the scores to match
-        eps (dict(str,float)/float): the numerical uncertainty
+        eps (dict(str,float)|float): the numerical uncertainty
         solver (obj): the solver object to use
 
     Returns:

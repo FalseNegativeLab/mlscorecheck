@@ -20,8 +20,8 @@ class SymbolicInterval:
         Constructor of the interval
 
         Args:
-            lower_bound (Symbol/Expression/int/float): the lower bound
-            upper_bound (Symbol/Expression/int/float): the upper bound
+            lower_bound (Symbol/Expression/int|float): the lower bound
+            upper_bound (Symbol/Expression/int|float): the upper bound
             condition (bool/Expression): the condition for the interval
         """
         self.lower_bound = sympy.simplify(lower_bound)
@@ -60,7 +60,7 @@ class SymbolicInterval:
         The addition operator
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to add
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to add
 
         Returns:
             SymbolicInterval: the sum
@@ -82,7 +82,7 @@ class SymbolicInterval:
         The right hand addition
 
         Args:
-            other (int/float/Interval): an object to add
+            other (int|float|Interval): an object to add
 
         Returns:
             SymbolicInterval: the sum
@@ -95,7 +95,7 @@ class SymbolicInterval:
         The subtraction operator
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to subtract
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to subtract
 
         Returns:
             SymbolicInterval: the difference
@@ -117,7 +117,7 @@ class SymbolicInterval:
         The right hand subtraction
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to subtract from
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to subtract from
 
         Returns:
             Interval: the difference
@@ -131,7 +131,7 @@ class SymbolicInterval:
         The multiplication operator
 
         Args:
-            other (int/float/Interval): an object to multiply
+            other (int|float|Interval): an object to multiply
 
         Returns:
             SymbolicInterval: the product
@@ -182,7 +182,7 @@ class SymbolicInterval:
         The right hand multiplication operator
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to multiply
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to multiply
 
         Returns:
             SymbolicIntervalUnion: the product
@@ -195,7 +195,7 @@ class SymbolicInterval:
         The division operator
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to divide with
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to divide with
 
         Returns:
             SymbolicIntervalUnion: the ratio
@@ -257,7 +257,7 @@ class SymbolicInterval:
         The right hand division operator
 
         Args:
-            other (int/float/Symbol/Expression/SymbolicInterval): an object to divide
+            other (int|float/Symbol/Expression/SymbolicInterval): an object to divide
 
         Returns:
             SymbolicInterval: the ratio
@@ -362,7 +362,7 @@ class SymbolicIntervalUnion:
         The addition operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to add
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to add
 
         Returns:
             IntervalUnion: the sum
@@ -383,7 +383,7 @@ class SymbolicIntervalUnion:
         The right hand addition
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to add
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to add
 
         Returns:
             IntervalUnion: the sum
@@ -396,7 +396,7 @@ class SymbolicIntervalUnion:
         The subtraction operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to subtract
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to subtract
 
         Returns:
             SymbolicIntervalUnion: the difference
@@ -417,7 +417,7 @@ class SymbolicIntervalUnion:
         The right hand subtraction
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to subtract from
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to subtract from
 
         Returns:
             SymbolicIntervalUnion: the difference
@@ -430,7 +430,7 @@ class SymbolicIntervalUnion:
         The multiplication operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to multiply
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to multiply
 
         Returns:
             SymbolicIntervalUnion: the product
@@ -456,7 +456,7 @@ class SymbolicIntervalUnion:
         The right hand multiplication operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to multiply
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to multiply
 
         Returns:
             SymbolicIntervalUnion: the product
@@ -469,7 +469,7 @@ class SymbolicIntervalUnion:
         The division operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to divide with
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to divide with
 
         Returns:
             SymbolicIntervalUnion: the ratio
@@ -496,7 +496,7 @@ class SymbolicIntervalUnion:
         The right hand division operator
 
         Args:
-            other (int/float/SymbolicInterval/SymbolicIntervalUnion): an object to divide
+            other (int|float/SymbolicInterval/SymbolicIntervalUnion): an object to divide
 
         Returns:
             SymbolicIntervalUnion: the ratio

@@ -30,9 +30,9 @@ def check_aggregated_scores(*,
     Check aggregated scores
 
     Args:
-        experiment (dict/Experiment): the experiment specification
+        experiment (dict|Experiment): the experiment specification
         scores (dict): the scores to match
-        eps (dict/float): the numerical uncertainty
+        eps (dict|float): the numerical uncertainty
         solver_name (str): the name of the solver to be used, check
                             pulp.listSolvers(onlyAvailable) for the available list
         timeout (int): the number of seconds to time out
@@ -47,7 +47,7 @@ def check_aggregated_scores(*,
 
     Returns:
         bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
-                        and optionally the details in a dictionary
+        and optionally the details in a dictionary
     """
     check_uncertainty_and_tolerance(eps, numerical_tolerance)
     eps = update_uncertainty(eps, numerical_tolerance)

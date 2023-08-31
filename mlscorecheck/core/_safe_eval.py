@@ -32,8 +32,8 @@ def check_applicability(params, non_applicable=None):
 
     Returns:
         bool: True if the parameter configuration in params does not
-                match any of the non-applicable configurations, False
-                otherwise
+        match any of the non-applicable configurations, False
+        otherwise
     """
     if non_applicable is None:
         return True
