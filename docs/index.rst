@@ -14,11 +14,6 @@ Welcome to mlscorecheck's documentation!
 
 .. toctree::
     :maxdepth: 2
-
-    installation
-
-.. toctree::
-    :maxdepth: 2
     :caption: Consistency testing
 
     use_cases

@@ -115,6 +115,10 @@ class Interval:
         """
         return Interval(np.ceil(self.lower_bound), np.floor(self.upper_bound))
 
+    def integer_counts(self):
+        integer = self.shrink_to_integers()
+        return integer.upper_bound - integer.lower_bound + 1
+
     def is_empty(self):
         """
         Checks if the interval is empty
@@ -474,6 +478,9 @@ class IntervalUnion:
             IntervalUnion: the shrinked interval union
         """
         return IntervalUnion([interval.shrink_to_integers() for interval in self.intervals])
+
+    def integer_counts(self):
+        return sum(interval.integer_counts() for interval in self.intervals)
 
     def is_empty(self):
         """

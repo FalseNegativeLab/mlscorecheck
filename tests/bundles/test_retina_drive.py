@@ -29,7 +29,7 @@ def test_aggregated():
     """
     results = drive_aggregated({'acc': 0.950, 'sens': 0.899, 'spec': 0.9834},
                                 eps=1e-4,
-                                bundle='test')
+                                image_set='test')
 
     assert len(results) == 4
 
@@ -39,7 +39,7 @@ def test_image():
     """
     results = drive_image({'acc': 0.950, 'sens': 0.899, 'spec': 0.9834},
                                 eps=1e-4,
-                                bundle='test',
+                                image_set='test',
                                 identifier='01')
 
     assert len(results) == 2

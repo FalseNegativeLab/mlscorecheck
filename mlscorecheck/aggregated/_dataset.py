@@ -21,7 +21,8 @@ from ..experiments import dataset_statistics
 __all__ = ['Dataset',
             'generate_dataset_specification',
             'create_folds_for_dataset',
-            'generate_dataset_and_scores']
+            'generate_dataset_and_scores',
+            'check_dataset_specification_consistency']
 
 def generate_dataset_pn(max_p,
                         max_n,
@@ -202,6 +203,49 @@ def generate_dataset_and_scores(*,
 
     return dataset_spec, scores
 
+def check_dataset_specification_consistency(*,
+                                            p=None,
+                                            n=None,
+                                            n_folds=None,
+                                            n_repeats=None,
+                                            folds=None,
+                                            name=None):
+    """
+    Checks if the dataset specification is not contradicting.
+
+    Args:
+        p (None|int): the number of positives
+        n (None|int): the number of negatives
+        n_folds (None|int): the number of folds
+        n_repeats (None|int): the number of repetitions
+        folds (None|list): the list of fold specifications
+        name (None|str): the name of the dataset to look-up
+
+    Raises:
+        ValueError: if the dataset specification is not consistent
+    """
+    if (p is None and n is not None) or (p is not None and n is None):
+        raise ValueError('either specify both p and n or neither of them')
+
+    if p is not None and name is not None:
+        raise ValueError('either specify p and n or the name of the dataset')
+
+    if p is not None and folds is not None:
+        raise ValueError('either specify (p and n or the name of the dataset) '\
+                        'or the list of fold specifications')
+
+    if (n_folds is not None or n_repeats is not None) and folds is not None:
+        raise ValueError('n_folds, n_repeats and folding cannot be specified '\
+                        'together with the list of fold specifications')
+
+    if name is not None and folds is not None:
+        raise ValueError('either specify the name of the dataset or the list '\
+                        'of fold specifications')
+
+    if p is None and name is None and folds is None:
+        raise ValueError('at least the p,n or the name of the dataset or the '\
+                        'list of fold specifications needs to be specified')
+
 def create_folds_for_dataset(*,
                             p,
                             n,
@@ -237,27 +281,12 @@ def create_folds_for_dataset(*,
         ValueError: if the dataset specification is inconsistent
     """
 
-    if (p is None and n is not None) or (p is not None and n is None):
-        raise ValueError('either specify both p and n or neither of them')
-
-    if p is not None and name is not None:
-        raise ValueError('either specify p and n or the name of the dataset')
-
-    if p is not None and folds is not None:
-        raise ValueError('either specify (p and n or the name of the dataset) '\
-                        'or the list of fold specifications')
-
-    if (n_folds is not None or n_repeats is not None) and folds is not None:
-        raise ValueError('n_folds, n_repeats and folding cannot be specified '\
-                        'together with the list of fold specifications')
-
-    if name is not None and folds is not None:
-        raise ValueError('either specify the name of the dataset or the list '\
-                        'of fold specifications')
-
-    if p is None and name is None and folds is None:
-        raise ValueError('at least the p,n or the name of the dataset or the '\
-                        'list of fold specifications needs to be specified')
+    check_dataset_specification_consistency(p=p,
+                                            n=n,
+                                            n_folds=n_folds,
+                                            n_repeats=n_repeats,
+                                            folds=folds,
+                                            name=name)
 
     if ((p is not None or name is not None)
         and ((n_folds is None or n_folds == 1) and aggregation is None)):

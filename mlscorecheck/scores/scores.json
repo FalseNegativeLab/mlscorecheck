@@ -9,7 +9,8 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "(tp + tn)/(p + n)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "(tp + tn)/(p + n)"
+            "formula_standardized": "(tp + tn)/(p + n)",
+            "polynomial_equation": "acc*(p + n) - (tp + tn)"
         },
         "err": {
             "name": "error_rate",
@@ -32,7 +33,8 @@
             "formula": "tp/p",
             "args_standardized": ["tp", "p"],
             "formula_standardized": "tp/p",
-            "synonyms": ["recall", "true_positive_rate"]
+            "synonyms": ["recall", "true_positive_rate"],
+            "polynomial_equation": "sens*p - tp"
         },
         "fnr": {
             "name": "false_negative_rate",
@@ -68,7 +70,8 @@
             "formula": "tn/n",
             "args_standardized": ["tn", "n"],
             "formula_standardized": "tn/n",
-            "synonyms": ["selectivity", "true_negative_rate"]
+            "synonyms": ["selectivity", "true_negative_rate"],
+            "polynomial_equation": "spec*n - tn"
         },
         "ppv": {
             "name": "positive_predictive_value",
@@ -81,7 +84,9 @@
             "formula": "tp/(tp + fp)",
             "args_standardized": ["tp", "tn", "n"],
             "formula_standardized": "tp/(tp + n - tn)",
-            "synonyms": ["precision"]
+            "nans_standardized": [{"tp": 0, "tn": "n"}],
+            "synonyms": ["precision"],
+            "polynomial_equation": "ppv * (tp + n - tn) - tp"
         },
         "fdr": {
             "name": "false_discovery_rate",
@@ -93,7 +98,8 @@
             "args": ["tp", "fp"],
             "formula": "fp/(tp + fp)",
             "args_standardized": ["tp", "tn", "n"],
-            "formula_standardized": "1 - tp/(tp + n - tn)"
+            "formula_standardized": "1 - tp/(tp + n - tn)",
+            "nans_standardized": [{"tp": 0, "tn": "n"}]
         },
         "for_": {
             "name": "false_omission_rate",
@@ -105,7 +111,8 @@
             "args": ["tn", "fn"],
             "formula": "fn/(tn + fn)",
             "args_standardized": ["tp", "tn", "p"],
-            "formula_standardized": "1 - tn/(tn + p - tp)"
+            "formula_standardized": "1 - tn/(tn + p - tp)",
+            "nans_standardized": [{"tp": "p", "tn": 0}]
         },
         "npv": {
             "name": "negative_predictive_value",
@@ -117,7 +124,9 @@
             "args": ["tn", "fn"],
             "formula": "tn/(tn + fn)",
             "args_standardized": ["tp", "tn", "p"],
-            "formula_standardized": "tn/(tn + p - tp)"
+            "formula_standardized": "tn/(tn + p - tp)",
+            "nans_standardized": [{"tp": "p", "tn": 0}],
+            "polynomial_equation": "npv * (tn + p - tp) - tn"
         },
         "fbp": {
             "name": "f_beta_plus",
@@ -126,7 +135,8 @@
             "args": ["tp", "fp", "p", "beta_plus"],
             "formula": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + fp)",
             "args_standardized": ["tp", "tn", "p", "n", "beta_plus"],
-            "formula_standardized": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + n - tn)"
+            "formula_standardized": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + n - tn)",
+            "polynomial_equation": "fbp * (tp + beta_plus**2*p + n - tn) - ((1 + beta_plus**2)*tp)"
         },
         "fbm": {
             "name": "f_beta_minus",
@@ -135,7 +145,8 @@
             "args": ["tn", "fn", "n", "beta_minus"],
             "formula": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + fn)",
             "args_standardized": ["tp", "tn", "p", "n", "beta_minus"],
-            "formula_standardized": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + p - tp)"
+            "formula_standardized": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + p - tp)",
+            "polynomial_equation": "fbm * (tn + beta_minus**2*n + p - tp) - ((1 + beta_minus**2)*tn)"
         },
         "f1p": {
             "name": "f1_plus",
@@ -145,7 +156,8 @@
             "formula": "(2*tp) / (tp + p + fp)",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "(2*tp) / (tp + p + n - tn)",
-            "synonyms": ["f1"]
+            "synonyms": ["f1"],
+            "polynomial_equation": "f1p * (tp + p + n - tn) - 2*tp"
         },
         "f1m": {
             "name": "f1_minus",
@@ -154,7 +166,8 @@
             "args": ["tn", "fn", "n"],
             "formula": "(2*tn) / (tn + n + fn)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "(2*tn) / (tn + n + p - tp)"
+            "formula_standardized": "(2*tn) / (tn + n + p - tp)",
+            "polynomial_equation": "f1m * (tn + n + p - tp) - 2*tn"
         },
         "upm": {
             "name": "unified_performance_measure",
@@ -166,7 +179,9 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))"
+            "formula_standardized": "4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))",
+            "nans_standardized": [{"tp": 0, "tn": 0}],
+            "polynomial_equation": "upm * (tn*(n + p - tn + tp) + tp*(n + p + tn - tp)) - 4*tp*tn"
         },
         "gm": {
             "name": "geometric_mean",
@@ -179,7 +194,8 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))"
+            "formula_standardized": "sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))",
+            "polynomial_equation": "gm**2 * p * n - tp * tn"
         },
         "fm": {
             "name": "fowlkes_mallows_index",
@@ -193,7 +209,9 @@
             "args": ["tp", "fp", "p"],
             "formula": "tp/sqrt(p*(fp + tp))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "tp/sqrt(p*(n - tn + tp))"
+            "formula_standardized": "tp/sqrt(p*(n - tn + tp))",
+            "nans_standardized": [{"tp": 0, "tn": "n"}],
+            "polynomial_equation": "fm**2 * (p*(n - tn + tp)) - tp**2"
         },
         "mk": {
             "name": "markedness",
@@ -207,7 +225,9 @@
             "formula": "tp/(tp + n - tn) + tn/(tn + p - tp) - 1",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "tp/(tp + n - tn) + tn/(tn + p - tp) - 1",
-            "synonyms": ["delta_p"]
+            "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
+            "synonyms": ["delta_p"],
+            "polynomial_equation": "mk*(tp + n - tn)*(tn + p - tp) - tp*(tn + p - tp) - tn*(tp + n - tn) + (tp + n - tn)*(tn + p - tp)"
         },
         "lrp": {
             "name": "positive_likelihood_ratio",
@@ -219,7 +239,9 @@
             "args": ["tp", "fp", "p", "n"],
             "formula": "n*tp/(fp*p)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "n*tp/((n-tn)*p)"
+            "formula_standardized": "n*tp/((n-tn)*p)",
+            "nans_standardized": [{"tn": "n"}],
+            "polynomial_equation": "lrp * ((n-tn)*p) - n*tp"
         },
         "lrn": {
             "name": "negative_likelihood_ratio",
@@ -231,7 +253,9 @@
             "args": ["tn", "fn", "p", "n"],
             "formula": "n*fn/(tn*p)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "n*(p - tp)/(tn*p)"
+            "formula_standardized": "n*(p - tp)/(tn*p)",
+            "nans_standardized": [{"tn": 0}],
+            "polynomial_equation": "lrn*(tn*p) - n*(p - tp)"
         },
         "mcc": {
             "name": "matthews_correlation_coefficient",
@@ -245,7 +269,9 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))"
+            "formula_standardized": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
+            "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
+            "polynomial_equation": "mcc**2 * (n*p*(n - tn + tp)*(p + tn - tp)) - (tn*tp - (n-tn)*(p-tp))**2"
         },
         "bm": {
             "name": "bookmaker_informedness",
@@ -258,18 +284,22 @@
             "formula": "tp/p + tn/n - 1",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "tp/p + tn/n - 1",
-            "synonyms": ["informedness"]
+            "synonyms": ["informedness"],
+            "polynomial_equation": "bm*p*n - tp*n - tn*p + p*n"
         },
         "pt": {
             "name": "prevalence_threshold",
             "abbreviation": "pt",
             "sqrt": true,
+            "nans": [{"fp": 0, "tp": 0}, {"tp": "p", "fp": "n"}],
             "short_args": ["tpr", "fpr"],
             "short_formula": "(sqrt(tpr*fpr) - fpr)/(tpr - fpr)",
             "args": ["tp", "fp", "p", "n"],
-            "formula": "p*(fp - n*sqrt(fp*tp/(n*p)))/(fp*p - n*tp)",
+            "formula": "-p*(-fp + n*sqrt(fp*tp/(n*p)))/(fp*p - n*tp)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "p*((n-tn) - n*sqrt((n-tn)*tp/(n*p)))/((n-tn)*p - n*tp)"
+            "formula_standardized": "-p*(n*sqrt(tp*(n - tn)/(n*p)) - n + tn)/(-n*tp + p*(n - tn))",
+            "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
+            "polynomial_equation": "(pt*(-n*tp + p*(n-tn)) - p*n + p*tn)**2 - p*n*(tp*(n-tn))"
         },
         "dor": {
             "name": "diagnostic_odds_ratio",
@@ -281,7 +311,9 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "tn*tp/((n-tn)*(p-tp))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "tn*tp/((n-tn)*(p-tp))"
+            "formula_standardized": "tn*tp/((n-tn)*(p-tp))",
+            "nans_standardized": [{"tn": "n"}, {"tp": "p"}],
+            "polynomial_equation": "dor*(n-tn)*(p-tp) - tn*tp"
         },
         "ji": {
             "name": "jaccard_index",
@@ -291,7 +323,8 @@
             "formula": "tp/(fp + p)",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "tp / (n - tn + p)",
-            "synonyms": ["threat_score"]
+            "synonyms": ["threat_score"],
+            "polynomial_equation": "ji*(n-tn+p) - tp"
         },
         "bacc": {
             "name": "balanced_accuracy",
@@ -303,26 +336,32 @@
             "args": ["tp", "tn", "p", "n"],
             "formula": "tp/(2*p) + tn/(2*n)",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "tp/(2*p) + tn/(2*n)"
+            "formula_standardized": "tp/(2*p) + tn/(2*n)",
+            "polynomial_equation": "bacc*2*p*n - tp*n - tn*p"
         },
         "kappa": {
             "name": "cohens_kappa",
             "abbreviation": "kappa",
-            "nans": [{"tn": 0, "tp": 0}],
+            "nans": [{"tn": "n", "tp": 0}, {"tp": "p", "tn": 0}],
             "args": ["tp", "tn", "p", "n"],
             "formula": "(2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "-2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)"
+            "formula_standardized": "-2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)",
+            "nans_standardized": [{"tn": "n", "tp": 0}, {"tp": "p", "tn": 0}],
+            "polynomial_equation": "kappa * (n**2 - n*tn + n*tp + p**2 + p*tn - p*tp) + 2*(n*p - n*tp - p*tn)"
         },
         "p4": {
             "name": "p4",
             "abbreviation": "p4",
+            "nans": [{"tp": 0, "tn": 0}, {"tp": "p", "tn": "n"}],
             "lower_bound": 0,
             "upper_bound": 1,
             "args": ["tp", "tn", "p", "n"],
             "formula": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))",
             "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))"
+            "formula_standardized": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))",
+            "nans_standardized": [{"tp": 0, "tn": 0}, {"tp": "p", "tn": "n"}],
+            "polynomial_equation": "p4 * (4*tp*tn + (tp + tn)*(p - tp + n - tn)) - 4*tp*tn"
         }
     }
 }

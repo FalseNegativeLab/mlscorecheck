@@ -3,20 +3,29 @@ This module implements the test suit for the retina vessel
 segmentation drive dataset
 """
 
+from ..core import NUMERICAL_TOLERANCE, logger
 from ..experiments import load_drive
 from ..check import (check_1_testset_no_kfold_scores,
                         check_n_datasets_mor_kfold_rom_scores,
                         check_n_datasets_rom_kfold_rom_scores)
 
-__all__ = ['drive_aggregated_fov',
-            'drive_aggregated_no_fov',
-            'drive_image_fov',
-            'drive_image_no_fov',
+__all__ = ['drive_aggregated_fov_pixels',
+            'drive_aggregated_all_pixels',
+            'drive_image_fov_pixels',
+            'drive_image_all_pixels',
             'drive_aggregated',
             'drive_image',
             'filter_drive']
 
-def _drive_aggregated_test_scores(data, scores, eps, aggregation):
+def _drive_aggregated_test_scores(data,
+                                    scores,
+                                    eps,
+                                    aggregation,
+                                    *,
+                                    solver_name=None,
+                                    timeout=None,
+                                    verbosity=1,
+                                    numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of the a dataset.
 
@@ -56,11 +65,19 @@ def filter_drive(data, subset=None):
         return data
     result = [dataset for dataset in data if dataset['identifier'] in subset]
     if len(result) == 0:
-        raise ValueError('There is no images remaining. Please check if the bundle '\
+        raise ValueError('There is no images remaining. Please check if the image_set '\
                         '("train"/"test") and the image identifiers are specified properly')
     return result
 
-def drive_aggregated(scores, eps, bundle, subset=None):
+def drive_aggregated(scores,
+                        eps,
+                        image_set,
+                        subset=None,
+                        *,
+                        solver_name=None,
+                        timeout=None,
+                        verbosity=1,
+                        numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Testing the consistency of DRIVE scores with multiple
     aggregation techniques and with the field of view (FoV)
@@ -70,10 +87,19 @@ def drive_aggregated(scores, eps, bundle, subset=None):
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image image_set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
-                            with the bundle
+                            with the image_set
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the pulp linear programming solver,
+                            0: silent, non-zero: verbose
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the result of the analysis
@@ -84,38 +110,59 @@ def drive_aggregated(scores, eps, bundle, subset=None):
     Examples:
         >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                             eps=1e-4,
-                            bundle='test')
-        # {'mor_fov_inconsistency': True,
-            'mor_no_fov_inconsistency': True,
-            'rom_fov_inconsistency': True,
-            'rom_no_fov_inconsistency': True}
+                            image_set='test')
+        # {'mor_fov_pixels_inconsistency': True,
+            'mor_all_pixels_inconsistency': True,
+            'rom_fov_pixels_inconsistency': True,
+            'rom_all_pixels_inconsistency': True}
     """
-    results_fov_mor = drive_aggregated_fov(scores=scores,
-                                        eps=eps,
-                                        aggregation='mor',
-                                        bundle=bundle,
-                                        subset=subset)
-    results_no_fov_mor = drive_aggregated_no_fov(scores=scores,
-                                            eps=eps,
-                                            aggregation='mor',
-                                            bundle=bundle,
-                                            subset=subset)
-    results_fov_rom = drive_aggregated_fov(scores=scores,
-                                        eps=eps,
-                                        aggregation='rom',
-                                        bundle=bundle,
-                                        subset=subset)
-    results_no_fov_rom = drive_aggregated_no_fov(scores=scores,
-                                            eps=eps,
-                                            aggregation='rom',
-                                            bundle=bundle,
-                                            subset=subset)
-    return {'mor_fov_inconsistency': results_fov_mor['inconsistency'],
-            'mor_no_fov_inconsistency': results_no_fov_mor['inconsistency'],
-            'rom_fov_inconsistency': results_fov_rom['inconsistency'],
-            'rom_no_fov_inconsistency': results_no_fov_rom['inconsistency']}
+    logger.info('testing MoR FoV pixels')
+    results_fov_mor = drive_aggregated_fov_pixels(scores=scores,
+                                                eps=eps,
+                                                aggregation='mor',
+                                                image_set=image_set,
+                                                subset=subset,
+                                                solver_name=solver_name,
+                                                timeout=timeout,
+                                                verbosity=verbosity,
+                                                numerical_tolerance=numerical_tolerance)
+    logger.info('testing MoR all pixels')
+    results_no_fov_mor = drive_aggregated_all_pixels(scores=scores,
+                                                    eps=eps,
+                                                    aggregation='mor',
+                                                    image_set=image_set,
+                                                    subset=subset,
+                                                    solver_name=solver_name,
+                                                    timeout=timeout,
+                                                    verbosity=verbosity,
+                                                    numerical_tolerance=numerical_tolerance)
+    logger.info('testing RoM FoV pixels')
+    results_fov_rom = drive_aggregated_fov_pixels(scores=scores,
+                                                eps=eps,
+                                                aggregation='rom',
+                                                image_set=image_set,
+                                                subset=subset,
+                                                solver_name=solver_name,
+                                                timeout=timeout,
+                                                verbosity=verbosity,
+                                                numerical_tolerance=numerical_tolerance)
+    logger.info('testing RoM all pixels')
+    results_no_fov_rom = drive_aggregated_all_pixels(scores=scores,
+                                                    eps=eps,
+                                                    aggregation='rom',
+                                                    image_set=image_set,
+                                                    subset=subset,
+                                                    solver_name=solver_name,
+                                                    timeout=timeout,
+                                                    verbosity=verbosity,
+                                                    numerical_tolerance=numerical_tolerance)
 
-def drive_image(scores, eps, bundle, identifier):
+    return {'mor_fov_pixels_inconsistency': results_fov_mor['inconsistency'],
+            'mor_all_pixels_inconsistency': results_no_fov_mor['inconsistency'],
+            'rom_fov_pixels_inconsistency': results_fov_rom['inconsistency'],
+            'rom_all_pixels_inconsistency': results_no_fov_rom['inconsistency']}
+
+def drive_image(scores, eps, image_set, identifier):
     """
     Testing the consistency of DRIVE a drive image scores with multiple
     with the field of view (FoV) and without the field of view (no FoV).
@@ -123,10 +170,10 @@ def drive_image(scores, eps, bundle, identifier):
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
-                            with the bundle
+                            with the image_set
 
     Returns:
         dict: the result of the analysis
@@ -138,28 +185,46 @@ def drive_image(scores, eps, bundle, identifier):
         >>> drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
                                 'f1p': 0.9801, 'ppv': 0.8543},
                         eps=1e-4,
-                        bundle='test',
+                        image_set='test',
                         identifier='01')
         # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
     """
-    results_fov = drive_image_fov(scores, eps, bundle, identifier)
-    results_no_fov = drive_image_no_fov(scores, eps, bundle, identifier)
-    return {'fov_inconsistency': results_fov['inconsistency'],
-            'no_fov_inconsistency': results_no_fov['inconsistency']}
+    results_fov = drive_image_fov_pixels(scores, eps, image_set, identifier)
+    results_no_fov = drive_image_all_pixels(scores, eps, image_set, identifier)
+    return {'fov_pixels_inconsistency': results_fov['inconsistency'],
+            'all_pixels_inconsistency': results_no_fov['inconsistency']}
 
-def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
+def drive_aggregated_fov_pixels(scores,
+                                eps,
+                                aggregation,
+                                image_set,
+                                subset=None,
+                                *,
+                                solver_name=None,
+                                timeout=None,
+                                verbosity=1,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
-    Testing the consistency of DRIVE scores with the field of view (FoV).
+    Testing the consistency of DRIVE scores with the field of view (FoV) pixels only.
     The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the aggregation technique ('mor'/'rom')
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
-                            with the bundle
+                            with the image_set
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the pulp linear programming solver,
+                            0: silent, non-zero: verbose
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the result of the analysis, the 'inconsistency' flag
@@ -170,31 +235,58 @@ def drive_aggregated_fov(scores, eps, aggregation, bundle, subset=None):
         ValueError: if the filtering results an empty set
 
     Examples:
-        >>> result = drive_aggregated_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+        >>> result = drive_aggregated_fov_pixels(scores={'acc': 0.9478,
+                                                            'sens': 0.8532,
+                                                            'spec': 0.9801},
                                             eps=1e-4,
-                                            bundle='test')
+                                            image_set='test')
         >>> result['inconsistency']
         # True
     """
-    assert bundle in ('train', 'test')
+    assert image_set in ('train', 'test')
     assert aggregation in ('mor', 'rom')
 
-    data = load_drive()[f'{bundle}_fov']['datasets']
+    data = load_drive()[f'{image_set}_fov']['datasets']
     data = filter_drive(data, subset)
 
-    return _drive_aggregated_test_scores(data, scores, eps, aggregation)
+    return _drive_aggregated_test_scores(data,
+                                            scores,
+                                            eps,
+                                            aggregation,
+                                            solver_name=solver_name,
+                                            timeout=timeout,
+                                            verbosity=verbosity,
+                                            numerical_tolerance=numerical_tolerance)
 
-def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
+def drive_aggregated_all_pixels(scores,
+                                eps,
+                                aggregation,
+                                image_set,
+                                subset=None,
+                                *,
+                                solver_name=None,
+                                timeout=None,
+                                verbosity=1,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
-    Testing the consistency of DRIVE scores with no field of view (no FoV).
+    Testing the consistency of DRIVE scores with all pixels.
     The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the aggregation technique ('mor'/'rom')
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the pulp linear programming solver,
+                            0: silent, non-zero: verbose
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the result of the analysis, the ``inconsistency`` flag
@@ -205,29 +297,38 @@ def drive_aggregated_no_fov(scores, eps, aggregation, bundle, subset=None):
         ValueError: if the filtering results an empty set
 
     Examples:
-        >>> result = drive_aggregated_no_fov(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+        >>> result = drive_aggregated_all_pixels(scores={'acc': 0.9478,
+                                                            'sens': 0.8532,
+                                                            'spec': 0.9801},
                                             eps=1e-4,
-                                            bundle='test')
+                                            image_set='test')
         >>> result['inconsistency']
         # True
     """
-    assert bundle in ('train', 'test')
+    assert image_set in ('train', 'test')
     assert aggregation in ('mor', 'rom')
 
-    data = load_drive()[f'{bundle}_no_fov']['datasets']
+    data = load_drive()[f'{image_set}_no_fov']['datasets']
     data = filter_drive(data, subset)
 
-    return _drive_aggregated_test_scores(data, scores, eps, aggregation)
+    return _drive_aggregated_test_scores(data,
+                                            scores,
+                                            eps,
+                                            aggregation,
+                                            solver_name=solver_name,
+                                            timeout=timeout,
+                                            verbosity=verbosity,
+                                            numerical_tolerance=numerical_tolerance)
 
-def drive_image_fov(scores, eps, bundle, identifier):
+def drive_image_fov_pixels(scores, eps, image_set, identifier):
     """
     Testing the consistency of DRIVE a drive image scores with the field of
-    view (FoV).
+    view (FoV) pixels only.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image set to test ('train'/'test')
         identifier (str): the identifier of the image (like '01' or '22')
 
     Returns:
@@ -241,32 +342,32 @@ def drive_image_fov(scores, eps, bundle, identifier):
         ValueError: if the specified image cannot be found
 
     Examples:
-        >>> result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+        >>> result = drive_image_fov_pixels(scores={'acc': 0.9478, 'npv': 0.8532,
                                             'f1p': 0.9801, 'ppv': 0.8543},
                                     eps=1e-4,
-                                    bundle='test',
+                                    image_set='test',
                                     identifier='01')
         >>> result['inconsistency']
         # True
     """
-    assert bundle in ('train', 'test')
+    assert image_set in ('train', 'test')
 
-    data = load_drive()[f'{bundle}_fov']['datasets']
+    data = load_drive()[f'{image_set}_fov']['datasets']
     image = filter_drive(data, [identifier])[0]['folds'][0]
 
     return check_1_testset_no_kfold_scores(scores=scores,
                                             eps=eps,
                                             testset=image)
 
-def drive_image_no_fov(scores, eps, bundle, identifier):
+def drive_image_all_pixels(scores, eps, image_set, identifier):
     """
     Testing the consistency of DRIVE a drive image scores
-    without the field of view (no FoV).
+    without all pixels.
 
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        bundle (str): the image bundle to test ('train'/'test')
+        image_set (str): the image set to test ('train'/'test')
         identifier (str): the identifier of the image (like '01' or '22')
 
     Returns:
@@ -280,17 +381,17 @@ def drive_image_no_fov(scores, eps, bundle, identifier):
         ValueError: if the specified image cannot be found
 
     Examples:
-        >>> result = drive_image_fov(scores={'acc': 0.9478, 'npv': 0.8532,
+        >>> result = drive_image_all_pixels(scores={'acc': 0.9478, 'npv': 0.8532,
                                             'f1p': 0.9801, 'ppv': 0.8543},
                                     eps=1e-4,
-                                    bundle='test',
+                                    image_set='test',
                                     identifier='01')
         >>> result['inconsistency']
         # True
     """
-    assert bundle in ('train', 'test')
+    assert image_set in ('train', 'test')
 
-    data = load_drive()[f'{bundle}_no_fov']['datasets']
+    data = load_drive()[f'{image_set}_no_fov']['datasets']
     image = filter_drive(data, [identifier])[0]['folds'][0]
 
     return check_1_testset_no_kfold_scores(scores=scores,

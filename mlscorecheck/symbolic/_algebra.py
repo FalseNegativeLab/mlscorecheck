@@ -224,18 +224,19 @@ class SympyAlgebra(Algebra):
         """
         return self.algebra.simplify(expression)
 
-    def solve(self, equation, var):
+    def solve(self, equation, var, **kwargs):
         """
         Solve an equation for a variable
 
         Args:
             equation (object): the equation to solve
             var (object): the variable to solve for
+            kwargs (dict): additional parameters to the solver
 
         Returns:
             list(dict): the solutions
         """
-        results = self.algebra.solve(equation, var)
+        results = self.algebra.solve(equation, var, **kwargs)
         solutions = []
         for res in results:
             solutions.append({var: res})
@@ -420,18 +421,19 @@ class SageAlgebra(Algebra):
         """
         return self.algebra.factor(expression)
 
-    def solve(self, equation, var):
+    def solve(self, equation, var, **kwargs):
         """
         Solve an equation for a variable
 
         Args:
             equation (object): the equation to solve
             var (object): the variable to solve for
+            kwargs (dict): additional parameters to the solver
 
         Returns:
             list(dict): the solutions
         """
-        results = self.algebra.solve(equation, var)
+        results = self.algebra.solve(equation, var, **kwargs)
         solutions = []
         for sol in results:
             solution = {sol.lhs(): self.algebra.factor(sol.rhs())}
@@ -522,7 +524,7 @@ class SageAlgebra(Algebra):
         if hasattr(expression.operator(), '__qualname__') \
             and expression.operator().__qualname__ == 'mul_vararg':
             operands = expression.operands()
-            print(operands)
+
             if len(operands) == 2:
                 if self.is_power(operands[1]):
                     _, power = operands[1].operands()

@@ -1,0 +1,231 @@
+{
+    "mcc": {
+        "tp": [
+            "(-mcc*sqrt(p)*(n + p)*sqrt(mcc**2*n*p + 4*n*tn - 4*tn**2) + sqrt(n)*p*(-mcc**2*n + mcc**2*p + 2*mcc**2*tn + 2*n - 2*tn))/(2*sqrt(n)*(mcc**2*p + n))",
+            "(mcc*sqrt(p)*(n + p)*sqrt(mcc**2*n*p + 4*n*tn - 4*tn**2) + sqrt(n)*p*(-mcc**2*n + mcc**2*p + 2*mcc**2*tn + 2*n - 2*tn))/(2*sqrt(n)*(mcc**2*p + n))"
+        ],
+        "tn": [
+            "(-mcc*sqrt(n)*(n + p)*sqrt(mcc**2*n*p + 4*p*tp - 4*tp**2) + n*sqrt(p)*(mcc**2*n - mcc**2*p + 2*mcc**2*tp + 2*p - 2*tp))/(2*sqrt(p)*(mcc**2*n + p))",
+            "(mcc*sqrt(n)*(n + p)*sqrt(mcc**2*n*p + 4*p*tp - 4*tp**2) + n*sqrt(p)*(mcc**2*n - mcc**2*p + 2*mcc**2*tp + 2*p - 2*tp))/(2*sqrt(p)*(mcc**2*n + p))"
+        ]
+    },
+    "acc": {
+        "tp": [
+            "acc*n + acc*p - tn"
+        ],
+        "tn": [
+            "acc*n + acc*p - tp"
+        ]
+    },
+    "err": {
+        "tp": [
+            "-err*n - err*p + n + p - tn"
+        ],
+        "tn": [
+            "-err*n - err*p + n + p - tp"
+        ]
+    },
+    "sens": {
+        "tp": [
+            "p*sens"
+        ],
+        "tn": []
+    },
+    "fnr": {
+        "tp": [
+            "p*(1 - fnr)"
+        ],
+        "tn": []
+    },
+    "fpr": {
+        "tp": [],
+        "tn": [
+            "n*(1 - fpr)"
+        ]
+    },
+    "spec": {
+        "tp": [],
+        "tn": [
+            "n*spec"
+        ]
+    },
+    "ppv": {
+        "tp": [
+            "ppv*(-n + tn)/(ppv - 1)"
+        ],
+        "tn": [
+            "n + tp - tp/ppv"
+        ]
+    },
+    "fdr": {
+        "tp": [
+            "(fdr*(-n + tn) + n - tn)/fdr"
+        ],
+        "tn": [
+            "(fdr*n + fdr*tp - n)/(fdr - 1)"
+        ]
+    },
+    "for_": {
+        "tp": [
+            "(for_*p + for_*tn - p)/(for_ - 1)"
+        ],
+        "tn": [
+            "(for_*(-p + tp) + p - tp)/for_"
+        ]
+    },
+    "npv": {
+        "tp": [
+            "p + tn - tn/npv"
+        ],
+        "tn": [
+            "npv*(-p + tp)/(npv - 1)"
+        ]
+    },
+    "fbp": {
+        "tp": [
+            "fbp*(beta_plus**2*p + n - tn)/(beta_plus**2 - fbp + 1)"
+        ],
+        "tn": [
+            "(-beta_plus**2*tp + fbp*(beta_plus**2*p + n + tp) - tp)/fbp"
+        ]
+    },
+    "f1p": {
+        "tp": [
+            "f1p*(-n - p + tn)/(f1p - 2)"
+        ],
+        "tn": [
+            "n + p + tp - 2*tp/f1p"
+        ]
+    },
+    "fbm": {
+        "tp": [
+            "(-beta_minus**2*tn + fbm*(beta_minus**2*n + p + tn) - tn)/fbm"
+        ],
+        "tn": [
+            "fbm*(beta_minus**2*n + p - tp)/(beta_minus**2 - fbm + 1)"
+        ]
+    },
+    "f1m": {
+        "tp": [
+            "n + p + tn - 2*tn/f1m"
+        ],
+        "tn": [
+            "f1m*(-n - p + tp)/(f1m - 2)"
+        ]
+    },
+    "upm": {
+        "tp": [
+            "n/2 + p/2 + tn - 2*tn/upm - sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2)/(2*upm)",
+            "n/2 + p/2 + tn - 2*tn/upm + sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2)/(2*upm)"
+        ],
+        "tn": [
+            "n/2 + p/2 + tp - 2*tp/upm - sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2)/(2*upm)",
+            "n/2 + p/2 + tp - 2*tp/upm + sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2)/(2*upm)"
+        ]
+    },
+    "gm": {
+        "tp": [
+            "-gm*n*p/tn",
+            "gm*n*p/tn"
+        ],
+        "tn": [
+            "-gm*n*p/tp",
+            "gm*n*p/tp"
+        ]
+    },
+    "fm": {
+        "tp": [
+            "fm*(fm*p - sqrt(p)*sqrt(fm**2*p + 4*n - 4*tn))/2",
+            "fm*(fm*p + sqrt(p)*sqrt(fm**2*p + 4*n - 4*tn))/2"
+        ],
+        "tn": [
+            "n + tp - tp**2/(fm**2*p)"
+        ]
+    },
+    "mk": {
+        "tp": [
+            "(-mk*n + mk*p + 2*mk*tn - n - sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2))/(2*mk)",
+            "(-mk*n + mk*p + 2*mk*tn - n + sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2))/(2*mk)"
+        ],
+        "tn": [
+            "(mk*n - mk*p + 2*mk*tp - p - sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2))/(2*mk)",
+            "(mk*n - mk*p + 2*mk*tp - p + sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2))/(2*mk)"
+        ]
+    },
+    "lrp": {
+        "tp": [
+            "lrp*p*(n - tn)/n"
+        ],
+        "tn": [
+            "n - n*tp/(lrp*p)"
+        ]
+    },
+    "lrn": {
+        "tp": [
+            "p*(-lrn*tn + n)/n"
+        ],
+        "tn": [
+            "n*(p - tp)/(lrn*p)"
+        ]
+    },
+    "bm": {
+        "tp": [
+            "p*(n*(bm + 1) - tn)/n"
+        ],
+        "tn": [
+            "n*(p*(bm + 1) - tp)/p"
+        ]
+    },
+    "pt": {
+        "tp": [
+            "p*(n - tn)/n",
+            "p*(n*pt**2 - 2*n*pt + n - pt**2*tn + 2*pt*tn - tn)/(n*pt**2)"
+        ],
+        "tn": [
+            "n*(p - tp)/p",
+            "n*(p*pt**2 - 2*p*pt + p - pt**2*tp)/(p*(pt**2 - 2*pt + 1))"
+        ]
+    },
+    "dor": {
+        "tp": [
+            "dor*p*(n - tn)/(dor*n - dor*tn + tn)"
+        ],
+        "tn": [
+            "dor*n*(p - tp)/(dor*p - dor*tp + tp)"
+        ]
+    },
+    "ji": {
+        "tp": [
+            "ji*(n + p - tn)"
+        ],
+        "tn": [
+            "n + p - tp/ji"
+        ]
+    },
+    "bacc": {
+        "tp": [
+            "p*(2*bacc*n - tn)/n"
+        ],
+        "tn": [
+            "n*(2*bacc*p - tp)/p"
+        ]
+    },
+    "kappa": {
+        "tp": [
+            "(kappa*n**2 + kappa*n*tn + kappa*p**2 - kappa*p*tn + 2*n*p - 2*n*tn)/(kappa*n - kappa*p + 2*p)"
+        ],
+        "tn": [
+            "(kappa*n**2 - kappa*n*tp + kappa*p**2 + kappa*p*tp + 2*n*p - 2*p*tp)/(-kappa*n + kappa*p + 2*n)"
+        ]
+    },
+    "p4": {
+        "tp": [
+            "n/2 + p/2 + tn - 2*tn/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)",
+            "n/2 + p/2 + tn - 2*tn/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)"
+        ],
+        "tn": [
+            "n/2 + p/2 + tp - 2*tp/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)",
+            "n/2 + p/2 + tp - 2*tp/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)"
+        ]
+    }
+}

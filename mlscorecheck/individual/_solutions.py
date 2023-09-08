@@ -14,9 +14,48 @@ from ._interval import Interval, IntervalUnion
 from ._expression import Expression
 
 __all__ = ['load_solutions',
+            'load_tptn_solutions',
             'Solution',
             'Solutions',
-            'solution_specifications']
+            'solution_specifications',
+            'Solution0']
+
+class Solution0:
+    def __init__(self,
+                    solution,
+                    non_zero,
+                    non_negative):
+        print(solution)
+        self.solution = Expression(**solution)
+        self.non_zeros = [Expression(**non_zero_item) for non_zero_item in non_zero]
+        self.non_negatives = [Expression(**non_negative_item) for non_negative_item in non_negative]
+
+        print(self.solution.symbols)
+
+        self.all_symbols = self.solution.symbols
+        for item in self.non_zeros:
+            self.all_symbols = self.all_symbols.union(item.symbols)
+        for item in self.non_negatives:
+            self.all_symbols = self.all_symbols.union(item.symbols)
+
+    def evaluate(self, subs):
+        """
+        Evaluate the solution with a substitution
+
+        Args:
+            subs (dict): a substitution
+
+        Returns:
+            dict: the results
+        """
+        subs = {key: subs[key] for key in self.all_symbols}
+
+        if any(non_zero.evaluate(subs) == 0 for non_zero in self.non_zeros):
+            return None
+        if any(non_negative.evaluate(subs) < 0 for non_negative in self.non_negatives):
+            return None
+
+        return self.solution.evaluate(subs)
 
 class Solution:
     """
@@ -111,7 +150,7 @@ class Solution:
                 if isinstance(value, Interval):
                     if value.upper_bound < 0:
                         return {key: value}
-                elif any(interval.upper_bound < 0 for interval in value.intervals):
+                elif all(interval.upper_bound < 0 for interval in value.intervals):
                     return {key: value}
             elif value < 0:
                 return {key: value}
@@ -230,4 +269,18 @@ def load_solutions():
 
     return results
 
+def load_tptn_solutions():
+    """
+    Load the solutions for tp and tn
+
+    Returns:
+        dict: the dictionary of the solutions
+    """
+    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'tptn_solutions.json')).read_text() # pylint: disable=unspecified-encoding
+
+    solutions_dict = json.loads(sio)
+
+    return solutions_dict
+
 solution_specifications = load_solutions()
+tptn_solution_specifications = load_tptn_solutions()

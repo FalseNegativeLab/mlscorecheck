@@ -23,11 +23,11 @@ Retinal Vessel Segmentation
 ---------------------------
 
 .. autofunction:: mlscorecheck.bundles.drive_aggregated
-.. autofunction:: mlscorecheck.bundles.drive_aggregated_fov
-.. autofunction:: mlscorecheck.bundles.drive_aggregated_no_fov
+.. autofunction:: mlscorecheck.bundles.drive_aggregated_fov_pixels
+.. autofunction:: mlscorecheck.bundles.drive_aggregated_all_pixels
 .. autofunction:: mlscorecheck.bundles.drive_image
-.. autofunction:: mlscorecheck.bundles.drive_image_fov
-.. autofunction:: mlscorecheck.bundles.drive_image_no_fov
+.. autofunction:: mlscorecheck.bundles.drive_image_fov_pixels
+.. autofunction:: mlscorecheck.bundles.drive_image_all_pixels
 
 
 EHG

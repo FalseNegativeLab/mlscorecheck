@@ -7,7 +7,7 @@ in a kfold scenario on one single dataset.
 import warnings
 
 from ..core import logger, NUMERICAL_TOLERANCE
-from ..individual import check_individual_scores
+from ..individual import check_individual_scores, check_scores_tptn
 from ..aggregated import check_aggregated_scores, Experiment
 
 __all__ = ['check_1_dataset_kfold_rom_scores']
@@ -114,10 +114,11 @@ def check_1_dataset_kfold_rom_scores(scores,
     figures = experiment.calculate_figures()
 
     # executing the individual tests
-    ind_results = check_individual_scores(scores=scores,
-                                            eps=eps,
-                                            p=figures['p'],
-                                            n=figures['n'])
+    ind_results = check_scores_tptn(scores=scores,
+                                    eps=eps,
+                                    p=figures['p'],
+                                    n=figures['n'],
+                                    numerical_tolerance=numerical_tolerance)
 
     result = {'inconsistency': ind_results['inconsistency'],
                 'individual_results': ind_results}

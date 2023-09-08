@@ -10,6 +10,7 @@ import numpy as np
 from ..core import safe_eval
 from ..scores import score_specifications
 from ..scores import score_functions_standardized_with_complements
+from ..scores import score_functions_without_complements
 
 from ._algebra import Symbols
 
@@ -44,7 +45,8 @@ __all__ = ['Score',
             'CohensKappa',
             'P4',
             'get_base_objects',
-            'get_all_objects']
+            'get_all_objects',
+            'get_objects_without_complements']
 
 scores = score_specifications
 functions = score_functions_standardized_with_complements
@@ -123,11 +125,12 @@ class Score: # pylint: disable=too-many-instance-attributes
             self.equation = self.symbol - self.expression
 
         # setting the polynomial equation
-        if equation_polynomial is not None:
+        if 'polynomial_equation' in descriptor:
+            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+            self.equation_polynomial = safe_eval(descriptor['polynomial_equation'], subs)
+        elif equation_polynomial is not None:
             subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
             self.equation_polynomial = safe_eval(equation_polynomial, subs)
-        else:
-            self.equation_polynomial = None
 
     def get_algebra(self):
         """
@@ -151,25 +154,6 @@ class Score: # pylint: disable=too-many-instance-attributes
             'function': self.function.__name__
         }
 
-class MatthewsCorrelationCoefficient(Score):
-    """
-    The MatthewsCorrelationCoefficient score
-    """
-    def __init__(self, symbols):
-        """
-        The constructor of the score
-
-        Args:
-            symbols (Symbols): the algebraic symbols to be used
-        """
-        Score.__init__(self,
-                        symbols,
-                        scores['mcc'],
-                        function=functions['mcc'])
-
-        num, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.symbol**2 * denom**2 - num**2)
-
 class Accuracy(Score):
     """
     The accuracy score
@@ -185,9 +169,6 @@ class Accuracy(Score):
                         symbols,
                         scores['acc'],
                         function=functions['acc'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class ErrorRate(Score):
     """
@@ -205,9 +186,6 @@ class ErrorRate(Score):
                         scores['err'],
                         function=functions['err'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class Sensitivity(Score):
     """
     The sensitivity score
@@ -223,9 +201,6 @@ class Sensitivity(Score):
                         symbols,
                         scores['sens'],
                         function=functions['sens'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class FalseNegativeRate(Score):
     """
@@ -243,9 +218,6 @@ class FalseNegativeRate(Score):
                         scores['fnr'],
                         function=functions['fnr'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class FalsePositiveRate(Score):
     """
     The false positive rate
@@ -261,9 +233,6 @@ class FalsePositiveRate(Score):
                         symbols,
                         scores['fpr'],
                         function=functions['fpr'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class Specificity(Score):
     """
@@ -281,9 +250,6 @@ class Specificity(Score):
                         scores['spec'],
                         function=functions['spec'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class PositivePredictiveValue(Score):
     """
     The positive predictive value
@@ -299,9 +265,6 @@ class PositivePredictiveValue(Score):
                         symbols,
                         scores['ppv'],
                         function=functions['ppv'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class FalseDiscoveryRate(Score):
     """
@@ -319,9 +282,6 @@ class FalseDiscoveryRate(Score):
                         scores['fdr'],
                         function=functions['fdr'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class FalseOmissionRate(Score):
     """
     The false omission rate
@@ -337,9 +297,6 @@ class FalseOmissionRate(Score):
                         symbols,
                         scores['for_'],
                         function=functions['for_'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class NegativePredictiveValue(Score):
     """
@@ -357,9 +314,6 @@ class NegativePredictiveValue(Score):
                         scores['npv'],
                         function=functions['npv'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class FBetaPlus(Score):
     """
     The f-beta plus score
@@ -375,9 +329,6 @@ class FBetaPlus(Score):
                         symbols,
                         scores['fbp'],
                         function=functions['fbp'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class F1Plus(Score):
     """
@@ -395,9 +346,6 @@ class F1Plus(Score):
                         scores['f1p'],
                         function=functions['f1p'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class FBetaMinus(Score):
     """
     The f-beta minus score
@@ -413,9 +361,6 @@ class FBetaMinus(Score):
                         symbols,
                         scores['fbm'],
                         function=functions['fbm'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class F1Minus(Score):
     """
@@ -433,28 +378,6 @@ class F1Minus(Score):
                         scores['f1m'],
                         function=functions['f1m'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
-class UnifiedPerformanceMeasure(Score):
-    """
-    The unified performance measure score
-    """
-    def __init__(self, symbols):
-        """
-        The constructor of the score
-
-        Args:
-            symbols (Symbols): the algebraic symbols to be used
-        """
-        Score.__init__(self,
-                        symbols,
-                        scores['upm'],
-                        function=functions['upm'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class GeometricMean(Score):
     """
     The geometric mean score
@@ -470,9 +393,6 @@ class GeometricMean(Score):
                         symbols,
                         scores['gm'],
                         function=functions['gm'])
-
-        self.equation_polynomial = self.symbol**2 - \
-                symbols.tp**2*symbols.tn**2/(symbols.p**2*symbols.n**2)
 
 class FowlkesMallowsIndex(Score):
     """
@@ -490,13 +410,22 @@ class FowlkesMallowsIndex(Score):
                         scores['fm'],
                         function=functions['fm'])
 
-        p = symbols.p
-        n = symbols.n
-        tp = symbols.tp
-        tn = symbols.tn
+class UnifiedPerformanceMeasure(Score):
+    """
+    The unified performance measure score
+    """
+    def __init__(self, symbols):
+        """
+        The constructor of the score
 
-        self.equation_polynomial = -(self.symbol**2*n*p - self.symbol**2*p*tn + \
-                                                        self.symbol**2*p*tp - tp**2)
+        Args:
+            symbols (Symbols): the algebraic symbols to be used
+        """
+        Score.__init__(self,
+                        symbols,
+                        scores['upm'],
+                        function=functions['upm'])
+
 
 class Markedness(Score):
     """
@@ -514,13 +443,6 @@ class Markedness(Score):
                         scores['mk'],
                         function=functions['mk'])
 
-        tp = symbols.tp
-        tn = symbols.tn
-        fp = symbols.n - tn
-        fn = symbols.p - tp
-
-        self.equation_polynomial = symbols.algebra.simplify(self.equation*(tp + fp)*(tn + fn))
-
 class PositiveLikelihoodRatio(Score):
     """
     The positive likelihood ratio score
@@ -536,9 +458,6 @@ class PositiveLikelihoodRatio(Score):
                         symbols,
                         scores['lrp'],
                         function=functions['lrp'])
-
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
 
 class NegativeLikelihoodRatio(Score):
     """
@@ -556,9 +475,6 @@ class NegativeLikelihoodRatio(Score):
                         scores['lrn'],
                         function=functions['lrn'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class Informedness(Score):
     """
     The informedness score
@@ -574,11 +490,6 @@ class Informedness(Score):
                         symbols,
                         scores['bm'],
                         function=functions['bm'])
-
-        p = symbols.p
-        n = symbols.n
-
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * p * n)
 
 class PrevalenceThreshold(Score):
     """
@@ -596,13 +507,6 @@ class PrevalenceThreshold(Score):
                         scores['pt'],
                         function=functions['pt'])
 
-        tp = symbols.tp
-        fp = symbols.n - symbols.tn
-        p = symbols.p
-        n = symbols.n
-
-        self.equation_polynomial = (self.symbol * (tp/p - fp/n) + fp/n)**2 - fp*tp/(n*p)
-
 class DiagnosticOddsRatio(Score):
     """
     The diagnostic odds ratio
@@ -618,14 +522,6 @@ class DiagnosticOddsRatio(Score):
                         symbols,
                         scores['dor'],
                         function=functions['dor'])
-
-        tp = symbols.tp
-        tn = symbols.tn
-        p = symbols.p
-        n = symbols.n
-
-        tmp = self.symbol * (n - tn) * (p - tp) - tn*tp
-        self.equation_polynomial = symbols.algebra.simplify(tmp)
 
 class JaccardIndex(Score):
     """
@@ -643,9 +539,6 @@ class JaccardIndex(Score):
                         scores['ji'],
                         function=functions['ji'])
 
-        _, denom = symbols.algebra.num_denom(self.expression)
-        self.equation_polynomial = symbols.algebra.simplify(self.equation * denom)
-
 class BalancedAccuracy(Score):
     """
     The balanced accuracy score
@@ -661,14 +554,6 @@ class BalancedAccuracy(Score):
                         symbols,
                         scores['bacc'],
                         function=functions['bacc'])
-
-
-        tp = symbols.tp
-        tn = symbols.tn
-        p = symbols.p
-        n = symbols.n
-
-        self.equation_polynomial = symbols.algebra.simplify(self.symbol * 2 * n * p - (n*tp + p*tn))
 
 class CohensKappa(Score):
     """
@@ -686,14 +571,6 @@ class CohensKappa(Score):
                         scores['kappa'],
                         function=functions['kappa'])
 
-        tp = symbols.tp
-        tn = symbols.tn
-        p = symbols.p
-        n = symbols.n
-
-        tmp = self.symbol * (n**2 + n*tn - n*tp + p**2 - p*tn + p*tp) + 2 * (n*p - n*tn - p*tp)
-        self.equation_polynomial = symbols.algebra.simplify(tmp)
-
 class P4(Score):
     """
     The P4 score
@@ -710,13 +587,21 @@ class P4(Score):
                         scores['p4'],
                         function=functions['p4'])
 
-        tp = symbols.tp
-        tn = symbols.tn
-        fp = symbols.n - tn
-        fn = symbols.p - tp
+class MatthewsCorrelationCoefficient(Score):
+    """
+    The MatthewsCorrelationCoefficient score
+    """
+    def __init__(self, symbols):
+        """
+        The constructor of the score
 
-        tmp = self.symbol * (4*tp*tn + (tp + tn)*(fp + fn)) - 4*tp*tn
-        self.equation_polynomial = symbols.algebra.simplify(tmp)
+        Args:
+            symbols (Symbols): the algebraic symbols to be used
+        """
+        Score.__init__(self,
+                        symbols,
+                        scores['mcc'],
+                        function=functions['mcc'])
 
 def get_base_objects(algebraic_system='sympy'):
     """
@@ -748,5 +633,12 @@ def get_all_objects(algebraic_system='sympy'):
     symbols = Symbols(algebraic_system=algebraic_system)
     score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
     score_objects = {obj.abbreviation: obj for obj in score_objects}
+
+    return score_objects
+
+def get_objects_without_complements(algebraic_system='sympy'):
+    symbols = Symbols(algebraic_system=algebraic_system)
+    score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
+    score_objects = {obj.abbreviation: obj for obj in score_objects if obj.abbreviation in score_functions_without_complements}
 
     return score_objects

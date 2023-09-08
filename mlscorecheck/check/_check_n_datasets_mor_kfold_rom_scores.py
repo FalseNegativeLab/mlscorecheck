@@ -118,9 +118,9 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
                             aggregation='mor')
 
     return check_aggregated_scores(experiment=experiment,
-                                        scores=scores,
-                                        eps=eps,
-                                        solver_name=solver_name,
-                                        timeout=timeout,
-                                        verbosity=verbosity,
-                                        numerical_tolerance=numerical_tolerance)
+                                    scores=scores,
+                                    eps=eps,
+                                    solver_name=solver_name,
+                                    timeout=timeout,
+                                    verbosity=verbosity,
+                                    numerical_tolerance=numerical_tolerance)

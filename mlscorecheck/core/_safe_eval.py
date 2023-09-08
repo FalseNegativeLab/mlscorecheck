@@ -41,6 +41,8 @@ def check_applicability(params, non_applicable=None):
     for configuration in non_applicable:
         flag = True
         for key, value in configuration.items():
+            if isinstance(value, str):
+                value = params.get(value)
             flag = flag and (params.get(key) == value)
         if flag:
             return False
@@ -59,7 +61,9 @@ def safe_call(function, params, non_applicable=None):
     Returns:
         obj: the result of the function call
     """
+    print(params, non_applicable)
     if not check_applicability(params, non_applicable):
+        print('non applicable')
         return None
 
     args = list(function.__code__.co_varnames[:function.__code__.co_kwonlyargcount])
