@@ -47,7 +47,14 @@ from ._tptn_solutions import (mcc_tp,
                                 p4_tp,
                                 p4_tn)
 
-__all__ = ['tp_solutions', 'tn_solutions', 'tptn_solutions']
+__all__ = ['tp_solutions', 'tn_solutions', 'tptn_solutions', 'is_applicable_tptn']
+
+def is_applicable_tptn(score, value, to_compute):
+    if score == 'pt' and value == 0.0 and to_compute == 'tp':
+        return False
+    if score == 'pt' and value == 1.0 and to_compute == 'tn':
+        return False
+    return True
 
 tp_solutions = {'mcc': mcc_tp,
                 'acc': acc_tp,

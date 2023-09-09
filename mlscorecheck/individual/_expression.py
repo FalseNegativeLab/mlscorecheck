@@ -12,7 +12,7 @@ class Expression:
     """
     The class represents a formal expression
     """
-    def __init__(self, expression, symbols, functional_symbols=None):
+    def __init__(self, expression, symbols, functional_symbols=None, **kwargs):
         """
         The constructor of the expression
 
@@ -39,7 +39,14 @@ class Expression:
         """
         subs = {**{symbol: subs[symbol] for symbol in self.symbols},
                 'sqrt': sqrt}
-        return safe_eval(self.expression, subs)
+        value = safe_eval(self.expression, subs)
+        if isinstance(value, complex):
+            if abs(value.imag) < 1e-10:
+                value = value.real
+            else:
+                raise ValueError("imaginary component remained significant: %f" % value.imag)
+
+        return value
 
     def to_dict(self):
         """

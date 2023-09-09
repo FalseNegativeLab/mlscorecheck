@@ -12,7 +12,7 @@ __all__ = ['ProblemSolver',
             '_collect_denominators_and_bases',
             'solve_func']
 
-def _collect_denominators_and_bases(expression, denoms, bases, algebra):
+def _collect_denominators_and_bases(expression, denoms, bases, algebra, depth):
     """
     Recursive core of collecting all denominators and bases
 
@@ -35,22 +35,22 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra):
         #print(datetime.datetime.now(), 'simplified')
 
         if not algebra.is_trivial(denom):
-            denoms.append(denom)
-            _collect_denominators_and_bases(denom, denoms, bases, algebra)
-        _collect_denominators_and_bases(num, denoms, bases, algebra)
+            denoms.append((denom, depth))
+            _collect_denominators_and_bases(denom, denoms, bases, algebra, depth+1)
+        _collect_denominators_and_bases(num, denoms, bases, algebra, depth+1)
     elif algebra.is_root(expression):
         #print(datetime.datetime.now(), 'root')
         # fractional exponents are already checked here
         base, _ = algebra.operands(expression)
-        bases.append(base)
+        bases.append((base, depth))
 
         for operand in algebra.operands(base):
-            _collect_denominators_and_bases(operand, denoms, bases, algebra)
+            _collect_denominators_and_bases(operand, denoms, bases, algebra, depth+1)
     else:
         #print(datetime.datetime.now(), 'else')
         for operand in algebra.operands(expression):
             if not algebra.is_trivial(operand):
-                _collect_denominators_and_bases(operand, denoms, bases, algebra)
+                _collect_denominators_and_bases(operand, denoms, bases, algebra, depth+1)
 
 def collect_denominators_and_bases(expression, algebra):
     """
@@ -66,7 +66,27 @@ def collect_denominators_and_bases(expression, algebra):
     #logger.info('collect denominators and bases')
     denoms = []
     bases = []
-    _collect_denominators_and_bases(expression, denoms, bases, algebra)
+    _collect_denominators_and_bases(expression, denoms, bases, algebra, depth=0)
+    denom_dict = {}
+    base_dict = {}
+    for denom, depth in denoms:
+        denom_str = str(denom)
+        if denom_str in denom_dict:
+            if denom_dict[denom_str][1] < depth:
+                denom_dict[denom_str] = (denom, depth)
+        else:
+            denom_dict[denom_str] = (denom, depth)
+    denoms = list(denom_dict.values())
+
+    for base, depth in bases:
+        base_str = str(base)
+        if base_str in base_dict:
+            if base_dict[base_str][1] < depth:
+                base_dict[base_str] = (base, depth)
+        else:
+            base_dict[base_str] = (base, depth)
+    bases = list(base_dict.values())
+
     return denoms, bases
 
 def solve_func(score0, score1):
@@ -169,6 +189,7 @@ class ProblemSolver:
         self.real_solutions = None
         self.denoms = None
         self.bases = None
+        self.conditions = None
         self.str_solutions = None
         self.raw_solutions = []
 
@@ -326,9 +347,9 @@ class ProblemSolver:
                 if not self.corner_case_solution(sol):
                     self.solutions.append(sol)
                 #logger.info('solutions: %s', self.solutions)
-                sol[var0]["expression"] = str(sol[var0]['expression'])
-                sol[var1]["expression"] = str(sol[var1]['expression'])
-                self.raw_solutions.append(sol)
+                #sol[var0]["expression"] = str(sol[var0]['expression'])
+                #sol[var1]["expression"] = str(sol[var1]['expression'])
+                #self.raw_solutions.append(sol)
         return self
 
     def edge_cases(self):
@@ -338,12 +359,13 @@ class ProblemSolver:
         self.denoms = []
         self.bases = []
         self.str_solutions = []
+        self.conditions = []
 
         algebra = self.score0.symbols.algebra
 
         for solution in self.solutions:
-            denoms_sol = set()
-            bases_sol = set()
+            denoms_sol = dict()
+            bases_sol = dict()
 
             #logger.info('collecting edge cases')
 
@@ -353,16 +375,33 @@ class ProblemSolver:
                 denoms, bases = collect_denominators_and_bases(simplified, algebra)
                 denoms = list(denoms)
                 bases = list(bases)
-                denoms_sol = denoms_sol.union(set(denoms))
-                bases_sol = bases_sol.union(set(bases))
+                for denom, depth in denoms:
+                    denom_str = str(denom)
+                    if denom_str in denoms_sol:
+                        if denoms_sol[denom_str][1] < depth:
+                            denoms_sol[denom_str] = (denom, depth)
+                    else:
+                        denoms_sol[denom_str] = (denom, depth)
+                for base, depth in bases:
+                    base_str = str(base)
+                    if base_str in bases_sol:
+                        if bases_sol[base_str][1] < depth:
+                            bases_sol[base_str] = (base, depth)
+                    else:
+                        bases_sol[base_str] = (base, depth)
 
-            denoms_sol = [{'expression': str(denom),
-                            'symbols': algebra.free_symbols(denom)} for denom in denoms_sol]
-            bases_sol = [{'expression': str(base),
-                            'symbols': algebra.free_symbols(base)} for base in bases_sol]
+            denoms_sol = [{'expression': str(denom[0]),
+                            'symbols': algebra.free_symbols(denom[0]),
+                            'depth': denom[1],
+                            'mode': 'non-zero'} for denom in list(denoms_sol.values())]
+            bases_sol = [{'expression': str(base[0]),
+                            'symbols': algebra.free_symbols(base[0]),
+                            'depth': base[1],
+                            'mode': 'non-negative'} for base in list(bases_sol.values())]
 
             self.denoms.append(denoms_sol)
             self.bases.append(bases_sol)
+            self.conditions.append(denoms_sol + bases_sol)
             tmp = {str(key): {key2: str(value2)
                                 if key2 == 'expression'
                                 else value2 for key2, value2 in value.items()}
@@ -378,10 +417,9 @@ class ProblemSolver:
         """
         results = []
 
-        for solution, denoms, bases in zip(self.str_solutions, self.denoms, self.bases):
+        for solution, conditions in zip(self.str_solutions, self.conditions):
             results.append({'solution': solution,
-                            'non_zero': denoms,
-                            'non_negative': bases})
+                            'conditions': conditions})
 
         solution = Solutions(scores=[self.score0.abbreviation, self.score1.abbreviation],
                             solutions=results)

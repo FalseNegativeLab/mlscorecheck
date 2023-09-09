@@ -13,14 +13,16 @@ def is_zero(value, tolerance=1e-8):
     return value.contains(0.0)
 
 def unify_results(value_list):
-    if not isinstance(value_list[0], (Interval, IntervalUnion)):
-        return value_list
+    if not any(isinstance(value, (Interval, IntervalUnion)) for value in value_list):
+        return [value for value in value_list if value is not None]
 
     intervals = []
     for interval in value_list:
         if isinstance(interval, Interval):
             intervals.append(interval)
-        else:
+        elif isinstance(interval, IntervalUnion):
             intervals.extend(interval.intervals)
+        elif interval is not None:
+            intervals.append(Interval(interval, interval))
 
     return IntervalUnion(intervals)

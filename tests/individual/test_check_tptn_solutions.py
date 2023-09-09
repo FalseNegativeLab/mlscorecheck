@@ -13,7 +13,8 @@ from mlscorecheck.individual import (check_scores_tptn,
                                         Interval,
                                         generate_1_problem,
                                         calculate_scores,
-                                        sqrt)
+                                        sqrt,
+                                        is_applicable_tptn)
 from mlscorecheck.scores import (score_functions_standardized_without_complements,
                                     score_specifications)
 
@@ -42,7 +43,7 @@ def test_tptn_solutions(score, figure, zeros, random_seed):
                             evaluation,
                             score_specifications[score].get('nans_standardized'))
 
-    if score_val is None:
+    if score_val is None or not is_applicable_tptn(score, score_val, figure):
         return
 
     print(score, figure, evaluation, score_val)

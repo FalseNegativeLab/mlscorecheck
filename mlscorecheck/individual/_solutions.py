@@ -14,7 +14,6 @@ from ._interval import Interval, IntervalUnion
 from ._expression import Expression
 
 __all__ = ['load_solutions',
-            'load_tptn_solutions',
             'Solution',
             'Solutions',
             'solution_specifications',
@@ -64,8 +63,7 @@ class Solution:
     """
     def __init__(self,
                     solution,
-                    non_zero,
-                    non_negative):
+                    conditions=None):
         """
         Constructor of the solution
 
@@ -75,8 +73,7 @@ class Solution:
             non_negative (list(dict)): the non-negative conditions ([{'expression': , 'symbols':}])
         """
         self.solution = solution
-        self.non_zero = non_zero
-        self.non_negative = non_negative
+        self.conditions = conditions
 
         # extracting all symbols
         self.all_symbols = set()
@@ -84,11 +81,10 @@ class Solution:
         for _, item in self.solution.items():
             self.all_symbols = self.all_symbols.union(item['symbols'])
 
-        for non_zero_val in self.non_zero:
-            self.all_symbols = self.all_symbols.union(non_zero_val['symbols'])
+        for cond in self.conditions:
+            self.all_symbols = self.all_symbols.union(cond['symbols'])
 
-        for non_negative_val in self.non_negative:
-            self.all_symbols = self.all_symbols.union(non_negative_val['symbols'])
+        self.conditions = sorted(self.conditions,key=lambda x: -x['depth'])
 
     def to_dict(self):
         """
@@ -98,8 +94,7 @@ class Solution:
             dict: the dictionary representation
         """
         return {'solution': self.solution,
-                'non_zero': self.non_zero,
-                'non_negative': self.non_negative}
+                'conditions': self.conditions}
 
     def check_non_zeros(self, evals):
         """
@@ -183,17 +178,36 @@ class Solution:
         """
         subs = {key: subs[key] for key in self.all_symbols}
 
-        if non_zero := self.non_zero_conditions(subs):
-            return {'tp': None,
-                    'tn': None,
-                    'message': 'zero division',
-                    'denominator': non_zero}
+        message = None
+        for condition in self.conditions:
+            if condition['mode'] == 'non-negative':
+                value = Expression(**condition).evaluate(subs)
+                if isinstance(value, (Interval, IntervalUnion)):
+                    if isinstance(value, Interval):
+                        if value.upper_bound < 0:
+                            message = 'negative base'
+                            break
+                    elif all(interval.upper_bound < 0 for interval in value.intervals):
+                        message = 'negative base'
+                        break
+                elif value < 0:
+                    message = 'negative base'
+                    break
+            elif condition['mode'] == 'non-zero':
+                value = Expression(**condition).evaluate(subs)
+                if isinstance(value, (Interval, IntervalUnion)):
+                    if value.contains(0):
+                        message = 'zero division'
+                        break
+                else:
+                    if abs(value) < 1e-8:
+                        message = 'zero division'
+                        break
 
-        if non_negative := self.non_negative_conditions(subs):
+        if message is not None:
             return {'tp': None,
                     'tn': None,
-                    'message': 'negative base',
-                    'base': non_negative}
+                    'message': message}
 
         res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
         if 'tp' in self.solution:
@@ -267,20 +281,11 @@ def load_solutions():
         scores = list(sol['scores'])
         results[tuple(sorted(scores))] = Solutions(**sol)
 
+    # removing the solutions containing complex values
+    del results[('fm', 'gm')]
+    del results[('fm', 'mk')]
+
     return results
 
-def load_tptn_solutions():
-    """
-    Load the solutions for tp and tn
-
-    Returns:
-        dict: the dictionary of the solutions
-    """
-    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'tptn_solutions.json')).read_text() # pylint: disable=unspecified-encoding
-
-    solutions_dict = json.loads(sio)
-
-    return solutions_dict
-
 solution_specifications = load_solutions()
-tptn_solution_specifications = load_tptn_solutions()
+#solution_specifications = {}

@@ -4,6 +4,9 @@ This module implements the interval arithmetics
 
 import numpy as np
 
+import warnings
+warnings.filterwarnings("error")
+
 __all__ = ['Interval',
             'IntervalUnion',
             'sqrt']
@@ -18,7 +21,12 @@ def sqrt(obj):
     Returns:
         Interval|IntervalUnion|numeric: the square root of the parameter
     """
-    return obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else np.sqrt(obj)
+    if not isinstance(obj, (Interval, IntervalUnion)) and obj < 0.0:
+        raise ValueError("negative sqrt %f", obj)
+
+    result = obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else obj**0.5
+
+    return result
 
 class Interval:
     """

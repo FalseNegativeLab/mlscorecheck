@@ -37,14 +37,18 @@ def check_tptn(tp, tn, result, eps=1e-5):
     """
 
     flags = []
+    zero_division = False
 
     for res in result:
-        if res.get('message') is not None:
+        if res.get('message') == 'zero division':
+            zero_division = True
+            continue
+        elif res.get('message') is not None:
             continue
 
         flags.append(abs(tp - res['tp']) < eps and abs(tn - res['tn']) < eps)
 
-    return len(flags) == 0, not any(flags)
+    return len(flags) == 0 or zero_division, not any(flags)
 
 def adjust_evaluation(evaluation):
     """
@@ -59,7 +63,7 @@ def adjust_evaluation(evaluation):
         evaluation['tp'] = evaluation['tp'] * 10 + 5
 
 @pytest.mark.parametrize("sol", list(solutions.keys()))
-@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn']])
+@pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'], ['tn', 'fn'], ['tn', 'tp'], ['fn', 'fp']])
 @pytest.mark.parametrize("random_state", [3, 5, 7])
 def test_solution(sol, zeros, random_state):
     """
@@ -82,6 +86,8 @@ def test_solution(sol, zeros, random_state):
     result = solutions[sol].evaluate({**evaluation,
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
+
+    print(score0, score1, result)
 
     solvable, failed = check_tptn(evaluation['tp'], evaluation['tn'], result)
     assert solvable or not failed
@@ -140,7 +146,8 @@ def test_solution_non_negatives():
 
     sol = Solution({'tp': {'expression': 'p', 'symbols': ['p']}},
                     non_zero=[],
-                    non_negative=[{'expression': 'p', 'symbols': ['p']}])
+                    conditions=[{'expression': 'p', 'symbols': ['p'],
+                                    'mode': 'non-negative', 'depth': 1}])
 
     res = sol.evaluate({'p': Interval(-2, -1)})
 
