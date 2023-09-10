@@ -96,76 +96,6 @@ class Solution:
         return {'solution': self.solution,
                 'conditions': self.conditions}
 
-    def check_non_zeros(self, evals):
-        """
-        Check if the non-zero conditions hold
-
-        Args:
-            evals (dict): evaluations
-
-        Returns:
-            dict/None: if any of the conditions hold, the condition
-        """
-        for key, value in evals.items():
-            if isinstance(value, (Interval, IntervalUnion)):
-                if value.contains(0):
-                    return {key: value}
-            else:
-                if abs(value) < 1e-8:
-                    return {key: value}
-        return None
-
-    def non_zero_conditions(self, subs):
-        """
-        Checking the non-zero condition with a substitution
-
-        Args:
-            subs (dict): a substitution
-
-        Returns:
-            bool: the result of the check
-        """
-        non_zeros = {non_zero['expression']: Expression(**non_zero).evaluate(subs)
-                                for non_zero in self.non_zero}
-
-        return self.check_non_zeros(non_zeros)
-
-    def check_non_negatives(self, evals):
-        """
-        Check if the non-negative conditions hold
-
-        Args:
-            evals (dict): evaluations
-
-        Returns:
-            dict/None: if any of the conditions hold, the condition
-        """
-        for key, value in evals.items():
-            if isinstance(value, (Interval, IntervalUnion)):
-                if isinstance(value, Interval):
-                    if value.upper_bound < 0:
-                        return {key: value}
-                elif all(interval.upper_bound < 0 for interval in value.intervals):
-                    return {key: value}
-            elif value < 0:
-                return {key: value}
-        return None
-
-    def non_negative_conditions(self, subs):
-        """
-        Checking the non-negativity condition with a substitution
-
-        Args:
-            subs (dict): a substitution
-
-        Returns:
-            bool: the result of the check
-        """
-        non_negatives = {non_negative['expression']: Expression(**non_negative).evaluate(subs)
-                                for non_negative in self.non_negative}
-
-        return self.check_non_negatives(non_negatives)
-
     def evaluate(self, subs):
         """
         Evaluate the solution with a substitution
@@ -179,6 +109,7 @@ class Solution:
         subs = {key: subs[key] for key in self.all_symbols}
 
         message = None
+        term = None
         for condition in self.conditions:
             if condition['mode'] == 'non-negative':
                 value = Expression(**condition).evaluate(subs)
@@ -186,28 +117,34 @@ class Solution:
                     if isinstance(value, Interval):
                         if value.upper_bound < 0:
                             message = 'negative base'
+                            term = condition['expression']
                             break
                     elif all(interval.upper_bound < 0 for interval in value.intervals):
                         message = 'negative base'
+                        term = condition['expression']
                         break
                 elif value < 0:
                     message = 'negative base'
+                    term = condition['expression']
                     break
             elif condition['mode'] == 'non-zero':
                 value = Expression(**condition).evaluate(subs)
                 if isinstance(value, (Interval, IntervalUnion)):
                     if value.contains(0):
                         message = 'zero division'
+                        term = condition['expression']
                         break
                 else:
                     if abs(value) < 1e-8:
                         message = 'zero division'
+                        term = condition['expression']
                         break
 
         if message is not None:
             return {'tp': None,
                     'tn': None,
-                    'message': message}
+                    'message': message,
+                    'term': term}
 
         res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
         if 'tp' in self.solution:
@@ -284,6 +221,12 @@ def load_solutions():
     # removing the solutions containing complex values
     del results[('fm', 'gm')]
     del results[('fm', 'mk')]
+    del results[('fm', 'p4')] # goes to complex
+    del results[('fm', 'upm')] # goes to complex
+    del results[('dor', 'p4')] # goes to complex
+    del results[('dor', 'upm')] # goes to complex
+    del results[('gm', 'mk')] # goes to complex
+    del results[('gm', 'mcc')] # goes to complex when tn = 0 (maybe other times too)
 
     return results
 

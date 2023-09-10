@@ -35,7 +35,7 @@ def test_calculate_all_scores():
     Testing the calculation of all scores
     """
 
-    scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15})
+    scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15, 'beta_plus': 2, 'beta_minus': 2})
     assert scores['acc'] == 20/30
 
 def test_generate_problems():

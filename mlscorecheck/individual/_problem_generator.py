@@ -38,6 +38,8 @@ def generate_problem_and_scores(*,
                                                 zeros=zeros,
                                                 add_complements=add_complements,
                                                 random_state=random_state)
+    evaluation['beta_minus'] = 2
+    evaluation['beta_plus'] = 2
     scores = calculate_scores(evaluation, rounding_decimals=rounding_decimals)
     if score_subset is not None:
         scores = {key: value for key, value in scores.items() if key in score_subset}

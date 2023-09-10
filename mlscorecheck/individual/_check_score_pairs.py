@@ -16,8 +16,7 @@ from ..scores import (score_functions_without_complements,
 from ._interval import Interval, IntervalUnion, sqrt
 from ..core import safe_call, logger, check_uncertainty_and_tolerance, NUMERICAL_TOLERANCE
 
-__all__ = ['check_individual_scores',
-            'check_2v1',
+__all__ = ['check_2v1',
             'create_intervals',
             'create_problems_2',
             'evaluate_1_solution',
@@ -60,9 +59,16 @@ def resolve_aliases_and_complements(scores):
         else:
             complemented[key] = val
 
+    """
+    if 'beta_plus' in scores:
+        complemented['beta_plus'] = scores['beta_plus']
+    if 'beta_minus' in scores:
+        complemented['beta_minus'] = scores['beta_minus']
+    """
+
     return complemented
 
-def determine_edge_cases(score, p, n):
+def determine_edge_cases(score, p, n, beta_plus=None, beta_minus=None):
     """
     Determining the edge cases of a score
 
@@ -84,6 +90,10 @@ def determine_edge_cases(score, p, n):
     for arg0 in tp_cases:
         for arg1 in tn_cases:
             params = {**arg0, **arg1, 'p': p, 'n': n}
+            if beta_plus is not None:
+                params['beta_plus'] = beta_plus
+            if beta_minus is not None:
+                params['beta_minus'] = beta_minus
             edge_cases.add(safe_call(score_functions_standardized_all[score],
                                         {**params, 'sqrt': sqrt},
                                         nans))
@@ -222,7 +232,7 @@ def check_intersection(target, reconstructed):
                                 'do intersect',
             'target_interval_reconstructed': reconstructed.to_tuple()}
 
-def evaluate_1_solution(target_interval, result, p, n, score_function):
+def evaluate_1_solution(target_interval, result, p, n, score_function, beta_plus=None, beta_minus=None):
     """
     Carry out the evaluation for 1 particular solution
 
@@ -257,7 +267,7 @@ def evaluate_1_solution(target_interval, result, p, n, score_function):
     if tmp := check_empty_interval(tn, 'tn'):
         return tmp
 
-    score = safe_call(score_function, {**result, 'p': p, 'n': n, 'sqrt': sqrt})
+    score = safe_call(score_function, {**result, 'p': p, 'n': n, 'sqrt': sqrt, 'beta_plus': beta_plus, 'beta_minus': beta_minus})
 
     return check_intersection(target_interval, score)
 
@@ -296,8 +306,18 @@ def check_2v1(scores,
                                     if key in problem},
                                     eps,
                                     numerical_tolerance=numerical_tolerance)
+    if 'beta_minus' in scores:
+        intervals['beta_minus'] = scores['beta_minus']
+    if 'beta_plus' in scores:
+        intervals['beta_plus'] = scores['beta_plus']
 
     # evaluating the solution
+    if tuple(sorted([score0, score1])) not in solutions:
+        return {'details': {'message': f'solutions for {score0} and {score1} are not available'},
+                'edge_scores': [],
+                'underdetermined': True,
+                'inconsistency': False}
+
     results = solutions[tuple(sorted([score0, score1]))].evaluate({**intervals,
                                                                      **{'p': p, 'n': n}})
 
@@ -310,14 +330,16 @@ def check_2v1(scores,
                 'score_1': score1,
                 'score_1_interval': intervals[score1].to_tuple(),
                 'target_score': target,
-                'target_interval': intervals[target].to_tuple(),
+                'target_interval': intervals[target].to_tuple() if isinstance(target, (Interval, IntervalUnion)) else (intervals[target], intervals[target]),
                 'solution': result}
 
         evaluation = evaluate_1_solution(intervals[target],
                                             result,
                                             p,
                                             n,
-                                            functions_standardized[target])
+                                            functions_standardized[target],
+                                            scores.get('beta_plus'),
+                                            scores.get('beta_minus'))
 
         output.append({**res, **evaluation})
 
@@ -326,58 +348,8 @@ def check_2v1(scores,
     # the triplet is considered consistent
     return {'details': output,
             'edge_scores': list({key for key in [score0, score1]
-                            if scores[key] in determine_edge_cases(key, p, n)}),
+                            if scores[key] in determine_edge_cases(key, p, n, scores.get('beta_plus'), scores.get('beta_minus'))}),
             'underdetermined': all(tmp.get('message') == 'zero division'
                                     for tmp in output),
             'inconsistency': all(tmp['inconsistency'] for tmp in output)}
 
-def check_individual_scores(scores, p, n, eps, numerical_tolerance=1e-6):
-    """
-    The main check functionality
-
-    Args:
-        scores (dict): the scores to check
-        p (int): the number of positives
-        n (int): the number of negatives
-        eps (float|dict): the numerical uncertainty of the scores
-        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
-
-    Returns:
-        dict: the result of the check. The 'consistency' flag contains the
-        overall decision, the 'succeeded' and 'failed' lists contain
-        the details of the individual tests
-    """
-    check_uncertainty_and_tolerance(eps, numerical_tolerance)
-
-    scores = resolve_aliases_and_complements(scores)
-
-    scores = {key: value for key, value in scores.items() if key in supported_scores}
-
-    problems = create_problems_2(list(scores.keys()))
-
-    results = [check_2v1(scores, eps, problem, p, n,
-                            numerical_tolerance=numerical_tolerance)
-                for problem in problems]
-
-    succeeded = []
-    failed = []
-    edge_scores = set()
-
-    for result in results:
-        edge_scores = edge_scores.union(set(result['edge_scores']))
-        if result['inconsistency']:
-            failed.append(result)
-        else:
-            succeeded.append(result)
-
-    return {
-        'tests_succeeded': succeeded,
-        'tests_failed': failed,
-        'underdetermined': len(failed) == 0 and all(tmp['underdetermined'] for tmp in succeeded),
-        'edge_scores': list(edge_scores),
-        'inconsistency': len(failed) > 0
-        }

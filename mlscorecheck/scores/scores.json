@@ -247,7 +247,7 @@
         "mk": {
             "name": "markedness",
             "abbreviation": "mk",
-            "lower_bound": 0,
+            "lower_bound": -1,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
             "args_short": ["ppv", "npv"],
@@ -315,7 +315,7 @@
         "bm": {
             "name": "bookmaker_informedness",
             "abbreviation": "bm",
-            "lower_bound": 0,
+            "lower_bound": -1,
             "upper_bound": 1,
             "args_short": ["tpr", "tnr"],
             "formula_short": "tpr + tnr - 1",

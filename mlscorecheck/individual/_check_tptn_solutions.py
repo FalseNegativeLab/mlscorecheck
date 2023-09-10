@@ -5,11 +5,12 @@ tp and tn combinations.
 
 from ..core import NUMERICAL_TOLERANCE, logger
 
-from ._interval import Interval
-from ._check_score_pairs import resolve_aliases_and_complements
+from ._interval import Interval, IntervalUnion
+from ._check_score_pairs import resolve_aliases_and_complements, create_intervals
 from ._tptn_solution_bundles import tptn_solutions, sens_tp, spec_tn
+from ._solutions import solution_specifications
 
-__all__ = ['check_scores_tptn']
+__all__ = ['check_scores_tptn', 'check_scores_tptn_interval']
 
 preferred_order = ['acc', 'sens', 'spec', 'bacc', 'npv', 'ppv', 'f1p', 'f1m', 'fbp', 'fbm',
                     'fm', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor',
@@ -188,3 +189,86 @@ def check_scores_tptn(p,
     return {'inconsistency': len(valid_pairs) == 0,
             'details': details,
             'valid_tptn_pairs': total_count}
+
+def check_scores_tptn_interval(p,
+                                n,
+                                scores,
+                                eps,
+                                *,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
+    # resolving aliases and complements
+    scores = resolve_aliases_and_complements(scores)
+
+    # updating the uncertainties
+    eps = eps if isinstance(eps, dict) else {score: eps for score in scores}
+    eps = {key: value + numerical_tolerance for key, value in eps.items()}
+
+    params = {'p': p, 'n': n,
+                'beta_plus': scores.get('beta_plus'),
+                'beta_minus': scores.get('beta_minus')}
+    intervals = create_intervals(scores, eps)
+
+    tp = Interval(0, p)
+    tn = Interval(0, n)
+
+    details = []
+
+    score_names = list(scores.keys())
+    scores_used = {score: False for score in score_names}
+
+    for idx, score0 in enumerate(score_names):
+        for score1 in score_names[idx+1:]:
+            detail = {'base_score_0': score0,
+                        'base_score_1': score1}
+
+            if tuple(sorted([score0, score1])) not in solution_specifications:
+                logger.info(f'there is no solution for {score0} and {score1}')
+                details.append(detail | {'inconsistency': False, 'explanation': 'there is no solution for the pair'})
+                continue
+
+            logger.info(f'evaluating the tp and tn solution for {score0} and {score1}')
+
+            sols = solution_specifications[(tuple(sorted([score0, score1])))].evaluate(params | intervals)
+
+            if all(sol.get('message') == 'negative base' for sol in sols):
+                details.append(detail | {'inconsistency': True, 'explanation': 'all solutions lead to negative bases'})
+                break
+            if any(sol.get('message') == 'zero division' for sol in sols):
+                details.append(detail | {'inconsistency': False, 'explanation': 'zero division indicates an underdetermined system'})
+                continue
+
+            scores_used[score0] = True
+            scores_used[score1] = True
+
+            tp_union = IntervalUnion([sol['tp'] for sol in sols if sol['tp'] is not None])
+            tn_union = IntervalUnion([sol['tn'] for sol in sols if sol['tn'] is not None])
+
+            logger.info(f'the tp solutions: {tp_union}')
+            logger.info(f'the tn solutions: {tn_union}')
+
+            tp = tp.intersection(tp_union)
+            tn = tn.intersection(tn_union)
+            tp = tp.shrink_to_integers()
+            tn = tn.shrink_to_integers()
+
+            details.append({'base_score_0': score0,
+                            'base_score_1': score1,
+                            'tp': tp_union.to_tuple(),
+                            'tn': tn_union.to_tuple(),
+                            'tp_after': tp.to_tuple(),
+                            'tn_after': tn.to_tuple(),
+                            'inconsistency': (tp.is_empty()) and (tn.is_empty())})
+
+        else:
+            continue
+        break
+
+    for score, flag in scores_used.items():
+        if flag:
+            continue
+
+        logger.info('TODO')
+
+
+    return {'inconsistency': (tp.is_empty()) and (tn.is_empty()),
+            'details': details}

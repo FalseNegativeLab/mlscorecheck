@@ -7,7 +7,7 @@ in a kfold scenario on one single dataset.
 import warnings
 
 from ..core import logger, NUMERICAL_TOLERANCE
-from ..individual import check_individual_scores, check_scores_tptn
+from ..individual import check_scores_tptn
 from ..aggregated import check_aggregated_scores, Experiment
 
 __all__ = ['check_n_datasets_rom_kfold_rom_scores']

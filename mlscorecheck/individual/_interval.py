@@ -5,7 +5,6 @@ This module implements the interval arithmetics
 import numpy as np
 
 import warnings
-warnings.filterwarnings("error")
 
 __all__ = ['Interval',
             'IntervalUnion',
@@ -349,13 +348,18 @@ class Interval:
         if other < 1:
             tmp = self.intersection(Interval(0, np.inf))
             res = Interval(tmp.lower_bound**other, tmp.upper_bound**other)
-        elif other == 2:
+        elif int(other) % 2 == 0:
             if self.lower_bound > 0 or self.upper_bound < 0:
-                lower_bound = self.lower_bound**2
-                upper_bound = self.upper_bound**2
+                lower_bound = self.lower_bound**other
+                upper_bound = self.upper_bound**other
                 res = Interval(min(lower_bound, upper_bound), max(lower_bound, upper_bound))
             else:
-                res = Interval(0, max(self.lower_bound**2, self.upper_bound**2))
+                res = Interval(0, max(self.lower_bound**other, self.upper_bound**other))
+        elif int(other) % 2 == 1:
+            lower_bound = self.lower_bound**other
+            upper_bound = self.upper_bound**other
+            res = Interval(min(lower_bound, upper_bound), max(lower_bound, upper_bound))
+
         return res
 
 class IntervalUnion:

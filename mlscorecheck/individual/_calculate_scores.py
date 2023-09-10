@@ -3,6 +3,7 @@ This module brings together functionalities related to the systematic
 calculation of scores
 """
 
+import math
 import numpy as np
 
 from ..core import safe_call
@@ -27,7 +28,7 @@ def round_scores(scores, rounding_decimals=None):
     if rounding_decimals is None:
         return scores
 
-    return {key: np.round(score, rounding_decimals)
+    return {key: float(np.round(score, rounding_decimals))
                     for key, score in scores.items()}
 
 def calculate_scores_for_lp(problem, score_subset=None):
@@ -68,7 +69,7 @@ def calculate_scores(problem,
         dict: the calculated scores
     """
     if additional_symbols is None:
-        additional_symbols = {'sqrt': np.sqrt}
+        additional_symbols = {'sqrt': math.sqrt}
 
     additional = {}
 

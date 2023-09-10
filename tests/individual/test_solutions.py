@@ -128,12 +128,10 @@ def test_solution_object():
     """
 
     sol = Solution(solution={'tp': {'expression': 'p*sens', 'symbols': ['p', 'sens']}},
-                    non_zero=[{'expression': 'p',
-                                'symbols': ['p']}],
-                    non_negative=[{'expression': 'p',
-                                'symbols': ['p']}])
+                    conditions=[{'expression': 'p', 'symbols': ['p'],
+                                    'mode': 'non-negative', 'depth': 1}])
 
-    assert len(sol.to_dict()) == 3
+    assert len(sol.to_dict()) == 2
 
     res = sol.evaluate({'p': 3, 'sens': 1})
 
@@ -145,7 +143,6 @@ def test_solution_non_negatives():
     """
 
     sol = Solution({'tp': {'expression': 'p', 'symbols': ['p']}},
-                    non_zero=[],
                     conditions=[{'expression': 'p', 'symbols': ['p'],
                                     'mode': 'non-negative', 'depth': 1}])
 

@@ -136,7 +136,9 @@ score_functions_standardized_all = {'acc': accuracy_standardized,
 # scores with solutions
 score_functions_with_solutions = \
     {key: score_functions_all[key]
-        for key in ['acc', 'sens', 'spec', 'npv', 'ppv', 'bacc', 'f1p', 'fm']}
+        for key in ['acc', 'sens', 'spec', 'npv', 'ppv', 'bacc', 'f1p', 'fm',
+                    'f1m', 'fbp', 'fbm', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor', 'mcc',
+                    'ji', 'kappa', 'gm', 'upm', 'p4']}
 
 # complement functions
 score_function_complement_functions = \

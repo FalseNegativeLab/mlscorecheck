@@ -6,7 +6,7 @@ scores calculated from raw figures
 import warnings
 
 from ..core import logger, NUMERICAL_TOLERANCE, update_uncertainty
-from ..individual import check_individual_scores, check_scores_tptn
+from ..individual import check_scores_tptn, check_scores_tptn_interval
 from ..experiments import dataset_statistics
 
 __all__ = ['check_1_testset_no_kfold_scores']
@@ -96,4 +96,4 @@ def check_1_testset_no_kfold_scores(scores,
     logger.info('calling the score check with scores %s, uncertainty %s, p %d and n %d',
                 str(scores), str(eps), p, n)
 
-    return check_scores_tptn(scores=scores, eps=eps, p=p, n=n, numerical_tolerance=numerical_tolerance)
+    return check_scores_tptn_interval(scores=scores, eps=eps, p=p, n=n, numerical_tolerance=numerical_tolerance)
