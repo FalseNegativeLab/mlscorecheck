@@ -2,7 +2,7 @@
 This module tests all scores
 """
 
-import numpy as np
+import math
 
 import pytest
 
@@ -18,14 +18,13 @@ functions_standardized = score_functions_standardized_with_complements
 scores = score_specifications
 aliases = score_function_aliases
 
-short_formula_scores = {key: score for key, score in scores.items() if 'short_args' in score}
+short_formula_scores = {key: score for key, score in scores.items() if 'args_short' in score}
 complement_scores = {key: score for key, score in scores.items() if 'complement' in score}
 
 evaluation, problem = generate_1_problem(random_state=5,
                                             add_complements=True)
-evaluation['beta_plus'] = 2
-evaluation['beta_minus'] = 2
-evaluation['sqrt'] = np.sqrt
+evaluation['beta_positive'] = 2
+evaluation['beta_negative'] = 2
 
 for key in scores:
     evaluation[key] = functions[key](**{arg: evaluation[arg] for arg in scores[key]['args']})
@@ -51,9 +50,9 @@ def test_short_formulas(score):
     """
     value = safe_call(functions[score], evaluation)
 
-    short_formula = short_formula_scores[score]['short_formula']
+    short_formula = short_formula_scores[score]['formula_short']
 
-    value_short = safe_eval(short_formula, evaluation)
+    value_short = safe_eval(short_formula, evaluation | {'sqrt': math.sqrt})
 
     assert abs(value - value_short) < 1e-8
 

@@ -27,10 +27,10 @@ __all__ = ['Score',
             'NegativePredictiveValue',
             'FalseDiscoveryRate',
             'FalseOmissionRate',
-            'FBetaPlus',
-            'F1Plus',
-            'FBetaMinus',
-            'F1Minus',
+            'FBetaPositive',
+            'F1Positive',
+            'FBetaNegative',
+            'F1Negative',
             'UnifiedPerformanceMeasure',
             'GeometricMean',
             'FowlkesMallowsIndex',
@@ -61,8 +61,7 @@ class Score: # pylint: disable=too-many-instance-attributes
                     *,
                     function,
                     expression=None,
-                    equation=None,
-                    equation_polynomial=None):
+                    equation=None):
         """
         Constructor of the base class
 
@@ -125,12 +124,8 @@ class Score: # pylint: disable=too-many-instance-attributes
             self.equation = self.symbol - self.expression
 
         # setting the polynomial equation
-        if 'polynomial_equation' in descriptor:
-            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
-            self.equation_polynomial = safe_eval(descriptor['polynomial_equation'], subs)
-        elif equation_polynomial is not None:
-            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
-            self.equation_polynomial = safe_eval(equation_polynomial, subs)
+        subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+        self.equation_polynomial = safe_eval(descriptor['polynomial_equation'], subs)
 
     def get_algebra(self):
         """
@@ -150,7 +145,6 @@ class Score: # pylint: disable=too-many-instance-attributes
             'descriptor': self.descriptor,
             'expression': str(self.expression),
             'equation': str(self.equation),
-            'equation_polynomial': str(self.equation_polynomial),
             'function': self.function.__name__
         }
 
@@ -314,7 +308,7 @@ class NegativePredictiveValue(Score):
                         scores['npv'],
                         function=functions['npv'])
 
-class FBetaPlus(Score):
+class FBetaPositive(Score):
     """
     The f-beta plus score
     """
@@ -330,7 +324,7 @@ class FBetaPlus(Score):
                         scores['fbp'],
                         function=functions['fbp'])
 
-class F1Plus(Score):
+class F1Positive(Score):
     """
     The f1-plus score
     """
@@ -346,7 +340,7 @@ class F1Plus(Score):
                         scores['f1p'],
                         function=functions['f1p'])
 
-class FBetaMinus(Score):
+class FBetaNegative(Score):
     """
     The f-beta minus score
     """
@@ -359,10 +353,10 @@ class FBetaMinus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        scores['fbm'],
-                        function=functions['fbm'])
+                        scores['fbn'],
+                        function=functions['fbn'])
 
-class F1Minus(Score):
+class F1Negative(Score):
     """
     The f1-minus score
     """
@@ -375,8 +369,8 @@ class F1Minus(Score):
         """
         Score.__init__(self,
                         symbols,
-                        scores['f1m'],
-                        function=functions['f1m'])
+                        scores['f1n'],
+                        function=functions['f1n'])
 
 class GeometricMean(Score):
     """
@@ -607,6 +601,9 @@ def get_base_objects(algebraic_system='sympy'):
     """
     Returns the dict of basic score objects
 
+    Args:
+        algebraic_system (str): 'sympy'/'sage' - the algebraic system to use
+
     Returns:
         dict: the dictionary of basic score objects
     """
@@ -617,7 +614,7 @@ def get_base_objects(algebraic_system='sympy'):
                                                         PositivePredictiveValue,
                                                         NegativePredictiveValue,
                                                         BalancedAccuracy,
-                                                        F1Plus,
+                                                        F1Positive,
                                                         FowlkesMallowsIndex]]
     score_objects = {obj.abbreviation: obj for obj in score_objects}
 
@@ -625,10 +622,13 @@ def get_base_objects(algebraic_system='sympy'):
 
 def get_all_objects(algebraic_system='sympy'):
     """
-    Returns the dict of basic score objects
+    Returns the dict of all score objects
+
+    Args:
+        algebraic_system (str): 'sympy'/'sage' - the algebraic system to use
 
     Returns:
-        dict: the dictionary of basic score objects
+        dict: the dictionary of all score objects
     """
     symbols = Symbols(algebraic_system=algebraic_system)
     score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
@@ -637,8 +637,18 @@ def get_all_objects(algebraic_system='sympy'):
     return score_objects
 
 def get_objects_without_complements(algebraic_system='sympy'):
+    """
+    Returns the dict of basic score objects without complements
+
+    Args:
+        algebraic_system (str): 'sympy'/'sage' - the algebraic system to use
+
+    Returns:
+        dict: the dictionary of score objects
+    """
     symbols = Symbols(algebraic_system=algebraic_system)
     score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
-    score_objects = {obj.abbreviation: obj for obj in score_objects if obj.abbreviation in score_functions_without_complements}
+    score_objects = {obj.abbreviation: obj for obj in score_objects
+                        if obj.abbreviation in score_functions_without_complements}
 
     return score_objects

@@ -2,15 +2,14 @@
 This module implements the problem solver
 """
 
-import datetime
-
 from ..core import logger
 from ..individual import Solutions
 
 __all__ = ['ProblemSolver',
             'collect_denominators_and_bases',
             '_collect_denominators_and_bases',
-            'solve_func']
+            'solve_order',
+            'check_recurrent_solution']
 
 def _collect_denominators_and_bases(expression, denoms, bases, algebra, depth):
     """
@@ -22,32 +21,24 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra, depth):
         bases (list): the list of already collected bases
         algebra (Algebra): the algebra to be used
     """
-    #print(datetime.datetime.now(), 'cdm', expression)
 
-    #print('is_division')
     if algebra.is_division(expression):
-        #print(datetime.datetime.now(), 'division')
         num, denom = algebra.num_denom(expression)
-        #print(datetime.datetime.now(), 'num, denom')
         num = algebra.simplify(num)
-        #print(datetime.datetime.now(), 'simplify')
         denom = algebra.simplify(denom)
-        #print(datetime.datetime.now(), 'simplified')
 
         if not algebra.is_trivial(denom):
             denoms.append((denom, depth))
             _collect_denominators_and_bases(denom, denoms, bases, algebra, depth+1)
         _collect_denominators_and_bases(num, denoms, bases, algebra, depth+1)
     elif algebra.is_root(expression):
-        #print(datetime.datetime.now(), 'root')
         # fractional exponents are already checked here
-        base, _ = algebra.operands(expression)
-        bases.append((base, depth))
+        base, exponent = algebra.operands(expression)
+        bases.append((base, float(exponent), depth))
 
         for operand in algebra.operands(base):
             _collect_denominators_and_bases(operand, denoms, bases, algebra, depth+1)
     else:
-        #print(datetime.datetime.now(), 'else')
         for operand in algebra.operands(expression):
             if not algebra.is_trivial(operand):
                 _collect_denominators_and_bases(operand, denoms, bases, algebra, depth+1)
@@ -63,12 +54,12 @@ def collect_denominators_and_bases(expression, algebra):
     Returns:
         list, list: the collected denominators and bases
     """
-    #logger.info('collect denominators and bases')
     denoms = []
     bases = []
     _collect_denominators_and_bases(expression, denoms, bases, algebra, depth=0)
     denom_dict = {}
     base_dict = {}
+
     for denom, depth in denoms:
         denom_str = str(denom)
         if denom_str in denom_dict:
@@ -78,97 +69,84 @@ def collect_denominators_and_bases(expression, algebra):
             denom_dict[denom_str] = (denom, depth)
     denoms = list(denom_dict.values())
 
-    for base, depth in bases:
-        base_str = str(base)
+    for base, exponent, depth in bases:
+        base_str = str((base, exponent))
         if base_str in base_dict:
-            if base_dict[base_str][1] < depth:
-                base_dict[base_str] = (base, depth)
+            if base_dict[base_str][2] < depth:
+                base_dict[base_str] = (base, exponent, depth)
         else:
-            base_dict[base_str] = (base, depth)
+            base_dict[base_str] = (base, exponent, depth)
     bases = list(base_dict.values())
 
     return denoms, bases
 
-def solve_func(score0, score1):
+def solve_order(score0, score1):
+    """
+    Determining the order the equations should be solved, based on using the shortest solution
+    first
+
+    Args:
+        score0 (Score): the first score object
+        score1 (Score): the second score object
+
+    Returns:
+        obj, obj, str, str: the equations to be solved and the order of
+        the 'tp'/'tn' variables
+    """
     symbols = score0.symbols
     algebra = score0.get_algebra()
 
-    tp0 = None
-    tp0_len = None
-    tn0 = None
-    tn0_len = None
-    tp1 = None
-    tp1_len = None
-    tn1 = None
-    tn1_len = None
+    sols = {}
+    lens = {}
 
-    if 'tp' in algebra.free_symbols(score0.equation_polynomial):
-        tp0 = algebra.solve(score0.equation_polynomial, symbols.tp)
-        tp0_len = len(str(tp0[0][symbols.tp]))
-    if 'tn' in algebra.free_symbols(score0.equation_polynomial):
-        tn0 = algebra.solve(score0.equation_polynomial, symbols.tn)
-        tn0_len = len(str(tn0[0][symbols.tn]))
-    if 'tp' in algebra.free_symbols(score1.equation_polynomial):
-        tp1 = algebra.solve(score1.equation_polynomial, symbols.tp)
-        tp1_len = len(str(tp1[0][symbols.tp]))
-    if 'tn' in algebra.free_symbols(score1.equation_polynomial):
-        tn1 = algebra.solve(score1.equation_polynomial, symbols.tn)
-        tn1_len = len(str(tn1[0][symbols.tn]))
+    for figure in ['tp', 'tn']:
+        for score_idx, score in enumerate([score0, score1]):
+            key = (figure, score_idx)
+            if figure in algebra.free_symbols(score.equation_polynomial):
+                sols[key] = algebra.solve(score.equation_polynomial, getattr(symbols, figure))
+                lens[key] = len(str(sols[key][0][getattr(symbols, figure)]))
 
     min_length = 1e10
     min_variable = None
-    if tp0 is not None and tp0_len < min_length:
-        min_length = tp0_len
-        min_variable = 'tp0'
-    if tn0 is not None and tn0_len < min_length:
-        min_length = tn0_len
-        min_variable = 'tn0'
-    if tp1 is not None and tp1_len < min_length:
-        min_length = tp1_len
-        min_variable = 'tp1'
-    if tn1 is not None and tn1_len < min_length:
-        min_length = tn1_len
-        min_variable = 'tn1'
 
-    #print(tp0_len, tn0_len, tp1_len, tn1_len)
-    #print(min_variable, min_length)
-    #print(symbols.tp, symbols.tn)
+    for key, value in lens.items():
+        if value < min_length:
+            min_length = value
+            min_variable = key
 
-    if (tn0 is None):
-        return score0, score1, 'tp', 'tn'
-    if (tp0 is None):
-        return score0, score1, 'tn', 'tp'
-    if (tp1 is None):
-        return score0, score1, 'tp', 'tn'
-    if (tn1 is None):
-        return score0, score1, 'tn', 'tp'
+    if ('tn', 0) not in sols or ('tp', 1) not in sols:
+        return score0.equation_polynomial, score1.equation_polynomial, 'tp', 'tn'
+    if ('tp', 0) not in sols or ('tn', 1) not in sols:
+        return score0.equation_polynomial, score1.equation_polynomial, 'tn', 'tp'
 
-    change_equations = False
     first_variable = None
     second_variable = None
-    if min_variable == 'tp0':
+    if min_variable[0] == 'tp':
         first_variable = symbols.tp
         second_variable = symbols.tn
-    if min_variable == 'tn0':
+        if min_variable[1] == 1:
+            score0, score1 = score1, score0
+    elif min_variable[0] == 'tn':
         first_variable = symbols.tn
         second_variable = symbols.tp
-    if min_variable == 'tp1':
-        #print('aaa', symbols.tp, symbols.tn)
-        first_variable = symbols.tp
-        second_variable = symbols.tn
-        #print(first_variable, second_variable)
-        change_equations = True
-    if min_variable == 'tn1':
-        first_variable = symbols.tn
-        second_variable = symbols.tp
-        change_equations = True
+        if min_variable[1] == 1:
+            score0, score1 = score1, score0
 
-    #print(first_variable, second_variable)
+    return (score0.equation_polynomial, score1.equation_polynomial,
+            str(first_variable), str(second_variable))
 
-    if change_equations:
-        score0, score1 = score1, score0
+def check_recurrent_solution(symbol, symbols):
+    """
+    Checks and warns if the solution is recurrent in the variable
 
-    return score0, score1, str(first_variable), str(second_variable)
+    Args:
+        symbol (str): the variable to check
+        symbols (list): the free symbols
+    """
+    if symbol in symbols:
+        logger.warning('recurrent %s %s', symbol, str(symbols))
+
+    return symbol in symbols
 
 class ProblemSolver:
     """
@@ -186,46 +164,10 @@ class ProblemSolver:
         self.score0 = score0
         self.score1 = score1
         self.solutions = None
-        self.real_solutions = None
         self.denoms = None
         self.bases = None
         self.conditions = None
         self.str_solutions = None
-        self.raw_solutions = []
-
-    def determine_variable_order(self):
-        """
-        Determine the variable order
-
-        Returns:
-            obj, obj, obj, obj: the first variable to solve; the second variable
-                        to solve; the first equation to solve; the second equation to solve
-        """
-        equation0 = self.score0.equation_polynomial
-        equation1 = self.score1.equation_polynomial
-
-        # the initial choice of variable order to solve
-        var0 = 'tp'
-        var1 = 'tn'
-
-        args0 = self.score0.args
-        args1 = self.score1.args
-
-        n_vars0 = int('tp' in args0) + int('tn' in args0)
-        n_vars1 = int('tp' in args1) + int('tn' in args1)
-
-        if n_vars0 != 1 and n_vars1 == 1:
-            equation0, equation1 = (self.score1.equation_polynomial,
-                                    self.score0.equation_polynomial)
-            args0, args1 = args1, args0
-
-        if 'tp' not in args1:
-            var0, var1 = 'tn', 'tp'
-
-        if var0 not in args0:
-            var0, var1 = var1, var0
-
-        return var0, var1, equation0, equation1
 
     def corner_case_solution(self, solution):
         """
@@ -253,7 +195,7 @@ class ProblemSolver:
         Solves the problem
 
         Args:
-            kwargs: additional parameters to the solver
+            kwargs (dict): additional parameters to the solver
 
         Returns:
             self: the solver object
@@ -261,19 +203,8 @@ class ProblemSolver:
         logger.info('solving %s %s', self.score0.abbreviation, self.score1.abbreviation)
 
         self.solutions = []
-        self.real_solutions = []
 
-        #var0, var1, equation0, equation1 = self.determine_variable_order()
-
-        score0, score1, var0, var1 = solve_func(self.score0, self.score1)
-        equation0 = score0.equation_polynomial
-        equation1 = score1.equation_polynomial
-        #var0 = 'tn'
-        #var1 = 'tp'
-        #equation0 = self.score0.equation_polynomial
-        #equation1 = self.score1.equation_polynomial
-
-        #print(var0, var1)
+        equation0, equation1, var0, var1 = solve_order(self.score0, self.score1)
 
         # querying the symbols
         sym0 = getattr(self.score0.symbols, var0)
@@ -281,75 +212,35 @@ class ProblemSolver:
 
         algebra = self.score0.symbols.algebra
 
-        #logger.info('eq0 %s', equation0)
-        #logger.info('sym0 %s', sym0)
-
-        # solving the first equation for sym0
-        v0_sols = algebra.solve(equation0, sym0, **kwargs)
-        #logger.info('simplification')
-        #v0_sols = [{key: algebra.simplify(value) for key, value in v0_sol.items()} for v0_sol in v0_sols]
-        #logger.info('simplified')
-
-        #logger.info('v0s %s', v0_sols)
-
-        for v0_sol in v0_sols:
+        for v0_sol in algebra.solve(equation0, sym0, **kwargs):
             # iterating through all solutions
-            #logger.info('v0 %s', v0_sol)
 
             # substitution into the other equation if needed
-            equation1_tmp = equation1
-
-            #logger.info('%s', algebra.args(equation1))
-            if sym0 in algebra.args(equation1):
-                #logger.info('substitution %s %s', equation1, v0_sol)
-                equation1_tmp = algebra.subs(equation1, v0_sol)
-
-            #logger.info('eq1tmp %s', equation1_tmp)
+            equation1_tmp = (algebra.subs(equation1, v0_sol)
+                                if sym0 in algebra.args(equation1)
+                                else equation1)
 
             # solving for sym1
             v1_sols = algebra.solve(equation1_tmp, sym1, **kwargs)
-            #logger.info('simplification')
-            #v1_sols = [{key: algebra.simplify(value) for key, value in v1_sol.items()} for v1_sol in v1_sols]
-            #logger.info('simplified')
 
             logger.info('solved')
 
-            #logger.info('v1s %s', v1_sols)
-
             # assembling all solutions
             for v1_sol in v1_sols:
-                v0_final = v0_sol[sym0]
+                v0_final = (algebra.subs(v0_sol[sym0], v1_sol)
+                            if sym1 in algebra.args(v0_sol[sym0])
+                            else v0_sol[sym0])
 
-                if sym1 in algebra.args(v0_final):
-                    v0_final = algebra.subs(v0_final, v1_sol)
-
-                #logger.info('v0_final %s', v0_final)
-
-                #logger.info('simplifying v0')
-                v0_final_simp = algebra.simplify(v0_final)
-                #v0_final_simp = v0_final
-                #logger.info('simplifying v1')
-                v1_final_simp = algebra.simplify(v1_sol[sym1])
-                #v1_final_simp = v1_sol[sym1]
-
-                sol = {var0: {'expression': v0_final_simp,
+                sol = {var0: {'expression': algebra.simplify(v0_final),
                                 'symbols': algebra.free_symbols(v0_final)},
-                        var1: {'expression': v1_final_simp,
+                        var1: {'expression': algebra.simplify(v1_sol[sym1]),
                                 'symbols': algebra.free_symbols(v1_sol[sym1])}}
 
-                #print('aaa', var0, var1)
-
-                if str(var0) in sol[var0]['symbols']:
-                    print('RECURRENT', var0, sol[var0]['symbols'])
-                if str(var1) in sol[var1]['symbols']:
-                    print('RECURRENT', var1, sol[var1]['symbols'])
+                check_recurrent_solution(str(var0), sol[var0]['symbols'])
+                check_recurrent_solution(str(var1), sol[var1]['symbols'])
 
                 if not self.corner_case_solution(sol):
                     self.solutions.append(sol)
-                #logger.info('solutions: %s', self.solutions)
-                #sol[var0]["expression"] = str(sol[var0]['expression'])
-                #sol[var1]["expression"] = str(sol[var1]['expression'])
-                #self.raw_solutions.append(sol)
         return self
 
     def edge_cases(self):
@@ -364,39 +255,31 @@ class ProblemSolver:
         algebra = self.score0.symbols.algebra
 
         for solution in self.solutions:
-            denoms_sol = dict()
-            bases_sol = dict()
-
-            #logger.info('collecting edge cases')
+            denoms_sol = {}
+            bases_sol = {}
 
             for _, sol in solution.items():
-                #logger.info('collecting edge case')
-                simplified = algebra.simplify(sol['expression'])
-                denoms, bases = collect_denominators_and_bases(simplified, algebra)
+                denoms, bases = collect_denominators_and_bases(algebra.simplify(sol['expression']),
+                                                                algebra)
                 denoms = list(denoms)
                 bases = list(bases)
                 for denom, depth in denoms:
                     denom_str = str(denom)
-                    if denom_str in denoms_sol:
-                        if denoms_sol[denom_str][1] < depth:
-                            denoms_sol[denom_str] = (denom, depth)
-                    else:
+                    if ((denom_str not in denoms_sol) or (denoms_sol[denom_str][1] < depth)):
                         denoms_sol[denom_str] = (denom, depth)
-                for base, depth in bases:
-                    base_str = str(base)
-                    if base_str in bases_sol:
-                        if bases_sol[base_str][1] < depth:
-                            bases_sol[base_str] = (base, depth)
-                    else:
-                        bases_sol[base_str] = (base, depth)
+                for base, exponent, depth in bases:
+                    base_str = str((base, exponent))
+                    if ((base_str not in bases_sol) or (bases_sol[base_str][2] < depth)):
+                        bases_sol[base_str] = (base, exponent, depth)
 
             denoms_sol = [{'expression': str(denom[0]),
                             'symbols': algebra.free_symbols(denom[0]),
                             'depth': denom[1],
                             'mode': 'non-zero'} for denom in list(denoms_sol.values())]
             bases_sol = [{'expression': str(base[0]),
+                            'exponent': base[1],
                             'symbols': algebra.free_symbols(base[0]),
-                            'depth': base[1],
+                            'depth': base[2],
                             'mode': 'non-negative'} for base in list(bases_sol.values())]
 
             self.denoms.append(denoms_sol)

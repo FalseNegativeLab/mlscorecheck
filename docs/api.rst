@@ -62,8 +62,8 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.false_discovery_rate
 .. autofunction:: mlscorecheck.scores.false_omission_rate
 .. autofunction:: mlscorecheck.scores.negative_predictive_value
-.. autofunction:: mlscorecheck.scores.f_beta_plus
-.. autofunction:: mlscorecheck.scores.f_beta_minus
+.. autofunction:: mlscorecheck.scores.f_beta_positive
+.. autofunction:: mlscorecheck.scores.f_beta_negative
 .. autofunction:: mlscorecheck.scores.f1_plus
 .. autofunction:: mlscorecheck.scores.f1_minus
 .. autofunction:: mlscorecheck.scores.unified_performance_measure
@@ -91,8 +91,8 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.false_discovery_rate_standardized
 .. autofunction:: mlscorecheck.scores.false_omission_rate_standardized
 .. autofunction:: mlscorecheck.scores.negative_predictive_value_standardized
-.. autofunction:: mlscorecheck.scores.f_beta_plus_standardized
-.. autofunction:: mlscorecheck.scores.f_beta_minus_standardized
+.. autofunction:: mlscorecheck.scores.f_beta_positive_standardized
+.. autofunction:: mlscorecheck.scores.f_beta_negative_standardized
 .. autofunction:: mlscorecheck.scores.f1_plus_standardized
 .. autofunction:: mlscorecheck.scores.f1_minus_standardized
 .. autofunction:: mlscorecheck.scores.unified_performance_measure_standardized

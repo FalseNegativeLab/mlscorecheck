@@ -105,7 +105,7 @@ def generate_datasets_and_scores(*, # pylint: disable=too-many-locals
     experiment = Experiment(**experiment_spec)
     sample = experiment.sample(random_state)
     if experiment.aggregation == 'rom':
-        scores = calculate_scores(sample.calculate_figures() | {'beta_plus': 2, 'beta_minus': 2}, rounding_decimals=rounding_decimals)
+        scores = calculate_scores(sample.calculate_figures() | {'beta_positive': 2, 'beta_negative': 2}, rounding_decimals=rounding_decimals)
     else:
         scores = sample.calculate_scores(rounding_decimals=rounding_decimals)
     scores = scores if score_subset is None else {key: value for key, value in scores.items()

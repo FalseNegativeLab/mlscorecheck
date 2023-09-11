@@ -581,8 +581,8 @@ class Symbols: # pylint: disable=too-many-instance-attributes
         self.tn = self.algebra.create_symbol('tn', nonnegative=True, real=True)
         self.p = self.algebra.create_symbol('p', positive=True, real=True)
         self.n = self.algebra.create_symbol('n', positive=True, real=True)
-        self.beta_plus = self.algebra.create_symbol('beta_plus', positive=True, real=True)
-        self.beta_minus = self.algebra.create_symbol('beta_minus', positive=True, real=True)
+        self.beta_positive = self.algebra.create_symbol('beta_positive', positive=True, real=True)
+        self.beta_negative = self.algebra.create_symbol('beta_negative', positive=True, real=True)
         self.sqrt = self.algebra.sqrt
 
     def get_algebra(self):
@@ -605,6 +605,6 @@ class Symbols: # pylint: disable=too-many-instance-attributes
                 'tn': self.tn,
                 'p': self.p,
                 'n': self.n,
-                'beta_plus': self.beta_plus,
-                'beta_minus': self.beta_minus,
+                'beta_positive': self.beta_positive,
+                'beta_negative': self.beta_negative,
                 'sqrt': self.sqrt}

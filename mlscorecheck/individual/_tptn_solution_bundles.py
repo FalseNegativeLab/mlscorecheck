@@ -16,10 +16,10 @@ from ._tptn_solutions import (mcc_tp,
                                 fbp_tn,
                                 f1p_tp,
                                 f1p_tn,
-                                fbm_tp,
-                                fbm_tn,
-                                f1m_tp,
-                                f1m_tn,
+                                fbn_tp,
+                                fbn_tn,
+                                f1n_tp,
+                                f1n_tn,
                                 upm_tp,
                                 upm_tn,
                                 gm_tp,
@@ -50,10 +50,22 @@ from ._tptn_solutions import (mcc_tp,
 __all__ = ['tp_solutions', 'tn_solutions', 'tptn_solutions', 'is_applicable_tptn']
 
 def is_applicable_tptn(score, value, to_compute):
+    """
+    Checks if the tp-tn solution is computable
+
+    Args:
+        score (str): the score to check
+        value (float): the value of the score
+        to_compute (str): the figure to compute ('tp'/'tn')
+
+    Returns:
+        bool: True if the setup can be solved, False otherwise
+    """
     if score == 'pt' and value == 0.0 and to_compute == 'tp':
         return False
     if score == 'pt' and value == 1.0 and to_compute == 'tn':
         return False
+
     return True
 
 tp_solutions = {'mcc': mcc_tp,
@@ -63,8 +75,8 @@ tp_solutions = {'mcc': mcc_tp,
                 'npv': npv_tp,
                 'fbp': fbp_tp,
                 'f1p': f1p_tp,
-                'fbm': fbm_tp,
-                'f1m': f1m_tp,
+                'fbn': fbn_tp,
+                'f1n': f1n_tp,
                 'upm': upm_tp,
                 'gm': gm_tp,
                 'fm': fm_tp,
@@ -86,8 +98,8 @@ tn_solutions = {'mcc': mcc_tn,
                 'npv': npv_tn,
                 'fbp': fbp_tn,
                 'f1p': f1p_tn,
-                'fbm': fbm_tn,
-                'f1m': f1m_tn,
+                'fbn': fbn_tn,
+                'f1n': f1n_tn,
                 'upm': upm_tn,
                 'gm': gm_tn,
                 'fm': fm_tn,
@@ -103,4 +115,8 @@ tn_solutions = {'mcc': mcc_tn,
                 'p4': p4_tn}
 
 tptn_solutions = {key: {'tp': tp_solutions.get(key),
-                        'tn': tn_solutions.get(key)} for key in tp_solutions}
+                        'tn': tn_solutions.get(key)} for key in ['mcc', 'acc', 'spec', 'sens',
+                                                            'ppv', 'npv', 'fbp', 'f1p', 'fbn',
+                                                            'f1n', 'upm', 'gm', 'fm', 'mk', 'lrp',
+                                                            'lrn', 'bm', 'pt', 'dor', 'ji',
+                                                            'bacc', 'kappa', 'p4']}

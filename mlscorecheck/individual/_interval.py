@@ -4,8 +4,6 @@ This module implements the interval arithmetics
 
 import numpy as np
 
-import warnings
-
 __all__ = ['Interval',
             'IntervalUnion',
             'sqrt']
@@ -20,8 +18,6 @@ def sqrt(obj):
     Returns:
         Interval|IntervalUnion|numeric: the square root of the parameter
     """
-    if not isinstance(obj, (Interval, IntervalUnion)) and obj < 0.0:
-        raise ValueError("negative sqrt %f", obj)
 
     result = obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else obj**0.5
 
@@ -120,11 +116,19 @@ class Interval:
         Returns:
             Interval: the interval shrunk to integers
         """
-        return Interval(np.ceil(self.lower_bound), np.floor(self.upper_bound))
+        return Interval(int(np.ceil(self.lower_bound)), int(np.floor(self.upper_bound)))
 
     def integer_counts(self):
-        integer = self.shrink_to_integers()
-        return integer.upper_bound - integer.lower_bound + 1
+        """
+        Returns the number of integers in the interval
+
+        Returns:
+            int: the number of integers in the interval
+        """
+        if not self.is_empty():
+            integer = self.shrink_to_integers()
+            return integer.upper_bound - integer.lower_bound + 1
+        return 0
 
     def is_empty(self):
         """
@@ -221,8 +225,8 @@ class Interval:
         term2 = self.upper_bound * other.lower_bound
         term3 = self.upper_bound * other.upper_bound
 
-        return Interval(np.min([term0, term1, term2, term3]),
-                        np.max([term0, term1, term2, term3]))
+        return Interval(min(term0, term1, term2, term3),
+                        max(term0, term1, term2, term3))
 
     def __rmul__(self, other):
         """
@@ -492,6 +496,12 @@ class IntervalUnion:
         return IntervalUnion([interval.shrink_to_integers() for interval in self.intervals])
 
     def integer_counts(self):
+        """
+        Returns the count of integers in the interval union
+
+        Returns:
+            int: the count of integers in the interval union
+        """
         return sum(interval.integer_counts() for interval in self.intervals)
 
     def is_empty(self):

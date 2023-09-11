@@ -38,8 +38,8 @@ def generate_problem_and_scores(*,
                                                 zeros=zeros,
                                                 add_complements=add_complements,
                                                 random_state=random_state)
-    evaluation['beta_minus'] = 2
-    evaluation['beta_plus'] = 2
+    evaluation['beta_negative'] = 2
+    evaluation['beta_positive'] = 2
     scores = calculate_scores(evaluation, rounding_decimals=rounding_decimals)
     if score_subset is not None:
         scores = {key: value for key, value in scores.items() if key in score_subset}
@@ -70,22 +70,22 @@ def generate_1_problem(*,
     if zeros is None:
         zeros = []
 
-    p = random_state.randint(2, max_p+1)
-    n = random_state.randint(2, max_n+1)
+    p = int(random_state.randint(2, max_p+1))
+    n = int(random_state.randint(2, max_n+1))
 
     if 'tp' in zeros:
         tp = 0
     elif 'fn' in zeros:
         tp = p
     else:
-        tp = random_state.randint(1, p)
+        tp = int(random_state.randint(1, p))
 
     if 'tn' in zeros:
         tn = 0
     elif 'fp' in zeros:
         tn = n
     else:
-        tn = random_state.randint(1, n)
+        tn = int(random_state.randint(1, n))
 
     result = {'p': p, 'n': n, 'tp': tp, 'tn': tn}
 

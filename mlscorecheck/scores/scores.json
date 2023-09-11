@@ -23,6 +23,7 @@
             "formula": "(fp + fn)/(p + n)",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "1 - (tp + tn)/(p + n)",
+            "polynomial_equation": "err*(p + n) - (p + n) + (tp + tn)",
             "higher_better": false
         },
         "sens": {
@@ -49,6 +50,7 @@
             "formula": "fn/p",
             "args_standardized": ["tp", "p"],
             "formula_standardized": "1 - tp/p",
+            "polynomial_equation": "fnr*p - p + tp",
             "synonyms": ["miss_rate"],
             "higher_better": false
         },
@@ -62,6 +64,7 @@
             "formula": "fp/n",
             "args_standardized": ["tn", "n"],
             "formula_standardized": "1 - tn/n",
+            "polynomial_equation": "fpr*n - n + tn",
             "synonyms": ["false_alarm", "fall_out"],
             "higher_better": false
         },
@@ -108,6 +111,7 @@
             "args_standardized": ["tp", "tn", "n"],
             "formula_standardized": "1 - tp/(tp + n - tn)",
             "nans_standardized": [{"tp": 0, "tn": "n"}],
+            "polynomial_equation": "fdr * (tp + n - tn) - (tp + n - tn) + tp",
             "higher_better": false,
             "dependency_breaks": [{"tp": 1.0}]
         },
@@ -122,6 +126,7 @@
             "formula": "fn/(tn + fn)",
             "args_standardized": ["tp", "tn", "p"],
             "formula_standardized": "1 - tn/(tn + p - tp)",
+            "polynomial_equation": "for_ * (tn + p - tp) - (tn + p - tp) + tn",
             "nans_standardized": [{"tp": "p", "tn": 0}],
             "higher_better": false,
             "dependency_breaks": [{"tn": 1.0}]
@@ -143,31 +148,31 @@
             "dependency_breaks": [{"tn": 1.0}]
         },
         "fbp": {
-            "name": "f_beta_plus",
+            "name": "f_beta_positive",
             "abbreviation": "fbp",
             "lower_bound": 0,
-            "args": ["tp", "fp", "p", "beta_plus"],
-            "formula": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + fp)",
-            "args_standardized": ["tp", "tn", "p", "n", "beta_plus"],
-            "formula_standardized": "((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + n - tn)",
-            "polynomial_equation": "fbp * (tp + beta_plus**2*p + n - tn) - ((1 + beta_plus**2)*tp)",
+            "args": ["tp", "fp", "p", "beta_positive"],
+            "formula": "((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + fp)",
+            "args_standardized": ["tp", "tn", "p", "n", "beta_positive"],
+            "formula_standardized": "((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + n - tn)",
+            "polynomial_equation": "fbp * (tp + beta_positive**2*p + n - tn) - ((1 + beta_positive**2)*tp)",
             "higher_better": true,
             "dependency_breaks": [{"tn": 0.0}]
         },
-        "fbm": {
-            "name": "f_beta_minus",
-            "abbreviation": "fbm",
+        "fbn": {
+            "name": "f_beta_negative",
+            "abbreviation": "fbn",
             "lower_bound": 0,
-            "args": ["tn", "fn", "n", "beta_minus"],
-            "formula": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + fn)",
-            "args_standardized": ["tp", "tn", "p", "n", "beta_minus"],
-            "formula_standardized": "((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + p - tp)",
-            "polynomial_equation": "fbm * (tn + beta_minus**2*n + p - tp) - ((1 + beta_minus**2)*tn)",
+            "args": ["tn", "fn", "n", "beta_negative"],
+            "formula": "((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + fn)",
+            "args_standardized": ["tp", "tn", "p", "n", "beta_negative"],
+            "formula_standardized": "((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + p - tp)",
+            "polynomial_equation": "fbn * (tn + beta_negative**2*n + p - tp) - ((1 + beta_negative**2)*tn)",
             "higher_better": true,
             "dependency_breaks": [{"tp": 0.0}]
         },
         "f1p": {
-            "name": "f1_plus",
+            "name": "f1_positive",
             "abbreviation": "f1p",
             "lower_bound": 0,
             "args": ["tp", "fp", "p"],
@@ -179,15 +184,15 @@
             "higher_better": true,
             "dependency_breaks": [{"tn": 0.0}]
         },
-        "f1m": {
-            "name": "f1_minus",
-            "abbreviation": "f1m",
+        "f1n": {
+            "name": "f1_negative",
+            "abbreviation": "f1n",
             "lower_bound": 0,
             "args": ["tn", "fn", "n"],
             "formula": "(2*tn) / (tn + n + fn)",
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "(2*tn) / (tn + n + p - tp)",
-            "polynomial_equation": "f1m * (tn + n + p - tp) - 2*tn",
+            "polynomial_equation": "f1n * (tn + n + p - tp) - 2*tn",
             "higher_better": true,
             "dependency_breaks": [{"tp": 0.0}]
         },

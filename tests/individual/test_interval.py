@@ -635,3 +635,22 @@ def test_negation():
 
     assert -Interval(0, 1) == Interval(-1, 0)
     assert -IntervalUnion([Interval(0, 1)]) == IntervalUnion([Interval(-1, 0)])
+
+def test_integer_counts():
+    """
+    Testing the integer counts
+    """
+
+    assert Interval(0, 1).integer_counts() == 2
+    assert Interval(1, 0).integer_counts() == 0
+    assert IntervalUnion([Interval(0, 1), Interval(1, 0)]).integer_counts() == 2
+    assert IntervalUnion([]).integer_counts() == 0
+
+def test_odd_power():
+    """
+    Testing the odd powers
+    """
+
+    assert Interval(0, 2)**3 == Interval(0, 8)
+    assert Interval(-1, 2)**3 == Interval(-1, 8)
+    assert Interval(-2, -1)**3 == Interval(-8, -1)

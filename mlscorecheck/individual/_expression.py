@@ -20,7 +20,10 @@ class Expression:
             expression (str): the formal expression
             symbols (list(str)): the symbols in the expression
             functional_symbols (list(str)|None): the function symbols
+            kwargs (dict): the additional keyword arguments
         """
+        _ = kwargs
+
         if functional_symbols is None:
             self.functional_symbols = {'sqrt': sqrt}
 
@@ -39,14 +42,7 @@ class Expression:
         """
         subs = {**{symbol: subs[symbol] for symbol in self.symbols},
                 'sqrt': sqrt}
-        value = safe_eval(self.expression, subs)
-        if isinstance(value, complex):
-            if abs(value.imag) < 1e-10:
-                value = value.real
-            else:
-                raise ValueError("imaginary component remained significant: %f" % value.imag)
-
-        return value
+        return safe_eval(self.expression, subs)
 
     def to_dict(self):
         """

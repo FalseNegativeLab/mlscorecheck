@@ -68,4 +68,4 @@ def safe_call(function, params, non_applicable=None):
 
     args = list(function.__code__.co_varnames[:function.__code__.co_kwonlyargcount])
 
-    return function(**{arg: params[arg] for arg in args})
+    return function(**{arg: params[arg] for arg in args if arg in params})

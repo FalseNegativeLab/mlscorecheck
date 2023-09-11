@@ -16,10 +16,10 @@ __all__ = [
 'false_discovery_rate',
 'false_omission_rate',
 'negative_predictive_value',
-'f_beta_plus',
-'f_beta_minus',
-'f1_plus',
-'f1_minus',
+'f_beta_positive',
+'f_beta_negative',
+'f1_positive',
+'f1_negative',
 'unified_performance_measure',
 'geometric_mean',
 'fowlkes_mallows_index',
@@ -169,39 +169,39 @@ def negative_predictive_value(*, tn, fn):
     """
     return tn/(tn + fn)
 
-def f_beta_plus(*, tp, fp, p, beta_plus):
+def f_beta_positive(*, tp, fp, p, beta_positive):
     """
-    The f_beta_plus score
+    The f_beta_positive score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives
         fp (int|float|Interval|IntervalUnion): The number of false positives
         p (int|float|Interval|IntervalUnion): The number of positives
-        beta_plus (int|float|Interval|IntervalUnion): the beta parameter
+        beta_positive (int|float|Interval|IntervalUnion): the beta parameter
 
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + fp)
+    return ((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + fp)
 
-def f_beta_minus(*, tn, fn, n, beta_minus):
+def f_beta_negative(*, tn, fn, n, beta_negative):
     """
-    The f_beta_minus score
+    The f_beta_negative score
 
     Args:
         tn (int|float|Interval|IntervalUnion): The number of true negatives
         fn (int|float|Interval|IntervalUnion): The number of false negatives
         n (int|float|Interval|IntervalUnion): The number of negatives
-        beta_minus (int|float|Interval|IntervalUnion): the beta parameter
+        beta_negative (int|float|Interval|IntervalUnion): the beta parameter
 
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + fn)
+    return ((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + fn)
 
-def f1_plus(*, tp, fp, p):
+def f1_positive(*, tp, fp, p):
     """
-    The f1_plus score
+    The f1_positive score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives
@@ -213,9 +213,9 @@ def f1_plus(*, tp, fp, p):
     """
     return (2*tp) / (tp + p + fp)
 
-def f1_minus(*, tn, fn, n):
+def f1_negative(*, tn, fn, n):
     """
-    The f1_minus score
+    The f1_negative score
 
     Args:
         tn (int|float|Interval|IntervalUnion): The number of true negatives

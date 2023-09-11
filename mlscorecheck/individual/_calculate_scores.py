@@ -4,32 +4,13 @@ calculation of scores
 """
 
 import math
-import numpy as np
 
-from ..core import safe_call
+from ..core import safe_call, round_scores
 from ..scores import score_functions_with_solutions
 from ..scores import score_specifications
 
-__all__ = ['round_scores',
-            'calculate_scores',
+__all__ = ['calculate_scores',
             'calculate_scores_for_lp']
-
-def round_scores(scores, rounding_decimals=None):
-    """
-    Rounds the scores in the dictionary
-
-    Args:
-        scores (dict): the dictionary of scores to round
-        rounding_decimals (None|int): the decimal places to round to
-
-    Returns:
-        dict: a dictionary with the rounded scores
-    """
-    if rounding_decimals is None:
-        return scores
-
-    return {key: float(np.round(score, rounding_decimals))
-                    for key, score in scores.items()}
 
 def calculate_scores_for_lp(problem, score_subset=None):
     """
@@ -49,9 +30,7 @@ def calculate_scores_for_lp(problem, score_subset=None):
             'bacc': ((problem['tp'] * (1.0 / problem['p'])) \
                         + (problem['tn'] * (1.0 / problem['n']))) / 2}
 
-    if score_subset is None:
-        return scores
-    return {key: scores[key] for key in score_subset}
+    return scores if score_subset is None else {key: scores[key] for key in score_subset}
 
 def calculate_scores(problem,
                     *,

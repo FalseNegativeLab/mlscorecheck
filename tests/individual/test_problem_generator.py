@@ -6,8 +6,8 @@ import numpy as np
 
 from mlscorecheck.individual import (generate_problems,
                                 calculate_scores,
-                                round_scores,
                                 generate_problem_and_scores)
+from mlscorecheck.core import round_scores
 
 def test_generate_problem_and_scores():
     """
@@ -35,7 +35,8 @@ def test_calculate_all_scores():
     Testing the calculation of all scores
     """
 
-    scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15, 'beta_plus': 2, 'beta_minus': 2})
+    scores = calculate_scores({'p': 10, 'tp': 5, 'n': 20, 'tn': 15,
+                                'beta_positive': 2, 'beta_negative': 2})
     assert scores['acc'] == 20/30
 
 def test_generate_problems():

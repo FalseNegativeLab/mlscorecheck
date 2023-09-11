@@ -5,58 +5,136 @@ solution of scores for intervals.
 
 import pytest
 
-import numpy as np
-
-from mlscorecheck.core import NUMERICAL_TOLERANCE, safe_call
-from mlscorecheck.individual import (check_scores_tptn,
-                                        tptn_solutions,
-                                        Interval,
+from mlscorecheck.individual import (check_scores_tptn_pairs,
+                                        _check_scores_tptn_pairs,
                                         generate_1_problem,
                                         calculate_scores,
-                                        sqrt,
-                                        is_applicable_tptn)
-from mlscorecheck.scores import (score_functions_standardized_without_complements,
-                                    score_specifications)
+                                        sqrt)
+from mlscorecheck.scores import (score_functions_standardized_without_complements)
 
 score_functions = score_functions_standardized_without_complements
 
-@pytest.mark.parametrize('score', list(tptn_solutions.keys()))
-@pytest.mark.parametrize('figure', ['tp', 'tn'])
+@pytest.mark.parametrize('figure', ['tp', 'tn', None])
 @pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
                                     ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
-@pytest.mark.parametrize('random_seed', list(range(20)))
-def test_tptn_solutions(score, figure, zeros, random_seed):
+@pytest.mark.parametrize('random_seed', list(range(10)))
+def test_check_scores_tptn_pairs(figure, zeros, random_seed):
     """
-    This function tests the tp-tn solutions
-    """
-    if tptn_solutions[score][figure] is None:
-        return
+    This function tests the check functionality
 
-    evaluation, _ = generate_1_problem(random_state=random_seed,
+    Args:
+        figure (str): the figure to solve_for (``tp``/``tn``)
+        zeros (list(str)): the list of figures to set zero
+        random_seed (int): the random seed to use
+    """
+
+    evaluation, problem = generate_1_problem(random_state=random_seed,
                                                 zeros=zeros)
 
-    evaluation['beta_plus'] = 1
-    evaluation['beta_minus'] = 1
+    evaluation['beta_positive'] = 1
+    evaluation['beta_negative'] = 1
     evaluation['sqrt'] = sqrt
 
-    score_val = safe_call(score_functions[score],
-                            evaluation,
-                            score_specifications[score].get('nans_standardized'))
+    scores = calculate_scores(evaluation)
+    scores = {key: value for key, value in scores.items() if value is not None}
 
-    if score_val is None or not is_applicable_tptn(score, score_val, figure):
-        return
+    scores['beta_positive'] = 1
+    scores['beta_negative'] = 1
 
-    print(score, figure, evaluation, score_val)
+    results = _check_scores_tptn_pairs(p=problem['p'],
+                                        n=problem['n'],
+                                        scores=scores,
+                                        eps=1e-4,
+                                        solve_for=figure)
 
-    figure_value = tptn_solutions[score][figure](**evaluation, **{score: score_val})
+    assert not results['inconsistency']
 
-    if (figure_value is None):
-        return None
-    if isinstance(figure_value, list):
-        if all(figure_tmp is None for figure_tmp in figure_value):
-            return
-        figure_value = [tmp for tmp in figure_value if not tmp is None]
+@pytest.mark.parametrize('prefilter_by_pairs', [True, False])
+@pytest.mark.parametrize('figure', ['tp', 'tn', None])
+@pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
+                                    ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
+@pytest.mark.parametrize('random_seed', list(range(10)))
+def test_check_scores_tptn_pairs_prefilter(figure, zeros, random_seed, prefilter_by_pairs):
+    """
+    This function tests the check functionality with prefiltering
 
-    print(figure_value)
+    Args:
+        figure (str): the figure to solve_for (``tp``/``tn``)
+        zeros (list(str)): the list of figures to set zero
+        random_seed (int): the random seed to use
+        prefilter_by_pairs (bool): whether to prefilter by the pairwise solutions
+    """
 
-    assert np.any(np.abs(np.array(figure_value) - evaluation[figure]) <= 1e-6)
+    evaluation, problem = generate_1_problem(random_state=random_seed,
+                                                zeros=zeros)
+
+    evaluation['beta_positive'] = 1
+    evaluation['beta_negative'] = 1
+    evaluation['sqrt'] = sqrt
+
+    scores = calculate_scores(evaluation)
+    scores = {key: value for key, value in scores.items() if value is not None}
+
+    scores['beta_positive'] = 1
+    scores['beta_negative'] = 1
+
+    results = check_scores_tptn_pairs(p=problem['p'],
+                                        n=problem['n'],
+                                        scores=scores,
+                                        eps=1e-4,
+                                        solve_for=figure,
+                                        prefilter_by_pairs=prefilter_by_pairs)
+
+    assert not results['inconsistency']
+
+@pytest.mark.parametrize('prefilter_by_pairs', [True, False])
+@pytest.mark.parametrize('figure', ['tp', 'tn', None])
+@pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
+                                    ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
+@pytest.mark.parametrize('random_seed', list(range(10)))
+def test_check_scores_tptn_pairs_prefilter_failure(figure,
+                                                    zeros,
+                                                    random_seed,
+                                                    prefilter_by_pairs):
+    """
+    This function tests the check functionality with failure
+
+    Args:
+        figure (str): the figure to solve_for (``tp``/``tn``)
+        zeros (list(str)): the list of figures to set zero
+        random_seed (int): the random seed to use
+        prefilter_by_pairs (bool): whether to prefilter by pair-solutions
+    """
+
+    evaluation, problem = generate_1_problem(random_state=random_seed,
+                                                zeros=zeros)
+
+    evaluation['beta_positive'] = 1
+    evaluation['beta_negative'] = 1
+    evaluation['sqrt'] = sqrt
+
+    scores = calculate_scores(evaluation)
+    scores = {key: value for key, value in scores.items() if value is not None}
+    scores['bacc'] = 0.8
+    scores['sens'] = 0.85
+    scores['spec'] = 0.86
+
+    scores['beta_positive'] = 1
+    scores['beta_negative'] = 1
+
+    results = check_scores_tptn_pairs(p=problem['p'],
+                                        n=problem['n'],
+                                        scores=scores,
+                                        eps=1e-4,
+                                        solve_for=figure,
+                                        prefilter_by_pairs=prefilter_by_pairs)
+
+    assert results['inconsistency']
+
+def test_check_parametrization():
+    """
+    Testing the parametrization
+    """
+
+    with pytest.raises(ValueError):
+        _check_scores_tptn_pairs(5, 10, scores={}, eps=1e-4, solve_for='dummy')

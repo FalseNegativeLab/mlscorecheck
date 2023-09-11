@@ -48,13 +48,13 @@ def test_consistent():
     """
     evaluation, problem = generate_1_problem(random_state=5)
 
-    evaluation['beta_minus'] = 2
-    evaluation['beta_plus'] = 2
+    evaluation['beta_negative'] = 2
+    evaluation['beta_positive'] = 2
 
     scores = calculate_scores(evaluation,
                                 rounding_decimals=k)
-    scores['beta_minus'] = 2
-    scores['beta_plus'] = 2
+    scores['beta_negative'] = 2
+    scores['beta_positive'] = 2
 
     result = check_1_testset_no_kfold_scores(scores,
                                             eps=eps,
@@ -68,15 +68,15 @@ def test_failure():
     """
     evaluation, problem = generate_1_problem(random_state=5)
 
-    evaluation['beta_minus'] = 2
-    evaluation['beta_plus'] = 2
+    evaluation['beta_negative'] = 2
+    evaluation['beta_positive'] = 2
 
     scores = calculate_scores(evaluation,
                                 rounding_decimals=k)
     scores['bacc'] = 0.9
     scores['acc'] = 0.1
-    scores['beta_minus'] = 2
-    scores['beta_plus'] = 2
+    scores['beta_negative'] = 2
+    scores['beta_positive'] = 2
 
     result = check_1_testset_no_kfold_scores(scores,
                                                 eps=eps,

@@ -3,7 +3,10 @@ This module contains the tp and tn solutions.
 This is a generated file, do not edit.
 """
 
-from ._helper import is_less_than_zero, is_zero, unify_results
+# pylint: disable=line-too-long
+# pylint: disable=too-many-lines
+
+from ._helper import is_zero, unify_results
 from ._interval import sqrt
 
 __all__ = [
@@ -19,10 +22,10 @@ __all__ = [
 "fbp_tn",
 "f1p_tp",
 "f1p_tn",
-"fbm_tp",
-"fbm_tn",
-"f1m_tp",
-"f1m_tn",
+"fbn_tp",
+"fbn_tn",
+"f1n_tp",
+"f1n_tn",
 "gm_tp",
 "gm_tn",
 "fm_tp_0",
@@ -74,179 +77,189 @@ __all__ = [
 "mcc_tn_1",
 "mcc_tn"]
 
-def acc_tp(*, p, acc, tn, n, **kwargs):
+def acc_tp(*, tn, n, acc, p, **kwargs):
     """
     Solves tp from the score acc
 
     Args:
-        p (int): the p count
-        acc (float|Interval|IntervalUnion): the value or interval for the score acc
         tn (int): the tn count
         n (int): the n count
+        acc (float|Interval|IntervalUnion): the value or interval for the score acc
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     return acc*n + acc*p - tn
 
-def acc_tn(*, tp, p, acc, n, **kwargs):
+def acc_tn(*, n, acc, p, tp, **kwargs):
     """
     Solves tn from the score acc
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
-        acc (float|Interval|IntervalUnion): the value or interval for the score acc
         n (int): the n count
+        acc (float|Interval|IntervalUnion): the value or interval for the score acc
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     return acc*n + acc*p - tp
 
-def sens_tp(*, p, sens, **kwargs):
+def sens_tp(*, sens, p, **kwargs):
     """
     Solves tp from the score sens
 
     Args:
-        p (int): the p count
         sens (float|Interval|IntervalUnion): the value or interval for the score sens
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     return p*sens
 
-def spec_tn(*, n, spec, **kwargs):
+def spec_tn(*, spec, n, **kwargs):
     """
     Solves tn from the score spec
 
     Args:
-        n (int): the n count
         spec (float|Interval|IntervalUnion): the value or interval for the score spec
+        n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     return n*spec
 
-def ppv_tp(*, ppv, tn, n, **kwargs):
+def ppv_tp(*, n, tn, ppv, **kwargs):
     """
     Solves tp from the score ppv
 
     Args:
-        ppv (float|Interval|IntervalUnion): the value or interval for the score ppv
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        ppv (float|Interval|IntervalUnion): the value or interval for the score ppv
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(ppv - 1):
         return None
     return ppv*(-n + tn)/(ppv - 1)
 
-def ppv_tn(*, tp, ppv, n, **kwargs):
+def ppv_tn(*, ppv, n, tp, **kwargs):
     """
     Solves tn from the score ppv
 
     Args:
-        tp (int): the tp count
         ppv (float|Interval|IntervalUnion): the value or interval for the score ppv
         n (int): the n count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(ppv):
         return None
     return n + tp - tp/ppv
 
-def npv_tp(*, p, npv, tn, **kwargs):
+def npv_tp(*, npv, p, tn, **kwargs):
     """
     Solves tp from the score npv
 
     Args:
-        p (int): the p count
         npv (float|Interval|IntervalUnion): the value or interval for the score npv
+        p (int): the p count
         tn (int): the tn count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(npv):
         return None
     return p + tn - tn/npv
 
-def npv_tn(*, tp, p, npv, **kwargs):
+def npv_tn(*, p, npv, tp, **kwargs):
     """
     Solves tn from the score npv
 
     Args:
-        tp (int): the tp count
         p (int): the p count
         npv (float|Interval|IntervalUnion): the value or interval for the score npv
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(npv - 1):
         return None
     return npv*(-p + tp)/(npv - 1)
 
-def fbp_tp(*, p, tn, n, beta_plus, fbp, **kwargs):
+def fbp_tp(*, tn, n, beta_positive, p, fbp, **kwargs):
     """
     Solves tp from the score fbp
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
-        beta_plus (float): the beta_plus parameter of the score
+        beta_positive (float): the beta_positive parameter of the score
+        p (int): the p count
         fbp (float|Interval|IntervalUnion): the value or interval for the score fbp
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_zero(beta_plus**2 - fbp + 1):
+    _ = kwargs
+    if is_zero(beta_positive**2 - fbp + 1):
         return None
-    return fbp*(beta_plus**2*p + n - tn)/(beta_plus**2 - fbp + 1)
+    return fbp*(beta_positive**2*p + n - tn)/(beta_positive**2 - fbp + 1)
 
-def fbp_tn(*, tp, p, n, beta_plus, fbp, **kwargs):
+def fbp_tn(*, n, beta_positive, p, fbp, tp, **kwargs):
     """
     Solves tn from the score fbp
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
-        beta_plus (float): the beta_plus parameter of the score
+        beta_positive (float): the beta_positive parameter of the score
+        p (int): the p count
         fbp (float|Interval|IntervalUnion): the value or interval for the score fbp
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(fbp):
         return None
-    return (-beta_plus**2*tp + fbp*(beta_plus**2*p + n + tp) - tp)/fbp
+    return (-beta_positive**2*tp + fbp*(beta_positive**2*p + n + tp) - tp)/fbp
 
-def f1p_tp(*, p, f1p, tn, n, **kwargs):
+def f1p_tp(*, f1p, p, tn, n, **kwargs):
     """
     Solves tp from the score f1p
 
     Args:
-        p (int): the p count
         f1p (float|Interval|IntervalUnion): the value or interval for the score f1p
+        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         kwargs (dict): additional keyword arguments
@@ -254,1005 +267,1025 @@ def f1p_tp(*, p, f1p, tn, n, **kwargs):
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(f1p - 2):
         return None
     return f1p*(-n - p + tn)/(f1p - 2)
 
-def f1p_tn(*, tp, p, f1p, n, **kwargs):
+def f1p_tn(*, f1p, n, p, tp, **kwargs):
     """
     Solves tn from the score f1p
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         f1p (float|Interval|IntervalUnion): the value or interval for the score f1p
         n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(f1p):
         return None
     return n + p + tp - 2*tp/f1p
 
-def fbm_tp(*, p, tn, n, fbm, beta_minus, **kwargs):
+def fbn_tp(*, fbn, tn, n, beta_negative, p, **kwargs):
     """
-    Solves tp from the score fbm
+    Solves tp from the score fbn
 
     Args:
-        p (int): the p count
+        fbn (float|Interval|IntervalUnion): the value or interval for the score fbn
         tn (int): the tn count
         n (int): the n count
-        fbm (float|Interval|IntervalUnion): the value or interval for the score fbm
-        beta_minus (float): the beta_minus parameter of the score
+        beta_negative (float): the beta_negative parameter of the score
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_zero(fbm):
+    _ = kwargs
+    if is_zero(fbn):
         return None
-    return (-beta_minus**2*tn + fbm*(beta_minus**2*n + p + tn) - tn)/fbm
+    return (-beta_negative**2*tn + fbn*(beta_negative**2*n + p + tn) - tn)/fbn
 
-def fbm_tn(*, p, tp, n, fbm, beta_minus, **kwargs):
+def fbn_tn(*, fbn, n, beta_negative, p, tp, **kwargs):
     """
-    Solves tn from the score fbm
+    Solves tn from the score fbn
 
     Args:
+        fbn (float|Interval|IntervalUnion): the value or interval for the score fbn
+        n (int): the n count
+        beta_negative (float): the beta_negative parameter of the score
         p (int): the p count
         tp (int): the tp count
-        n (int): the n count
-        fbm (float|Interval|IntervalUnion): the value or interval for the score fbm
-        beta_minus (float): the beta_minus parameter of the score
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_zero(beta_minus**2 - fbm + 1):
+    _ = kwargs
+    if is_zero(beta_negative**2 - fbn + 1):
         return None
-    return fbm*(beta_minus**2*n + p - tp)/(beta_minus**2 - fbm + 1)
+    return fbn*(beta_negative**2*n + p - tp)/(beta_negative**2 - fbn + 1)
 
-def f1m_tp(*, p, tn, n, f1m, **kwargs):
+def f1n_tp(*, tn, n, f1n, p, **kwargs):
     """
-    Solves tp from the score f1m
+    Solves tp from the score f1n
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
-        f1m (float|Interval|IntervalUnion): the value or interval for the score f1m
+        f1n (float|Interval|IntervalUnion): the value or interval for the score f1n
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_zero(f1m):
+    _ = kwargs
+    if is_zero(f1n):
         return None
-    return n + p + tn - 2*tn/f1m
+    return n + p + tn - 2*tn/f1n
 
-def f1m_tn(*, tp, f1m, p, n, **kwargs):
+def f1n_tn(*, f1n, p, n, tp, **kwargs):
     """
-    Solves tn from the score f1m
+    Solves tn from the score f1n
 
     Args:
-        tp (int): the tp count
-        f1m (float|Interval|IntervalUnion): the value or interval for the score f1m
+        f1n (float|Interval|IntervalUnion): the value or interval for the score f1n
         p (int): the p count
         n (int): the n count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_zero(f1m - 2):
+    _ = kwargs
+    if is_zero(f1n - 2):
         return None
-    return f1m*(-n - p + tp)/(f1m - 2)
+    return f1n*(-n - p + tp)/(f1n - 2)
 
-def gm_tp(*, p, tn, gm, n, **kwargs):
+def gm_tp(*, tn, gm, p, n, **kwargs):
     """
     Solves tp from the score gm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         gm (float|Interval|IntervalUnion): the value or interval for the score gm
+        p (int): the p count
         n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(tn):
         return None
     return gm**2*n*p/tn
 
-def gm_tn(*, p, tp, gm, n, **kwargs):
+def gm_tn(*, gm, p, n, tp, **kwargs):
     """
     Solves tn from the score gm
 
     Args:
-        p (int): the p count
-        tp (int): the tp count
         gm (float|Interval|IntervalUnion): the value or interval for the score gm
+        p (int): the p count
         n (int): the n count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(tp):
         return None
     return gm**2*n*p/tp
 
-def fm_tp_0(*, p, tn, n, fm, **kwargs):
+def fm_tp_0(*, tn, n, fm, p, **kwargs):
     """
     Solves tp from the score fm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         fm (float|Interval|IntervalUnion): the value or interval for the score fm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(p) or is_less_than_zero(fm**2*p + 4*n - 4*tn):
-        return None
+    _ = kwargs
     return fm*(fm*p - sqrt(p)*sqrt(fm**2*p + 4*n - 4*tn))/2
 
-def fm_tp_1(*, p, tn, n, fm, **kwargs):
+def fm_tp_1(*, tn, n, fm, p, **kwargs):
     """
     Solves tp from the score fm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         fm (float|Interval|IntervalUnion): the value or interval for the score fm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(p) or is_less_than_zero(fm**2*p + 4*n - 4*tn):
-        return None
+    _ = kwargs
     return fm*(fm*p + sqrt(p)*sqrt(fm**2*p + 4*n - 4*tn))/2
 
-def fm_tp(*, p, tn, n, fm, **kwargs):
+def fm_tp(*, tn, n, fm, p, **kwargs):
     """
     Solves tp from the score fm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         fm (float|Interval|IntervalUnion): the value or interval for the score fm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([fm_tp_0(p=p, tn=tn, n=n, fm=fm),
-                          fm_tp_1(p=p, tn=tn, n=n, fm=fm)])
-def fm_tn(*, tp, p, n, fm, **kwargs):
+    _ = kwargs
+    return unify_results([fm_tp_0(tn=tn, n=n, fm=fm, p=p),
+                          fm_tp_1(tn=tn, n=n, fm=fm, p=p)])
+def fm_tn(*, n, fm, p, tp, **kwargs):
     """
     Solves tn from the score fm
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         fm (float|Interval|IntervalUnion): the value or interval for the score fm
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_zero(p) or is_zero(fm**2):
+    _ = kwargs
+    if is_zero(fm**2) or is_zero(p):
         return None
     return n + tp - tp**2/(fm**2*p)
 
-def upm_tp_0(*, p, tn, n, upm, **kwargs):
+def upm_tp_0(*, tn, n, upm, p, **kwargs):
     """
     Solves tp from the score upm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2):
-        return None
+    _ = kwargs
     if is_zero(upm):
         return None
     return n/2 + p/2 + tn - 2*tn/upm - sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2)/(2*upm)
 
-def upm_tp_1(*, p, tn, n, upm, **kwargs):
+def upm_tp_1(*, tn, n, upm, p, **kwargs):
     """
     Solves tp from the score upm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2):
-        return None
+    _ = kwargs
     if is_zero(upm):
         return None
     return n/2 + p/2 + tn - 2*tn/upm + sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tn*upm**2 - 8*n*tn*upm + p**2*upm**2 + 8*p*tn*upm**2 - 8*p*tn*upm - 16*tn**2*upm + 16*tn**2)/(2*upm)
 
-def upm_tp(*, p, tn, n, upm, **kwargs):
+def upm_tp(*, tn, n, upm, p, **kwargs):
     """
     Solves tp from the score upm
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([upm_tp_0(p=p, tn=tn, n=n, upm=upm),
-                          upm_tp_1(p=p, tn=tn, n=n, upm=upm)])
-def upm_tn_0(*, tp, p, n, upm, **kwargs):
+    _ = kwargs
+    return unify_results([upm_tp_0(tn=tn, n=n, upm=upm, p=p),
+                          upm_tp_1(tn=tn, n=n, upm=upm, p=p)])
+def upm_tn_0(*, n, upm, p, tp, **kwargs):
     """
     Solves tn from the score upm
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2):
-        return None
+    _ = kwargs
     if is_zero(upm):
         return None
     return n/2 + p/2 + tp - 2*tp/upm - sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2)/(2*upm)
 
-def upm_tn_1(*, tp, p, n, upm, **kwargs):
+def upm_tn_1(*, n, upm, p, tp, **kwargs):
     """
     Solves tn from the score upm
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2):
-        return None
+    _ = kwargs
     if is_zero(upm):
         return None
     return n/2 + p/2 + tp - 2*tp/upm + sqrt(n**2*upm**2 + 2*n*p*upm**2 + 8*n*tp*upm**2 - 8*n*tp*upm + p**2*upm**2 + 8*p*tp*upm**2 - 8*p*tp*upm - 16*tp**2*upm + 16*tp**2)/(2*upm)
 
-def upm_tn(*, tp, p, n, upm, **kwargs):
+def upm_tn(*, n, upm, p, tp, **kwargs):
     """
     Solves tn from the score upm
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         upm (float|Interval|IntervalUnion): the value or interval for the score upm
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    return unify_results([upm_tn_0(tp=tp, p=p, n=n, upm=upm),
-                          upm_tn_1(tp=tp, p=p, n=n, upm=upm)])
-def mk_tp_0(*, p, mk, tn, n, **kwargs):
+    _ = kwargs
+    return unify_results([upm_tn_0(n=n, upm=upm, p=p, tp=tp),
+                          upm_tn_1(n=n, upm=upm, p=p, tp=tp)])
+def mk_tp_0(*, n, tn, mk, p, **kwargs):
     """
     Solves tp from the score mk
 
     Args:
-        p (int): the p count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2):
-        return None
+    _ = kwargs
     if is_zero(mk):
         return None
     return (-mk*n + mk*p + 2*mk*tn - n - sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2))/(2*mk)
 
-def mk_tp_1(*, p, mk, tn, n, **kwargs):
+def mk_tp_1(*, tn, n, mk, p, **kwargs):
     """
     Solves tp from the score mk
 
     Args:
-        p (int): the p count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
         tn (int): the tn count
         n (int): the n count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2):
-        return None
+    _ = kwargs
     if is_zero(mk):
         return None
     return (-mk*n + mk*p + 2*mk*tn - n + sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n**2 + 2*mk*n*p - 4*mk*n*tn - 4*mk*p*tn + n**2))/(2*mk)
 
-def mk_tp(*, p, mk, tn, n, **kwargs):
+def mk_tp(*, tn, n, mk, p, **kwargs):
     """
     Solves tp from the score mk
 
     Args:
-        p (int): the p count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
         tn (int): the tn count
         n (int): the n count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([mk_tp_0(p=p, mk=mk, tn=tn, n=n),
-                          mk_tp_1(p=p, mk=mk, tn=tn, n=n)])
-def mk_tn_0(*, p, tp, mk, n, **kwargs):
+    _ = kwargs
+    return unify_results([mk_tp_0(tn=tn, n=n, mk=mk, p=p),
+                          mk_tp_1(tn=tn, n=n, mk=mk, p=p)])
+def mk_tn_0(*, n, mk, p, tp, **kwargs):
     """
     Solves tn from the score mk
 
     Args:
+        n (int): the n count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
         p (int): the p count
         tp (int): the tp count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
-        n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2):
-        return None
+    _ = kwargs
     if is_zero(mk):
         return None
     return (mk*n - mk*p + 2*mk*tp - p - sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2))/(2*mk)
 
-def mk_tn_1(*, p, tp, mk, n, **kwargs):
+def mk_tn_1(*, n, mk, p, tp, **kwargs):
     """
     Solves tn from the score mk
 
     Args:
+        n (int): the n count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
         p (int): the p count
         tp (int): the tp count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
-        n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2):
-        return None
+    _ = kwargs
     if is_zero(mk):
         return None
     return (mk*n - mk*p + 2*mk*tp - p + sqrt(mk**2*n**2 + 2*mk**2*n*p + mk**2*p**2 + 2*mk*n*p - 4*mk*n*tp + 2*mk*p**2 - 4*mk*p*tp + p**2))/(2*mk)
 
-def mk_tn(*, p, tp, mk, n, **kwargs):
+def mk_tn(*, n, mk, p, tp, **kwargs):
     """
     Solves tn from the score mk
 
     Args:
+        n (int): the n count
+        mk (float|Interval|IntervalUnion): the value or interval for the score mk
         p (int): the p count
         tp (int): the tp count
-        mk (float|Interval|IntervalUnion): the value or interval for the score mk
-        n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    return unify_results([mk_tn_0(p=p, tp=tp, mk=mk, n=n),
-                          mk_tn_1(p=p, tp=tp, mk=mk, n=n)])
-def lrp_tp(*, p, tn, n, lrp, **kwargs):
+    _ = kwargs
+    return unify_results([mk_tn_0(n=n, mk=mk, p=p, tp=tp),
+                          mk_tn_1(n=n, mk=mk, p=p, tp=tp)])
+def lrp_tp(*, lrp, n, tn, p, **kwargs):
     """
     Solves tp from the score lrp
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
-        n (int): the n count
         lrp (float|Interval|IntervalUnion): the value or interval for the score lrp
+        n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(n):
         return None
     return lrp*p*(n - tn)/n
 
-def lrp_tn(*, tp, p, n, lrp, **kwargs):
+def lrp_tn(*, lrp, n, p, tp, **kwargs):
     """
     Solves tn from the score lrp
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
-        n (int): the n count
         lrp (float|Interval|IntervalUnion): the value or interval for the score lrp
+        n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_zero(p) or is_zero(lrp):
+    _ = kwargs
+    if is_zero(lrp) or is_zero(p):
         return None
     return n - n*tp/(lrp*p)
 
-def lrn_tp(*, p, tn, n, lrn, **kwargs):
+def lrn_tp(*, lrn, n, tn, p, **kwargs):
     """
     Solves tp from the score lrn
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
-        n (int): the n count
         lrn (float|Interval|IntervalUnion): the value or interval for the score lrn
+        n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(n):
         return None
     return p*(-lrn*tn + n)/n
 
-def lrn_tn(*, p, tp, n, lrn, **kwargs):
+def lrn_tn(*, lrn, n, p, tp, **kwargs):
     """
     Solves tn from the score lrn
 
     Args:
+        lrn (float|Interval|IntervalUnion): the value or interval for the score lrn
+        n (int): the n count
         p (int): the p count
         tp (int): the tp count
-        n (int): the n count
-        lrn (float|Interval|IntervalUnion): the value or interval for the score lrn
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(p) or is_zero(lrn):
         return None
     return n*(p - tp)/(lrn*p)
 
-def bm_tp(*, p, tn, n, bm, **kwargs):
+def bm_tp(*, n, tn, p, bm, **kwargs):
     """
     Solves tp from the score bm
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         bm (float|Interval|IntervalUnion): the value or interval for the score bm
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(n):
         return None
     return p*(n*(bm + 1) - tn)/n
 
-def bm_tn(*, p, tp, n, bm, **kwargs):
+def bm_tn(*, n, p, bm, tp, **kwargs):
     """
     Solves tn from the score bm
 
     Args:
-        p (int): the p count
-        tp (int): the tp count
         n (int): the n count
+        p (int): the p count
         bm (float|Interval|IntervalUnion): the value or interval for the score bm
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(p):
         return None
     return n*(p*(bm + 1) - tp)/p
 
-def pt_tp_0(*, p, tn, n, **kwargs):
+def pt_tp_0(*, tn, p, n, **kwargs):
     """
     Solves tp from the score pt
 
     Args:
-        p (int): the p count
         tn (int): the tn count
+        p (int): the p count
         n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(n):
         return None
     return p*(n - tn)/n
 
-def pt_tp_1(*, p, pt, tn, n, **kwargs):
+def pt_tp_1(*, pt, n, tn, p, **kwargs):
     """
     Solves tp from the score pt
 
     Args:
-        p (int): the p count
         pt (float|Interval|IntervalUnion): the value or interval for the score pt
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(pt**2) or is_zero(n):
         return None
     return p*(n*pt**2 - 2*n*pt + n - pt**2*tn + 2*pt*tn - tn)/(n*pt**2)
 
-def pt_tp(*, p, pt, tn, n, **kwargs):
+def pt_tp(*, pt, n, tn, p, **kwargs):
     """
     Solves tp from the score pt
 
     Args:
-        p (int): the p count
         pt (float|Interval|IntervalUnion): the value or interval for the score pt
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([pt_tp_0(p=p, pt=pt, tn=tn, n=n),
-                          pt_tp_1(p=p, pt=pt, tn=tn, n=n)])
-def pt_tn_0(*, p, tp, n, **kwargs):
+    _ = kwargs
+    return unify_results([pt_tp_0(pt=pt, n=n, tn=tn, p=p),
+                          pt_tp_1(pt=pt, n=n, tn=tn, p=p)])
+def pt_tn_0(*, p, n, tp, **kwargs):
     """
     Solves tn from the score pt
 
     Args:
         p (int): the p count
-        tp (int): the tp count
         n (int): the n count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(p):
         return None
     return n*(p - tp)/p
 
-def pt_tn_1(*, p, pt, tp, n, **kwargs):
+def pt_tn_1(*, pt, n, p, tp, **kwargs):
     """
     Solves tn from the score pt
 
     Args:
-        p (int): the p count
         pt (float|Interval|IntervalUnion): the value or interval for the score pt
-        tp (int): the tp count
         n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(p) or is_zero(pt**2 - 2*pt + 1):
         return None
     return n*(p*pt**2 - 2*p*pt + p - pt**2*tp)/(p*(pt**2 - 2*pt + 1))
 
-def pt_tn(*, p, pt, tp, n, **kwargs):
+def pt_tn(*, pt, n, p, tp, **kwargs):
     """
     Solves tn from the score pt
 
     Args:
-        p (int): the p count
         pt (float|Interval|IntervalUnion): the value or interval for the score pt
-        tp (int): the tp count
         n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    return unify_results([pt_tn_0(p=p, pt=pt, tp=tp, n=n),
-                          pt_tn_1(p=p, pt=pt, tp=tp, n=n)])
-def dor_tp(*, p, dor, tn, n, **kwargs):
+    _ = kwargs
+    return unify_results([pt_tn_0(pt=pt, n=n, p=p, tp=tp),
+                          pt_tn_1(pt=pt, n=n, p=p, tp=tp)])
+def dor_tp(*, dor, tn, n, p, **kwargs):
     """
     Solves tp from the score dor
 
     Args:
-        p (int): the p count
         dor (float|Interval|IntervalUnion): the value or interval for the score dor
         tn (int): the tn count
         n (int): the n count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(dor*n - dor*tn + tn):
         return None
     return dor*p*(n - tn)/(dor*n - dor*tn + tn)
 
-def dor_tn(*, tp, p, dor, n, **kwargs):
+def dor_tn(*, dor, n, p, tp, **kwargs):
     """
     Solves tn from the score dor
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         dor (float|Interval|IntervalUnion): the value or interval for the score dor
         n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(dor*p - dor*tp + tp):
         return None
     return dor*n*(p - tp)/(dor*p - dor*tp + tp)
 
-def ji_tp(*, p, n, tn, ji, **kwargs):
+def ji_tp(*, ji, p, tn, n, **kwargs):
     """
     Solves tp from the score ji
 
     Args:
-        p (int): the p count
-        n (int): the n count
-        tn (int): the tn count
         ji (float|Interval|IntervalUnion): the value or interval for the score ji
+        p (int): the p count
+        tn (int): the tn count
+        n (int): the n count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     return ji*(n + p - tn)
 
-def ji_tn(*, p, tp, ji, n, **kwargs):
+def ji_tn(*, ji, p, n, tp, **kwargs):
     """
     Solves tn from the score ji
 
     Args:
-        p (int): the p count
-        tp (int): the tp count
         ji (float|Interval|IntervalUnion): the value or interval for the score ji
+        p (int): the p count
         n (int): the n count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(ji):
         return None
     return n + p - tp/ji
 
-def bacc_tp(*, p, tn, n, bacc, **kwargs):
+def bacc_tp(*, n, bacc, tn, p, **kwargs):
     """
     Solves tp from the score bacc
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
         n (int): the n count
         bacc (float|Interval|IntervalUnion): the value or interval for the score bacc
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(n):
         return None
     return p*(2*bacc*n - tn)/n
 
-def bacc_tn(*, p, tp, n, bacc, **kwargs):
+def bacc_tn(*, n, bacc, p, tp, **kwargs):
     """
     Solves tn from the score bacc
 
     Args:
-        p (int): the p count
-        tp (int): the tp count
         n (int): the n count
         bacc (float|Interval|IntervalUnion): the value or interval for the score bacc
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(p):
         return None
     return n*(2*bacc*p - tp)/p
 
-def kappa_tp(*, p, kappa, tn, n, **kwargs):
+def kappa_tp(*, kappa, n, tn, p, **kwargs):
     """
     Solves tp from the score kappa
 
     Args:
-        p (int): the p count
         kappa (float|Interval|IntervalUnion): the value or interval for the score kappa
-        tn (int): the tn count
         n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
+    _ = kwargs
     if is_zero(-kappa*n + kappa*p + 2*n):
         return None
     return (kappa*n**2 - kappa*n*tn + kappa*p**2 + kappa*p*tn + 2*n*p - 2*p*tn)/(-kappa*n + kappa*p + 2*n)
 
-def kappa_tn(*, p, tp, kappa, n, **kwargs):
+def kappa_tn(*, kappa, n, p, tp, **kwargs):
     """
     Solves tn from the score kappa
 
     Args:
-        p (int): the p count
-        tp (int): the tp count
         kappa (float|Interval|IntervalUnion): the value or interval for the score kappa
         n (int): the n count
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
+    _ = kwargs
     if is_zero(kappa*n - kappa*p + 2*p):
         return None
     return (kappa*n**2 + kappa*n*tp + kappa*p**2 - kappa*p*tp + 2*n*p - 2*n*tp)/(kappa*n - kappa*p + 2*p)
 
-def p4_tp_0(*, p, tn, n, p4, **kwargs):
+def p4_tp_0(*, tn, n, p4, p, **kwargs):
     """
     Solves tp from the score p4
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2):
-        return None
+    _ = kwargs
     if is_zero(p4):
         return None
     return n/2 + p/2 + tn - 2*tn/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)
 
-def p4_tp_1(*, p, tn, n, p4, **kwargs):
+def p4_tp_1(*, tn, n, p4, p, **kwargs):
     """
     Solves tp from the score p4
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2):
-        return None
+    _ = kwargs
     if is_zero(p4):
         return None
     return n/2 + p/2 + tn - 2*tn/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)
 
-def p4_tp(*, p, tn, n, p4, **kwargs):
+def p4_tp(*, tn, n, p4, p, **kwargs):
     """
     Solves tp from the score p4
 
     Args:
-        p (int): the p count
         tn (int): the tn count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([p4_tp_0(p=p, tn=tn, n=n, p4=p4),
-                          p4_tp_1(p=p, tn=tn, n=n, p4=p4)])
-def p4_tn_0(*, tp, p, n, p4, **kwargs):
+    _ = kwargs
+    return unify_results([p4_tp_0(tn=tn, n=n, p4=p4, p=p),
+                          p4_tp_1(tn=tn, n=n, p4=p4, p=p)])
+def p4_tn_0(*, n, p4, p, tp, **kwargs):
     """
     Solves tn from the score p4
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2):
-        return None
+    _ = kwargs
     if is_zero(p4):
         return None
     return n/2 + p/2 + tp - 2*tp/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)
 
-def p4_tn_1(*, tp, p, n, p4, **kwargs):
+def p4_tn_1(*, n, p4, p, tp, **kwargs):
     """
     Solves tn from the score p4
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2):
-        return None
+    _ = kwargs
     if is_zero(p4):
         return None
     return n/2 + p/2 + tp - 2*tp/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)
 
-def p4_tn(*, tp, p, n, p4, **kwargs):
+def p4_tn(*, n, p4, p, tp, **kwargs):
     """
     Solves tn from the score p4
 
     Args:
-        tp (int): the tp count
-        p (int): the p count
         n (int): the n count
         p4 (float|Interval|IntervalUnion): the value or interval for the score p4
+        p (int): the p count
+        tp (int): the tp count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    return unify_results([p4_tn_0(tp=tp, p=p, n=n, p4=p4),
-                          p4_tn_1(tp=tp, p=p, n=n, p4=p4)])
-def mcc_tp_0(*, p, tn, n, mcc, **kwargs):
+    _ = kwargs
+    return unify_results([p4_tn_0(n=n, p4=p4, p=p, tp=tp),
+                          p4_tn_1(n=n, p4=p4, p=p, tp=tp)])
+def mcc_tp_0(*, mcc, n, tn, p, **kwargs):
     """
     Solves tp from the score mcc
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
-        n (int): the n count
         mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(p) or is_less_than_zero(mcc**2*n*p + 4*n*tn - 4*tn**2) or is_less_than_zero(n):
-        return None
+    _ = kwargs
     if is_zero(sqrt(n)) or is_zero(mcc**2*p + n):
         return None
     return (-mcc*sqrt(p)*(n + p)*sqrt(mcc**2*n*p + 4*n*tn - 4*tn**2) + sqrt(n)*p*(-mcc**2*n + mcc**2*p + 2*mcc**2*tn + 2*n - 2*tn))/(2*sqrt(n)*(mcc**2*p + n))
 
-def mcc_tp_1(*, p, tn, n, mcc, **kwargs):
+def mcc_tp_1(*, mcc, n, tn, p, **kwargs):
     """
     Solves tp from the score mcc
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
-        n (int): the n count
         mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    if is_less_than_zero(p) or is_less_than_zero(mcc**2*n*p + 4*n*tn - 4*tn**2) or is_less_than_zero(n):
-        return None
+    _ = kwargs
     if is_zero(sqrt(n)) or is_zero(mcc**2*p + n):
         return None
     return (mcc*sqrt(p)*(n + p)*sqrt(mcc**2*n*p + 4*n*tn - 4*tn**2) + sqrt(n)*p*(-mcc**2*n + mcc**2*p + 2*mcc**2*tn + 2*n - 2*tn))/(2*sqrt(n)*(mcc**2*p + n))
 
-def mcc_tp(*, p, tn, n, mcc, **kwargs):
+def mcc_tp(*, mcc, n, tn, p, **kwargs):
     """
     Solves tp from the score mcc
 
     Args:
-        p (int): the p count
-        tn (int): the tn count
-        n (int): the n count
         mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
+        tn (int): the tn count
+        p (int): the p count
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tp
     """
-    return unify_results([mcc_tp_0(p=p, tn=tn, n=n, mcc=mcc),
-                          mcc_tp_1(p=p, tn=tn, n=n, mcc=mcc)])
-def mcc_tn_0(*, p, tp, n, mcc, **kwargs):
+    _ = kwargs
+    return unify_results([mcc_tp_0(mcc=mcc, n=n, tn=tn, p=p),
+                          mcc_tp_1(mcc=mcc, n=n, tn=tn, p=p)])
+def mcc_tn_0(*, mcc, n, p, tp, **kwargs):
     """
     Solves tn from the score mcc
 
     Args:
+        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
         p (int): the p count
         tp (int): the tp count
-        n (int): the n count
-        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(p) or is_less_than_zero(mcc**2*n*p + 4*p*tp - 4*tp**2) or is_less_than_zero(n):
-        return None
-    if is_zero(mcc**2*n + p) or is_zero(sqrt(p)):
+    _ = kwargs
+    if is_zero(sqrt(p)) or is_zero(mcc**2*n + p):
         return None
     return (-mcc*sqrt(n)*(n + p)*sqrt(mcc**2*n*p + 4*p*tp - 4*tp**2) + n*sqrt(p)*(mcc**2*n - mcc**2*p + 2*mcc**2*tp + 2*p - 2*tp))/(2*sqrt(p)*(mcc**2*n + p))
 
-def mcc_tn_1(*, p, tp, n, mcc, **kwargs):
+def mcc_tn_1(*, mcc, n, p, tp, **kwargs):
     """
     Solves tn from the score mcc
 
     Args:
+        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
         p (int): the p count
         tp (int): the tp count
-        n (int): the n count
-        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    if is_less_than_zero(p) or is_less_than_zero(mcc**2*n*p + 4*p*tp - 4*tp**2) or is_less_than_zero(n):
-        return None
-    if is_zero(mcc**2*n + p) or is_zero(sqrt(p)):
+    _ = kwargs
+    if is_zero(sqrt(p)) or is_zero(mcc**2*n + p):
         return None
     return (mcc*sqrt(n)*(n + p)*sqrt(mcc**2*n*p + 4*p*tp - 4*tp**2) + n*sqrt(p)*(mcc**2*n - mcc**2*p + 2*mcc**2*tp + 2*p - 2*tp))/(2*sqrt(p)*(mcc**2*n + p))
 
-def mcc_tn(*, p, tp, n, mcc, **kwargs):
+def mcc_tn(*, mcc, n, p, tp, **kwargs):
     """
     Solves tn from the score mcc
 
     Args:
+        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
+        n (int): the n count
         p (int): the p count
         tp (int): the tp count
-        n (int): the n count
-        mcc (float|Interval|IntervalUnion): the value or interval for the score mcc
         kwargs (dict): additional keyword arguments
 
     Returns:
         float|Interval|IntervalUnion: the value or interval for tn
     """
-    return unify_results([mcc_tn_0(p=p, tp=tp, n=n, mcc=mcc),
-                          mcc_tn_1(p=p, tp=tp, n=n, mcc=mcc)])
+    _ = kwargs
+    return unify_results([mcc_tn_0(mcc=mcc, n=n, p=p, tp=tp),
+                          mcc_tn_1(mcc=mcc, n=n, p=p, tp=tp)])

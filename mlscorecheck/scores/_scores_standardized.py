@@ -16,10 +16,10 @@ __all__ = [
 'false_discovery_rate_standardized',
 'false_omission_rate_standardized',
 'negative_predictive_value_standardized',
-'f_beta_plus_standardized',
-'f_beta_minus_standardized',
-'f1_plus_standardized',
-'f1_minus_standardized',
+'f_beta_positive_standardized',
+'f_beta_negative_standardized',
+'f1_positive_standardized',
+'f1_negative_standardized',
 'unified_performance_measure_standardized',
 'geometric_mean_standardized',
 'fowlkes_mallows_index_standardized',
@@ -173,41 +173,41 @@ def negative_predictive_value_standardized(*, tp, tn, p):
     """
     return tn/(tn + p - tp)
 
-def f_beta_plus_standardized(*, tp, tn, p, n, beta_plus):
+def f_beta_positive_standardized(*, tp, tn, p, n, beta_positive):
     """
-    The standardized f_beta_plus score
+    The standardized f_beta_positive score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives
         tn (int|float|Interval|IntervalUnion): The number of true negatives
         p (int|float|Interval|IntervalUnion): The number of positives
         n (int|float|Interval|IntervalUnion): The number of negatives
-        beta_plus (int|float|Interval|IntervalUnion): the beta parameter
+        beta_positive (int|float|Interval|IntervalUnion): the beta parameter
 
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_plus**2)*tp) / (tp + beta_plus**2*p + n - tn)
+    return ((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + n - tn)
 
-def f_beta_minus_standardized(*, tp, tn, p, n, beta_minus):
+def f_beta_negative_standardized(*, tp, tn, p, n, beta_negative):
     """
-    The standardized f_beta_minus score
+    The standardized f_beta_negative score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives
         tn (int|float|Interval|IntervalUnion): The number of true negatives
         p (int|float|Interval|IntervalUnion): The number of positives
         n (int|float|Interval|IntervalUnion): The number of negatives
-        beta_minus (int|float|Interval|IntervalUnion): the beta parameter
+        beta_negative (int|float|Interval|IntervalUnion): the beta parameter
 
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_minus**2)*tn) / (tn + beta_minus**2*n + p - tp)
+    return ((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + p - tp)
 
-def f1_plus_standardized(*, tp, tn, p, n):
+def f1_positive_standardized(*, tp, tn, p, n):
     """
-    The standardized f1_plus score
+    The standardized f1_positive score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives
@@ -220,9 +220,9 @@ def f1_plus_standardized(*, tp, tn, p, n):
     """
     return (2*tp) / (tp + p + n - tn)
 
-def f1_minus_standardized(*, tp, tn, p, n):
+def f1_negative_standardized(*, tp, tn, p, n):
     """
-    The standardized f1_minus score
+    The standardized f1_negative score
 
     Args:
         tp (int|float|Interval|IntervalUnion): The number of true positives

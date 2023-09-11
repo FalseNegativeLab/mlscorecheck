@@ -7,6 +7,7 @@ import pytest
 from mlscorecheck.symbolic import (get_base_objects,
                                     get_symbolic_toolkit,
                                     get_all_objects,
+                                    get_objects_without_complements,
                                     Score)
 
 symbolic_toolkit = get_symbolic_toolkit()
@@ -24,6 +25,13 @@ def test_all_objects():
     Testing the instantiation of the base objects
     """
     assert len(get_all_objects(symbolic_toolkit)) > 0
+
+@pytest.mark.skipif(symbolic_toolkit is None, reason='no symbolic toolkit available')
+def test_no_complement_objects():
+    """
+    Testing the instantiation of the base objects
+    """
+    assert len(get_objects_without_complements(symbolic_toolkit)) > 0
 
 @pytest.mark.skipif(symbolic_toolkit is None, reason='no symbolic toolkit available')
 def test_serialization():

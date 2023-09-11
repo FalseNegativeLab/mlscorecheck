@@ -190,7 +190,7 @@ def generate_dataset_and_scores(*,
     dataset = Dataset(**dataset_spec) # pylint: disable=missing-kwoa
     sample = dataset.sample(random_state)
     if dataset.aggregation == 'rom':
-        scores = calculate_scores(sample.calculate_figures() | {'beta_plus': 2, 'beta_minus': 2}, rounding_decimals=rounding_decimals)
+        scores = calculate_scores(sample.calculate_figures() | {'beta_positive': 2, 'beta_negative': 2}, rounding_decimals=rounding_decimals)
     else:
         scores = sample.calculate_scores(rounding_decimals=rounding_decimals)
     scores = scores if score_subset is None else {key: value for key, value in scores.items()

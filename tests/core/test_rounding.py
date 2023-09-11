@@ -15,8 +15,8 @@ def test_round_scores():
 
     rounded = round_scores(scores, 3)
 
-    assert np.round(scores['acc'], 3) == rounded['acc']
-    assert np.round(scores['sens'], 3) == rounded['sens']
+    assert float(np.round(scores['acc'], 3)) == rounded['acc']
+    assert float(np.round(scores['sens'], 3)) == rounded['sens']
 
     assert round_scores(scores)['acc'] == scores['acc']
 

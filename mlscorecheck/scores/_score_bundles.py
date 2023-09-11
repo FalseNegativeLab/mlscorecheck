@@ -8,10 +8,10 @@ from ._scores import (accuracy,
                         negative_predictive_value,
                         positive_predictive_value,
                         balanced_accuracy,
-                        f1_plus,
-                        f1_minus,
-                        f_beta_plus,
-                        f_beta_minus,
+                        f1_positive,
+                        f1_negative,
+                        f_beta_positive,
+                        f_beta_negative,
                         fowlkes_mallows_index,
                         bookmaker_informedness,
                         prevalence_threshold,
@@ -36,10 +36,10 @@ from ._scores_standardized import (accuracy_standardized,
                         negative_predictive_value_standardized,
                         positive_predictive_value_standardized,
                         balanced_accuracy_standardized,
-                        f1_plus_standardized,
-                        f1_minus_standardized,
-                        f_beta_plus_standardized,
-                        f_beta_minus_standardized,
+                        f1_positive_standardized,
+                        f1_negative_standardized,
+                        f_beta_positive_standardized,
+                        f_beta_negative_standardized,
                         fowlkes_mallows_index_standardized,
                         bookmaker_informedness_standardized,
                         prevalence_threshold_standardized,
@@ -81,10 +81,10 @@ score_functions_all = {'acc': accuracy,
                 'npv': negative_predictive_value,
                 'ppv': positive_predictive_value,
                 'bacc': balanced_accuracy,
-                'f1p': f1_plus,
-                'f1m': f1_minus,
-                'fbp': f_beta_plus,
-                'fbm': f_beta_minus,
+                'f1p': f1_positive,
+                'f1n': f1_negative,
+                'fbp': f_beta_positive,
+                'fbn': f_beta_negative,
                 'fm': fowlkes_mallows_index,
                 'bm': bookmaker_informedness,
                 'pt': prevalence_threshold,
@@ -110,10 +110,10 @@ score_functions_standardized_all = {'acc': accuracy_standardized,
                 'npv': negative_predictive_value_standardized,
                 'ppv': positive_predictive_value_standardized,
                 'bacc': balanced_accuracy_standardized,
-                'f1p': f1_plus_standardized,
-                'f1m': f1_minus_standardized,
-                'fbp': f_beta_plus_standardized,
-                'fbm': f_beta_minus_standardized,
+                'f1p': f1_positive_standardized,
+                'f1n': f1_negative_standardized,
+                'fbp': f_beta_positive_standardized,
+                'fbn': f_beta_negative_standardized,
                 'fm': fowlkes_mallows_index_standardized,
                 'bm': bookmaker_informedness_standardized,
                 'pt': prevalence_threshold_standardized,
@@ -137,7 +137,7 @@ score_functions_standardized_all = {'acc': accuracy_standardized,
 score_functions_with_solutions = \
     {key: score_functions_all[key]
         for key in ['acc', 'sens', 'spec', 'npv', 'ppv', 'bacc', 'f1p', 'fm',
-                    'f1m', 'fbp', 'fbm', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor', 'mcc',
+                    'f1n', 'fbp', 'fbn', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor', 'mcc',
                     'ji', 'kappa', 'gm', 'upm', 'p4']}
 
 # complement functions
@@ -148,8 +148,8 @@ score_function_complement_functions = \
 # all score functions without complements
 score_functions_without_complements = \
     {key: score_functions_all[key] for key in
-                    ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1m',
-                    'fbp', 'fbm', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
+                    ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1n',
+                    'fbp', 'fbn', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
                     'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}
 
 # all score functions with complements
@@ -164,8 +164,8 @@ score_function_standardized_complement_functions = \
 # all standardized score functions without complements
 score_functions_standardized_without_complements = \
     {key: score_functions_standardized_all[key] for key in
-                    ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1m',
-                    'fbp', 'fbm', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
+                    ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1n',
+                    'fbp', 'fbn', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
                     'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}
 
 # all standardized score functions with complements
