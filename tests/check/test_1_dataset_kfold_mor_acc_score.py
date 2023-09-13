@@ -61,3 +61,13 @@ def test_failure(random_seed):
     print(result)
 
     assert result['inconsistency']
+
+def test_exception():
+    """
+    Testing if the exception is thrown
+    """
+    with pytest.raises(ValueError):
+        check_kfold_accuracy_score({'folding': {'folds': []}},
+                                    0.12345678,
+                                    1e-8,
+                                    numerical_tolerance=1e-9)
