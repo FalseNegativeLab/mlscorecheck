@@ -11,7 +11,7 @@ __all__ = ['check_1_dataset_kfold_mor_scores']
 
 def check_1_dataset_kfold_mor_scores(scores,
                                     eps,
-                                    dataset,
+                                    evaluation,
                                     *,
                                     solver_name=None,
                                     timeout=None,
@@ -93,21 +93,14 @@ def check_1_dataset_kfold_mor_scores(scores,
         # True
 
     """
-    if dataset.get('aggregation', 'mor') != 'mor':
-        raise ValueError(f'the aggregation {dataset.get("aggregation")} specified '\
+    if evaluation.get('aggregation') != 'mor':
+        raise ValueError(f'the aggregation {evaluation.get("aggregation")} specified '\
                         'in the dataset specification is not suitable for this test, '\
                         'consider removing the mode of aggregation or specify "rom".')
 
-    # adjusting the dataset specification to ensure the aggregation is set
-    dataset = dataset | {'aggregation' : 'mor'}
-
-    if dataset.get('score_bounds') is not None:
-        raise ValueError('it is unnecessary to set score bounds at the dataset level, '\
-                            'the scores are implicitly bounded by the numerical uncertainty')
-
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(datasets=[dataset],
+    experiment = Experiment(evaluations=[evaluation],
                             aggregation='mor')
 
     return check_aggregated_scores(experiment=experiment,

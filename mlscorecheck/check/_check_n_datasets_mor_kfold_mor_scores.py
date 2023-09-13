@@ -11,7 +11,7 @@ __all__ = ['check_n_datasets_mor_kfold_mor_scores']
 
 def check_n_datasets_mor_kfold_mor_scores(scores,
                                             eps,
-                                            datasets,
+                                            experiment,
                                             *,
                                             solver_name=None,
                                             timeout=None,
@@ -97,17 +97,9 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
         # True
 
     """
-    if any(dataset.get('aggregation', 'mor') != 'mor' for dataset in datasets):
+    if any(evaluation.get('aggregation', 'mor') != 'mor'
+            for evaluation in experiment['evaluations']) or experiment['aggregation'] != 'mor':
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
-
-    # adjusting the dataset specification to ensure the aggregation is set
-    for dataset in datasets:
-        dataset['aggregation'] = 'mor'
-
-    # creating the experiment consisting of one single dataset, the
-    # outer level aggregation can be arbitrary
-    experiment = Experiment(datasets=datasets,
-                            aggregation='mor')
 
     return check_aggregated_scores(experiment=experiment,
                                     scores=scores,

@@ -15,8 +15,9 @@ from ._utils import compare_scores, aggregated_scores
 
 __all__ = ['check_aggregated_scores']
 
-PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
+PREFERRED_SOLVER = 'PULP_CBC_CMD' if 'PULP_CBC_CMD' in solvers else solvers[0]
+
 
 def check_aggregated_scores(*,
                             experiment,
@@ -49,6 +50,7 @@ def check_aggregated_scores(*,
         bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
         and optionally the details in a dictionary
     """
+
     check_uncertainty_and_tolerance(eps, numerical_tolerance)
     eps = update_uncertainty(eps, numerical_tolerance)
 
@@ -61,10 +63,14 @@ def check_aggregated_scores(*,
 
     experiment = Experiment(**experiment) if isinstance(experiment, dict) else experiment
 
-    solver_name = PREFERRED_SOLVER if solver_name is None else solver_name
-    if solver_name not in solvers:
-        logger.info('solver %s not available, using %s', solver_name, solvers[0])
-        solver_name = solvers[0]
+    if experiment.aggregation == 'rom' \
+        and any(evaluation.aggregation == 'mor' for evaluation in experiment.evaluations):
+            raise ValueError('experiment level MoR aggregation with dataset level RoM '\
+                'aggregation is an unlikely situation, it is not supported in this high level '\
+                'interface.')
+
+    solver_name = (PREFERRED_SOLVER if solver_name is None or solver_name not in solvers
+                                    else solver_name)
 
     solver = pl.getSolver(solver_name, timeLimit=timeout, msg=verbosity)
 

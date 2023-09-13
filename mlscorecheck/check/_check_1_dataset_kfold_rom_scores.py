@@ -14,7 +14,7 @@ __all__ = ['check_1_dataset_kfold_rom_scores']
 
 def check_1_dataset_kfold_rom_scores(scores,
                                         eps,
-                                        dataset,
+                                        evaluation,
                                         *,
                                         solver_name=None,
                                         timeout=None,
@@ -93,59 +93,19 @@ def check_1_dataset_kfold_rom_scores(scores,
         # True
 
     """
-    if dataset.get('aggregation', 'rom') != 'rom':
-        raise ValueError(f'the aggregation {dataset.get("aggregation")} specified '\
+    if evaluation.get('aggregation', 'rom') != 'rom':
+        raise ValueError(f'the aggregation {evaluation.get("aggregation")} specified '\
                         'in the dataset specification is not suitable for this test, '\
                         'consider removing the mode of aggregation or specify "rom".')
 
-    # adjusting the dataset specification to ensure the aggregation is set
-    dataset = dataset | {'aggregation' : 'rom'}
-
-    if dataset.get('score_bounds') is not None:
-        raise ValueError('it is unnecessary to set score bounds at the dataset level, '\
-                            'the scores are implicitly bounded by the numerical uncertainty')
-
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(datasets=[dataset],
+    experiment = Experiment(evaluations=[evaluation],
                             aggregation='rom')
 
-    # calculating the raw tp, tn, p and n figures
-    figures = experiment.calculate_figures()
-
     # executing the individual tests
-    ind_results = check_scores_tptn_pairs(scores=scores,
+    return check_scores_tptn_pairs(scores=scores,
                                             eps=eps,
-                                            p=figures['p'],
-                                            n=figures['n'],
+                                            p=experiment.p,
+                                            n=experiment.n,
                                             numerical_tolerance=numerical_tolerance)
-
-    result = {'inconsistency': ind_results['inconsistency'],
-                'individual_results': ind_results}
-
-    if not experiment.has_downstream_bounds():
-        logger.info('In the lack of score bounds, the linear programming '\
-                    'based aggregated test is not considered.')
-        return result
-
-    warnings.warn('It is not a common situation that score bounds '\
-                        'can be specified with ratio-of-means aggregation '\
-                        'on one single dataset. Please double check the '\
-                        'configuration.')
-
-    # for the aggregated figures the original dataset is constructed
-    # the difference is that for this step the folding structure is not
-    # arbitrary
-
-    agg_results = check_aggregated_scores(experiment=experiment,
-                                        scores=scores,
-                                        eps=eps,
-                                        solver_name=solver_name,
-                                        timeout=timeout,
-                                        verbosity=verbosity,
-                                        numerical_tolerance=numerical_tolerance)
-
-    result['aggregated_results'] = agg_results
-    result['inconsistency'] = result['inconsistency'] or agg_results['inconsistency']
-
-    return result

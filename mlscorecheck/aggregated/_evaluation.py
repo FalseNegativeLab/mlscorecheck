@@ -34,6 +34,10 @@ class Evaluation:
         self.fold_score_bounds = fold_score_bounds
         self.aggregation = aggregation
 
+        if aggregation == 'rom' and fold_score_bounds is not None:
+            raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
+                                'aggregation, therefore, it is not supported.')
+
         self.tp = None
         self.tn = None
         self.scores = None
@@ -68,6 +72,8 @@ class Evaluation:
 
         for fold in self.folds:
             fold.sample_figures(random_state)
+
+        self.calculate_scores()
 
         return self
 

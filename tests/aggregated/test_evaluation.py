@@ -203,7 +203,7 @@ def test_get_fold_score_bounds(random_seed, aggregation):
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_success_bounds(subset,
                                             random_seed,
@@ -242,7 +242,7 @@ def test_linear_programming_success_bounds(subset,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_failure_bounds(subset,
                                             random_seed,
@@ -276,3 +276,13 @@ def test_linear_programming_failure_bounds(subset,
     assert lp_program.status in (-1, 0)
 
     evaluate_timeout(lp_program, skeleton, scores, 10**(-rounding_decimals), subset)
+
+def test_others():
+    """
+    Testing other functionalities
+    """
+
+    evaluation = generate_evaluation(aggregation='rom',
+                                        feasible_fold_score_bounds=True)
+    with pytest.raises(ValueError):
+        Evaluation(**evaluation)

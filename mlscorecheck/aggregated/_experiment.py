@@ -38,6 +38,10 @@ class Experiment:
         self.dataset_score_bounds = dataset_score_bounds
         self.aggregation = aggregation
 
+        if aggregation == 'rom' and dataset_score_bounds is not None:
+            raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
+                                'aggregation, therefore, it is not supported.')
+
         self.p = sum(evaluation.p for evaluation in self.evaluations)
         self.n = sum(evaluation.n for evaluation in self.evaluations)
 
@@ -69,6 +73,8 @@ class Experiment:
 
         for evaluation in self.evaluations:
             evaluation.sample_figures(random_state)
+
+        self.calculate_scores()
 
         return self
 

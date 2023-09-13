@@ -80,7 +80,7 @@ def test_sampling_and_scores(random_seed):
                 - scores['acc']) < 1e-10
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('aggregation_folds', ['mor', 'rom'])
 def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
     """
@@ -153,7 +153,7 @@ def test_linear_programming_success(subset, random_seed, aggregation, rounding_d
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 def test_linear_programming_success_with_bounds(subset,
                                                 random_seed,
@@ -185,7 +185,7 @@ def test_linear_programming_success_with_bounds(subset,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_failure_with_bounds(subset,
                                                 random_seed,
@@ -217,7 +217,7 @@ def test_linear_programming_failure_with_bounds(subset,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3])
 def test_linear_programming_success_both_bounds(subset,
                                                 random_seed,
@@ -235,6 +235,7 @@ def test_linear_programming_success_both_bounds(subset,
 
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
+                                                aggregation_folds='mor',
                                                 return_scores=True,
                                                 rounding_decimals=rounding_decimals,
                                                 feasible_dataset_score_bounds=True,
@@ -254,7 +255,7 @@ def test_linear_programming_success_both_bounds(subset,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_failure_both_bounds(subset,
                                                 random_seed,
@@ -272,6 +273,7 @@ def test_linear_programming_failure_both_bounds(subset,
 
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
+                                                aggregation_folds='mor',
                                                 return_scores=True,
                                                 rounding_decimals=rounding_decimals,
                                                 feasible_dataset_score_bounds=False,
@@ -285,3 +287,13 @@ def test_linear_programming_failure_both_bounds(subset,
     assert lp_program.status in (-1, 0)
 
     evaluate_timeout(lp_program, experiment, scores, 10**(-rounding_decimals), subset)
+
+def test_others():
+    """
+    Testing other functionalities
+    """
+
+    experiment = generate_experiment(aggregation='rom',
+                                        feasible_dataset_score_bounds=True)
+    with pytest.raises(ValueError):
+        Experiment(**experiment)

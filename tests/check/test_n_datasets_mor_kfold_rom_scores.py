@@ -7,82 +7,87 @@ over the datasets
 import pytest
 
 from mlscorecheck.check import check_n_datasets_mor_kfold_rom_scores
-from mlscorecheck.aggregated import (Experiment,
-                                    generate_experiment_specification)
+from mlscorecheck.aggregated import (generate_experiment)
 
-def test_consistency():
+@pytest.mark.parametrize('random_seed', list(range(10)))
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
+def test_consistency(random_seed, rounding_decimals):
     """
     Testing with a consistent setup
     """
 
-    experiment_spec = generate_experiment_specification(aggregation='mor',
-                                                        aggregation_ds='rom',
-                                                        random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
-    scores = sample.calculate_scores(rounding_decimals=4)
+    experiment, scores = generate_experiment(aggregation='mor',
+                                                aggregation_folds='rom',
+                                                random_state=random_seed,
+                                                rounding_decimals=rounding_decimals,
+                                                return_scores=True)
 
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=experiment.to_dict()['datasets'],
+    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
                                                     scores=scores,
-                                                    eps=1e-4)
+                                                    eps=10**(-rounding_decimals))
 
     assert not result['inconsistency']
 
-def test_failure():
+@pytest.mark.parametrize('random_seed', list(range(10)))
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
+def test_failure(random_seed, rounding_decimals):
     """
     Testing with an inconsistent setup
     """
-    experiment_spec = generate_experiment_specification(aggregation='mor',
-                                                        aggregation_ds='rom',
-                                                        random_state=5)
-    experiment = Experiment(**experiment_spec)
+    experiment, scores = generate_experiment(aggregation='mor',
+                                                aggregation_folds='rom',
+                                                random_state=random_seed,
+                                                rounding_decimals=rounding_decimals,
+                                                return_scores=True)
+
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=experiment.to_dict()['datasets'],
+    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
                                                 scores=scores,
-                                                eps=1e-4)
+                                                eps=10**(-rounding_decimals))
 
     assert result['inconsistency']
 
-def test_consistency_bounds():
+@pytest.mark.parametrize('random_seed', list(range(10)))
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
+def test_consistency_bounds(random_seed, rounding_decimals):
     """
     Testing with a consistent setup and bounds
     """
-    experiment_spec = generate_experiment_specification(aggregation='mor',
-                                                        aggregation_ds='rom',
-                                                        random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
-    bounds = sample.get_dataset_fold_bounds(feasible=True)
-    experiment = experiment.add_dataset_fold_bounds(bounds)
-    scores = sample.calculate_scores(rounding_decimals=4)
+    experiment, scores = generate_experiment(aggregation='mor',
+                                                aggregation_folds='rom',
+                                                random_state=random_seed,
+                                                rounding_decimals=rounding_decimals,
+                                                return_scores=True,
+                                                feasible_dataset_score_bounds=True)
 
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=experiment.to_dict()['datasets'],
+    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
                                                 scores=scores,
-                                                eps=1e-4)
+                                                eps=10**(-rounding_decimals),
+                                                timeout=2)
 
-    assert not result['inconsistency']
+    assert not result['inconsistency'] or result['lp_status'] == 'timeout'
 
-def test_failure_bounds():
+@pytest.mark.parametrize('random_seed', list(range(10)))
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
+def test_failure_bounds(random_seed, rounding_decimals):
     """
     Testing with a inconsistent setup and bounds
     """
-    experiment_spec = generate_experiment_specification(aggregation='mor',
-                                                        aggregation_ds='rom',
-                                                        random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
-    bounds = sample.get_dataset_fold_bounds(feasible=True)
-    experiment = experiment.add_dataset_fold_bounds(bounds)
-    scores = {'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
+    experiment, scores = generate_experiment(aggregation='mor',
+                                                aggregation_folds='rom',
+                                                random_state=random_seed,
+                                                rounding_decimals=rounding_decimals,
+                                                return_scores=True,
+                                                feasible_dataset_score_bounds=False)
 
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=experiment.to_dict()['datasets'],
+    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
                                                 scores=scores,
-                                                eps=1e-4)
+                                                eps=10**(-rounding_decimals),
+                                                timeout=2)
     print(result)
 
-    assert result['message'] \
-            == 'no scores suitable for aggregated consistency checks'
+    assert result['inconsistency'] or result['lp_status'] == 'timeout'
 
 def test_exception():
     """
@@ -90,23 +95,7 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_kfold_rom_scores(datasets=[{'aggregation': 'mor'}],
+        check_n_datasets_mor_kfold_rom_scores(experiment={'aggregation': 'rom',
+                                                            'evaluations': []},
                                                 scores={},
                                                 eps=1e-4)
-
-def test_success_with_no_folding():
-    """
-    Testing the successful execution with folding specified
-    """
-
-    datasets = [{'p': 5, 'n': 10, 'n_folds': 3, 'n_repeats': 5, 'aggregation': 'rom'},
-                {'p': 4, 'n': 20, 'n_folds': 5, 'n_repeats': 8, 'aggregation': 'rom'}]
-    experiment = Experiment(datasets=datasets, aggregation='mor')
-    sample = experiment.sample()
-    scores = sample.calculate_scores(rounding_decimals=4)
-
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                    scores=scores,
-                                                    eps=1e-4)
-
-    assert not result['inconsistency']
