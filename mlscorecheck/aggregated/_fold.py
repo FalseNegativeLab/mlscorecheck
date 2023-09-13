@@ -115,22 +115,8 @@ class Fold:
             if 'spec' in scores:
                 tn_init = scores['spec'] * self.n
 
-            """
-            if np.random.randint(2) == 0:
-                tp_init = min(max(tp_init + np.random.randint(int(np.sqrt(self.p))), 0), self.p)
-            else:
-                tp_init = min(max(tp_init - np.random.randint(int(np.sqrt(self.p))), 0), self.p)
-
-            if np.random.randint(2) == 0:
-                tn_init = min(max(tn_init + np.random.randint(int(np.sqrt(self.n))), 0), self.n)
-            else:
-                tn_init = min(max(tn_init - np.random.randint(int(np.sqrt(self.n))), 0), self.n)
-            """
-
             self.tp.setInitialValue(int(tp_init))
             self.tn.setInitialValue(int(tn_init))
-        #self.tp.setInitialValue(np.random.randint(self.p+1))
-        #self.tn.setInitialValue(np.random.randint(self.n+1))
 
         self.calculate_scores()
 

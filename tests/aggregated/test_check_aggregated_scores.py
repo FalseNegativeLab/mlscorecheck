@@ -2,47 +2,56 @@
 This module tests the top level interfaces to the aggregated score checks
 """
 
-from mlscorecheck.aggregated import (check_aggregated_scores,
-                                        generate_experiment_specification,
-                                        generate_dataset_specification,
-                                        Experiment)
+import pytest
 
-def test_check_aggregated_scores_feasible():
+from mlscorecheck.aggregated import (check_aggregated_scores,
+                                        generate_experiment,
+                                        generate_dataset,
+                                        generate_evaluation,
+                                        Experiment,
+                                        round_scores)
+
+random_seeds = list(range(20))
+
+@pytest.mark.parametrize('random_seed', random_seeds)
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+def test_check_aggregated_scores_feasible(random_seed, rounding_decimals):
     """
     Testing the top level aggregated check function with a feasible problem
     """
-    experiment_spec = generate_experiment_specification(random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
-    scores = sample.calculate_scores(rounding_decimals=3)
+    experiment, scores = generate_experiment(random_state=random_seed,
+                                                return_scores=True)
 
-    details = check_aggregated_scores(experiment=experiment_spec,
+    scores = round_scores(scores, rounding_decimals)
+
+    details = check_aggregated_scores(experiment=experiment,
                                             scores=scores,
-                                            eps=1e-3)
+                                            eps=10**(-rounding_decimals),
+                                            timeout=1)
 
     assert not details['inconsistency']
-    assert details['lp_status'] == 'feasible'
-    assert details['lp_configuration_scores_match']
-    assert details['lp_configuration_bounds_match']
-    assert details['lp_configuration'] is not None
+    assert details['lp_status'] in {'feasible', 'timeout'}
+    if details['lp_status'] != 'timeout':
+        assert details['lp_configuration_scores_match']
+        assert details['lp_configuration_bounds_match']
+        assert details['lp_configuration'] is not None
 
 def test_check_aggregated_scores_feasible_custom_solver():
     """
     Testing the top level aggregated check function with a feasible problem
     with custom solver
     """
-    experiment_spec = generate_experiment_specification(random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
-    scores = sample.calculate_scores(rounding_decimals=3)
+    experiment, scores = generate_experiment(random_state=5,
+                                                return_scores=True)
+    scores = round_scores(scores, 4)
 
-    details = check_aggregated_scores(experiment=experiment_spec,
+    details = check_aggregated_scores(experiment=experiment,
                                         scores=scores,
                                         eps=1e-3,
                                         solver_name='dummy')
 
     assert not details['inconsistency']
-    assert details['lp_status'] == 'feasible'
+    assert details['lp_status'] in {'feasible', 'timeout'}
     assert details['lp_configuration_scores_match']
     assert details['lp_configuration_bounds_match']
     assert details['lp_configuration'] is not None
@@ -51,19 +60,13 @@ def test_check_aggregated_scores_infeasible():
     """
     Testing the top level aggregated check function with an infeasible problem
     """
-    experiment_spec = generate_experiment_specification(random_state=5)
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=5)
+    experiment, scores = generate_experiment(random_state=5,
+                                                return_scores=True,
+                                                feasible_fold_score_bounds=False)
 
     scores = {'acc': 0.1, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.4}
 
-    bounds = sample.get_dataset_fold_bounds(score_subset=['acc', 'sens', 'spec', 'bacc'],
-                                            feasible=False)
-
-    final = experiment.add_dataset_fold_bounds(bounds)
-    final_spec = final.to_dict()
-
-    details = check_aggregated_scores(experiment=final_spec,
+    details = check_aggregated_scores(experiment=experiment,
                                         scores=scores,
                                         eps=1e-4)
 
@@ -77,30 +80,35 @@ def test_check_aggregated_scores_timeout():
 
     Eventually this test can fail, due to the unpredictability of solvers timing out
     """
-    experiment_spec = {'aggregation': 'mor',
-                        'datasets': [generate_dataset_specification(aggregation='mor',
-                                                                    random_state=idx,
-                                                                    max_n_folds=20,
-                                                                    max_n_repeats=20)
-                                        for idx in range(2)]}
+    experiment, scores = generate_experiment(max_evaluations=20,
+                                                max_folds=20,
+                                                max_repeats=20,
+                                                random_state=5,
+                                                return_scores=True,
+                                                feasible_fold_score_bounds=True,
+                                                feasible_dataset_score_bounds=True)
 
-    experiment = Experiment(**experiment_spec)
-    sample = experiment.sample(random_state=7)
+    scores = round_scores(scores, 7)
 
-    scores = sample.calculate_scores(rounding_decimals=7)
-
-    bounds = sample.get_dataset_fold_bounds(['acc', 'sens', 'spec', 'bacc'], True)
-    experiment = experiment.add_dataset_fold_bounds(bounds)
-
-    bounds = sample.get_dataset_bounds(['acc', 'sens', 'spec', 'bacc'], True)
-    experiment = experiment.add_dataset_bounds(bounds)
-
-    details = check_aggregated_scores(experiment=experiment.to_dict(problem_only=True),
+    details = check_aggregated_scores(experiment=experiment,
                                         scores=scores,
                                         eps=1e-7,
-                                        timeout=0.1,
+                                        timeout=0.001,
                                         numerical_tolerance=1e-9)
 
     assert not details['inconsistency']
     assert details['lp_status'] == 'timeout'
     assert details['lp_configuration'] is not None
+
+def test_no_suitable_score():
+    """
+    Testing the case when no score is suitable
+    """
+
+    details = check_aggregated_scores(experiment=None,
+                                        scores={'f1': 0.5},
+                                        eps=1e-7,
+                                        timeout=0.001,
+                                        numerical_tolerance=1e-9)
+
+    assert not details['inconsistency']

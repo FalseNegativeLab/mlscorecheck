@@ -12,6 +12,7 @@ from ..core import (init_random_state, dict_mean, round_scores, dict_minmax,
 from ..individual import calculate_scores_for_lp
 from ._folding_utils import _create_folds
 from ._utils import check_bounds
+from ._linear_programming import add_bounds
 
 class Evaluation:
     """
@@ -122,11 +123,8 @@ class Evaluation:
 
         self.calculate_scores()
 
-        if self.fold_score_bounds is not None:
-            for fold in self.folds:
-                for key in self.fold_score_bounds:
-                    lp_problem += fold.scores[key] >= self.fold_score_bounds[key][0]
-                    lp_problem += fold.scores[key] <= self.fold_score_bounds[key][1]
+        for fold in self.folds:
+            add_bounds(lp_problem, fold.scores, self.fold_score_bounds, fold.identifier)
 
         return lp_problem
 
@@ -158,7 +156,7 @@ class Evaluation:
         """
         results = {'folds': []}
         for fold in self.folds:
-            tmp = {'fold': fold.to_dict(),
+            tmp = {'fold': fold.to_dict() | {'tp': fold.tp, 'tn': fold.tn},
                     'scores': fold.scores,
                     'score_bounds': self.fold_score_bounds}
             if self.fold_score_bounds is not None:

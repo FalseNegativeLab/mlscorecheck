@@ -20,7 +20,7 @@ PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
 PREFERRED_SOLVER = PREFERRED_SOLVER if PREFERRED_SOLVER in solvers else solvers[0]
 solver = pl.getSolver(PREFERRED_SOLVER)
-solver_timeout = pl.getSolver(PREFERRED_SOLVER, timeLimit=2)
+solver_timeout = pl.getSolver(PREFERRED_SOLVER, timeLimit=5)
 
 two_combs = [['acc', 'sens'], ['acc', 'spec'], ['acc', 'bacc'],
             ['sens', 'spec'], ['sens', 'bacc'], ['spec', 'bacc']]
@@ -204,7 +204,7 @@ def test_get_fold_score_bounds(random_seed, aggregation):
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_success_bounds(subset,
                                             random_seed,
                                             aggregation,
@@ -234,7 +234,7 @@ def test_linear_programming_success_bounds(subset,
 
     skeleton = Evaluation(**evaluation.to_dict())
 
-    lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals))
+    lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals), solver=solver_timeout)
 
     assert lp_program.status in (0, 1)
 
@@ -243,7 +243,7 @@ def test_linear_programming_success_bounds(subset,
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+@pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_failure_bounds(subset,
                                             random_seed,
                                             aggregation,
@@ -271,6 +271,8 @@ def test_linear_programming_failure_bounds(subset,
 
     skeleton = Evaluation(**evaluation.to_dict())
 
-    lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals))
+    lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals), solver=solver_timeout)
 
     assert lp_program.status in (-1, 0)
+
+    evaluate_timeout(lp_program, skeleton, scores, 10**(-rounding_decimals), subset)

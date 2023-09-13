@@ -4,24 +4,24 @@ Testing some linear programming capabilities
 
 import pulp as pl
 
-from mlscorecheck.aggregated import (Fold,
-                                        generate_fold_specification,
-                                        solve,
-                                        add_bounds)
+from mlscorecheck.aggregated import (Evaluation,
+                                    generate_evaluation,
+                                    solve,
+                                    add_bounds)
 
 def test_solve():
     """
     Testing the fold functionality
     """
 
-    fold = Fold(**generate_fold_specification(random_state=5))
-    sample = fold.sample()
+    evaluation = Evaluation(**generate_evaluation(random_state=5))
+    sample = evaluation.sample_figures()
 
     scores = sample.calculate_scores()
 
     eps = {'acc': 0.001, 'sens': 0.001, 'spec': 0.001, 'bacc': 0.001}
 
-    assert solve(fold, scores, eps).status == 1
+    assert solve(evaluation, scores, eps).status == 1
 
 def test_add_bounds():
     """

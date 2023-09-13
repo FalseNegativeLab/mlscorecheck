@@ -14,6 +14,7 @@ from ._evaluation import Evaluation
 from ._utils import aggregated_scores
 
 from ._utils import check_bounds
+from ._linear_programming import add_bounds
 
 __all__ = ['Experiment']
 
@@ -126,11 +127,8 @@ class Experiment:
 
         self.calculate_scores()
 
-        if self.dataset_score_bounds is not None:
-            for evaluation in self.evaluations:
-                for key in self.dataset_score_bounds:
-                    lp_problem += evaluation.scores[key] >= self.dataset_score_bounds[key][0]
-                    lp_problem += evaluation.scores[key] <= self.dataset_score_bounds[key][1]
+        for evaluation in self.evaluations:
+            add_bounds(lp_problem, evaluation.scores, self.dataset_score_bounds, evaluation.dataset.identifier)
 
         return lp_problem
 
