@@ -6,279 +6,96 @@ import itertools
 import copy
 
 import numpy as np
+
+from ..core import init_random_state
 from ..experiments import dataset_statistics
 
-__all__ = ['stratified_configurations_sklearn',
-            'determine_fold_configurations',
-            '_create_folds',
-            'fold_variations',
-            'remainder_variations',
-            'create_all_kfolds']
+from ._fold import Fold
+from ._folding_utils import _create_folds
 
-def stratified_configurations_sklearn(p,
-                                        n,
-                                        n_splits):
+from ._dataset import Dataset
+
+__all__ = ['Folding']
+
+class Folding:
     """
-    The sklearn stratification strategy
-
-    Args:
-        p (int): number of positives
-        n (int): number of negatives
-        n_splits (int): the number of splits
-
-    Returns:
-        list(tuple): the list of the structure of the folds
+    Abstract representation of a folding
     """
-    p_base = p // n_splits
-    n_base = n // n_splits
-    p_remainder = p % n_splits
-    n_remainder = n % n_splits
+    def __init__(self,
+                    n_folds: int=None,
+                    n_repeats: int=None,
+                    folds: list=None,
+                    strategy: str=None):
+        """
+        Constructor of the folding
 
-    results = [(n_base, p_base)] * n_splits
+        Args:
+            n_folds (None|int): the number of folds
+            n_repeats (None|int): the number of repeats
+            folds (list(dict)): the list of folds
+            strategy (str): the folding strategy ('stratified_sklearn')
+        """
+        if (n_folds is not None) and (folds is not None):
+            raise ValueError('specify either n_folds,n_repeats,strategy or folds')
+        if (n_folds is None) and (n_repeats is None) and (folds is None):
+            raise ValueError('specify either n_folds,strategy or folds')
+        if (folds is None) and (strategy is None):
+            raise ValueError('specify strategy if folds are not set explicitly')
 
-    idx = 0
-    while n_remainder > 0:
-        results[idx] = (results[idx][0] + 1, results[idx][1])
-        n_remainder -= 1
-        idx += 1
-        idx %= n_splits
-    while p_remainder > 0:
-        results[idx] = (results[idx][0], results[idx][1] + 1)
-        p_remainder -= 1
-        idx += 1
-        idx %= n_splits
+        self.n_folds = n_folds
+        self.n_repeats = n_repeats if n_repeats is not None else 1
+        self.folds = folds
+        self.strategy = strategy
 
-    return results
+    def to_dict(self):
+        """
+        Dictionary representation of the folding
 
-def determine_fold_configurations(p,
-                                    n,
-                                    n_folds,
-                                    n_repeats,
-                                    folding='stratified_sklearn'):
-    """
-    Determine fold configurations according to a folding
+        Returns:
+            dict: the representation of the folding
+        """
+        return {'n_folds': self.n_folds,
+                'n_repeats': self.n_repeats,
+                'folds': self.folds,
+                'strategy': self.strategy}
 
-    Args:
-        p (int): the number of positives
-        n (int): the number of negatives
-        n_folds (int): the number of folds
-        n_repeats (int): the number of repeats
-        folding (str): 'stratified_sklearn' - the folding strategy
+    def generate_folds(self, dataset: Dataset, aggregation: str):
+        """
+        Generates fold objects according to the folding
 
-    Returns:
-        list(dict): the list of folds
+        Args:
+            dataset (Dataset): the dataset to generate folds for
+            aggregation (str): the type of aggregation ('mor'/'rom')
 
-    Raises:
-        ValueError: if the folding is not supported
-    """
-    if folding == 'stratified_sklearn':
-        confs = stratified_configurations_sklearn(p=p, n=n, n_splits=n_folds)
-        confs = [{'n': conf[0], 'p': conf[1]} for conf in confs]
-        results = []
-        for _ in range(n_repeats):
-            for item in confs:
-                results.append({**item})
-    else:
-        raise ValueError(f'folding strategy {folding} is not supported yet')
+        Returns:
+            list(Fold): the list of fold objects
+        """
+        if self.folds is not None:
+            p = 0
+            n = 0
+            for fold in self.folds:
+                p += fold['p']
+                n += fold['n']
 
-    return results
+            if (p % dataset.p != 0) or (n % dataset.n != 0) or (p // dataset.p != n // dataset.n):
+                raise ValueError("The total p and n figures in the folds are not '\
+                                    'multiples of the dataset's p and n figures")
 
-def _create_folds(p,
-                    n,
-                    *,
-                    n_folds=None,
-                    n_repeats=None,
-                    folding=None,
-                    score_bounds=None,
-                    identifier=None):
-    """
-    Given a dataset, adds folds to it
+            return [Fold(**fold) for fold in self.folds]
 
-    Args:
-        p (int): the number of positives
-        n (int): the number of negatives
-        n_folds (int/None): the number of folds (defaults to 1)
-        n_repeats (int|None): the number of repeats (defaults to 1)
-        folding (str): the folding strategy ('stratified_sklearn')
-        score_bounds (dict(str,tuple(float,float))): the score bounds
-        identifier (str|None): the identifier
+        p, n = dataset.p, dataset.n
 
-    Returns:
-        list(dict): the list of fold specifications
+        if aggregation == 'rom':
+            return [Fold(p=p * self.n_repeats,
+                        n=n * self.n_repeats)]
 
-    Raises:
-        ValueError: if the folding is not supported
-    """
+        if aggregation == 'mor':
+            folds = _create_folds(p=p,
+                                    n=n,
+                                    n_folds=self.n_folds,
+                                    n_repeats=self.n_repeats,
+                                    folding=self.strategy,
+                                    identifier=dataset.identifier)
+            return [Fold(**fold) for fold in folds]
 
-    if n_folds == 1:
-        folds = [{'p': p, 'n': n} for _ in range(n_repeats)]
-
-    elif folding is None:
-        folds = [{'p': p * n_repeats, 'n': n * n_repeats}]
-    else:
-        folds = determine_fold_configurations(p,
-                                                n,
-                                                n_folds,
-                                                n_repeats,
-                                                folding)
-        n_fold = 0
-        n_repeat = 0
-        for _, fold in enumerate(folds):
-            fold['identifier'] = f'{identifier}_{n_repeat}_{n_fold}'
-            n_fold += 1
-            if n_fold % n_folds == 0:
-                n_fold = 0
-                n_repeat += 1
-
-    for _, fold in enumerate(folds):
-        if score_bounds is not None:
-            fold['score_bounds'] = {**score_bounds}
-
-    return folds
-
-def fold_variations(n_items, n_folds, upper_bound_=None):
-    """
-    Create a list of fold variations for ``n_item`` items and ``n_folds`` folds
-
-    Args:
-        n_items (int): the number of items
-        n_folds (int): the number of folds
-
-    Returns:
-        list(list): the list of potential distributions of ``n_items``
-        items into ``n_folds`` folds
-    """
-    if n_folds == 1:
-        return 1, [[n_items]]
-    if n_items == 1:
-        return 1, [[0]*(n_folds-1) + [1]]
-
-    upper_bound = min(n_items, upper_bound_ if upper_bound_ is not None else n_items)
-    lower_bound = n_items // n_folds
-
-    total = 0
-    all_configurations = []
-
-    for value in reversed(list(range(lower_bound+1, upper_bound+1))):
-        count, configurations = fold_variations(n_items - value, n_folds-1, value)
-        total += count
-        for conf in configurations:
-            conf.append(value)
-        all_configurations.extend(configurations)
-
-    return total, all_configurations
-
-def remainder_variations(n_remainders, n_folds):
-    """
-    Determines the potential distribution of ``n_remainders`` remainders into ``n_folds`` folds.
-
-    Args:
-        n_remainders (int): the number of remainders
-        n_folds (int): the number of folds
-
-    Returns:
-        list(list): the potential distributions of ``n_remainders`` counts into
-        ``n_folds`` folds.
-    """
-    indices = itertools.combinations(list(range(n_folds)), n_remainders)
-    combinations = list(indices)
-
-    if len(combinations) == 0:
-        return [[0]*n_folds]
-
-    lists = []
-    for index in list(combinations):
-        tmp = [0] * n_folds
-        for idx in index:
-            tmp[idx] = 1
-        lists.append(tmp)
-    return lists
-
-def create_all_kfolds(p, n, n_folds):
-    """
-    Creates all potential foldings
-
-    Args:
-        p (int): the number of positives
-        n (int): the number of negatives
-        n_folds (int): the number of folds
-
-    Returns:
-        list(list), list(list): the counts of positives and negatives in the potential
-        foldings. The corresponding rows of the two list are the corresponding positive
-        and negative counts.
-    """
-    total = p + n
-    items_per_fold = total // n_folds
-    remainder = total % n_folds
-
-    totals = np.array(remainder_variations(remainder, n_folds)) + items_per_fold
-    folds = np.array(fold_variations(p, n_folds)[1])
-
-    positive_counts = []
-    negative_counts = []
-
-    for total_counts in totals:
-        other = total_counts - folds
-        fold_mask = np.sum(folds > 0, axis=1)
-        other_mask = np.sum(other > 0, axis=1)
-        positive_counts.append(folds[(fold_mask == n_folds) & (other_mask == n_folds)])
-        negative_counts.append(other[(fold_mask == n_folds) & (other_mask == n_folds)])
-
-    pos, neg = np.vstack(positive_counts).tolist(), np.vstack(negative_counts).tolist()
-
-    return pos, neg
-
-def generate_datasets_with_all_kfolds(dataset):
-    """
-    From a dataset specification generates all datasets with all possible
-    fold specifications.
-
-    Args:
-        dataset (dict): a dataset specification
-
-    Returns:
-        list(dict): a list of dataset specifications
-    """
-    if 'folds' in dataset:
-        raise ValueError('do not specify the "folds" key for the generation of folds')
-    if ('p' in dataset and 'n' not in dataset)\
-        or ('p' not in dataset and 'p' in dataset):
-        raise ValueError('either specifiy both "p" and "n" or None of them')
-    if 'name' in dataset and ('p' in dataset):
-        raise ValueError('either specificy "name" or "p" and "n"')
-
-    if 'name' in dataset:
-        p = dataset_statistics[dataset["name"]]["p"]
-        n = dataset_statistics[dataset["name"]]["n"]
-    else:
-        p = dataset["p"]
-        n = dataset["n"]
-
-    kfolds = create_all_kfolds(p=p, n=n, n_folds=dataset['n_folds'])
-    results = []
-    for positives, negatives in zip(*kfolds):
-        results.append({'folds': [{'p': p_, 'n': n_} for p_, n_ in zip(positives, negatives)]})
-
-    if dataset['n_repeats'] == 1:
-        return results
-
-    all_results = copy.deepcopy(results)
-
-    n_repeats = dataset['n_repeats'] - 1
-    while n_repeats > 0:
-        tmp = []
-        for result in all_results:
-            for res in results:
-                result = copy.deepcopy(result)
-                result['folds'].extend(res['folds'])
-                tmp.append(result)
-        all_results = tmp
-        n_repeats -= 1
-
-    if 'fold_score_bounds' in dataset:
-        for result in all_results:
-            for fold in result['folds']:
-                fold['score_bounds'] = {**dataset['fold_score_bounds']}
-
-    return all_results
+        raise ValueError(f'aggregation mode {aggregation} is not supported')

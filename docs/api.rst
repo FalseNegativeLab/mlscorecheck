@@ -156,8 +156,6 @@ Testing logic for aggregated scores (``aggregated``)
 .. autofunction:: mlscorecheck.aggregated.generate_dataset_and_scores
 .. autoclass:: mlscorecheck.aggregated.Experiment
     :members:
-.. autofunction:: mlscorecheck.aggregated.generate_dataset_and_scores
-.. autofunction:: mlscorecheck.aggregated.generate_dataset_specification
 .. autofunction:: mlscorecheck.aggregated.stratified_configurations_sklearn
 .. autofunction:: mlscorecheck.aggregated.determine_fold_configurations
 .. autofunction:: mlscorecheck.aggregated._create_folds

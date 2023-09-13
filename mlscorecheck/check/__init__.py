@@ -10,3 +10,5 @@ from ._check_n_datasets_mor_kfold_rom_scores import *
 from ._check_n_datasets_mor_kfold_mor_scores import *
 from ._check_1_dataset_kfold_scores import *
 from ._check_n_datasets_kfold_scores import *
+from ._check_1_dataset_kfold_mor_acc_score import *
+from ._check_1_dataset_kfold_mor_unknown_folds_scores import *

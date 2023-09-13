@@ -46,27 +46,12 @@ def add_bounds(lp_problem, variables, bounds, label):
 
     return lp_problem
 
+
 def create_lp_target(obj, scores, eps, lp_problem):
-    """
-    Creates the linear programming target
-
-    Args:
-        obj (object): the object to create the target conditions for
-        scores (dict(str,float)): the scores to match
-        eps (dict(str,float)|float): the numerical uncertainty
-        lp_problem (pl.LpProblem): the linear programming problem
-
-    Returns:
-        pl.LpProblem: the updated linear programming problem
-    """
     for key in scores:
         if key in ['acc', 'sens', 'spec', 'bacc']:
-            logger.info('%s: adding condition %s >= %f',
-                        obj.identifier, key, scores[key] - eps[key])
-            lp_problem += (obj.linear_programming[key] >= (scores[key] - eps[key]))
-            logger.info('%s: adding condition %s <= %f',
-                        obj.identifier, key, scores[key] + eps[key])
-            lp_problem += (obj.linear_programming[key] <= (scores[key] + eps[key]))
+            lp_problem += obj.scores[key] >= scores[key] - eps[key]
+            lp_problem += obj.scores[key] <= scores[key] + eps[key]
 
     return lp_problem
 
@@ -89,6 +74,7 @@ def solve(obj, scores, eps, solver=None):
     lp_program = pl.LpProblem(f'feasibility_{random_identifier(8)}')
 
     lp_program = obj.init_lp(lp_program, scores)
+    #lp_program = obj.init_lp(lp_program)
 
     lp_program = create_lp_target(obj, scores, eps, lp_program)
 

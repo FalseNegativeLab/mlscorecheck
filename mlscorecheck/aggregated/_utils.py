@@ -10,7 +10,6 @@ import numpy as np
 __all__ = ['random_identifier',
             'check_bounds',
             'compare_scores',
-            'create_bounds',
             'aggregated_scores']
 
 aggregated_scores = ['acc', 'sens', 'spec', 'bacc']
@@ -74,28 +73,3 @@ def compare_scores(scores0, scores1, eps, subset=None, tolerance=1e-5):
 
     return all(abs(scores0[key] - scores1[key]) <= eps[key] + tolerance
                 for key in scores1 if key in scores0)
-
-def create_bounds(scores, feasible=True):
-    """
-    Create bounds for scores depending on the feasibility flag
-
-    Args:
-        scores (dict(str,float)): the dictionary of scores to create bounds for
-        feasible (bool): if True, the bounds will be feasible, otherwise non-feasible
-
-    Returns:
-        dict(str,tuple(float, float)): the bounds
-    """
-    if feasible:
-        score_bounds = {key: (max(scores[key] - 2*1e-1, 0.0),
-                                min(1.0, scores[key] + 2*1e-1)) for key in scores}
-        return score_bounds
-
-    score_bounds = {}
-    for key in scores:
-        if scores[key] > 0.7:
-            score_bounds[key] = (0.0, 0.1)
-        else:
-            score_bounds[key] = (0.9, 1.0)
-
-    return score_bounds

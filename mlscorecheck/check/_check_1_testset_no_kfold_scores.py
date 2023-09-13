@@ -5,7 +5,7 @@ scores calculated from raw figures
 
 import warnings
 
-from ..core import logger, NUMERICAL_TOLERANCE, update_uncertainty
+from ..core import logger, NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
 from ..experiments import dataset_statistics
 

@@ -3,7 +3,17 @@ This module tests the accuracy score reported from a mean-of-ratios
 k-fold evaluation with unknown folds.
 """
 
-def check_kfold_accuracy_score(dataset, acc, eps, numerical_tolerance=NUMERICAL_TOLERANCE):
+import itertools
+
+from ..core import NUMERICAL_TOLERANCE
+from ..experiments import resolve_pn
+
+__all__ = ['check_kfold_accuracy_score']
+
+def check_kfold_accuracy_score(dataset,
+                                acc,
+                                eps,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking if the reported accuracy score can be the mean accuracy score for k folds
 
@@ -22,13 +32,11 @@ def check_kfold_accuracy_score(dataset, acc, eps, numerical_tolerance=NUMERICAL_
                         'specify the dataset by p,n,n_folds,n_repeats or the '\
                         'name of the dataset instead of p and n.')
 
-    check_dataset_specification_consistency(**dataset)
-
     if 'name' in dataset:
-        data = dataset_statistics[dataset['name']]
-        total = data['p'] + data['n']
-    else:
-        total = dataset['p'] + dataset['n']
+        dataset = resolve_pn(dataset)
+
+    total = dataset['p'] + dataset['n']
+
     n_folds = dataset.get('n_folds', 1)
     n_repeats = dataset.get('n_repeats', 1)
 
@@ -39,14 +47,15 @@ def check_kfold_accuracy_score(dataset, acc, eps, numerical_tolerance=NUMERICAL_
     total_low = n_items * n_low_fold * n_repeats
     total_high = n_items * n_high_fold * n_repeats
 
-    for true0, true1 in itertools.product(range(0, total_low + 1), range(0, total_high + 1)):
-        if total_low > 0 and total_high > 0:
-            acc_test = (true0 / total_low * n_low_fold + true1 / total_high * n_high_fold) / (n_low_fold + n_high_fold)
-        elif total_low == 0:
-            acc_test = true1 / total_high
+    for true0, true1 in itertools.product(range(total_low + 1), range(total_high + 1)):
+        if total_high > 0:
+            acc_test = (true0 / total_low * n_low_fold + true1 / total_high * n_high_fold) \
+                            / (n_low_fold + n_high_fold)
         elif total_high == 0:
             acc_test = true0 / total_low
         if abs(acc_test - acc) <= eps + numerical_tolerance:
-            return False
+            return {'inconsistency': False,
+                    'evidence_n_tptn_low': true0,
+                    'evidence_n_tptn_high': true1}
 
-    return True
+    return {'inconsistency': True}

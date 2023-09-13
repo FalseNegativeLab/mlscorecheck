@@ -71,11 +71,12 @@ def check_aggregated_scores(*,
     result = solve(experiment, scores, eps, solver)
 
     populated = experiment.populate(result)
+    populated.calculate_scores()
     configuration_details = populated.check_bounds()
 
     if result.status == 1:
         # the problem is feasible
-        comp_flag = compare_scores(scores, populated.calculate_scores(), eps+numerical_tolerance)
+        comp_flag = compare_scores(scores, populated.scores, eps+numerical_tolerance)
         bounds_flag = configuration_details['bounds_flag']
         return {'inconsistency': False,
                 'lp_status': 'feasible',

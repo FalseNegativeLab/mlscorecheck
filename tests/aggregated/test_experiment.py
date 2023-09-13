@@ -11,8 +11,6 @@ not tested with 2 decimals, since accidentally with whatever
 bounds it is likely to become feasible.
 """
 
-import warnings
-
 import pulp as pl
 
 import pytest
@@ -21,10 +19,11 @@ import numpy as np
 
 from mlscorecheck.aggregated import (Experiment,
                                         solve,
-                                        generate_experiment_specification,
-                                        generate_dataset_specification,
+                                        generate_experiment,
                                         compare_scores,
-                                        generate_datasets_and_scores)
+                                        get_dataset_score_bounds)
+
+from ._evaluate_lp import evaluate_timeout
 
 PREFERRED_SOLVER = 'PULP_CBC_CMD'
 solvers = pl.listSolvers(onlyAvailable=True)
@@ -38,355 +37,257 @@ three_combs = [['acc', 'sens', 'spec'], ['acc', 'sens', 'bacc'],
                 ['acc', 'spec', 'bacc'], ['sens', 'spec', 'bacc']]
 four_combs = [['acc', 'sens', 'spec', 'bacc']]
 
-random_seeds = list(range(20))
+random_seeds = list(range(5))
 
-def test_generate_datasets_and_scores():
+@pytest.mark.parametrize('random_seed', random_seeds)
+def test_experiment_instantiation(random_seed):
     """
-    Testing the datasets and scores generation
-    """
-
-    datasets, scores = generate_datasets_and_scores(random_state=5,
-                                                    aggregation='rom',
-                                                    fold_score_bounds=True,
-                                                    ds_score_bounds=True)
-    assert 'f1p' in scores
-    assert 'score_bounds' in datasets[0]
-    assert 'fold_score_bounds' in datasets[0] \
-        or ('folds' in datasets[0] and 'score_bounds' in datasets[0]['folds'][0])
-
-    datasets, scores = generate_datasets_and_scores(random_state=5,
-                                                    aggregation='mor',
-                                                    fold_score_bounds=True,
-                                                    ds_score_bounds=True)
-    assert 'f1p' not in scores
-    assert 'score_bounds' in datasets[0]
-    assert 'fold_score_bounds' in datasets[0] \
-        or ('folds' in datasets[0] and 'score_bounds' in datasets[0]['folds'][0])
-
-def evaluate_timeout(result, problem, scores, eps, score_subset):
-    """
-    Evaluate the stopped or succeeded tests
+    Testing the creation of Experiment objects
 
     Args:
-        result (pl.LpProblem): the executed problem
-        problem (Experiment): the problem to be solved
-        scores (dict(str,float)): the scores to match
-        eps (float): the tolerance
-        score_subset (list): the score subset to use
+        random_seed (int): the random seed to use
     """
-    if result.status == 1:
-        populated = problem.populate(result)
 
-        assert compare_scores(scores, populated.calculate_scores(), eps, score_subset)
-        assert populated.check_bounds()['bounds_flag'] is True
-    else:
-        warnings.warn('test timed out')
+    experiment = generate_experiment(random_state=random_seed)
+    experiment = Experiment(**experiment)
 
-def test_basic_functionalities():
+    assert experiment is not None
+
+    experiment2 = Experiment(**experiment.to_dict())
+
+    assert experiment.p == experiment2.p and experiment.n == experiment2.n
+
+@pytest.mark.parametrize('random_seed', random_seeds)
+def test_sampling_and_scores(random_seed):
     """
-    Testing the basic functionalities
+    Testing the score calculation in experiments
+
+    Args:
+        random_seed (int): the random seed to use
     """
-    with pytest.raises(ValueError):
-        Experiment(datasets=[generate_dataset_specification()],
-                    aggregation='dummy')
 
-    experiment = Experiment(**generate_experiment_specification())
+    experiment = generate_experiment(random_state=random_seed)
+    experiment = Experiment(**experiment)
 
-    assert isinstance(str(experiment), str)
+    experiment.sample_figures()
 
-@pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
+    scores = experiment.calculate_scores()
+
+    if experiment.aggregation == 'rom':
+        assert abs(scores['sens'] - float(experiment.tp / experiment.p)) < 1e-10
+    elif experiment.aggregation == 'mor':
+        assert abs(np.mean([evaluation.scores['acc'] for evaluation in experiment.evaluations])\
+                - scores['acc']) < 1e-10
+
+@pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('aggregation_ds', ['mor', 'rom'])
-def test_solving_success(score_subset,
-                            rounding_decimals,
-                            random_state,
-                            aggregation,
-                            aggregation_ds):
+@pytest.mark.parametrize('aggregation_folds', ['mor', 'rom'])
+def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
     """
-    Testing the successful solving capabilities
+    Testing the score bounds determination
 
     Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation on datasets ('mor'/'rom')
+        aggregation_folds (str): the aggregation on folds ('mor'/'rom')
     """
-    problem = generate_experiment_specification(max_n_datasets=5,
-                                                max_n_folds=4,
-                                                max_n_repeats=3,
-                                                random_state=random_state,
-                                                aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
 
-    sample = problem.sample(random_state)
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
+    experiment = generate_experiment(random_state=random_seed,
+                                        aggregation=aggregation,
+                                        aggregation_folds=aggregation_folds)
+    experiment = Experiment(**experiment)
+    experiment.sample_figures().calculate_scores()
 
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
+    score_bounds = get_dataset_score_bounds(experiment, feasible=True)
 
-    result = solve(problem, scores, eps, solver=solver)
+    for evaluation in experiment.evaluations:
+        for key in score_bounds:
+            assert score_bounds[key][0] <= evaluation.scores[key] <= score_bounds[key][1]
 
-    assert result.status == 1
+    score_bounds = get_dataset_score_bounds(experiment, feasible=False)
 
-    populated = problem.populate(result)
+    for evaluation in experiment.evaluations:
+        for key in score_bounds:
+            assert not (score_bounds[key][0] <= evaluation.scores[key] <= score_bounds[key][1])
 
-    assert compare_scores(scores, populated.calculate_scores(), eps, score_subset)
-    assert populated.check_bounds()['bounds_flag'] is True
-
-@pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
-@pytest.mark.parametrize('aggregation', ['rom', 'mor'])
-@pytest.mark.parametrize('aggregation_ds', ['rom', 'mor'])
-def test_solving_success_with_bounds(score_subset,
-                                        rounding_decimals,
-                                        random_state,
-                                        aggregation,
-                                        aggregation_ds):
-    """
-    Testing the successful solving capabilities with bounds
-
-    Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
-    """
-    problem = generate_experiment_specification(max_n_datasets=4,
-                                                max_n_folds=3,
-                                                max_n_repeats=2,
-                                                random_state=random_state,
-                                                aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
-
-    sample = problem.sample(random_state)
-    problem = problem.add_dataset_bounds(sample.get_dataset_bounds(score_subset, feasible=True))
-
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
-
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
-
-    result = solve(problem, scores, eps, solver=solver_timeout)
-
-    assert result.status >= 0
-
-    evaluate_timeout(result, problem, scores, eps, score_subset)
-
-@pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
-@pytest.mark.parametrize('aggregation', ['rom', 'mor'])
-@pytest.mark.parametrize('aggregation_ds', ['rom', 'mor'])
-def test_solving_success_with_minmax_bounds(score_subset,
-                                            rounding_decimals,
-                                            random_state,
-                                            aggregation,
-                                            aggregation_ds):
-    """
-    Testing the successful solving capabilities with bounds
-
-    Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
-    """
-    problem = generate_experiment_specification(max_n_datasets=4,
-                                                max_n_folds=3,
-                                                max_n_repeats=2,
-                                                random_state=random_state,
-                                                aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
-
-    sample = problem.sample(random_state)
-    problem = problem.add_dataset_bounds(sample.get_minmax_bounds(score_subset))
-
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
-
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
-
-    result = solve(problem, scores, eps, solver=solver_timeout)
-
-    assert result.status >= 0
-
-    evaluate_timeout(result, problem, scores, eps, score_subset)
-
-@pytest.mark.parametrize('score_subset', two_combs + three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
-@pytest.mark.parametrize('aggregation', ['rom', 'mor'])
-@pytest.mark.parametrize('aggregation_ds', ['rom', 'mor'])
-def test_solving_success_with_fold_bounds(score_subset,
-                                            rounding_decimals,
-                                            random_state,
-                                            aggregation,
-                                            aggregation_ds):
-    """
-    Testing the successful solving capabilities with bounds
-
-    Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
-    """
-    problem = generate_experiment_specification(max_n_datasets=4,
-                                                max_n_folds=3,
-                                                max_n_repeats=2,
-                                                random_state=random_state,
-                                                aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
-
-    sample = problem.sample(random_state)
-    problem = problem.add_dataset_fold_bounds(sample.get_dataset_fold_bounds(score_subset,
-                                                                                feasible=True))
-
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
-
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
-
-    result = solve(problem, scores, eps, solver=solver_timeout)
-
-    assert result.status >= 0
-
-    evaluate_timeout(result, problem, scores, eps, score_subset)
-
-@pytest.mark.parametrize('score_subset', three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
+@pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
+@pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('aggregation_ds', ['mor', 'rom'])
-def test_solving_failure(score_subset,
-                            rounding_decimals,
-                            random_state,
-                            aggregation,
-                            aggregation_ds):
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+def test_linear_programming_success(subset, random_seed, aggregation, rounding_decimals):
     """
-    Testing the solving capabilities with failure
+    Testing the linear programming functionalities in a successful scenario
 
     Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
+        subset (list): the score subset
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation to use ('mor'/'rom')
+        rounding_decimals (int): the number of decimals to round to
     """
-    random_state = np.random.RandomState(random_state)
 
-    problem = generate_experiment_specification(max_n_datasets=5,
-                                                max_n_folds=4,
-                                                max_n_repeats=3,
-                                                random_state=random_state,
-                                                aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
+    experiment = generate_experiment(random_state=random_seed,
+                                        aggregation=aggregation)
+    experiment = Experiment(**experiment)
 
-    sample = problem.sample(random_state)
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
+    experiment.sample_figures(random_state=random_seed)
 
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
+    scores = experiment.calculate_scores(rounding_decimals, subset)
 
-    scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.5}
-    scores = {key: scores[key] for key in score_subset}
+    print('BBB')
 
-    result = solve(problem, scores, eps, solver=solver)
+    skeleton = Experiment(**experiment.to_dict())
 
-    assert result.status != 1
+    lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals))
 
-@pytest.mark.parametrize('score_subset', three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
+    assert lp_program.status == 1
+
+    skeleton.populate(lp_program)
+
+    assert compare_scores(scores,
+                            skeleton.calculate_scores(),
+                            eps=10**(-rounding_decimals),
+                            tolerance=1e-6)
+
+    assert skeleton.check_bounds()['bounds_flag']
+
+@pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
+@pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('aggregation_ds', ['mor', 'rom'])
-def test_solving_failure_with_bounds(score_subset,
-                                    rounding_decimals,
-                                    random_state,
-                                    aggregation,
-                                    aggregation_ds):
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+def test_linear_programming_success_with_bounds(subset,
+                                                random_seed,
+                                                aggregation,
+                                                rounding_decimals):
     """
-    Testing the solving capabilities with failure bounds
+    Testing the linear programming functionalities with bounds
 
     Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
+        subset (list): the score subset
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation to use ('mor'/'rom')
+        rounding_decimals (int): the number of decimals to round to
     """
-    random_state = np.random.RandomState(random_state)
 
-    problem = generate_experiment_specification(max_n_datasets=5,
-                                                max_n_folds=4,
-                                                max_n_repeats=3,
-                                                random_state=random_state,
+    experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
+                                                return_scores=True,
+                                                feasible_dataset_score_bounds=True)
+    scores = {key: value for key, value in scores.items() if key in subset}
 
-    sample = problem.sample(random_state)
-    problem = problem.add_dataset_bounds(sample.get_dataset_bounds(score_subset, feasible=False))
+    experiment = Experiment(**experiment)
 
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
+    lp_program = solve(experiment, scores, eps=10**(-rounding_decimals))
 
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
+    assert lp_program.status == 1
 
-    scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.5}
-    scores = {key: scores[key] for key in score_subset}
+    experiment.populate(lp_program)
 
-    result = solve(problem, scores, eps, solver=solver)
+    assert compare_scores(scores,
+                            experiment.calculate_scores(),
+                            eps=10**(-rounding_decimals),
+                            tolerance=1e-6)
 
-    assert result.status != 1
+    assert experiment.check_bounds()['bounds_flag']
 
-@pytest.mark.parametrize('score_subset', three_combs + four_combs)
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
-@pytest.mark.parametrize('random_state', random_seeds)
+@pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
+@pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
-@pytest.mark.parametrize('aggregation_ds', ['mor', 'rom'])
-def test_solving_failure_with_fold_bounds(score_subset,
-                                            rounding_decimals,
-                                            random_state,
-                                            aggregation,
-                                            aggregation_ds):
+@pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
+def test_linear_programming_failure_with_bounds(subset,
+                                                random_seed,
+                                                aggregation,
+                                                rounding_decimals):
     """
-    Testing the solving capabilities with failure fold bounds
+    Testing the linear programming functionalities with bounds
 
     Args:
-        score_subset (list): the score subset to test with
-        rounding_decimals (int): the number of decimal places to round to
-        random_state (int): the random seed to use
-        aggregation (str): 'mor'/'rom' - the mode of aggregation at the experiment level
-        aggregation_ds (str): 'mor'/'rom' - the mode of aggregation at the dataset level
+        subset (list): the score subset
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation to use ('mor'/'rom')
+        rounding_decimals (int): the number of decimals to round to
     """
-    random_state = np.random.RandomState(random_state)
 
-    problem = generate_experiment_specification(max_n_datasets=5,
-                                                max_n_folds=4,
-                                                max_n_repeats=3,
-                                                random_state=random_state,
+    experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
-                                                aggregation_ds=aggregation_ds)
-    problem = Experiment(**problem)
+                                                return_scores=True,
+                                                feasible_dataset_score_bounds=False)
+    scores = {key: value for key, value in scores.items() if key in subset}
 
-    sample = problem.sample(random_state)
-    problem = problem.add_dataset_fold_bounds(sample.get_dataset_fold_bounds(score_subset,
-                                                                                feasible=False))
+    experiment = Experiment(**experiment)
 
-    scores = sample.calculate_scores(score_subset, rounding_decimals)
+    lp_program = solve(experiment, scores, eps=10**(-rounding_decimals))
 
-    eps = 10**(-rounding_decimals)/2 + 10**(-rounding_decimals-1)
+    assert lp_program.status == -1
 
-    scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.5}
-    scores = {key: scores[key] for key in score_subset}
+@pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
+@pytest.mark.parametrize('random_seed', random_seeds)
+@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('rounding_decimals', [2, 3])
+def test_linear_programming_success_both_bounds(subset,
+                                                random_seed,
+                                                aggregation,
+                                                rounding_decimals):
+    """
+    Testing the linear programming functionalities with both bounds
 
-    result = solve(problem, scores, eps, solver=solver)
+    Args:
+        subset (list): the score subset
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation to use ('mor'/'rom')
+        rounding_decimals (int): the number of decimals to round to
+    """
 
-    assert result.status != 1
+    experiment, scores = generate_experiment(random_state=random_seed,
+                                                aggregation=aggregation,
+                                                return_scores=True,
+                                                rounding_decimals=rounding_decimals,
+                                                feasible_dataset_score_bounds=True,
+                                                feasible_fold_score_bounds=True)
+    scores = {key: value for key, value in scores.items() if key in subset}
+
+    experiment = Experiment(**experiment)
+
+    lp_program = solve(experiment, scores, eps=10**(-rounding_decimals))
+
+    assert lp_program.status == 1
+
+    experiment.populate(lp_program)
+
+    assert compare_scores(scores,
+                            experiment.calculate_scores(),
+                            eps=10**(-rounding_decimals),
+                            tolerance=1e-6)
+
+    assert experiment.check_bounds()['bounds_flag']
+
+@pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
+@pytest.mark.parametrize('random_seed', random_seeds)
+@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('rounding_decimals', [2, 3])
+def test_linear_programming_failure_both_bounds(subset,
+                                                random_seed,
+                                                aggregation,
+                                                rounding_decimals):
+    """
+    Testing the linear programming functionalities with both bounds
+
+    Args:
+        subset (list): the score subset
+        random_seed (int): the random seed to use
+        aggregation (str): the aggregation to use ('mor'/'rom')
+        rounding_decimals (int): the number of decimals to round to
+    """
+
+    experiment, scores = generate_experiment(random_state=random_seed,
+                                                aggregation=aggregation,
+                                                return_scores=True,
+                                                rounding_decimals=rounding_decimals,
+                                                feasible_dataset_score_bounds=False,
+                                                feasible_fold_score_bounds=False)
+    scores = {key: value for key, value in scores.items() if key in subset}
+
+    experiment = Experiment(**experiment)
+
+    lp_program = solve(experiment, scores, eps=10**(-rounding_decimals))
+
+    assert lp_program.status == -1
