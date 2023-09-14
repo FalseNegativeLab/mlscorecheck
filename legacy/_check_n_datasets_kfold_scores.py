@@ -4,7 +4,7 @@ with no assumption on the mode of aggregation (mean-of-ratios/ratio-of-means).
 """
 
 from ..core import NUMERICAL_TOLERANCE
-from ._check_n_datasets_mor_kfold_mor_scores import check_n_datasets_mor_kfold_mor_scores
+from ._check_n_datasets_mor_known_folds_mor_scores import check_n_datasets_mor_known_folds_mor_scores
 from ._check_n_datasets_rom_kfold_rom_scores import check_n_datasets_rom_kfold_rom_scores
 from ._check_n_datasets_mor_kfold_rom_scores import check_n_datasets_mor_kfold_rom_scores
 
@@ -12,7 +12,7 @@ __all__ = ['check_n_datasets_kfold_scores']
 
 def check_n_datasets_kfold_scores(scores,
                                 eps,
-                                datasets,
+                                experiment,
                                 *,
                                 solver_name=None,
                                 timeout=None,
@@ -104,16 +104,16 @@ def check_n_datasets_kfold_scores(scores,
 
     """
 
-    results_mor_mor = check_n_datasets_mor_kfold_mor_scores(scores=scores,
+    results_mor_mor = check_n_datasets_mor_known_folds_mor_scores(scores=scores,
                                                         eps=eps,
-                                                        datasets=datasets,
+                                                        experiment=experiment,
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
                                                         numerical_tolerance=numerical_tolerance)
     results_mor_rom = check_n_datasets_mor_kfold_rom_scores(scores=scores,
                                                         eps=eps,
-                                                        datasets=datasets,
+                                                        experiment=experiment,
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
@@ -121,10 +121,7 @@ def check_n_datasets_kfold_scores(scores,
 
     results_rom_rom = check_n_datasets_rom_kfold_rom_scores(scores=scores,
                                                         eps=eps,
-                                                        datasets=datasets,
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity,
+                                                        experiment=experiment,
                                                         numerical_tolerance=numerical_tolerance)
 
     return {'inconsistency': results_mor_mor['inconsistency'] \

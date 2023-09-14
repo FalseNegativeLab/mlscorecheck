@@ -7,13 +7,18 @@ import itertools
 
 import numpy as np
 
+from ..experiments import dataset_statistics
+from ._utils import random_identifier
+
 __all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations',
             '_create_folds',
             'fold_variations',
             'remainder_variations',
             'create_all_kfolds',
-            'generate_datasets_with_all_kfolds']
+            'generate_datasets_with_all_kfolds',
+            '_check_specification_and_determine_p_n',
+            'generate_experiments_with_all_kfolds']
 
 def stratified_configurations_sklearn(p,
                                         n,
@@ -111,10 +116,10 @@ def _create_folds(p,
     """
 
     if n_folds == 1:
-        folds = [{'p': p, 'n': n} for _ in range(n_repeats)]
+        folds = [{'p': p, 'n': n, 'identifier': f'{identifier}_0_r{idx}'} for idx in range(n_repeats)]
 
     elif folding is None:
-        folds = [{'p': p * n_repeats, 'n': n * n_repeats}]
+        folds = [{'p': p * n_repeats, 'n': n * n_repeats, 'identifier': f'{identifier}_0'}]
     else:
         folds = determine_fold_configurations(p,
                                                 n,
@@ -159,7 +164,7 @@ def fold_variations(n_items, n_folds, upper_bound_=None):
     total = 0
     all_configurations = []
 
-    for value in reversed(list(range(lower_bound+1, upper_bound+1))):
+    for value in reversed(list(range(lower_bound, upper_bound+1))):
         count, configurations = fold_variations(n_items - value, n_folds-1, value)
         total += count
         for conf in configurations:
@@ -224,7 +229,7 @@ def create_all_kfolds(p, n, n_folds):
 
     return np.vstack(positive_counts).tolist(), np.vstack(negative_counts).tolist()
 
-def _check_specification_and_determine_p_n(dataset):
+def _check_specification_and_determine_p_n(dataset, folding):
     """
     Checking if the dataset specification is correct and determining the p and n values
 
@@ -237,26 +242,29 @@ def _check_specification_and_determine_p_n(dataset):
     Raises:
         ValueError: if the specification is not suitable
     """
-    if 'folds' in dataset:
+    if folding.get('folds') is not None:
         raise ValueError('do not specify the "folds" key for the generation of folds')
-    if ('p' in dataset and 'n' not in dataset)\
-        or ('p' not in dataset and 'p' in dataset):
+    if (dataset.get('p') is not None and dataset.get('n') is None)\
+        or (dataset.get('p') is None and dataset.get('n') is not None):
         raise ValueError('either specifiy both "p" and "n" or None of them')
-    if 'name' in dataset and ('p' in dataset):
-        raise ValueError('either specificy "name" or "p" and "n"')
+    if dataset.get('dataset_name') is not None and dataset.get('p') is not None:
+        raise ValueError('either specificy "dataset_name" or "p" and "n"')
 
-    p = dataset_statistics[dataset['name']]["p"] if 'name' in dataset else dataset["p"]
-    n = dataset_statistics[dataset['name']]["n"] if 'name' in dataset else dataset["n"]
+    p = (dataset_statistics[dataset['dataset_name']]["p"]
+            if dataset.get('dataset_name') is not None else dataset["p"])
+    n = (dataset_statistics[dataset['dataset_name']]["n"]
+            if dataset.get('dataset_name') is not None else dataset["n"])
 
     return p, n
 
-def generate_datasets_with_all_kfolds(dataset):
+def generate_datasets_with_all_kfolds(evaluation):
     """
     From a dataset specification generates all datasets with all possible
     fold specifications.
 
     Args:
         dataset (dict): a dataset specification
+        folding (dict): the folding specification
 
     Returns:
         list(dict): a list of dataset specifications
@@ -264,34 +272,83 @@ def generate_datasets_with_all_kfolds(dataset):
     Raises:
         ValueError: if the specification is not suitable
     """
-    p, n = _check_specification_and_determine_p_n(dataset)
+    p, n = _check_specification_and_determine_p_n(evaluation.get('dataset'),
+                                                    evaluation.get('folding'))
 
-    kfolds = create_all_kfolds(p=p, n=n, n_folds=dataset.get('n_folds', 1))
+    kfolds = create_all_kfolds(p=p, n=n, n_folds=evaluation['folding'].get('n_folds', 1))
     results = []
-    for positives, negatives in zip(*kfolds):
-        results.append({'folds': [{'p': p_, 'n': n_} for p_, n_ in zip(positives, negatives)]})
 
-    if dataset.get('n_repeats', 1) == 1:
+    if evaluation['dataset'].get('dataset_name') is not None:
+        evaluation['dataset']['identifier'] = \
+            f'{evaluation["dataset"]["dataset_name"]}_{random_identifier(3)}'
+    else:
+        evaluation['dataset']['identifier'] = random_identifier(6)
+
+    for jdx, (positives, negatives) in enumerate(zip(*kfolds)):
+        results.append({'dataset': copy.deepcopy(evaluation['dataset']),
+                        'folding': {'folds': [
+                            {'p': p_,
+                            'n': n_,
+                            'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}"}
+                            for idx, (p_, n_) in enumerate(zip(positives,
+                                                                negatives))]}})
+
+    if evaluation['folding'].get('n_repeats', 1) == 1:
+        for result in results:
+            result['aggregation'] = evaluation.get('aggregation')
         return results
 
     all_results = copy.deepcopy(results)
 
     # multiplicating the folds structures as many times as many repetitions there are
-    n_repeats = dataset.get('n_repeats', 1) - 1
+    n_repeats = evaluation['folding'].get('n_repeats', 1) - 1
+
     while n_repeats > 0:
         tmp = []
-        for result in all_results:
+        for one_result in all_results:
             for res in results:
-                result = copy.deepcopy(result)
-                result['folds'].extend(res['folds'])
-                tmp.append(result)
+                tmp_res = copy.deepcopy(one_result)
+                to_add = copy.deepcopy(res['folding']['folds'])
+                for fold in to_add:
+                    fold['identifier'] = f'{fold["identifier"]}_r{n_repeats}'
+                tmp_res['folding']['folds'].extend(to_add)
+
+                tmp.append(tmp_res)
         all_results = tmp
         n_repeats -= 1
 
     # adding fold bounds
-    if 'fold_score_bounds' in dataset:
+    if evaluation.get('fold_score_bounds') is not None:
         for result in all_results:
-            for fold in result['folds']:
-                fold['score_bounds'] = {**dataset['fold_score_bounds']}
+            result['fold_score_bounds'] = {**evaluation['fold_score_bounds']}
+    for result in all_results:
+        result['aggregation'] = evaluation.get('aggregation')
 
     return all_results
+
+def generate_experiments_with_all_kfolds(experiment):
+    """
+    From a dataset specification generates all datasets with all possible
+    fold specifications.
+
+    Args:
+        dataset (dict): a dataset specification
+        folding (dict): the folding specification
+
+    Returns:
+        list(dict): a list of dataset specifications
+
+    Raises:
+        ValueError: if the specification is not suitable
+    """
+    evaluations = [generate_datasets_with_all_kfolds(evaluation)
+                    for evaluation in experiment['evaluations']]
+
+    results = []
+
+    for evals in itertools.product(*evaluations):
+        results.append({'evaluations': evals,
+                        'dataset_score_bounds': experiment.get('dataset_score_bounds'),
+                        'aggregation': experiment['aggregation']})
+
+    return results

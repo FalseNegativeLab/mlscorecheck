@@ -4,7 +4,7 @@ Testing the checking of scores on 1 dataset using kfold with RoM aggregation
 
 import pytest
 
-from mlscorecheck.check import check_1_dataset_kfold_rom_scores
+from mlscorecheck.check import check_1_dataset_rom_scores
 from mlscorecheck.aggregated import (generate_evaluation)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
@@ -22,9 +22,10 @@ def test_consistency(random_seed, rounding_decimals):
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_kfold_rom_scores(evaluation=evaluation,
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals))
+    result = check_1_dataset_rom_scores(dataset=evaluation['dataset'],
+                                        folding=evaluation['folding'],
+                                        scores=scores,
+                                        eps=10**(-rounding_decimals))
 
     assert not result['inconsistency']
 
@@ -44,18 +45,23 @@ def test_failure(random_seed, rounding_decimals):
                                             return_scores=True)
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_1_dataset_kfold_rom_scores(evaluation=evaluation,
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals))
+    result = check_1_dataset_rom_scores(dataset=evaluation['dataset'],
+                                        folding=evaluation['folding'],
+                                        scores=scores,
+                                        eps=10**(-rounding_decimals))
 
     assert result['inconsistency']
 
-def test_exception():
+def test_adding_strategy():
     """
-    Testing the throwing of an exception
+    Testing the addition of strategy
     """
+    evaluation = {'dataset': {'p': 5, 'n': 6}, 'folding': {'n_folds': 2, 'n_repeats': 1}}
+    scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    with pytest.raises(ValueError):
-        check_1_dataset_kfold_rom_scores(evaluation={'aggregation': 'mor'},
-                                            scores={},
-                                            eps=1e-4)
+    result = check_1_dataset_rom_scores(dataset=evaluation['dataset'],
+                                        folding=evaluation['folding'],
+                                        scores=scores,
+                                        eps=10**(-4))
+
+    assert result['inconsistency']

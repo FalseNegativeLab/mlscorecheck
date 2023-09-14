@@ -8,18 +8,16 @@ import warnings
 
 from ..core import logger, NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
-from ..aggregated import check_aggregated_scores, Experiment
+from ..aggregated import Experiment
 
-__all__ = ['check_1_dataset_kfold_rom_scores']
+__all__ = ['check_1_dataset_rom_scores']
 
-def check_1_dataset_kfold_rom_scores(scores,
-                                        eps,
-                                        evaluation,
-                                        *,
-                                        solver_name=None,
-                                        timeout=None,
-                                        verbosity=1,
-                                        numerical_tolerance=NUMERICAL_TOLERANCE):
+def check_1_dataset_rom_scores(dataset,
+                                folding,
+                                scores,
+                                eps,
+                                *,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
@@ -93,14 +91,15 @@ def check_1_dataset_kfold_rom_scores(scores,
         # True
 
     """
-    if evaluation.get('aggregation', 'rom') != 'rom':
-        raise ValueError(f'the aggregation {evaluation.get("aggregation")} specified '\
-                        'in the dataset specification is not suitable for this test, '\
-                        'consider removing the mode of aggregation or specify "rom".')
+    if folding.get('folds') is None and folding.get('strategy') is None:
+        # any folding strategy results the same
+        folding = {**folding} | {'strategy': 'stratified_sklearn'}
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(evaluations=[evaluation],
+    experiment = Experiment(evaluations=[{'dataset': dataset,
+                                            'folding': folding,
+                                            'aggregation': 'rom'}],
                             aggregation='rom')
 
     # executing the individual tests

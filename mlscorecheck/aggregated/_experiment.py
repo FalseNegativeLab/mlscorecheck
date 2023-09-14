@@ -92,7 +92,6 @@ class Experiment:
         for evaluation in self.evaluations:
             evaluation.calculate_scores()
 
-        print('AAA', self.evaluations[0].folds[0].tp.__class__)
         if isinstance(self.evaluations[0].folds[0].tp, pl.LpVariable):
             self.tp = pl.lpSum(evaluation.tp for evaluation in self.evaluations)
             self.tn = pl.lpSum(evaluation.tn for evaluation in self.evaluations)

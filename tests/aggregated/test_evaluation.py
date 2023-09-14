@@ -2,6 +2,8 @@
 This module tests the Evaluation abstraction
 """
 
+import warnings
+
 import pytest
 
 import pulp as pl
@@ -29,6 +31,27 @@ three_combs = [['acc', 'sens', 'spec'], ['acc', 'sens', 'bacc'],
 four_combs = [['acc', 'sens', 'spec', 'bacc']]
 
 random_seeds = list(range(5))
+
+def test_evaluate_timeout():
+    """
+    Testing the evaluate_timeout function
+    """
+
+    class Mock:
+        """
+        Mock lp_problem class
+        """
+        def __init__(self):
+            """
+            Constructor of the mock class
+            """
+            self.status = 0
+
+    mock = Mock()
+
+    with warnings.catch_warnings(record=True) as warn:
+        evaluate_timeout(mock, None, None, None, None)
+        assert len(warn) == 1
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
@@ -227,8 +250,6 @@ def test_linear_programming_success_bounds(subset,
                                             return_scores=True)
 
     scores = {key: value for key, value in scores.items() if key in subset}
-
-    print(evaluation)
 
     evaluation = Evaluation(**evaluation)
 

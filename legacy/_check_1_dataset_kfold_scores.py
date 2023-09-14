@@ -2,19 +2,20 @@
 This module implements a general testing function for k-folded evaluations
 """
 
-from ..core import NUMERICAL_TOLERANCE
+from ..mlscorecheck.core import NUMERICAL_TOLERANCE
 
-from ._check_1_dataset_kfold_mor_scores import check_1_dataset_kfold_mor_scores
-from ._check_1_dataset_kfold_rom_scores import check_1_dataset_kfold_rom_scores
+from ..mlscorecheck.check._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
+from ..mlscorecheck.check._check_1_dataset_kfold_rom_scores import check_1_dataset_rom_scores
+from ..mlscorecheck.check._check_1_dataset_unknown_folds_mor_scores import check_1_dataset_unknown_folds_mor_scores
 
-def check_1_dataset_kfold_scores(scores,
-                                    eps,
-                                    dataset,
-                                    *,
-                                    solver_name=None,
-                                    timeout=None,
-                                    verbosity=1,
-                                    numerical_tolerance=NUMERICAL_TOLERANCE):
+def check_1_dataset_kfold_scores(evaluation,
+                                scores,
+                                eps,
+                                *,
+                                solver_name=None,
+                                timeout=None,
+                                verbosity=1,
+                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated in a k-fold cross validation on a single
     dataset, without knowing if the aggregation was ratio-of-means or mean-of-ratios. The
@@ -81,20 +82,32 @@ def check_1_dataset_kfold_scores(scores,
         # True
 
     """
-    results_mor = check_1_dataset_kfold_mor_scores(scores=scores,
+    if evaluation.get('aggregation') is not None:
+        raise ValueError("don't specify an aggregation for this test")
+
+    results_rom = check_1_dataset_rom_scores(scores=scores,
                                                     eps=eps,
-                                                    dataset=dataset,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
+                                                    dataset=evaluation['dataset'],
+                                                    folding=evaluation['folding'],
                                                     numerical_tolerance=numerical_tolerance)
-    results_rom = check_1_dataset_kfold_rom_scores(scores=scores,
-                                                    eps=eps,
-                                                    dataset=dataset,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
-                                                    numerical_tolerance=numerical_tolerance)
+
+    if evaluation['folding'].get('strategy') is not None \
+        or evaluation['folding'].get('folds') is not None:
+        results_mor = check_1_dataset_known_folds_mor_scores(scores=scores,
+                                                        eps=eps,
+                                                        evaluation=evaluation,
+                                                        solver_name=solver_name,
+                                                        timeout=timeout,
+                                                        verbosity=verbosity,
+                                                        numerical_tolerance=numerical_tolerance)
+    else:
+        results_mor = check_1_dataset_unknown_folds_mor_scores(scores=scores,
+                                                        eps=eps,
+                                                        evaluation=evaluation,
+                                                        solver_name=solver_name,
+                                                        timeout=timeout,
+                                                        verbosity=verbosity,
+                                                        numerical_tolerance=numerical_tolerance)
 
     return {'inconsistency': results_mor['inconsistency'] and results_rom['inconsistency'],
             'mor_results': results_mor,

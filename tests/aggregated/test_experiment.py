@@ -134,8 +134,6 @@ def test_linear_programming_success(subset, random_seed, aggregation, rounding_d
 
     scores = experiment.calculate_scores(rounding_decimals, subset)
 
-    print('BBB')
-
     skeleton = Experiment(**experiment.to_dict())
 
     lp_program = solve(skeleton, scores, eps=10**(-rounding_decimals))

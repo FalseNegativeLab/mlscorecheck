@@ -13,13 +13,14 @@ from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         fold_variations,
                                         remainder_variations,
                                         create_all_kfolds,
-                                        generate_datasets_with_all_kfolds)
+                                        generate_datasets_with_all_kfolds,
+                                        _check_specification_and_determine_p_n)
 
 def test_fold_variations():
     """
     Testing the generation of fold variations
     """
-    assert fold_variations(5, 3) == (3, [[0, 1, 4], [0, 2, 3], [1, 2, 2]])
+    assert fold_variations(5, 3)[0] == 6
 
 def test_remainder_variations():
     """
@@ -41,33 +42,46 @@ def test_create_all_kfolds():
     """
     Testing the generation of all k-fold configurations
     """
-    assert create_all_kfolds(5, 7, 3) == ([[1, 2, 2]], [[3, 2, 2]])
+    assert len(create_all_kfolds(5, 7, 3)) == 2
 
 def test_generate_datasets_with_all_kfolds():
     """
     Testing the generation of datasets with all kfold configurations
     """
-    assert generate_datasets_with_all_kfolds({'p': 5, 'n': 7, 'n_folds': 3}) \
-            == [{'folds': [{'p': 1, 'n': 3}, {'p': 2, 'n': 2}, {'p': 2, 'n': 2}]}]
+    evaluation = {'dataset': {'p': 5, 'n': 7}, 'folding': {'n_folds': 3}}
 
-    assert generate_datasets_with_all_kfolds({'p': 5, 'n': 7, 'n_folds': 3, 'n_repeats': 2}) \
-            == [{'folds': [{'p': 1, 'n': 3}, {'p': 2, 'n': 2}, {'p': 2, 'n': 2},
-                            {'p': 1, 'n': 3}, {'p': 2, 'n': 2}, {'p': 2, 'n': 2}]}]
+    datasets = generate_datasets_with_all_kfolds(evaluation)
+    assert len(datasets) == 3
 
-    datasets = generate_datasets_with_all_kfolds({'p': 5, 'n': 7,
-                                                'n_folds': 3,
-                                                'n_repeats': 2,
-                                                'fold_score_bounds': {'acc': (0, 1)}})
-    assert 'score_bounds' in datasets[0]['folds'][0]
+    evaluation = {'dataset': {'p': 5, 'n': 7},
+                    'folding': {'n_folds': 3, 'n_repeats': 2}}
+
+    datasets = generate_datasets_with_all_kfolds(evaluation)
+    assert len(datasets) == 9
+
+    evaluation = {'dataset': {'p': 5, 'n': 7},
+                    'folding': {'n_folds': 3, 'n_repeats': 2},
+                    'fold_score_bounds': {'acc': (0.0, 1.0)}}
+
+    datasets = generate_datasets_with_all_kfolds(evaluation)
+    assert 'fold_score_bounds' in datasets[0]
+
+def test_exceptions():
+    """
+    Testing if exceptions are thrown
+    """
 
     with pytest.raises(ValueError):
-        generate_datasets_with_all_kfolds({'folds': []})
+        _check_specification_and_determine_p_n(None, {'folds': []})
 
     with pytest.raises(ValueError):
-        generate_datasets_with_all_kfolds({'p': 5})
+        _check_specification_and_determine_p_n({'p': 2}, {})
 
     with pytest.raises(ValueError):
-        generate_datasets_with_all_kfolds({'p': 5, 'n': 7, 'name': 'common_datasets.ADA'})
+        _check_specification_and_determine_p_n({'p': 2, 'n': 5, 'dataset_name': 'dummy'}, {})
+
+    generate_datasets_with_all_kfolds({'dataset': {'dataset_name': 'common_datasets.ADA'},
+                                        'folding': {'n_folds': 2, 'n_repeats': 1}})
 
 def test_create_folds():
     """

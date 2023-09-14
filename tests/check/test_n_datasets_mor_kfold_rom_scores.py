@@ -85,7 +85,6 @@ def test_failure_bounds(random_seed, rounding_decimals):
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=2)
-    print(result)
 
     assert result['inconsistency'] or result['lp_status'] == 'timeout'
 

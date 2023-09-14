@@ -112,12 +112,8 @@ def test_check_aggregated_scores_success_score_bounds(strategy, modes, random_st
                                                     strategy=strategy,
                                                     return_populated=True)
 
-    print(strategy)
-    print(populated)
-
     for mode in modes:
         bounds = determine_bounds(populated, mode=mode)
-        print(mode, bounds)
         for dataset in problems:
             dataset[f'{mode}_bounds'] = bounds
 

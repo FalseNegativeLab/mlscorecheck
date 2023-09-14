@@ -171,7 +171,6 @@ def test_score_bounds_consistency():
         for fold in dataset['folds']:
             tmp.append(calculate_scores(fold))
         scores.append(tmp)
-    print(scores)
 
     #for score in bounds:
     #    bounds[score] = (bounds[score][0] - 1e-3, bounds[score][1] + 1e-3)
@@ -184,10 +183,6 @@ def test_score_bounds_consistency():
                                             eps=eps,
                                             datasets=problem,
                                             return_details=True)
-
-    print(problem)
-    print(evals)
-    print(details)
 
     assert flag
 

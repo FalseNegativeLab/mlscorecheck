@@ -8,12 +8,12 @@ import itertools
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import Evaluation
 
-__all__ = ['check_kfold_accuracy_score']
+__all__ = ['check_1_dataset_unknown_folds_mor_acc_score']
 
-def check_kfold_accuracy_score(evaluation,
-                                acc,
-                                eps,
-                                numerical_tolerance=NUMERICAL_TOLERANCE):
+def check_1_dataset_unknown_folds_mor_acc_score(evaluation,
+                                                acc,
+                                                eps,
+                                                numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking if the reported accuracy score can be the mean accuracy score for k folds
 
@@ -45,8 +45,6 @@ def check_kfold_accuracy_score(evaluation,
 
     total_low = n_items * n_low_fold * n_repeats
     total_high = (n_items + 1) * n_high_fold * n_repeats
-
-    #print(total, n_items, n_high_fold, n_low_fold, total_high, total_low)
 
     for true0, true1 in itertools.product(range(total_low + 1), range(total_high + 1)):
         if total_high > 0:

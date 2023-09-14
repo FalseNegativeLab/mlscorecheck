@@ -93,8 +93,6 @@ def test_solution(sol, zeros, random_state):
                                       **{sol[0]: score0,
                                             sol[1]: score1}})
 
-    print(score0, score1, result)
-
     solvable, failed = check_tptn(evaluation['tp'], evaluation['tn'], result)
     assert solvable or not failed
 

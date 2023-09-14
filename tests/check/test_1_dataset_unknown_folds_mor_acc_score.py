@@ -7,7 +7,7 @@ import pytest
 
 import numpy as np
 
-from mlscorecheck.check import check_kfold_accuracy_score
+from mlscorecheck.check import check_1_dataset_unknown_folds_mor_acc_score
 from mlscorecheck.aggregated import (generate_evaluation, generate_dataset,
                                         Evaluation, Folding)
 
@@ -30,9 +30,7 @@ def test_consistency(random_seed):
 
     scores = evaluation.sample_figures().calculate_scores(rounding_decimals=4)
 
-    print(evaluation.to_dict(), scores)
-
-    result = check_kfold_accuracy_score(evaluation.to_dict(),
+    result = check_1_dataset_unknown_folds_mor_acc_score(evaluation.to_dict(),
                                         scores['acc'],
                                         1e-4)
     assert not result['inconsistency']
@@ -54,11 +52,10 @@ def test_failure(random_seed):
                                             strategy='stratified_sklearn').to_dict(),
                             aggregation='mor')
 
-    result = check_kfold_accuracy_score(evaluation.to_dict(),
+    result = check_1_dataset_unknown_folds_mor_acc_score(evaluation.to_dict(),
                                         0.12345678,
                                         1e-8,
                                         numerical_tolerance=1e-9)
-    print(result)
 
     assert result['inconsistency']
 
@@ -67,7 +64,7 @@ def test_exception():
     Testing if the exception is thrown
     """
     with pytest.raises(ValueError):
-        check_kfold_accuracy_score({'folding': {'folds': []}},
+        check_1_dataset_unknown_folds_mor_acc_score({'folding': {'folds': []}},
                                     0.12345678,
                                     1e-8,
                                     numerical_tolerance=1e-9)

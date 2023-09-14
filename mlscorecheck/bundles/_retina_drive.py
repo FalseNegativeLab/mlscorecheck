@@ -39,13 +39,17 @@ def _drive_aggregated_test_scores(data,
         dict: the results of the analysis, the attribute ``inconsistency``
                 shows if inconsistency has been found
     """
+    experiment = {'evaluations': [{'dataset': dataset,
+                                    'folding': {'n_folds': 1, 'n_repeats': 1},
+                                    'aggregation': 'rom'} for dataset in data],
+                    'aggregation': aggregation}
     if aggregation == 'mor':
         return check_n_datasets_mor_kfold_rom_scores(scores=scores,
                                                         eps=eps,
-                                                        datasets=data)
+                                                        experiment=experiment)
     return check_n_datasets_rom_kfold_rom_scores(scores=scores,
                                                 eps=eps,
-                                                datasets=data)
+                                                experiment=experiment)
 
 def filter_drive(data, subset=None):
     """
@@ -246,7 +250,7 @@ def drive_aggregated_fov_pixels(scores,
     assert image_set in ('train', 'test')
     assert aggregation in ('mor', 'rom')
 
-    data = load_drive()[f'{image_set}_fov']['datasets']
+    data = load_drive()[f'{image_set}_fov']['images']
     data = filter_drive(data, subset)
 
     return _drive_aggregated_test_scores(data,
@@ -308,7 +312,7 @@ def drive_aggregated_all_pixels(scores,
     assert image_set in ('train', 'test')
     assert aggregation in ('mor', 'rom')
 
-    data = load_drive()[f'{image_set}_no_fov']['datasets']
+    data = load_drive()[f'{image_set}_no_fov']['images']
     data = filter_drive(data, subset)
 
     return _drive_aggregated_test_scores(data,
@@ -352,12 +356,13 @@ def drive_image_fov_pixels(scores, eps, image_set, identifier):
     """
     assert image_set in ('train', 'test')
 
-    data = load_drive()[f'{image_set}_fov']['datasets']
-    image = filter_drive(data, [identifier])[0]['folds'][0]
+    data = load_drive()[f'{image_set}_fov']['images']
+    image = filter_drive(data, [identifier])[0]
 
     return check_1_testset_no_kfold_scores(scores=scores,
                                             eps=eps,
-                                            testset=image)
+                                            testset=image,
+                                            prefilter_by_pairs=True)
 
 def drive_image_all_pixels(scores, eps, image_set, identifier):
     """
@@ -391,8 +396,8 @@ def drive_image_all_pixels(scores, eps, image_set, identifier):
     """
     assert image_set in ('train', 'test')
 
-    data = load_drive()[f'{image_set}_no_fov']['datasets']
-    image = filter_drive(data, [identifier])[0]['folds'][0]
+    data = load_drive()[f'{image_set}_no_fov']['images']
+    image = filter_drive(data, [identifier])[0]
 
     return check_1_testset_no_kfold_scores(scores=scores,
                                             eps=eps,

@@ -20,7 +20,8 @@ __all__ = ['generate_dataset',
 
 def generate_dataset(max_p: int=500,
                         max_n: int=500,
-                        random_state=None):
+                        random_state=None,
+                        no_name: bool=False):
     """
     Generate a random dataset specification
 
@@ -34,7 +35,7 @@ def generate_dataset(max_p: int=500,
     """
     random_state = init_random_state(random_state)
 
-    if random_state.randint(2) == 0:
+    if random_state.randint(2) == 0 or no_name:
         p = random_state.randint(1, max_p+1)
         n = random_state.randint(1, max_n+1)
         return {'p': p,
@@ -46,7 +47,8 @@ def generate_folding(dataset: dict,
                         max_folds: int=10,
                         max_repeats: int=5,
                         strategies: list=None,
-                        random_state=None):
+                        random_state=None,
+                        no_folds: bool=False):
     """
     Generate a random folding specification for a dataset
 
@@ -72,7 +74,7 @@ def generate_folding(dataset: dict,
     n_repeats = random_state.randint(1, max_repeats+1)
     strategy = random_state.choice(strategies)
 
-    if random_state.randint(2) == 0:
+    if random_state.randint(2) == 0 or no_folds:
         return {'n_folds': n_folds,
                 'n_repeats': n_repeats,
                 'strategy': strategy}
@@ -92,7 +94,9 @@ def generate_evaluation(max_p: int=500,
                             aggregation: str=None,
                             random_state=None,
                             return_scores: bool=False,
-                            rounding_decimals: int=None):
+                            rounding_decimals: int=None,
+                            no_name: bool=False,
+                            no_folds: bool=False):
     """
     Generate a random evaluation specification
 
@@ -117,12 +121,14 @@ def generate_evaluation(max_p: int=500,
     random_state = init_random_state(random_state)
     dataset_spec = generate_dataset(max_p=max_p,
                                         max_n=max_n,
-                                        random_state=random_state)
+                                        random_state=random_state,
+                                        no_name=no_name)
     folding_spec = generate_folding(dataset=dataset_spec,
                                         max_folds=max_folds,
                                         max_repeats=max_repeats,
                                         strategies=strategies,
-                                        random_state=random_state)
+                                        random_state=random_state,
+                                        no_folds=no_folds)
     aggregation = aggregation if aggregation is not None else random_state.choice(['rom', 'mor'])
 
     evaluation = Evaluation(dataset=dataset_spec,
@@ -193,7 +199,9 @@ def generate_experiment(max_evaluations: int=5,
                         aggregation: str=None,
                         random_state=None,
                         return_scores: bool=False,
-                        rounding_decimals: int=None):
+                        rounding_decimals: int=None,
+                        no_name: bool=False,
+                        no_folds: bool=False):
     """
     Generate a random experiment specification
 
@@ -234,7 +242,9 @@ def generate_experiment(max_evaluations: int=5,
                                         strategies=strategies,
                                         feasible_fold_score_bounds=feasible_fold_score_bounds,
                                         aggregation=aggregation_folds,
-                                        random_state=random_state)
+                                        random_state=random_state,
+                                        no_name=no_name,
+                                        no_folds=no_folds)
                                                 for _ in range(n_evaluations)]
 
     experiment = Experiment(evaluations=evaluations,

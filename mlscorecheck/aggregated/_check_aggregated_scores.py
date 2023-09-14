@@ -85,6 +85,7 @@ def check_aggregated_scores(*,
         comp_flag = compare_scores(scores, populated.scores, eps+numerical_tolerance)
         bounds_flag = configuration_details['bounds_flag']
         return {'inconsistency': False,
+                'lp_scores': populated.scores,
                 'lp_status': 'feasible',
                 'lp_configuration_scores_match': comp_flag,
                 'lp_configuration_bounds_match': bounds_flag,

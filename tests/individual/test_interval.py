@@ -376,9 +376,6 @@ def test_interval_union_subtract():
 
     sub = 2 - intun0
 
-    print(sub.intervals)
-    print(2 - intun0)
-
     assert len(sub.intervals) == len(intun0.intervals)
     assert sub.intervals[2] == (2 - intun0.intervals[0])
 

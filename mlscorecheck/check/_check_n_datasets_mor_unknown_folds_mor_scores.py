@@ -4,12 +4,13 @@ scores calculated by the mean of ratios aggregation
 in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 """
 
-from ..aggregated import check_aggregated_scores, Experiment
+from ._check_n_datasets_mor_known_folds_mor_scores import check_n_datasets_mor_known_folds_mor_scores
 from ..core import NUMERICAL_TOLERANCE
+from ..aggregated import generate_experiments_with_all_kfolds
 
-__all__ = ['check_n_datasets_mor_kfold_mor_scores']
+__all__ = ['check_n_datasets_mor_unknown_folds_mor_scores']
 
-def check_n_datasets_mor_kfold_mor_scores(scores,
+def check_n_datasets_mor_unknown_folds_mor_scores(scores,
                                             eps,
                                             experiment,
                                             *,
@@ -101,10 +102,24 @@ def check_n_datasets_mor_kfold_mor_scores(scores,
             for evaluation in experiment['evaluations']) or experiment['aggregation'] != 'mor':
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
 
-    return check_aggregated_scores(experiment=experiment,
-                                    scores=scores,
-                                    eps=eps,
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+    experiments = generate_experiments_with_all_kfolds(experiment=experiment)
+
+    results = {'details': [],
+                'inconsistency': True}
+
+    for experiment in experiments:
+        result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
+                                                    scores=scores,
+                                                    eps=eps,
+                                                    timeout=timeout,
+                                                    solver_name=solver_name,
+                                                    verbosity=verbosity,
+                                                    numerical_tolerance=numerical_tolerance)
+
+        results['details'].append(result)
+        results['inconsistency'] = results['inconsistency'] and result['inconsistency']
+
+        if not result['inconsistency']:
+            break
+
+    return results

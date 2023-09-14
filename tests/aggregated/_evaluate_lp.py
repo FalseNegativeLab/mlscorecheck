@@ -26,4 +26,3 @@ def evaluate_timeout(result, problem, scores, eps, score_subset):
         assert populated.check_bounds()['bounds_flag'] is True
     elif result.status == 0:
         warnings.warn('test timed out')
-

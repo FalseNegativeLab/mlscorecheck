@@ -121,7 +121,6 @@ def initialize_valid_pairs(p, n, iterate_by, init_tptn_intervals):
         dict(int,Interval|IntervalUnion): the initialized pairs
     """
     if init_tptn_intervals is not None:
-        print('init tptn intervals')
         tp_int = IntervalUnion(init_tptn_intervals['tp'])
         tn_int = IntervalUnion(init_tptn_intervals['tn'])
         valid_pairs = {}

@@ -6,7 +6,7 @@ over the datasets
 
 import pytest
 
-from mlscorecheck.check import check_n_datasets_mor_kfold_mor_scores
+from mlscorecheck.check import check_n_datasets_mor_known_folds_mor_scores
 from mlscorecheck.aggregated import (generate_experiment)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
@@ -22,7 +22,7 @@ def test_consistency(random_seed, rounding_decimals):
                                             random_state=random_seed,
                                             return_scores=True)
 
-    result = check_n_datasets_mor_kfold_mor_scores(experiment=experiment,
+    result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
                                                     scores=scores,
                                                     eps=10**(-rounding_decimals))
 
@@ -42,7 +42,7 @@ def test_failure(random_seed, rounding_decimals):
 
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_n_datasets_mor_kfold_mor_scores(experiment=experiment,
+    result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -62,7 +62,7 @@ def test_consistency_bounds(random_seed, rounding_decimals):
                                                 feasible_fold_score_bounds=True,
                                                 return_scores=True)
 
-    result = check_n_datasets_mor_kfold_mor_scores(experiment=experiment,
+    result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=2)
@@ -85,7 +85,7 @@ def test_failure_bounds(random_seed, rounding_decimals):
 
     scores = {'acc': 0.5, 'sens': 0.1, 'spec': 0.2, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
 
-    result = check_n_datasets_mor_kfold_mor_scores(experiment=experiment,
+    result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=2)
@@ -98,7 +98,7 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_kfold_mor_scores(experiment={'aggregation': 'rom',
+        check_n_datasets_mor_known_folds_mor_scores(experiment={'aggregation': 'rom',
                                                             'evaluations': []},
                                                 scores={},
                                                 eps=1e-4)

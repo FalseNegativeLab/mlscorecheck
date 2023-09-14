@@ -16,9 +16,6 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
                                             eps,
                                             experiment,
                                             *,
-                                            solver_name=None,
-                                            timeout=None,
-                                            verbosity=1,
                                             numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated by applying k-fold

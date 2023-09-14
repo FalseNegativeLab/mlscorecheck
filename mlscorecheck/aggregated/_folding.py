@@ -39,7 +39,7 @@ class Folding:
             raise ValueError('specify either n_folds,n_repeats,strategy or folds')
         if (n_folds is None) and (n_repeats is None) and (folds is None):
             raise ValueError('specify either n_folds,strategy or folds')
-        if (folds is None) and (strategy is None):
+        if ((folds is None) and (strategy is None)) and (n_folds > 1):
             raise ValueError('specify strategy if folds are not set explicitly')
 
         self.n_folds = n_folds
@@ -87,7 +87,8 @@ class Folding:
 
         if aggregation == 'rom':
             return [Fold(p=p * self.n_repeats,
-                        n=n * self.n_repeats)]
+                        n=n * self.n_repeats,
+                        identifier=dataset.identifier)]
 
         if aggregation == 'mor':
             folds = _create_folds(p=p,

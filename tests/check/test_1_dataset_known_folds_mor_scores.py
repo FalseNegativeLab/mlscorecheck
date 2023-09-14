@@ -5,7 +5,7 @@ aggregation
 
 import pytest
 
-from mlscorecheck.check import check_1_dataset_kfold_mor_scores
+from mlscorecheck.check import check_1_dataset_known_folds_mor_scores
 from mlscorecheck.aggregated import (generate_evaluation)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
@@ -23,7 +23,7 @@ def test_consistency(random_seed, rounding_decimals):
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_kfold_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -45,7 +45,7 @@ def test_failure(random_seed, rounding_decimals):
                                             return_scores=True)
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_1_dataset_kfold_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -67,7 +67,7 @@ def test_consistency_bounds(random_seed, rounding_decimals):
                                             feasible_fold_score_bounds=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_kfold_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=1)
@@ -91,11 +91,10 @@ def test_failure_bounds(random_seed, rounding_decimals):
                                             rounding_decimals=rounding_decimals)
     scores = {'acc': 0.9, 'bacc': 0.1, 'sens': 0.1, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
 
-    result = check_1_dataset_kfold_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=1)
-    print(result)
 
     assert result['inconsistency'] or result['lp_status'] == 'timeout'
 
@@ -105,6 +104,6 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_1_dataset_kfold_mor_scores(evaluation={'aggregation': 'rom'},
+        check_1_dataset_known_folds_mor_scores(evaluation={'aggregation': 'rom'},
                                             scores={},
                                             eps=1e-4)

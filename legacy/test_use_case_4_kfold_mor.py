@@ -197,10 +197,6 @@ def test_tptn_bounds_failure():
                                             dataset=problem,
                                             return_details=True)
 
-    print(problem)
-    print(details['configuration'])
-    print(details)
-
     assert not flag
 
 def test_fold_configurations_success():

@@ -57,9 +57,6 @@ def test_check_aggregated_scores_feasible_custom_solver(random_seed, aggregation
                                         eps=1e-3,
                                         solver_name='dummy',
                                         timeout=1)
-    print(experiment)
-    print(scores)
-    print(details)
 
     assert not details['inconsistency']
     assert details['lp_status'] in {'feasible', 'timeout'}

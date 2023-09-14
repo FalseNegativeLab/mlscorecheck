@@ -54,7 +54,9 @@ class Dataset:
         self.resolve_pn()
 
         if identifier is None:
-            self.identifier = dataset_name if dataset_name is not None else random_identifier(5)
+            self.identifier = (f'{dataset_name}_{random_identifier(3)}'
+                                if dataset_name is not None
+                                else random_identifier(5))
         else:
             self.identifier = identifier
 

@@ -7,11 +7,11 @@ in a kfold scenario on one single dataset.
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import check_aggregated_scores, Experiment
 
-__all__ = ['check_1_dataset_kfold_mor_scores']
+__all__ = ['check_1_dataset_known_folds_mor_scores']
 
-def check_1_dataset_kfold_mor_scores(scores,
+def check_1_dataset_known_folds_mor_scores(evaluation,
+                                    scores,
                                     eps,
-                                    evaluation,
                                     *,
                                     solver_name=None,
                                     timeout=None,
@@ -93,17 +93,17 @@ def check_1_dataset_kfold_mor_scores(scores,
         # True
 
     """
-    if evaluation.get('aggregation') != 'mor':
-        raise ValueError(f'the aggregation {evaluation.get("aggregation")} specified '\
-                        'in the dataset specification is not suitable for this test, '\
-                        'consider removing the mode of aggregation or specify "rom".')
+
+    if evaluation.get('aggregation', 'mor') != 'mor':
+        raise ValueError("either don't specify the aggregation or set it to 'mor'")
+    evaluation = evaluation | {'aggregation': 'mor'}
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
     experiment = Experiment(evaluations=[evaluation],
                             aggregation='mor')
 
-    return check_aggregated_scores(experiment=experiment,
+    return check_aggregated_scores(experiment=experiment.to_dict(),
                                         scores=scores,
                                         eps=eps,
                                         solver_name=solver_name,

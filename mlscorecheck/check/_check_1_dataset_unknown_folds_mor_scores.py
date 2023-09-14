@@ -5,16 +5,18 @@ scenario with unknown fold structures.
 
 from ..core import NUMERICAL_TOLERANCE, logger
 from ..aggregated import generate_datasets_with_all_kfolds
-from ._check_1_dataset_kfold_mor_scores import check_1_dataset_kfold_mor_scores
+from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
-def check_1_dataset_kfold_mor_unknown_folds_scores(scores,
-                                                    eps,
-                                                    dataset,
-                                                    *,
-                                                    solver_name=None,
-                                                    timeout=None,
-                                                    verbosity=1,
-                                                    numerical_tolerance=NUMERICAL_TOLERANCE):
+__all__ = ['check_1_dataset_unknown_folds_mor_scores']
+
+def check_1_dataset_unknown_folds_mor_scores(scores,
+                                            eps,
+                                            evaluation,
+                                            *,
+                                            solver_name=None,
+                                            timeout=None,
+                                            verbosity=1,
+                                            numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Checking the consistency of scores calculated in a k-fold cross validation on a single
     dataset, in a mean-of-ratios fashion, without knowing the folding strategy.
@@ -45,23 +47,28 @@ def check_1_dataset_kfold_mor_unknown_folds_scores(scores,
     Raises:
         ValueError: if the problem is not specified properly
     """
+    if evaluation.get('aggregation', 'mor') != 'mor':
+        raise ValueError("either don't specify the aggregation or set it to 'mor'")
+    evaluation = evaluation | {'aggregation': 'mor'}
 
-    datasets = generate_datasets_with_all_kfolds(dataset)
+    evaluations = generate_datasets_with_all_kfolds(evaluation)
 
-    logger.info('The total number of fold combinations: %d', len(datasets))
+    logger.info('The total number of fold combinations: %d', len(evaluations))
 
     results = {'details': []}
 
-    for dataset_0 in datasets:
-        tmp = {'dataset': dataset_0,
-                'details': check_1_dataset_kfold_mor_scores(scores=scores,
+    for evaluation_0 in evaluations:
+        tmp = {'folds': evaluation_0['folding']['folds'],
+                'details': check_1_dataset_known_folds_mor_scores(scores=scores,
                                                         eps=eps,
-                                                        dataset=dataset_0,
+                                                        evaluation=evaluation_0,
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
                                                         numerical_tolerance=numerical_tolerance)}
         results['details'].append(tmp)
+        if not tmp['details']['inconsistency']:
+            break
 
     results['inconsistency'] = all(tmp['details']['inconsistency'] for tmp in results['details'])
 
