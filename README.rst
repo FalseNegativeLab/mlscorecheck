@@ -276,8 +276,7 @@ In the example below, the scores values are generated to be consistent, and acco
 
 .. code-block:: Python
 
-    from mlscorecheck.check import check_1_testset_no_kfold_scores
-
+    >>> from mlscorecheck.check import check_1_testset_no_kfold_scores
     >>> result = check_1_testset_no_kfold_scores(
             scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
             eps=1e-2,
@@ -285,7 +284,7 @@ In the example below, the scores values are generated to be consistent, and acco
     >>> result['inconsistency']
     # False
 
-The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores *can* be the outcome of an evaluation. In the ``result`` structure one can find further information about the test. Namely, under the key ``n_valid_tptn_pairs`` one finds the number of potential ``tp`` and ``tn`` combinations which can lead to the reported performance scores with the given numerical uncertainty.
+The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores *can* be the outcome of an evaluation. In the ``result`` structure one can find further information about the test. Namely, under the key ``n_valid_tptn_pairs`` one finds the number of ``tp`` and ``tn`` combinations which can lead to the reported performance scores with the given numerical uncertainty.
 
 In the next example, a consistent set of scores was adjusted randomly to turn them into inconsistent.
 
@@ -304,215 +303,300 @@ As the ``inconsistency`` flag shows, here inconsistencies were identified, there
 1 dataset with kfold mean-of-ratios (MoR)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is the most common in the applications and research of machine learning. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the ``tp`` and ``tn`` parameters of all folds and checks its feasibility.
+This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the ``tp`` and ``tn`` parameters of all folds and checks its feasibility.
 
-In the example below, a consistent set of figures is generated and tested:
+In the example below, a consistent set of figures is tested:
 
 .. code-block:: Python
 
-    from mlscorecheck.check import check_1_dataset_kfold_mor_scores
+    >>> from mlscorecheck.check import check_1_dataset_kfold_mor_scores
 
-    dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
-    scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-
-    result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                eps=1e-3,
-                                                dataset=dataset)
-    result['inconsistency']
-
+    >>> evaluation = {'dataset': {'p': 126, 'n': 131},
+                    'folding': {'folds': [{'p': 52, 'n': 94},
+                                            {'p': 74, 'n': 37}]}}
+    >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
+    >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                    scores=scores,
+                                                    eps=1e-3)
+    >>> result['inconsistency']
     # False
 
-As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further entries to find further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too:
+As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too.
 
-.. code-block:: bash
-
-    {'id': 'monjhyriadkqzmza',
-    'figures': {'p': 126, 'n': 131, 'tp': 93.0, 'tn': 49.0},
-    'scores': {'acc': 0.572689127483648,
-                'sens': 0.7684511434511435,
-                'spec': 0.5556354226566993,
-                'bacc': 0.6620432830539213},
-    'score_bounds': None,
-    'score_bounds_flag': None,
-    'bounds_flag': True,
-    'folds': [{'identifier': 'pwjncyepgdalgccc',
-    'figures': {'tn': 13.0, 'tp': 49.0},
-    'scores': {'acc': 0.4246575342465753,
-                'sens': 0.9423076923076924,
-                'spec': 0.13829787234042554,
-                'bacc': 0.5403027823240589},
-    'score_bounds': None,
-    'score_bounds_flag': None,
-    'bounds_flag': True},
-    {'identifier': 'nibjsmoafamcpezu',
-    'figures': {'tn': 36.0, 'tp': 44.0},
-    'scores': {'acc': 0.7207207207207207,
-                'sens': 0.5945945945945946,
-                'spec': 0.972972972972973,
-                'bacc': 0.7837837837837838},
-    'score_bounds': None,
-    'score_bounds_flag': None,
-    'bounds_flag': True}]}
-
-As one can observe, the top level scores match the ones reported to the accuracy of the numerical uncertainty.
-
-As the following example shows, a hand-crafted and insatisfiable set of scores (accuracy must always be between sensitivity ans specificity) leads to the discovery of inconsistency:
+As the following example shows, a hand-crafted and insatisfiable set of scores leads to the discovery of inconsistency:
 
 .. code-block:: Python
 
-    dataset = {'p': 398,
-                'n': 569,
-                'n_folds': 4,
-                'n_repeats': 2,
-                'folding': 'stratified_sklearn'}
-    scores = {'acc': 0.91, 'spec': 0.9, 'sens': 0.6}
-
-    result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                eps=1e-2,
-                                                dataset=dataset)
-    result['inconsistency']
-
-    >> True
+    >>> dataset = {'p': 398, 'n': 569}
+    >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> evaluation = {'dataset': dataset, 'folding': folding}
+    >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
+    >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                    scores=scores,
+                                                    eps=1e-2)
+    >>> result['inconsistency']
+    # True
 
 Finally, we mention that if there are hints for bounds on the scores in the folds (for example, the minimum and maximum scores across the folds are reported), one can add these figures to strengthen the test. In the next example, the same score bounds on the accuracy have been added to each fold, with the interpretation that beyond matching the overall reported scores, we also require that the accuracy in each fold should be in the range [0.8, 1.0], which becomes unfeasible:
 
 .. code-block:: Python
 
-    dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
-                'n_folds': 4,
-                'n_repeats': 2,
-                'folding': 'stratified_sklearn',
-                'fold_score_bounds': {'acc': (0.8, 1.0)}}
-    scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
+    >>> dataset = {'dataset_name': 'common_datasets.glass_0_1_6_vs_2'}
+    >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> evaluation = {'dataset': dataset,
+                    'folding': folding,
+                    'fold_score_bounds': {'acc': (0.8, 1.0)}}
+    >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
+    >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                    scores=scores,
+                                                    eps=1e-2,
+                                                    numerical_tolerance=1e-6)
+    >>> result['inconsistency']
+    # True
 
-    result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                eps=1e-2,
-                                                dataset=dataset)
-    result['inconsistency']
-
-    >> True
-
-Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four completely linear scores.
+Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four linear scores.
 
 1 dataset with kfold ratio-of-means (RoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When the scores are calculated in the Ratio-of-Means (RoM) manner in a k-fold scenario, it means that the total confusion matrix (``tp`` and ``tn`` values) of all folds is calculated first, and then some of the formulas (``acc``, ``sens``, ``spec``, ``npv``, ``ppv``, ``f1``, ``fm``) are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The details of the analysis are structured similarly and are accessible under the ``individual_results`` key of the resulting dictionary.
+When the scores are calculated in the Ratio-of-Means (RoM) manner in a k-fold scenario, it means that the total confusion matrix (``tp`` and ``tn`` values) of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
 
-However, having the fold structure enables the testing of the four linear scores (``acc``, ``sens``, ``spec`` and ``bacc``) with potential bounds using linear programming. If any of the four linear scores are supplied and at least one bound is specified, then a linear programming based check similar to the one in the "1 dataset with kfold MoR" scenario is executed. The details of the analysis are structured similarly, and appear under the ``aggregated_results`` key of the resulting dictionary.
-
-In the following example an inconsistent scenario is prepared, and due to the fold level score bounds besides the testing of the individual results, the linear programming based test is also executed.
+For example, testing a consistent scenario:
 
 .. code-block:: Python
 
-    dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
-                'n_folds': 4,
-                'n_repeats': 2,
-                'folding': 'stratified_sklearn',
-                'fold_score_bounds': {'acc': (0.8, 1.0)}}
-    scores = {'acc': 0.9, 'npv': 0.9, 'sens': 0.6, 'f1p': 0.95, 'spec': 0.8}
+    >>> from mlscorecheck.check import check_1_dataset_rom_scores
+    >>> dataset = {'dataset_name': 'common_datasets.monk-2'}
+    >>> folding = {'n_folds': 4, 'n_repeats': 3,
+                    'strategy': 'stratified_sklearn'}
+    >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
+                    'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
+    >>> result = check_1_dataset_rom_scores(dataset=dataset,
+                                        folding=folding,
+                                        scores=scores,
+                                        eps=1e-3)
+    >>> result['inconsistency']
+    # False
 
-    result = check_1_dataset_kfold_rom_scores(scores=scores,
-                                                eps=1e-2,
-                                                dataset=dataset)
-    result['inconsistency']
+Similarly, an inconsistent case:
 
+.. code-block:: Python
+
+    >>> dataset = {'p': 10, 'n': 20}
+    >>> folding = {'n_folds': 5, 'n_repeats': 1}
+    >>> scores = {'acc': 0.428, 'npv': 0.392, 'bacc': 0.442, 'f1p': 0.391}
+    >>> result = check_1_dataset_rom_scores(dataset=dataset,
+                                            folding=folding,
+                                            scores=scores,
+                                            eps=1e-3)
+    >>> result['inconsistency']
     # True
-
-For further details of the analysis the user can access both the details of the individual and the aggregated analysis.
 
 n datasets with k-folds, RoM over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is very similar to the "1 dataset k-fold RoM" scenario, except there is another level of aggregation over datasets, however, still one single confusion matrix is determined first for the entire experiment and the 8 supported scores are calculated from it. In this scenario a list of datasets needs to be specified potentially with folds. If there are score bounds specified for the folds, besides the testing of the individual figures, the aggregated check is also executed. The output of the test is structured similarly as in the "1 dataset k-fold RoM" case, there is a top level ``inconsistency`` flag indicating if inconsistency has been detected. In the following example a consistent case is prepared with two datasets and some mild score bounds.
+Again, the scenario is similar to the "1 dataset k-fold RoM" scenario, except there is another level of aggregation over datasets, and one single confusion matrix is determined for the entire experiment and the scores are calculated from that. In this scenario a list of evaluations need to be specified. The output of the test is structured similarly as in the "1 dataset k-fold RoM" case, there is a top level ``inconsistency`` flag indicating if inconsistency has been detected. In the following example, a consistent case is prepared with two datasets.
 
 .. code-block:: Python
 
-    datasets = [{'p': 389,
-                    'n': 630,
-                    'n_folds': 6,
-                    'n_repeats': 3,
-                    'folding': 'stratified_sklearn',
-                    'fold_score_bounds': {'acc': (0.2, 1)}},
-                {'name': 'common_datasets.saheart',
-                    'n_folds': 2,
-                    'n_repeats': 5,
-                    'folding': 'stratified_sklearn'}]
-    scores = {'acc': 0.467, 'sens': 0.432, 'spec': 0.488, 'f1p': 0.373}
+    >>> from mlscorecheck.check import check_n_datasets_rom_kfold_rom_scores
+    >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
+                    'folding': {'n_folds': 6, 'n_repeats': 3,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
+                        'folding': {'n_folds': 2, 'n_repeats': 5,
+                                    'strategy': 'stratified_sklearn'}}
+    >>> evaluations = [evaluation0, evaluation1]
+    >>> scores = {'acc': 0.467, 'sens': 0.432, 'spec': 0.488, 'f1p': 0.373}
+    >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                                evaluations=evaluations,
+                                                eps=1e-3)
+    >>> result['inconsistency']
+    # False
 
-    result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
-                                            datasets=datasets,
-                                            eps=1e-3)
-    result['inconsistency']
+Similarly, an inconsistent scenario, with 3 different datasets and foldings:
 
-    >> False
+.. code-block:: Python
 
-The results show that the scores are consistent. Further details are available under the keys ``individual_results`` and ``aggregated_results``. We mention that score bounds at the dataset level could also be specified by adding the ``score_bounds`` key to the dataset specifications.
-
+    >>> evaluation0 = {'dataset': {'p': 412, 'n': 180},
+                    'folding': {'folds': [{'p': 98, 'n': 8},
+                                            {'p': 68, 'n': 25},
+                                            {'p': 92, 'n': 19},
+                                            {'p': 78, 'n': 61},
+                                            {'p': 76, 'n': 67}]}}
+    >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.zoo-3'},
+                    'folding': {'n_folds': 3, 'n_repeats': 4,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluation2 = {'dataset': {'dataset_name': 'common_datasets.winequality-red-3_vs_5'},
+                    'folding': {'n_folds': 5, 'n_repeats': 5,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluations = [evaluation0, evaluation1, evaluation2]
+    >>> scores = {'acc': 0.4532, 'sens': 0.6639, 'npv': 0.9129, 'f1p': 0.2090}
+    >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                            evaluations=evaluations,
+                                            eps=1e-4/2)
+    >>> result['inconsistency']
+    # True
 
 n datasets with k-folds, MoR over datasets and RoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is about performance scores calculated for each dataset individually by the RoM aggregation in any k-folding strategy, and then the scores are aggregated across the datasets in the MoR manner. Because of the overall averaging, one cannot do inference about the non-linear scores, only the four linear scores are supported (``acc``, ``sens``, ``spec``, ``bacc``), and the scores are checked by linear programming. Similarly as before, the specification of a list of datasets is needed. In the following example an inconsistent scenario is checked:
+This scenario is about performance scores calculated for each dataset individually by the RoM aggregation in any k-folding strategy, and then the scores are aggregated across the datasets in the MoR manner. Because of the overall averaging, one cannot do inference about the non-linear scores, only the four linear scores are supported (``acc``, ``sens``, ``spec``, ``bacc``), and the scores are checked by linear programming. Similarly as before, the specification of a list of evaluations is needed. In the following example a consistent scenario is tested, with score bounds also specified on the datasets:
 
 .. code-block:: Python
 
-    datasets = [{'folds': [{'p': 22, 'n': 90},
-                    {'p': 51, 'n': 45},
-                    {'p': 78, 'n': 34},
-                    {'p': 33, 'n': 89}],
-                'fold_score_bounds': {'acc': (0.8, 1.0)},
-                'score_bounds': {'acc': (0.85, 1.0)}
-                },
-                {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
-                'n_folds': 8,
-                'n_repeats': 4,
-                'folding': 'stratified_sklearn',
-                'fold_score_bounds': {'acc': (0.8, 1.0)},
-                'score_bounds': {'acc': (0.85, 1.0)}
-                }]
-    scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+    >>> from mlscorecheck.check import check_n_datasets_mor_kfold_rom_scores
+    >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
+                    'folding': {'n_folds': 8, 'n_repeats': 4,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
+                    'folding': {'n_folds': 3, 'n_repeats': 3,
+                                'strategy': 'stratified_sklearn'}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1],
+                    'dataset_score_bounds': {'acc': (0.5, 1.0)}}
+    >>> scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
+    >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+                                                    eps=1e-3,
+                                                    scores=scores)
+    >>> result['inconsistency']
+    # False
 
-    result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                            eps=1e-3,
-                                            scores=scores)
-    result['inconsistency']
+Similarly, an inconsistent scenario:
 
+.. code-block:: Python
+
+    >>> evaluation0 = {'dataset': {'p': 184, 'n': 258},
+                    'folding': {'folds': [{'p': 22, 'n': 90},
+                                        {'p': 51, 'n': 45},
+                                        {'p': 78, 'n': 34},
+                                        {'p': 33, 'n': 89}]}}
+    >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.yeast-1-2-8-9_vs_7'},
+                        'folding': {'n_folds': 8, 'n_repeats': 4, 'strategy': 'stratified_sklearn'}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+    >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
+    >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+                                                        eps=1e-4,
+                                                        scores=scores)
+    >>> result['inconsistency']
     # True
 
-The output is structured similarly to the '1 dataset k-folds MoR' case, one can query the status of the solver by the key ``lp_status`` and the actual configuration of the variables by the ``lp_configuration`` key. In this example dataset specification one can observe bounds both at the fold and the dataset level, which must simultaniously hold.
+The output is structured similarly to the '1 dataset k-folds MoR' case, one can query the status of the solver by the key ``lp_status`` and the actual configuration of the variables by the ``lp_configuration`` key.
 
 n datasets with k-folds, MoR over datasets and MoR over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The last supported scenario is when scores are calculated in the MoR manner for each dataset, and then aggregated again across the datasets. Again, because of the averaging, only the four linear scores (``acc``, ``sens``, ``spec``, ``bacc``) are supported. Again, the list of datasets involved in the experiment must be specified. In the following example a consistent scenario is checked with three datasets and without score bounds specified at any level:
+In this scenario, scores are calculated in the MoR manner for each dataset, and then aggregated again across the datasets. Again, because of the averaging, only the four linear scores (``acc``, ``sens``, ``spec``, ``bacc``) are supported. In the following example a consistent scenario is checked with three datasets and without score bounds specified at any level:
 
 .. code-block:: Python
 
-    from mlscorecheck.check import check_n_datasets_mor_kfold_mor_scores
+    >>> from mlscorecheck.check import check_n_datasets_mor_kfold_mor_scores
+    >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
+                        'folding': {'folds': [{'p': 22, 'n': 23},
+                                                {'p': 96, 'n': 72}]}}
+    >>> evaluation1 = {'dataset': {'p': 781, 'n': 423},
+                        'folding': {'n_folds': 1, 'n_repeats': 3}}
+    >>> evaluation2 = {'dataset': {'dataset_name': 'common_datasets.glass_0_6_vs_5'},
+                        'folding': {'n_folds': 6, 'n_repeats': 1, 'strategy': 'stratified_sklearn'}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1, evaluation2]}
+    >>> scores = {'acc': 0.541, 'sens': 0.32, 'spec': 0.728, 'bacc': 0.524}
+    >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
+                                                        scores=scores,
+                                                        eps=1e-3)
+    >>> result['inconsistency']
+    # False
 
-    datasets = [{'folds': [{'p': 22, 'n': 23},
-                            {'p': 96, 'n': 72}]},
-                {'p': 781, 'n': 423, 'n_folds': 1, 'n_repeats': 3},
-                {'name': 'common_datasets.glass_0_6_vs_5',
-                'n_folds': 6,
-                'n_repeats': 1,
-                'folding': 'stratified_sklearn'}]
-    scores = {'acc': 0.541, 'sens': 0.32, 'spec': 0.728, 'bacc': 0.524}
+Again, the details of the analysis are accessible under the ``lp_status`` and ``lp_configuration`` keys. Finally, an inconsistent scenario:
 
-    result = check_n_datasets_mor_kfold_mor_scores(datasets=datasets,
-                                                    scores=scores,
-                                                    eps=1e-3)
-    result['inconsistency']
+.. code-block:: Python
 
-    >> False
-
-Being an aggregated test, again, the details of the analysis are accessible under the ``lp_status`` and ``lp_configuration`` keys.
+    >>> evaluation0 = {'dataset': {'dataset_name': 'common_datasets.ecoli_0_2_3_4_vs_5'},
+                        'folding': {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}}
+    >>> evaluation1 = {'dataset': {'p': 355, 'n': 438},
+                        'folding': {'n_folds': 1, 'n_repeats': 3}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1],
+                        'dataset_score_bounds': {'sens': (0.8, 1.0)}}
+    >>> scores = {'acc': 0.532, 'sens': 0.417, 'spec': 0.622, 'bacc': 0.519}
+    >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
+                                                        scores=scores,
+                                                        eps=1e-3)
+    >>> result['inconsistency']
+    # True
 
 Not knowing the mode of aggregation
 -----------------------------------
 
 The biggest challenge with aggregated scores is that the ways of aggregation at the dataset and experiment level are rarely disclosed explicitly. Even in this case the tools presented in the previous section can be used since there are hardly any further ways of meaningful averaging than (MoR on folds, MoR on datasets), (RoM on folds, MoR on datasets), (RoM on folds, RoM on datasets), hence, if a certain set of scores is inconsistent with each of these possibilities, one can safely say that the results do not satisfy the reasonable expectations.
+
+Not knowing the k-folding scheme
+--------------------------------
+
+In many cases, it is not stated explicitly if stratification was applied or not, only the use of k-fold is phrased in papers. Not knowing the folding structure, the MoR aggregated tests cannot be used. However, if the cardinality of the minority class is not too big (a couple of dozens), then all potential k-fold configurations can be generated, and the MoR tests can be applied to each. If the scores are inconsistent with each, it means that no k-fold could result the scores. There are two functions supporting these exhaustive tests, one for the dataset level, and one for the experiment level.
+
+Given a dataset and knowing that k-fold cross-validation was applied with MoR aggregation, but stratification is not mentioned, the following sample code demonstrates the use of the exhaustive test, with a consistent setup:
+
+.. code-block:: Python
+    >>> from mlscorecheck.check import check_1_dataset_unknown_folds_mor_scores
+    >>> evaluation = {'dataset': {'p': 126, 'n': 131},
+                    'folding': {'n_folds': 2, 'n_repeats': 1}}
+    >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
+    >>> result = check_1_dataset_unknown_folds_mor_scores(evaluation=evaluation,
+                                                        scores=scores,
+                                                        eps=1e-3)
+    >>> result['inconsistency']
+    # False
+
+A similar situation with an inconsistent setup:
+
+.. code-block:: Python
+
+    >>> dataset = {'p': 19, 'n': 97}
+    >>> folding = {'n_folds': 3, 'n_repeats': 1}
+    >>> evaluation = {'dataset': dataset, 'folding': folding}
+    >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
+    >>> result = check_1_dataset_unknown_folds_mor_scores(evaluation=evaluation,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+In the result of the tests, under the key ``details`` one can find the results for all possible fold combinations.
+
+The following scenario is similar in the sense that MoR aggregation is applied to multiple datasets with unknown fold structures:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check import check_n_datasets_mor_unknown_folds_mor_scores
+    >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
+                    'folding': {'n_folds': 4, 'n_repeats': 1,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
+                    'folding': {'n_folds': 3, 'n_repeats': 1,
+                                'strategy': 'stratified_sklearn'}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+    >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
+    >>> result = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+                                                            scores=scores,
+                                                            eps=1e-3)
+    >>> result['inconsistency']
+    # False
+
+Similarly, an inconsistent scenario:
+
+.. code-block:: Python
+
+    >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
+                    'folding': {'n_folds': 4, 'n_repeats': 1,
+                                'strategy': 'stratified_sklearn'}}
+    >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
+                    'folding': {'n_folds': 3, 'n_repeats': 1,
+                                'strategy': 'stratified_sklearn'}}
+    >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+    >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
+    >>> result = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+                                                                scores=scores,
+                                                                eps=1e-3)
+    >>> result['inconsistency']
+    # True
 
 Test bundles
 ============
@@ -531,10 +615,11 @@ The first function enables the testing of performance scores reported for certai
 
 .. code-block:: Python
 
-    drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
-                        eps=1e-4,
-                        bundle='test',
-                        identifier='01')
+    >>> from mlscorecheck.bundles import (drive_image, drive_aggregated)
+    >>> drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
+                    eps=1e-4,
+                    bundle='test',
+                    identifier='01')
     # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
 
 The interpretation of these results is that the reported scores are inconsistent with any of the reasonable evaluation methodolgoies.
@@ -543,7 +628,7 @@ A similar functionality is provided for the aggregated scores calculated on the 
 
 .. code-block:: Python
 
-    drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
+    >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                         eps=1e-4,
                         bundle='test')
     # {'mor_fov_inconsistency': True,
@@ -552,6 +637,21 @@ A similar functionality is provided for the aggregated scores calculated on the 
     #   'rom_no_fov_inconsistency': True}
 
 The results here show that the reported scores could not be the result of any aggregation of any evaluation methodologies.
+
+EHG
+---
+
+Electrohysterogram classification for the prediction of preterm delivery in pregnancy became a popular area for the applications of minority oversampling, however, it turned out that there were overly optimistic classification results reported due to systematic data leakage in the data preparation process [EHG]_. In [EHG]_, the implementations were replicated and it was shown that there is a decent gap in terms of performance when the data is prepared properly. However, data leakage changes the statistics of the dataset being cross-validated. Hence, the problematic scores could be identified with the tests implemented in the ``mlscorecheck`` package. In order to facilitate the use of the tools for this purpose, some functionalities have been prepared with the dataset already pre-populated.
+
+For illustration, given a set of scores reported in a real paper, the test below shows that it is not consistent with the dataset:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.bundles import check_ehg
+    >>> scores = {'acc': 0.9552, 'sens': 0.9351, 'spec': 0.9713}
+    >>> results = check_ehg(scores=scores, eps=10**(-4), n_folds=10, n_repeats=1)
+    >>> results['inconsistency']
+    # True
 
 Contribution
 ============
