@@ -6,6 +6,8 @@ from ..experiments import load_ehg
 
 from ..check import check_1_dataset_unknown_folds_mor_scores
 
+__all__ = ['check_ehg']
+
 def check_ehg(scores: dict,
                 eps,
                 n_folds: int,
