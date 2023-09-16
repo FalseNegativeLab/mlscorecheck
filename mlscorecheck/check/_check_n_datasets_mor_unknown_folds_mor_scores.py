@@ -27,6 +27,9 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
     over the folds in the mean of ratios fashion and over the datasets
     in the mean of ratios fashion.
 
+    Note that depending on the number of the minority instances and on the
+    folding structure, this test might lead to enormous execution times.
+
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
@@ -44,15 +47,8 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
     Returns:
         dict: the dictionary of the results of the analysis, the
         ``inconsistency`` entry indicates if inconsistencies have
-        been found. The aggregated_results entry is empty if
-        the execution of the linear programming based check was
-        unnecessary. The result has four more keys. Under ``lp_status``
-        one finds the status of the lp solver, under ``lp_configuration_scores_match``
-        one finds a flag indicating if the scores from the lp configuration
-        match the scores provided, ``lp_configuration_bounds_match`` indicates
-        if the specified bounds match the actual figures and finally
-        ``lp_configuration`` contains the actual configuration of the
-        linear programming solver.
+        been found. The ``details`` entry contains all possible folding
+        combinations and the corresponding detailed results.
 
     Raises:
         ValueError: if the problem is not specified properly
