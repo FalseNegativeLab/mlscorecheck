@@ -57,7 +57,7 @@ def test_generate_folds():
         folding.generate_folds(dataset=Dataset(p=4, n=21), aggregation='rom')
 
 @pytest.mark.parametrize('random_seed', range(10))
-def test_generate_folding(random_seed):
+def test_generate_folding(random_seed: int):
     """
     Testing the folding generation
 

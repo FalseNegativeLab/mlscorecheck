@@ -15,7 +15,10 @@ from mlscorecheck.individual import (tptn_solutions, is_applicable_tptn,
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'],
                                     ['tn', 'fn'], ['tn', 'tp'], ['fn', 'fp']])
 @pytest.mark.parametrize("random_state", [3, 5, 7, 11])
-def test_tptn_solutions(figure, score, zeros, random_state):
+def test_tptn_solutions(figure: str,
+                        score: str,
+                        zeros: list,
+                        random_state: int):
     """
     Testing the tp-tn solutions
 
@@ -58,8 +61,8 @@ special_values = {'ppv': [1, 0],
 
 @pytest.mark.parametrize('figure', ['tp', 'tn'])
 @pytest.mark.parametrize("score", list(tptn_solutions.keys()))
-@pytest.mark.parametrize("random_state", [3])
-def test_tptn_solutions_failure(figure, score, random_state):
+@pytest.mark.parametrize("random_state", [3, 5, 7])
+def test_tptn_solutions_failure(figure: str, score: str, random_state: int):
     """
     Testing the tp-tn solutions with failure
 

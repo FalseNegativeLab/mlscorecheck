@@ -422,4 +422,5 @@ def drive_image_all_pixels(scores: dict,
 
     return check_1_testset_no_kfold_scores(scores=scores,
                                             eps=eps,
-                                            testset=image)
+                                            testset=image,
+                                            prefilter_by_pairs=True)

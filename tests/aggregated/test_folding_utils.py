@@ -20,7 +20,7 @@ def test_fold_variations():
     """
     Testing the generation of fold variations
     """
-    assert fold_variations(5, 3)[0] == 6
+    assert fold_variations(5, 3)[0] == 5
 
 def test_remainder_variations():
     """
@@ -51,13 +51,13 @@ def test_generate_datasets_with_all_kfolds():
     evaluation = {'dataset': {'p': 5, 'n': 7}, 'folding': {'n_folds': 3}}
 
     datasets = generate_evaluations_with_all_kfolds(evaluation)
-    assert len(datasets) == 3
+    assert len(datasets) == 2
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2}}
 
     datasets = generate_evaluations_with_all_kfolds(evaluation)
-    assert len(datasets) == 9
+    assert len(datasets) == 4
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2},

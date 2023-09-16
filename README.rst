@@ -35,7 +35,7 @@ mlscorecheck: testing the consistency of binary classification performance score
 In a nutshell
 =============
 
-One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the scores are consistent with each other and the assumptions on the experimental setup.
+One comes across some performance scores of binary classification reported for a dataset and finds them suspicious (typo, unorthodox evaluation methodology, leaky data preparation, etc.). With the tools implemented in the ``mlscorecheck`` package one can test if the reported performance scores are consistent with each other and the assumptions on the experimental setup.
 
 The consistency tests are numerical and **not** statistical: if inconsistencies are identified, it means that either the assumptions on the evaluation protocol or the reported scores are incorrect.
 
@@ -61,11 +61,11 @@ If you use the package, please consider citing the following paper:
 Introduction
 ============
 
-Binary classification is one of the most basic tasks in machine learning. The evaluation of the performance of binary classification techniques (whether it is original theoretical development or application to a specific field) is driven by performance scores (https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). Despite performance scores provide the basis to estimate the value of reasearch, the reported scores usually suffer from methodological problems, typos and the insufficient description of experimental settings, contributing to the replication crisis (https://en.wikipedia.org/wiki/Replication_crisis) and the skewing of entire fields ([RV]_, [EHG]_), as the reported but usually incomparable scores are usually rank approaches and ideas.
+Binary classification is one of the most fundamental tasks in machine learning. The evaluation of the performance of binary classification techniques (whether it is original theoretical advancement or application to a specific field) is driven by performance scores (https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). Despite performance scores provide the basis to estimate the value of reasearch, the reported scores usually suffer from methodological problems, typos and the insufficient description of experimental settings, contributing to the replication crisis (https://en.wikipedia.org/wiki/Replication_crisis) and eventually the derailing of entire fields ([RV]_, [EHG]_). Even systematic reviews can suffer from using incomparable performance scores to rank research papers [RV]_.
 
-Most of the performance score are functions of the values of the binary confusion matrix (with four entries: true positives (tp), true negatives (tn), false positives (fp), false negatives (fn)). Consequently, when multiple performance scores are reported for some experiment, they cannot take any values independently.
+Most of the performance score are functions of the values of the binary confusion matrix, having four entries: the number of true positives (``tp``), true negatives (``tn``), false positives (``fp``) and false negatives (``fn``). Since ``tp + fn`` equals the number of positive evaluation samples and ``tn + fp`` equals the number of negative test samples, the matrix has eventually two independent elements. Without the loss of generality, we can pick ``tp`` and ``tn``.
 
-Depending on the experimental setup, one can develop techniques to check if the performance scores reported for a dataset are consistent. This package implements such consistency tests for some common scenarios. We highlight that the developed tests cannot guarantee that the scores are surely calculated by some standards. However, if the tests fail and inconsistencies are detected, it means that the scores are not calculated by the presumed protocols with certainty. In this sense, the specificity of the test is 1.0, the inconsistencies being detected are inevitable.
+Depending on the experimental setup, one can develop numerical techniques to test if there exists any combination of ``tp`` and ``tn`` which leads to the reported performance scores. This package implements such consistency tests for some common scenarios. We highlight that the developed tests cannot guarantee that the scores are surely calculated by some standards or a presumed evaluation protocol. However, *if the tests fail and inconsistencies are detected, it means that the scores are not calculated by the presumed protocols with certainty*. In this sense, the specificity of the test is 1.0, the inconsistencies being detected are inevitable.
 
 For further information, see
 
@@ -75,7 +75,7 @@ For further information, see
 Installation
 ============
 
-The package has only basic requirements when used for consistency checking.
+The package has only basic requirements when used for consistency testing.
 
 * ``numpy``
 * ``pulp``
@@ -84,37 +84,68 @@ The package has only basic requirements when used for consistency checking.
 
     > pip install numpy pulp
 
-In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. In order to install ``sage`` into a conda environment one needs adding the ``conda-forge`` channel first:
+In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the algebraic solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. In order to install ``sage`` into a conda environment one needs adding the ``conda-forge`` channel first:
 
 .. code-block:: bash
 
     > conda config --add channels conda-forge
     > conda install sage
 
+The ``mlscorecheck`` package itself can be installed from the PyPI repository by issuing
+
+.. code-block:: bash
+
+    > pip install mlscorecheck
+
+Alternatively, the latest (unreleased) version of the package can be cloned from GitHub and installed into the active virtual environment as
+
+.. code-block:: bash
+
+    > git clone git@github.com:gykovacs/mlscorecheck.git
+    > cd mlscorecheck
+    > pip install .
+
 Use cases
 =========
 
-In general, there are three inputs to the consistency checking functions:
+In general, there are three inputs to the consistency testing functions:
 
 * the specification of the dataset(s) involved;
-* the collection of available performance scores. The currently supported scores with their abbreviations in paranthesis are:
+* the collection of available performance scores. When aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported. When cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
 
   * accuracy (``acc``),
   * sensitivity (``sens``),
   * specificity (``spec``),
   * positive predictive value (``ppv``),
   * negative predictive value (``npv``),
-  * F1-score (``f1``),
-  * Fowlkes-Mallows index (``fm``);
+  * balanced accuracy (``bacc``),
+  * f1(-positive) score (``f1``),
+  * f1-negative score (``f1n``),
+  * f-beta positive (``fbp``),
+  * f-beta negative (``fbn``),
+  * Fowlkes-Mallows index (``fm``),
+  * unified performance measure (``upm``),
+  * geometric mean (``gm``),
+  * markedness (``mk``),
+  * positive likelihood ratio (``lrp``),
+  * negative likelihood ratio (``lrn``),
+  * Matthews correlation coefficient (``mcc``),
+  * bookmaker informedness (``bm``),
+  * prevalence threshold (``pt``),
+  * diagnostic odds ratio (``dor``),
+  * jaccard index (``ji``),
+  * Cohen's kappa (``kappa``),
+  * P4 measure (``p4``);
+
 * the estimated numerical uncertainty: the performance scores are usually shared with some finite precision, being rounded/ceiled/floored to ``k`` decimal places. The numerical uncertainty estimates the maximum difference of the reported score and its true value. For example, having the accuracy score 0.9489 published (4 decimal places), one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-4)/2). To be more conservative, one can assume that the score was ceiled or floored. In this case the numerical uncertainty becomes 0.0001 (10^(-4)).
 
-Specifying datasets
--------------------
+Specifying the experimental setup
+---------------------------------
 
-In this subsection we illustrate the various ways datasets can be specified.
+In this subsection we illustrate the various ways the experimental setup can be specified.
 
-Specifying one testset
-^^^^^^^^^^^^^^^^^^^^^^
+Specifying one testset or dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There are multiple ways to specify datasets and entire experiments consisting of multiple datasets evaluated in differing ways of cross-validations.
 
@@ -124,11 +155,11 @@ A simple binary classification test-set consisting of ``p`` positive samples (us
 
     testset = {"p": 10, "n": 20}
 
-One can also specify a commonly used dataset by its name and the package will look up the ``p`` and ``n`` statistics of the datasets from its internal registry:
+One can also specify a commonly used dataset by its name and the package will look up the ``p`` and ``n`` statistics of the datasets from its internal registry (based on the representations in the ``common-datasets`` package):
 
 .. code-block:: Python
 
-    testset = {"name": "common_datasets.ADA"}
+    dataset = {"dataset_name": "common_datasets.ADA"}
 
 To see the list of supported datasets and corresponding statistics, issue
 
@@ -137,41 +168,92 @@ To see the list of supported datasets and corresponding statistics, issue
     from mlscorecheck.experiments import dataset_statistics
     print(dataset_statistics)
 
-Specifying a dataset with folding
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Specifying a folding
+^^^^^^^^^^^^^^^^^^^^
 
-There are multiple ways to specify a dataset with some folding structure, either by specifying the parameters of the folding (if it is following a well known strategy, like stratification), or specifying the folds themselves. If ``n_repeats`` or ``n_folds`` are not specified, they are considered to be 1. If there is 1 fold, there is no need to specify the folding strategy (``folding``), otherwise the folding strategy needs to be specified. If the ``folds`` are specified explicitly, there is no need to specify any other parameter (like ``p``, ``n``, ``n_folds``, ``n_repeats``). It is possible to specify additional constraints on the ``acc``, ``sens``, ``spec`` or ``bacc`` scores, either by adding the ``score_bounds`` key to the fold (when ``folds`` are specified), or setting the ``fold_score_bounds`` key at the dataset level. For example, multiple ways of specifying datasets with 2 times repeated stratified 3-fold folding structure:
+The specification of foldings is needed when the scores are computed in cross-validation scenarios. We distinguish two main cases: in the first case, the number of positive and negative samples in the folds are known, or can be derived from the attributes of the dataset (for example, by stratification); in the second case, the statistics of the folds are not known, but the number of folds and potential repetitions are known.
 
-.. code-block:: Python
-
-    # kfold with 2 repetitions of stratified folding of 3 folds
-    dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
-
-    dataset = {"dataset": "common_datasets.ecoli1", "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn"}
-
-    dataset = {"folds": [{"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6},
-                            {"p": 3, "n": 7}, {"p": 3, "n": 7}, {"p": 4, "n": 6}]
-
-Score bounds can be added in multiple ways:
+In the first case, when the folds are known, one can specify them by listing them:
 
 .. code-block:: Python
 
-    dataset = {"p": 10, "n": 20, "n_repeats": 2, "n_folds": 3, "folding": "stratified_sklearn",
-                "fold_score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}}
+    folding = {"folds": [{"p": 5, "n": 10},
+                            {"p": 4, "n": 10},
+                            {"p": 5, "n": 10}]}
 
-    dataset = {"folds":
-        [{"p": 3, "n": 7, "score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}},
-        {"p": 3, "n": 7, "score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}},
-        {"p": 4, "n": 6, "score_bounds": {"acc": (0.8, 1.0), "sens": (0.8, 1.0)}}]}
+This folding can represent the evaluation of a dataset with 14 positive and 30 negative samples in a 3-fold stratified cross-validation scenario.
 
-If the specification of a dataset is not consistent or incomplete, the package will guide the user with verbose exceptions on how to fix the specification.
+Knowing that the folding is derived by some standard stratification techniques, one can just specify the parameters of the folding:
+
+.. code-block:: Python
+
+    folding = {"n_folds": 3, "n_repeats": 1, "strategy": "stratified_sklearn"}
+
+In this specification it is prescribed that the samples are distributed to the folds according to the ``sklearn`` stratification implementation.
+
+Finally, if nor the folds or the folding strategy is known, one can simply specify the folding with its parameters:
+
+.. code-block:: Python
+
+    folding = {"n_folds": 3, "n_repeats": 2}
+
+Note, that not all consistency testing functions support the latter case (not knowing the folds).
+
+Specifying an evaluation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A dataset and a folding constitutes an *evaluation*, which can also contain some bounds presumed on the scores calculated in the folds. These bounds can be estimated by the minimum and maximum scores across the folds if they are also reported. Evaluation specifications can be assembled like
+
+.. code-block:: Python
+
+    evaluation = {"dataset": {"p": 10, "n": 50},
+                    "folding": {"n_folds": 5, "n_repeats": 1,
+                                "strategy": "stratified_sklearn"}}
+
+And with bounds on the scores calculated in the folds:
+
+.. code-block:: Python
+
+    evaluation = {"dataset": {"p": 10, "n": 50},
+                    "folding": {"n_folds": 5, "n_repeats": 1,
+                                "strategy": "stratified_sklearn"},
+                    "fold_score_bounds": {"acc": (0.2, 0.8),
+                                            "sens": (0.1, 0.7),
+                                            "spec": (0.3, 0.9)}}
+
+Specifying an experiment
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the context of the package, an experiment is a collection of one or more evaluations, which are presumed to lead to the reported aggregated scores. Experiments are assembled by evaluations, and potential bounds on the scores calculated for the various datasets:
+
+.. code-block:: Python
+
+    experiment = {"evaluations": [{"dataset": {"p": 10, "n": 50},
+                                        "folding": {"n_folds": 5, "n_repeats": 1,
+                                                    "strategy": "stratified_sklearn"}},
+                                    {"dataset": {"p": 30, "n": 30},
+                                        "folding": {"n_folds": 5, "n_repeats": 1,
+                                                    "strategy": "stratified_sklearn"}]}
+
+With score bounds on the datasets:
+
+.. code-block:: Python
+
+    experiment = {"evaluations": [{"dataset": {"p": 10, "n": 50},
+                                    "folding": {"n_folds": 5, "n_repeats": 1,
+                                                "strategy": "stratified_sklearn"}},
+                                    {"dataset": {"p": 30, "n": 30},
+                                    "folding": {"n_folds": 5, "n_repeats": 1,
+                                                "strategy": "stratified_sklearn"}],
+            "dataset_score_bounds": {"acc": (0.2, 0.8),
+                                        "spec": (0.4, 0.95)}}
 
 Checking the consistency of performance scores
 ----------------------------------------------
 
-Numerous experimental protocols are supported by the package in which performance scores of binary classification can be produced. In this section we go through them one by one giving some examples of possible use cases.
+Numerous evaluation setups are supported by the package. In this section we go through them one by one giving some examples of possible use cases.
 
-We highlight again that the tests detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be inconsistent, however, if the ``inconsistency`` flag is ``True``, that is, inconsistencies are detected, then the reported scores with the assumptions are inconsistent with certainty.
+We highlight again, that the tests detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways, however, if the ``inconsistency`` flag is ``True``, that is, inconsistencies are detected, then the reported scores are inconsistent with the assumptions with certainty.
 
 A note on the Ratio-of-Means and Mean-of-Ratios aggregations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,53 +263,29 @@ Most of the performance scores are some sorts of ratios. When it comes to the ag
 The two types of tests
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Having one single testset, or a RoM type of aggregation (leading to one confusion matrix) and at least 3 performance scores reported, one can pick two scores and solve the system for the confusion matrix (``tp``, ``tn``) also accounting for the numerical uncertainty of potential rounding/ceiling/flooring, and use the reconstructed confusion matrix to estimate an interval for the third score and check if it is contained in it. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``bacc``, ``npv``, ``ppv``, ``f1p``, ``fm``.
+Having one single testset, or a RoM type of aggregation (leading to one confusion matrix), one can iterate through all potential pairs of ``tp`` and ``tn`` values and check if any of them can produce the reported scores with the given numerical uncertainty. The test is sped up by using interval arithmetic to prevent the evaluation of all possible pairs. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``, ``p4``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` values.
 
 With a MoR type of aggregation, only the averages of scores over folds or datasets are available. In this case the reconstruction of fold level or dataset level confusion matrices is possible only for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear programming. Based on the reported scores and the folding structures, these tests formulate a linear (integer) program of all confusion matrix entries and checks if the program is feasible to result in the reported values with the estimated numerical uncertainties.
-
 
 1 testset with no kfold
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This test assumes that at least three of the ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``f1``, ``fm`` scores are reported. A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
+A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
 
-In the example below, the scores are generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
+In the example below, the scores values are generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
 
 .. code-block:: Python
 
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
-    result = check_1_testset_no_kfold_scores(
+    >>> result = check_1_testset_no_kfold_scores(
             scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
             eps=1e-2,
-            testset={'p': 530, 'n': 902}
-        )
-    result['inconsistency']
-
+            testset={'p': 530, 'n': 902})
+    >>> result['inconsistency']
     # False
 
-The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores plus/minus ``0.01`` could be the result of a real evaluation. In the ``result`` structure one can find further information about the test. Namely, each pair of scores is used to estimate the range of each other, and under the keys ``tests_succeeded`` and ``tests_failed`` one can find the list of tests which passed and failed. For example, in this particular case, no test has failed. The first entry (``result['tests_succeeded'][0]``) of the succeeded list reads as
-
-.. code-block:: bash
-
-    {'details': [{'score_0': 'acc',
-                'score_0_interval': (0.6099979999999999, 0.6300020000000001),
-                'score_1': 'sens',
-                'score_1_interval': (0.209998, 0.230002),
-                'target_score': 'spec',
-                'target_interval': (0.8499979999999999, 0.870002),
-                'solution': {'tp': (111.29894, 121.90106),
-                            'tn': (751.6160759999999, 790.8639240000001),
-                            'tp_formula': 'p*sens',
-                            'tn_formula': 'acc*n + acc*p - p*sens'},
-                'inconsistency': False,
-                'explanation': 'the target score interval ((0.8499979999999999, 0.870002)) and the reconstructed intervals ((0.8332772461197339, 0.8767892727272728)) do intersect',
-                'target_interval_reconstructed': (0.8332772461197339, 0.8767892727272728)}],
-    'edge_scores': [],
-    'underdetermined': False,
-    'inconsistency': False}
-
-From the output structure one can read that the accuracy and sensitivity scores are used to reconstruct the interval for specificity (``target_interval_reconstructed``) using the formulas for ``tp`` and ``tn`` under the ``solution`` key. Then, comparing the reconstructed interval with the actual known interval for specificity, one can conclude that they do intersect, hence, the accuracy, sensitivity and specificity scores are not inconsistent.
+The interpretation of the outcome is that given a testset containing 530 positive and 902 negative samples, the reported scores *can* be the outcome of an evaluation. In the ``result`` structure one can find further information about the test. Namely, under the key ``n_valid_tptn_pairs`` one finds the number of potential ``tp`` and ``tn`` combinations which can lead to the reported performance scores with the given numerical uncertainty.
 
 In the next example, a consistent set of scores was adjusted randomly to turn them into inconsistent.
 
@@ -236,34 +294,12 @@ In the next example, a consistent set of scores was adjusted randomly to turn th
     result = check_1_testset_no_kfold_scores(
         scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
         eps=1e-3,
-        testset={'name': 'common_datasets.ADA'}
-    )
+        testset={'name': 'common_datasets.ADA'})
     result['inconsistency']
 
     # True
 
-As the ``inconsistency`` flag shows, here inconsistencies were identified. Looking into the details of the first failed test (``result['tests_failed'][0]``) one can see that
-
-.. code-block:: bash
-
-    {'details': [{'score_0': 'acc',
-                'score_0_interval': (0.9529979999999999, 0.955002),
-                'score_1': 'sens',
-                'score_1_interval': (0.932998, 0.9350020000000001),
-                'target_score': 'spec',
-                'target_interval': (0.9839979999999999, 0.986002),
-                'solution': {'tp': (960.054942, 962.1170580000002),
-                            'tn': (2989.965647999999, 3000.3383520000007),
-                            'tp_formula': 'p*sens',
-                            'tn_formula': 'acc*n + acc*p - p*sens'},
-                'inconsistency': True,
-                'explanation': 'the target score interval ((0.9839979999999999, 0.986002)) and the reconstructed intervals ((0.9589370262989092, 0.9622637434252729)) do not intersect',
-                'target_interval_reconstructed': (0.9589370262989092, 0.9622637434252729)}],
-    'edge_scores': [],
-    'underdetermined': False,
-    'inconsistency': True}
-
-The interpretation of the output is that given the accuracy and sensitivity scores (and the ``p`` and ``n`` statistics of the dataset), the specificity must fall into the interval ``target_interval_reconstructed``, however, as one can observe the supplied specificity score, it does not, which indicates an inconsistency among the scores.
+As the ``inconsistency`` flag shows, here inconsistencies were identified, there are no such ``tp`` and ``tn`` combinations which would end up with the reported scores. Either the assumption on the properties of the dataset, or the scores are incorrect.
 
 1 dataset with kfold mean-of-ratios (MoR)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

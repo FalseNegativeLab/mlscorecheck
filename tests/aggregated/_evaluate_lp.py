@@ -4,11 +4,17 @@ A function used to test the output of the linear programming
 
 import warnings
 
-from mlscorecheck.aggregated import compare_scores
+import pulp as pl
+
+from mlscorecheck.aggregated import compare_scores, Experiment
 
 __all__ = ['evaluate_timeout']
 
-def evaluate_timeout(result, problem, scores, eps, score_subset):
+def evaluate_timeout(result: pl.LpProblem,
+                        problem: Experiment,
+                        scores: dict,
+                        eps,
+                        score_subset: list):
     """
     Evaluate the stopped or succeeded tests
 
@@ -16,7 +22,7 @@ def evaluate_timeout(result, problem, scores, eps, score_subset):
         result (pl.LpProblem): the executed problem
         problem (Experiment): the problem to be solved
         scores (dict(str,float)): the scores to match
-        eps (float): the tolerance
+        eps (float|dict(str,float)): the tolerance
         score_subset (list): the score subset to use
     """
     if result.status == 1:

@@ -12,7 +12,7 @@ from mlscorecheck.aggregated import (generate_dataset,
                                         Evaluation, Folding)
 
 @pytest.mark.parametrize('random_seed', range(20))
-def test_consistency(random_seed):
+def test_consistency(random_seed: int):
     """
     Testing with a consistent setup
 
@@ -36,7 +36,7 @@ def test_consistency(random_seed):
     assert not result['inconsistency']
 
 @pytest.mark.parametrize('random_seed', range(20))
-def test_failure(random_seed):
+def test_failure(random_seed: int):
     """
     Testing with an inconsistent setup
 

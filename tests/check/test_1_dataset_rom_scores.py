@@ -9,7 +9,7 @@ from mlscorecheck.aggregated import (generate_evaluation)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_consistency(random_seed, rounding_decimals):
+def test_consistency(random_seed: int, rounding_decimals: int):
     """
     Testing with a consistent setup
 
@@ -31,7 +31,7 @@ def test_consistency(random_seed, rounding_decimals):
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_failure(random_seed, rounding_decimals):
+def test_failure(random_seed: int, rounding_decimals: int):
     """
     Testing with an inconsistent setup
 

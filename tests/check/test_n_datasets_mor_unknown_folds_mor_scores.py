@@ -6,17 +6,34 @@ import pytest
 
 import numpy as np
 
-from mlscorecheck.check import (check_n_datasets_mor_unknown_folds_mor_scores)
+from mlscorecheck.check import (check_n_datasets_mor_unknown_folds_mor_scores,
+                                estimate_n_experiments)
 from mlscorecheck.aggregated import (generate_experiments_with_all_kfolds,
                                         generate_experiment)
 
-def generate_test_case(random_seed, rounding_decimals):
+def test_estimation():
+    """
+    Testing the evaluation count estimation
+    """
+
+    count = estimate_n_experiments(experiment={'evaluations':
+                                                [{'dataset': {'p': 5, 'n': 11},
+                                                'folding': {'n_folds': 3, 'n_repeats': 2}},
+                                                {'dataset': {'p': 6, 'n': 9},
+                                                'folding': {'n_folds': 3, 'n_repeats': 2}}]})
+
+    assert count == 144
+
+def generate_test_case(random_seed: int, rounding_decimals: int) -> (dict, dict):
     """
     Generate one random test case
 
     Args:
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
+
+    Returns:
+        dict, dict: the experiment specification and the scores
     """
     evaluation_params = {'max_p': 25,
                         'max_n': 200,
@@ -45,9 +62,12 @@ def generate_test_case(random_seed, rounding_decimals):
     return experiment, scores
 
 @pytest.mark.parametrize('random_seed', list(range(5)))
-def test_successful(random_seed):
+def test_successful(random_seed: int):
     """
     Testing a successful scenario
+
+    Args:
+        random_seed (int): the random seed to use
     """
     experiment, scores = generate_test_case(random_seed, 4)
 
@@ -61,9 +81,12 @@ def test_successful(random_seed):
     assert not results['inconsistency']
 
 @pytest.mark.parametrize('random_seed', list(range(5)))
-def test_failure(random_seed):
+def test_failure(random_seed: int):
     """
     Testing a failure
+
+    Args:
+        random_seed (int): the random seed to use
     """
 
     experiment, scores = generate_test_case(random_seed, 4)

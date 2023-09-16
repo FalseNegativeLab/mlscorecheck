@@ -4,6 +4,7 @@ This module implements some functionalities related to folding
 
 import copy
 import itertools
+from functools import cmp_to_key
 
 import numpy as np
 
@@ -164,7 +165,7 @@ def fold_variations(n_items: int,
         return 1, [[0]*(n_folds-1) + [1]]
 
     upper_bound = min(n_items, upper_bound_ if upper_bound_ is not None else n_items)
-    lower_bound = n_items // n_folds
+    lower_bound = int(np.ceil(n_items / n_folds))
 
     total = 0
     all_configurations = []
@@ -201,7 +202,28 @@ def remainder_variations(n_remainders: int, n_folds: int) -> list:
         lists.append(tmp)
     return lists
 
-def create_all_kfolds(p: int, n: int, n_folds: int) -> (np.array, np.array):
+def remove_duplicates(positives: list, negatives: list) -> (list, list):
+    """
+    Remove the duplicate configurations
+
+    Args:
+        positives (list(list)): the list of positive count combinations
+        negatives (list(list)): the list of negative count combinations
+
+    Returns:
+        list(tuple), list(tuple): the lists of unique positive and negative count contributions
+    """
+    pairs = list(map(lambda x: list(zip(x[0], x[1])), list(zip(positives, negatives))))
+
+    pairs_sorted = list(map(lambda pair: sorted(pair, key=cmp_to_key(lambda x, y: x[0] - y[0]
+                                                        if x[0] - y[0] != 0
+                                                        else x[0] + x[1] - y[0] - y[1])), pairs))
+
+    results = [list(tmp2) for tmp2 in set(tuple(tmp) for tmp in pairs_sorted)]
+
+    return tuple(list(map(list, zip(*list(map(lambda x: list(zip(*x)), results))))))
+
+def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
     """
     Creates all potential foldings
 
@@ -211,7 +233,7 @@ def create_all_kfolds(p: int, n: int, n_folds: int) -> (np.array, np.array):
         n_folds (int): the number of folds
 
     Returns:
-        list(list), list(list): the counts of positives and negatives in the potential
+        list(tuple), list(tuple): the counts of positives and negatives in the potential
         foldings. The corresponding rows of the two list are the corresponding positive
         and negative counts.
     """
@@ -232,7 +254,8 @@ def create_all_kfolds(p: int, n: int, n_folds: int) -> (np.array, np.array):
         positive_counts.append(folds[(fold_mask == n_folds) & (other_mask == n_folds)])
         negative_counts.append(other[(fold_mask == n_folds) & (other_mask == n_folds)])
 
-    return np.vstack(positive_counts).tolist(), np.vstack(negative_counts).tolist()
+    return remove_duplicates(np.vstack(positive_counts).tolist(),
+                                np.vstack(negative_counts).tolist())
 
 def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int, int):
     """

@@ -1,17 +1,34 @@
 """
 This module implements the top level check function for
 scores calculated by the mean of ratios aggregation
-in a kfold scenarios and mean of ratios aggregation on multiple datastes.
+in a kfold scenarios and mean of ratios aggregation on multiple datasets.
 """
 
 import copy
 
+import numpy as np
+
 from ._check_n_datasets_mor_known_folds_mor_scores \
             import check_n_datasets_mor_known_folds_mor_scores
+from ._check_1_dataset_unknown_folds_mor_scores import estimate_n_evaluations
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import generate_experiments_with_all_kfolds
 
-__all__ = ['check_n_datasets_mor_unknown_folds_mor_scores']
+__all__ = ['check_n_datasets_mor_unknown_folds_mor_scores',
+            'estimate_n_experiments']
+
+def estimate_n_experiments(experiment: dict) -> int:
+    """
+    Estimates the number of estimations with different fold combinations.
+
+    Args:
+        evaluation (dict): an evaluation specification
+
+    Returns:
+        int: the estimated number of different fold configurations.
+    """
+    counts = [estimate_n_evaluations(evaluation) for evaluation in experiment['evaluations']]
+    return np.prod(counts)
 
 def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
                                         eps,
@@ -29,6 +46,8 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
 
     Note that depending on the number of the minority instances and on the
     folding structure, this test might lead to enormous execution times.
+    Use the function ``estimate_n_experiments`` to get a rough upper bound estimate
+    on the number of experiments with different fold combinations.
 
     Args:
         scores (dict(str,float)): the scores to check

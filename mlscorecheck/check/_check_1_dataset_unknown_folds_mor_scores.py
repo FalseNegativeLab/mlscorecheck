@@ -6,10 +6,34 @@ scenario with unknown fold structures.
 import copy
 
 from ..core import NUMERICAL_TOLERANCE, logger
-from ..aggregated import generate_evaluations_with_all_kfolds
+from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset, remainder_variations,
+                            fold_variations)
 from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
-__all__ = ['check_1_dataset_unknown_folds_mor_scores']
+__all__ = ['check_1_dataset_unknown_folds_mor_scores',
+            'estimate_n_evaluations']
+
+def estimate_n_evaluations(evaluation: dict) -> int:
+    """
+    Estimates the number of estimations with different fold combinations.
+
+    Args:
+        evaluation (dict): an evaluation specification
+
+    Returns:
+        int: the estimated number of different fold configurations.
+    """
+    dataset = Dataset(**evaluation['dataset'])
+    total = dataset.p + dataset.n
+
+    remainder = total % evaluation['folding'].get('n_folds', 1)
+
+    n_remainder_variations = len(remainder_variations(remainder,
+                                                        evaluation['folding'].get('n_folds', 1)))
+    n_fold_variations = len(fold_variations(dataset.p, evaluation['folding'].get('n_folds', 1)))
+    n_repeats = evaluation['folding'].get('n_repeats', 1)
+
+    return (n_remainder_variations * n_fold_variations)**n_repeats
 
 def check_1_dataset_unknown_folds_mor_scores(
                                         scores: dict,
@@ -29,7 +53,8 @@ def check_1_dataset_unknown_folds_mor_scores(
 
     Note that depending on the size of the dataset (especially the number of minority instances)
     and the folding configuration, this test might lead to an untractable number of problems to
-    be solved.
+    be solved. Use the function ``estimate_n_evaluations`` to get a rough upper bound estimate
+    on the number of fold combinations.
 
     Args:
         scores (dict(str,float)): the scores to check

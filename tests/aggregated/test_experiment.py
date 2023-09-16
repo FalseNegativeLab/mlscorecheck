@@ -40,7 +40,7 @@ four_combs = [['acc', 'sens', 'spec', 'bacc']]
 random_seeds = list(range(5))
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-def test_experiment_instantiation(random_seed):
+def test_experiment_instantiation(random_seed: int):
     """
     Testing the creation of Experiment objects
 
@@ -59,7 +59,7 @@ def test_experiment_instantiation(random_seed):
             and experiment.figures['n'] == experiment2.figures['n']
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-def test_sampling_and_scores(random_seed):
+def test_sampling_and_scores(random_seed: int):
     """
     Testing the score calculation in experiments
 
@@ -84,7 +84,9 @@ def test_sampling_and_scores(random_seed):
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('aggregation_folds', ['mor', 'rom'])
-def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
+def test_get_dataset_score_bounds(random_seed: int,
+                                    aggregation: str,
+                                    aggregation_folds: str):
     """
     Testing the score bounds determination
 
@@ -117,7 +119,10 @@ def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-def test_linear_programming_success(subset, random_seed, aggregation, rounding_decimals):
+def test_linear_programming_success(subset: list,
+                                    random_seed: int,
+                                    aggregation: str,
+                                    rounding_decimals: int):
     """
     Testing the linear programming functionalities in a successful scenario
 
@@ -155,10 +160,10 @@ def test_linear_programming_success(subset, random_seed, aggregation, rounding_d
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-def test_linear_programming_success_with_bounds(subset,
-                                                random_seed,
-                                                aggregation,
-                                                rounding_decimals):
+def test_linear_programming_success_with_bounds(subset: list,
+                                                random_seed: int,
+                                                aggregation: str,
+                                                rounding_decimals: int):
     """
     Testing the linear programming functionalities with bounds
 
@@ -187,10 +192,10 @@ def test_linear_programming_success_with_bounds(subset,
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_linear_programming_failure_with_bounds(subset,
-                                                random_seed,
-                                                aggregation,
-                                                rounding_decimals):
+def test_linear_programming_failure_with_bounds(subset: list,
+                                                random_seed: int,
+                                                aggregation: str,
+                                                rounding_decimals: int):
     """
     Testing the linear programming functionalities with bounds
 
@@ -219,10 +224,10 @@ def test_linear_programming_failure_with_bounds(subset,
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3])
-def test_linear_programming_success_both_bounds(subset,
-                                                random_seed,
-                                                aggregation,
-                                                rounding_decimals):
+def test_linear_programming_success_both_bounds(subset: list,
+                                                random_seed: int,
+                                                aggregation: str,
+                                                rounding_decimals: int):
     """
     Testing the linear programming functionalities with both bounds
 
@@ -257,10 +262,10 @@ def test_linear_programming_success_both_bounds(subset,
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_linear_programming_failure_both_bounds(subset,
-                                                random_seed,
-                                                aggregation,
-                                                rounding_decimals):
+def test_linear_programming_failure_both_bounds(subset: list,
+                                                random_seed: int,
+                                                aggregation: str,
+                                                rounding_decimals: int):
     """
     Testing the linear programming functionalities with both bounds
 

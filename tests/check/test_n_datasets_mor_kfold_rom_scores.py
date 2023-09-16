@@ -11,9 +11,13 @@ from mlscorecheck.aggregated import (generate_experiment)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_consistency(random_seed, rounding_decimals):
+def test_consistency(random_seed: int, rounding_decimals: int):
     """
     Testing with a consistent setup
+
+    Args:
+        random_seed (int): the random seed to use
+        rounding_decimals (int): the number of decimals to round to
     """
 
     experiment, scores = generate_experiment(aggregation='mor',
@@ -30,9 +34,13 @@ def test_consistency(random_seed, rounding_decimals):
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_failure(random_seed, rounding_decimals):
+def test_failure(random_seed: int, rounding_decimals: int):
     """
     Testing with an inconsistent setup
+
+    Args:
+        random_seed (int): the random seed to use
+        rounding_decimals (int): the number of decimals to round to
     """
     experiment, scores = generate_experiment(aggregation='mor',
                                                 evaluation_params={'aggregation': 'rom'},
@@ -50,9 +58,13 @@ def test_failure(random_seed, rounding_decimals):
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_consistency_bounds(random_seed, rounding_decimals):
+def test_consistency_bounds(random_seed: int, rounding_decimals: int):
     """
     Testing with a consistent setup and bounds
+
+    Args:
+        random_seed (int): the random seed to use
+        rounding_decimals (int): the number of decimals to round to
     """
     experiment, scores = generate_experiment(aggregation='mor',
                                                 evaluation_params={'aggregation': 'rom'},
@@ -70,9 +82,13 @@ def test_consistency_bounds(random_seed, rounding_decimals):
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
-def test_failure_bounds(random_seed, rounding_decimals):
+def test_failure_bounds(random_seed: int, rounding_decimals: int):
     """
     Testing with a inconsistent setup and bounds
+
+    Args:
+        random_seed (int): the random seed to use
+        rounding_decimals (int): the number of decimals to round to
     """
     experiment, scores = generate_experiment(aggregation='mor',
                                                 evaluation_params={'aggregation': 'rom'},

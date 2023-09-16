@@ -112,7 +112,7 @@ def test_depths():
     denoms, bases = collect_denominators_and_bases(expr, symbols.algebra)
     assert bases
 
-def test_recurrent_solutionn():
+def test_recurrent_solution():
     """
     Testing the recurrent solution test
     """

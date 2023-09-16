@@ -13,9 +13,16 @@ random_seeds = list(range(20))
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
-def test_check_aggregated_scores_feasible(random_seed, rounding_decimals, aggregations):
+def test_check_aggregated_scores_feasible(random_seed: int,
+                                            rounding_decimals: int,
+                                            aggregations: tuple):
     """
     Testing the top level aggregated check function with a feasible problem
+
+    Args:
+        random_seed (int): the random seed to use
+        rounding_decimals (int): the number of decimals to round to
+        aggregations (tuple(str,str)): the aggregations to use
     """
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,
@@ -38,10 +45,14 @@ def test_check_aggregated_scores_feasible(random_seed, rounding_decimals, aggreg
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
-def test_check_aggregated_scores_feasible_custom_solver(random_seed, aggregations):
+def test_check_aggregated_scores_feasible_custom_solver(random_seed: int, aggregations: tuple):
     """
     Testing the top level aggregated check function with a feasible problem
     with custom solver
+
+    Args:
+        random_seed (int): the random seed to use
+        aggregations (tuple(str,str)): the aggregations to use
     """
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,
@@ -64,9 +75,14 @@ def test_check_aggregated_scores_feasible_custom_solver(random_seed, aggregation
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
-def test_check_aggregated_scores_infeasible(random_seed, aggregations):
+def test_check_aggregated_scores_infeasible(random_seed: int, aggregations: tuple):
     """
     Testing the top level aggregated check function with an infeasible problem
+
+
+    Args:
+        random_seed (int): the random seed to use
+        aggregations (tuple(str,str)): the aggregations to use
     """
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,

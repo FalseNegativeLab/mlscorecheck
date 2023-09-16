@@ -33,9 +33,12 @@ for key, val in aliases.items():
     evaluation[key] = evaluation[val]
 
 @pytest.mark.parametrize("score", list(scores.keys()))
-def test_score_and_standardized(score):
+def test_score_and_standardized(score: str):
     """
     This module tests a score against the standardized score
+
+    Args:
+        score (str): the score to test
     """
 
     value = safe_call(functions[score], evaluation)
@@ -44,9 +47,12 @@ def test_score_and_standardized(score):
     assert abs(value - value_standard) < 1e-8
 
 @pytest.mark.parametrize("score", list(short_formula_scores.keys()))
-def test_short_formulas(score):
+def test_short_formulas(score: str):
     """
     This module tests a score against the short formula
+
+    Args:
+        score (str): the score to test
     """
     value = safe_call(functions[score], evaluation)
 
@@ -57,9 +63,12 @@ def test_short_formulas(score):
     assert abs(value - value_short) < 1e-8
 
 @pytest.mark.parametrize("score", list(complement_scores.keys()))
-def test_short_complements(score):
+def test_short_complements(score: str):
     """
     This module tests a score against the short formula
+
+    Args:
+        score (str): the score to test
     """
 
     value = safe_call(functions[score], evaluation)

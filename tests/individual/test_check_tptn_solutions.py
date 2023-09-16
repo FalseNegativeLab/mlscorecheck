@@ -18,7 +18,7 @@ score_functions = score_functions_standardized_without_complements
 @pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
                                     ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
 @pytest.mark.parametrize('random_seed', list(range(10)))
-def test_check_scores_tptn_pairs(figure, zeros, random_seed):
+def test_check_scores_tptn_pairs(figure: str, zeros: list, random_seed: int):
     """
     This function tests the check functionality
 
@@ -54,7 +54,10 @@ def test_check_scores_tptn_pairs(figure, zeros, random_seed):
 @pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
                                     ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
 @pytest.mark.parametrize('random_seed', list(range(10)))
-def test_check_scores_tptn_pairs_prefilter(figure, zeros, random_seed, prefilter_by_pairs):
+def test_check_scores_tptn_pairs_prefilter(figure: str,
+                                            zeros: list,
+                                            random_seed: int,
+                                            prefilter_by_pairs: bool):
     """
     This function tests the check functionality with prefiltering
 
@@ -92,10 +95,10 @@ def test_check_scores_tptn_pairs_prefilter(figure, zeros, random_seed, prefilter
 @pytest.mark.parametrize('zeros', [[], ['tp'], ['tn'], ['fp'], ['fn'],
                                     ['tp', 'tn'], ['tp', 'fp'], ['fp', 'fn'], ['tn', 'fn']])
 @pytest.mark.parametrize('random_seed', list(range(10)))
-def test_check_scores_tptn_pairs_prefilter_failure(figure,
-                                                    zeros,
-                                                    random_seed,
-                                                    prefilter_by_pairs):
+def test_check_scores_tptn_pairs_prefilter_failure(figure: str,
+                                                    zeros: list,
+                                                    random_seed: int,
+                                                    prefilter_by_pairs: bool):
     """
     This function tests the check functionality with failure
 

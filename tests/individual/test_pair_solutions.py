@@ -66,7 +66,7 @@ def adjust_evaluation(evaluation):
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'],
                                     ['tn', 'fn'], ['tn', 'tp'], ['fn', 'fp']])
 @pytest.mark.parametrize("random_state", [3, 5, 7])
-def test_solution(sol, zeros, random_state):
+def test_solution(sol: tuple, zeros: list, random_state: int):
     """
     Testing a particular solution
 
@@ -100,7 +100,7 @@ def test_solution(sol, zeros, random_state):
 @pytest.mark.parametrize("zeros", [[], ['tp'], ['tn'], ['fp'], ['fn'], ['tp', 'fp'],
                                     ['tn', 'fn']])
 @pytest.mark.parametrize("random_state", [3, 5, 7])
-def test_solution_failure(sol, zeros, random_state):
+def test_solution_failure(sol: tuple, zeros: list, random_state: int):
     """
     Testing a particular solution with failure
 

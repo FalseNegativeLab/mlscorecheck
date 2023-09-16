@@ -41,7 +41,7 @@ def test_dataset_instantiation():
     assert dataset2.p == dataset.p and dataset2.n == dataset.n
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-def test_dataset_generation(random_seed):
+def test_dataset_generation(random_seed: int):
     """
     Testing the dataset generation
 
