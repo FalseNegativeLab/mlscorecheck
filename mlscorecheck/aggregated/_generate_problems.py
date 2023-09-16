@@ -1,15 +1,16 @@
+"""
+This module implements some functionalities to generate random datasets, foldings,
+evaluations and experiments.
+"""
 
-from ..core import (init_random_state, dict_mean, dict_minmax, NUMERICAL_TOLERANCE)
+from ..core import (init_random_state, dict_minmax)
 from ..experiments import dataset_statistics
 from ..individual import calculate_scores
 
-from ._fold import Fold
 from ._dataset import Dataset
 from ._folding import Folding
 from ._evaluation import Evaluation
 from ._experiment import Experiment
-
-from ._folding_utils import _create_folds
 
 __all__ = ['generate_dataset',
             'generate_folding',
@@ -43,7 +44,7 @@ def generate_dataset(max_p: int=500,
 
     return {'dataset_name': random_state.choice(list(dataset_statistics.keys()))}
 
-def generate_folding(dataset: dict,
+def generate_folding(*, dataset: dict,
                         max_folds: int=10,
                         max_repeats: int=5,
                         strategies: list=None,
@@ -66,8 +67,8 @@ def generate_folding(dataset: dict,
 
     strategies = ['stratified_sklearn'] if strategies is None else strategies
 
-    ds = Dataset(**dataset)
-    p, n = ds.p, ds.n
+    dataset = Dataset(**dataset)
+    p, n = dataset.p, dataset.n
     max_folds = min(p, n, max_folds)
 
     n_folds = random_state.randint(1, max_folds+1)
@@ -83,9 +84,9 @@ def generate_folding(dataset: dict,
                         n_repeats=n_repeats,
                         strategy=strategy)
 
-    return {'folds': [fold.to_dict() for fold in folding.generate_folds(ds, 'mor')]}
+    return {'folds': [fold.to_dict() for fold in folding.generate_folds(dataset, 'mor')]}
 
-def generate_evaluation(max_p: int=500,
+def generate_evaluation(*, max_p: int=500,
                             max_n: int=500,
                             max_folds: int=10,
                             max_repeats: int=5,
@@ -119,29 +120,27 @@ def generate_evaluation(max_p: int=500,
         parameter is set)
     """
     random_state = init_random_state(random_state)
-    dataset_spec = generate_dataset(max_p=max_p,
+
+    result = {'dataset': generate_dataset(max_p=max_p,
                                         max_n=max_n,
                                         random_state=random_state,
-                                        no_name=no_name)
-    folding_spec = generate_folding(dataset=dataset_spec,
+                                        no_name=no_name)}
+    result['folding'] = generate_folding(dataset=result['dataset'],
                                         max_folds=max_folds,
                                         max_repeats=max_repeats,
                                         strategies=strategies,
                                         random_state=random_state,
                                         no_folds=no_folds)
+
     aggregation = aggregation if aggregation is not None else random_state.choice(['rom', 'mor'])
 
-    evaluation = Evaluation(dataset=dataset_spec,
-                            folding=folding_spec,
+    evaluation = Evaluation(dataset=result['dataset'],
+                            folding=result['folding'],
                             aggregation=aggregation).sample_figures(random_state)
 
     if aggregation == 'rom':
-        scores = calculate_scores(problem={'p': evaluation.p,
-                                            'n': evaluation.n,
-                                            'tp': evaluation.tp,
-                                            'tn': evaluation.tn,
-                                            'beta_positive': 2,
-                                            'beta_negative': 2},
+        scores = calculate_scores(problem=evaluation.figures | {'beta_positive': 2,
+                                                                'beta_negative': 2},
                                     rounding_decimals=rounding_decimals)
         scores['beta_positive'] = 2
         scores['beta_negative'] = 2
@@ -149,16 +148,13 @@ def generate_evaluation(max_p: int=500,
         scores = evaluation.calculate_scores(rounding_decimals)
 
     if feasible_fold_score_bounds is None:
-        fold_score_bounds = None
+        result['fold_score_bounds'] = None
     else:
-        fold_score_bounds = get_fold_score_bounds(evaluation, feasible_fold_score_bounds)
+        result['fold_score_bounds'] = get_fold_score_bounds(evaluation, feasible_fold_score_bounds)
 
-    evaluation = {'dataset': dataset_spec,
-                    'folding': folding_spec,
-                    'aggregation': aggregation,
-                    'fold_score_bounds': fold_score_bounds}
+    result['aggregation'] = aggregation
 
-    return (evaluation, scores) if return_scores else evaluation
+    return (result, scores) if return_scores else result
 
 def get_fold_score_bounds(evaluation: Evaluation,
                             feasible: bool=True,
@@ -187,21 +183,13 @@ def get_fold_score_bounds(evaluation: Evaluation,
 
     return score_bounds
 
-def generate_experiment(max_evaluations: int=5,
-                        max_p: int=500,
-                        max_n: int=500,
-                        max_folds: int=10,
-                        max_repeats: int=5,
-                        strategies=None,
-                        feasible_fold_score_bounds: bool=None,
+def generate_experiment(*, max_evaluations: int=5,
+                        evaluation_params = None,
                         feasible_dataset_score_bounds: bool=None,
-                        aggregation_folds: str=None,
                         aggregation: str=None,
                         random_state=None,
                         return_scores: bool=False,
-                        rounding_decimals: int=None,
-                        no_name: bool=False,
-                        no_folds: bool=False):
+                        rounding_decimals: int=None):
     """
     Generate a random experiment specification
 
@@ -228,6 +216,9 @@ def generate_experiment(max_evaluations: int=5,
         dict[,dict]: the experiment specification (and the scores if the ``return_scores``
         parameter is set)
     """
+    if evaluation_params is None:
+        evaluation_params = {}
+
     random_state = init_random_state(random_state)
 
     n_evaluations = random_state.randint(1, max_evaluations+1)
@@ -235,37 +226,26 @@ def generate_experiment(max_evaluations: int=5,
     aggregation = (aggregation if aggregation is not None
                             else random_state.choice(['rom', 'mor']))
 
-    evaluations = [generate_evaluation(max_p=max_p,
-                                        max_n=max_n,
-                                        max_folds=max_folds,
-                                        max_repeats=max_repeats,
-                                        strategies=strategies,
-                                        feasible_fold_score_bounds=feasible_fold_score_bounds,
-                                        aggregation=aggregation_folds,
-                                        random_state=random_state,
-                                        no_name=no_name,
-                                        no_folds=no_folds)
+    evaluations = [generate_evaluation(**evaluation_params,
+                                        random_state=random_state)
                                                 for _ in range(n_evaluations)]
 
     experiment = Experiment(evaluations=evaluations,
                                 aggregation=aggregation).sample_figures(random_state)
     if aggregation == 'rom':
-        scores = calculate_scores(problem={'p': experiment.p,
-                                            'n': experiment.n,
-                                            'tp': experiment.tp,
-                                            'tn': experiment.tn,
-                                            'beta_positive': 2,
-                                            'beta_negative': 2},
+        scores = calculate_scores(problem=experiment.figures | {'beta_positive': 2,
+                                                                'beta_negative': 2},
                                     rounding_decimals=rounding_decimals)
         scores['beta_positive'] = 2
         scores['beta_negative'] = 2
     else:
         scores = experiment.calculate_scores(rounding_decimals)
 
-    if feasible_fold_score_bounds is not None:
+    if evaluation_params.get('feasible_fold_score_bounds') is not None:
         for idx, evaluation in enumerate(experiment.evaluations):
-            evaluations[idx]['fold_score_bounds'] = get_fold_score_bounds(evaluation,
-                                                                        feasible_fold_score_bounds)
+            evaluations[idx]['fold_score_bounds'] = \
+                get_fold_score_bounds(evaluation,
+                                        evaluation_params['feasible_fold_score_bounds'])
 
     if feasible_dataset_score_bounds is None:
         score_bounds = None

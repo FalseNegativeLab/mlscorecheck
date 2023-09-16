@@ -17,7 +17,7 @@ def test_consistency(random_seed, rounding_decimals):
     """
 
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='rom',
+                                                evaluation_params={'aggregation': 'rom'},
                                                 random_state=random_seed,
                                                 rounding_decimals=rounding_decimals,
                                                 return_scores=True)
@@ -35,7 +35,7 @@ def test_failure(random_seed, rounding_decimals):
     Testing with an inconsistent setup
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='rom',
+                                                evaluation_params={'aggregation': 'rom'},
                                                 random_state=random_seed,
                                                 rounding_decimals=rounding_decimals,
                                                 return_scores=True)
@@ -55,7 +55,7 @@ def test_consistency_bounds(random_seed, rounding_decimals):
     Testing with a consistent setup and bounds
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='rom',
+                                                evaluation_params={'aggregation': 'rom'},
                                                 random_state=random_seed,
                                                 rounding_decimals=rounding_decimals,
                                                 return_scores=True,
@@ -75,7 +75,7 @@ def test_failure_bounds(random_seed, rounding_decimals):
     Testing with a inconsistent setup and bounds
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='rom',
+                                                evaluation_params={'aggregation': 'rom'},
                                                 random_state=random_seed,
                                                 rounding_decimals=rounding_decimals,
                                                 return_scores=True,

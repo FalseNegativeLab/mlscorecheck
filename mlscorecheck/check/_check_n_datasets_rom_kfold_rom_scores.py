@@ -4,11 +4,9 @@ scores calculated by the ratio-of-means aggregation
 in a kfold scenario on one single dataset.
 """
 
-import warnings
-
-from ..core import logger, NUMERICAL_TOLERANCE
+from ..core import NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
-from ..aggregated import check_aggregated_scores, Experiment
+from ..aggregated import Experiment
 
 __all__ = ['check_n_datasets_rom_kfold_rom_scores']
 
@@ -129,6 +127,6 @@ def check_n_datasets_rom_kfold_rom_scores(scores,
     # executing the individual tests
     return check_scores_tptn_pairs(scores=scores,
                                             eps=eps,
-                                            p=experiment.p,
-                                            n=experiment.n,
+                                            p=experiment.figures['p'],
+                                            n=experiment.figures['n'],
                                             numerical_tolerance=numerical_tolerance)

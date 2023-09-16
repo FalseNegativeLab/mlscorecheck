@@ -46,7 +46,11 @@ def _drive_aggregated_test_scores(data,
     if aggregation == 'mor':
         return check_n_datasets_mor_kfold_rom_scores(scores=scores,
                                                         eps=eps,
-                                                        experiment=experiment)
+                                                        experiment=experiment,
+                                                        solver_name=solver_name,
+                                                        timeout=timeout,
+                                                        verbosity=verbosity,
+                                                        numerical_tolerance=numerical_tolerance)
     return check_n_datasets_rom_kfold_rom_scores(scores=scores,
                                                 eps=eps,
                                                 experiment=experiment)

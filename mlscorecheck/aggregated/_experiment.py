@@ -4,14 +4,11 @@ This module implements an abstraction for an experiment
 
 import pulp as pl
 
-from ..core import (init_random_state, dict_mean, round_scores, dict_minmax,
-                    NUMERICAL_TOLERANCE, round_scores)
-from ..individual import calculate_scores_for_lp, calculate_scores
+from ..core import (init_random_state, dict_mean, round_scores,
+                    NUMERICAL_TOLERANCE)
+from ..individual import calculate_scores_for_lp
 
-from ._fold import Fold
-from ._dataset import (Dataset)
 from ._evaluation import Evaluation
-from ._utils import aggregated_scores
 
 from ._utils import check_bounds
 from ._linear_programming import add_bounds
@@ -42,11 +39,12 @@ class Experiment:
             raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
                                 'aggregation, therefore, it is not supported.')
 
-        self.p = sum(evaluation.p for evaluation in self.evaluations)
-        self.n = sum(evaluation.n for evaluation in self.evaluations)
+        self.figures = {'tp': None,
+                        'tn': None,
+                        'p': sum(evaluation.figures['p'] for evaluation in self.evaluations),
+                        'n': sum(evaluation.figures['n'] for evaluation in self.evaluations)}
 
-        self.tp = None
-        self.tn = None
+        self.scores = None
 
     def to_dict(self):
         """
@@ -93,17 +91,18 @@ class Experiment:
             evaluation.calculate_scores()
 
         if isinstance(self.evaluations[0].folds[0].tp, pl.LpVariable):
-            self.tp = pl.lpSum(evaluation.tp for evaluation in self.evaluations)
-            self.tn = pl.lpSum(evaluation.tn for evaluation in self.evaluations)
+            self.figures['tp'] = pl.lpSum(evaluation.figures['tp']
+                                            for evaluation in self.evaluations)
+            self.figures['tn'] = pl.lpSum(evaluation.figures['tn']
+                                            for evaluation in self.evaluations)
         else:
-            self.tp = sum(evaluation.tp for evaluation in self.evaluations)
-            self.tn = sum(evaluation.tn for evaluation in self.evaluations)
+            self.figures['tp'] = sum(evaluation.figures['tp']
+                                        for evaluation in self.evaluations)
+            self.figures['tn'] = sum(evaluation.figures['tn']
+                                        for evaluation in self.evaluations)
 
         if self.aggregation == 'rom':
-            self.scores = calculate_scores_for_lp({'p': self.p,
-                                                    'n': self.n,
-                                                    'tp': self.tp,
-                                                    'tn': self.tn})
+            self.scores = calculate_scores_for_lp(self.figures)
         elif self.aggregation == 'mor':
             self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
 
@@ -133,7 +132,10 @@ class Experiment:
         self.calculate_scores()
 
         for evaluation in self.evaluations:
-            add_bounds(lp_problem, evaluation.scores, self.dataset_score_bounds, evaluation.dataset.identifier)
+            add_bounds(lp_problem,
+                        evaluation.scores,
+                        self.dataset_score_bounds,
+                        evaluation.dataset.identifier)
 
         return lp_problem
 
@@ -178,6 +180,7 @@ class Experiment:
                 tmp['bounds_flag'] = tmp['folds']
             results['evaluations'].append(tmp)
 
-        results['bounds_flag'] = all(evaluation['bounds_flag'] for evaluation in results['evaluations'])
+        results['bounds_flag'] = all(evaluation['bounds_flag']
+                                        for evaluation in results['evaluations'])
 
         return results

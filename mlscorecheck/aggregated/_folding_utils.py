@@ -116,7 +116,9 @@ def _create_folds(p,
     """
 
     if n_folds == 1:
-        folds = [{'p': p, 'n': n, 'identifier': f'{identifier}_0_r{idx}'} for idx in range(n_repeats)]
+        folds = [{'p': p,
+                    'n': n,
+                    'identifier': f'{identifier}_0_r{idx}'} for idx in range(n_repeats)]
 
     elif folding is None:
         folds = [{'p': p * n_repeats, 'n': n * n_repeats, 'identifier': f'{identifier}_0'}]
@@ -257,6 +259,35 @@ def _check_specification_and_determine_p_n(dataset, folding):
 
     return p, n
 
+def create_folding_combinations(evaluations, n_repeats):
+    """
+    Generates all fold combinations according to n_repeats
+
+    Args:
+        evaluations (list(Evaluation)): the list of evaluations with different fold structures
+        n_repeats (int): the number of repetitions to add
+
+    Returns:
+        list(Evaluations): the list of evaluations with all fold combinations
+    """
+    all_results = copy.deepcopy(evaluations)
+
+    while n_repeats > 0:
+        tmp = []
+        for one_result in all_results:
+            for res in evaluations:
+                tmp_res = copy.deepcopy(one_result)
+                to_add = copy.deepcopy(res['folding']['folds'])
+                for fold in to_add:
+                    fold['identifier'] = f'{fold["identifier"]}_r{n_repeats}'
+                tmp_res['folding']['folds'].extend(to_add)
+
+                tmp.append(tmp_res)
+        all_results = tmp
+        n_repeats -= 1
+
+    return all_results
+
 def generate_datasets_with_all_kfolds(evaluation):
     """
     From a dataset specification generates all datasets with all possible
@@ -298,24 +329,10 @@ def generate_datasets_with_all_kfolds(evaluation):
             result['aggregation'] = evaluation.get('aggregation')
         return results
 
-    all_results = copy.deepcopy(results)
-
     # multiplicating the folds structures as many times as many repetitions there are
     n_repeats = evaluation['folding'].get('n_repeats', 1) - 1
 
-    while n_repeats > 0:
-        tmp = []
-        for one_result in all_results:
-            for res in results:
-                tmp_res = copy.deepcopy(one_result)
-                to_add = copy.deepcopy(res['folding']['folds'])
-                for fold in to_add:
-                    fold['identifier'] = f'{fold["identifier"]}_r{n_repeats}'
-                tmp_res['folding']['folds'].extend(to_add)
-
-                tmp.append(tmp_res)
-        all_results = tmp
-        n_repeats -= 1
+    all_results = create_folding_combinations(results, n_repeats)
 
     # adding fold bounds
     if evaluation.get('fold_score_bounds') is not None:

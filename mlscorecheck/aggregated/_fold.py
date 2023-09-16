@@ -7,18 +7,12 @@ sampling, and the calculation of scores and the assemblance of
 the linear programming problem
 """
 
-import copy
-
-import numpy as np
-
 import pulp as pl
 
-from ..core import (logger, init_random_state, round_scores, NUMERICAL_TOLERANCE,
-                    round_scores)
+from ..core import (init_random_state, round_scores)
 from ..individual import calculate_scores_for_lp
 
-from ._linear_programming import add_bounds
-from ._utils import check_bounds, random_identifier, aggregated_scores
+from ._utils import random_identifier
 
 __all__ = ['Fold']
 

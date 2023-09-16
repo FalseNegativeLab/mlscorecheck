@@ -7,7 +7,7 @@ import pytest
 import numpy as np
 
 from mlscorecheck.check import check_1_dataset_unknown_folds_mor_scores
-from mlscorecheck.aggregated import generate_evaluation, generate_dataset, Evaluation
+from mlscorecheck.aggregated import Evaluation
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [4])
@@ -59,8 +59,6 @@ def test_failure(random_seed, rounding_decimals):
                             folding=folding,
                             aggregation='mor')
     evaluation.sample_figures()
-
-    scores = evaluation.calculate_scores(rounding_decimals)
 
     evaluation = evaluation.to_dict()
     del evaluation['aggregation']

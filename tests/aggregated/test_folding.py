@@ -48,13 +48,13 @@ def test_generate_folds():
     assert len(folding.generate_folds(dataset, 'mor')) == 15
 
     with pytest.raises(ValueError):
-        folding.generate_folds(dataset, 'dummy')
+        folding.generate_folds(dataset=dataset, aggregation='dummy')
 
     folding = Folding(folds=[{'p': 5, 'n': 10}, {'p': 10, 'n': 20}])
-    assert len(folding.generate_folds(dataset, 'rom')) == 2
+    assert len(folding.generate_folds(dataset=dataset, aggregation='rom')) == 2
 
     with pytest.raises(ValueError):
-        folding.generate_folds(Dataset(p=4, n=21), aggregation='rom')
+        folding.generate_folds(dataset=Dataset(p=4, n=21), aggregation='rom')
 
 @pytest.mark.parametrize('random_seed', range(10))
 def test_generate_folding(random_seed):
@@ -66,6 +66,6 @@ def test_generate_folding(random_seed):
     """
 
     dataset = generate_dataset(random_state=random_seed)
-    folding = generate_folding(dataset, random_state=random_seed)
+    folding = generate_folding(dataset=dataset, random_state=random_seed)
 
     assert Folding(**folding) is not None

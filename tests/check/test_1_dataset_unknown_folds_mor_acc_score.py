@@ -8,7 +8,7 @@ import pytest
 import numpy as np
 
 from mlscorecheck.check import check_1_dataset_unknown_folds_mor_acc_score
-from mlscorecheck.aggregated import (generate_evaluation, generate_dataset,
+from mlscorecheck.aggregated import (generate_dataset,
                                         Evaluation, Folding)
 
 @pytest.mark.parametrize('random_seed', range(20))

@@ -55,7 +55,8 @@ def test_experiment_instantiation(random_seed):
 
     experiment2 = Experiment(**experiment.to_dict())
 
-    assert experiment.p == experiment2.p and experiment.n == experiment2.n
+    assert experiment.figures['p'] == experiment2.figures['p']\
+            and experiment.figures['n'] == experiment2.figures['n']
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 def test_sampling_and_scores(random_seed):
@@ -74,7 +75,8 @@ def test_sampling_and_scores(random_seed):
     scores = experiment.calculate_scores()
 
     if experiment.aggregation == 'rom':
-        assert abs(scores['sens'] - float(experiment.tp / experiment.p)) < 1e-10
+        value = float(experiment.figures['tp'] / experiment.figures['p'])
+        assert abs(scores['sens'] - value) < 1e-10
     elif experiment.aggregation == 'mor':
         assert abs(np.mean([evaluation.scores['acc'] for evaluation in experiment.evaluations])\
                 - scores['acc']) < 1e-10
@@ -94,7 +96,7 @@ def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
 
     experiment = generate_experiment(random_state=random_seed,
                                         aggregation=aggregation,
-                                        aggregation_folds=aggregation_folds)
+                                        evaluation_params={'aggregation': aggregation_folds})
     experiment = Experiment(**experiment)
     experiment.sample_figures().calculate_scores()
 
@@ -109,7 +111,7 @@ def test_get_dataset_score_bounds(random_seed, aggregation, aggregation_folds):
     for evaluation in experiment.evaluations:
         for key in score_bounds:
             if score_bounds[key][0] < 1.0:
-                assert not (score_bounds[key][0] <= evaluation.scores[key] <= score_bounds[key][1])
+                assert not score_bounds[key][0] <= evaluation.scores[key] <= score_bounds[key][1]
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
@@ -232,12 +234,12 @@ def test_linear_programming_success_both_bounds(subset,
     """
 
     experiment, scores = generate_experiment(random_state=random_seed,
-                                                aggregation=aggregation,
-                                                aggregation_folds='mor',
-                                                return_scores=True,
-                                                rounding_decimals=rounding_decimals,
-                                                feasible_dataset_score_bounds=True,
-                                                feasible_fold_score_bounds=True)
+                                        aggregation=aggregation,
+                                        evaluation_params={'aggregation': 'mor',
+                                                            'feasible_fold_score_bounds': True},
+                                        return_scores=True,
+                                        rounding_decimals=rounding_decimals,
+                                        feasible_dataset_score_bounds=True)
     scores = {key: value for key, value in scores.items() if key in subset}
 
     experiment = Experiment(**experiment)
@@ -270,12 +272,12 @@ def test_linear_programming_failure_both_bounds(subset,
     """
 
     experiment, scores = generate_experiment(random_state=random_seed,
-                                                aggregation=aggregation,
-                                                aggregation_folds='mor',
-                                                return_scores=True,
-                                                rounding_decimals=rounding_decimals,
-                                                feasible_dataset_score_bounds=False,
-                                                feasible_fold_score_bounds=False)
+                                        aggregation=aggregation,
+                                        evaluation_params={'aggregation': 'mor',
+                                                            'feasible_fold_score_bounds': True},
+                                        return_scores=True,
+                                        rounding_decimals=rounding_decimals,
+                                        feasible_dataset_score_bounds=False)
     scores = {key: value for key, value in scores.items() if key in subset}
 
     experiment = Experiment(**experiment)

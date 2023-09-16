@@ -2,8 +2,6 @@
 This module tests the fold abstraction
 """
 
-import pytest
-
 import pulp as pl
 
 import numpy as np

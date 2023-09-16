@@ -6,9 +6,6 @@ import pytest
 
 from mlscorecheck.aggregated import (check_aggregated_scores,
                                         generate_experiment,
-                                        generate_dataset,
-                                        generate_evaluation,
-                                        Experiment,
                                         round_scores)
 
 random_seeds = list(range(20))
@@ -23,7 +20,7 @@ def test_check_aggregated_scores_feasible(random_seed, rounding_decimals, aggreg
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,
                                                 aggregation=aggregations[0],
-                                                aggregation_folds=aggregations[1])
+                                                evaluation_params={'aggregation': aggregations[1]})
 
     scores = round_scores(scores, rounding_decimals)
 
@@ -49,7 +46,7 @@ def test_check_aggregated_scores_feasible_custom_solver(random_seed, aggregation
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,
                                                 aggregation=aggregations[0],
-                                                aggregation_folds=aggregations[1])
+                                                evaluation_params={'aggregation': aggregations[1]})
     scores = round_scores(scores, 4)
 
     details = check_aggregated_scores(experiment=experiment,
@@ -74,7 +71,7 @@ def test_check_aggregated_scores_infeasible(random_seed, aggregations):
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 return_scores=True,
                                                 aggregation=aggregations[0],
-                                                aggregation_folds=aggregations[1])
+                                                evaluation_params={'aggregation': aggregations[1]})
 
     scores = {'acc': 0.1, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.4}
 
@@ -93,14 +90,14 @@ def test_check_aggregated_scores_timeout():
     Eventually this test can fail, due to the unpredictability of solvers timing out
     """
     experiment, scores = generate_experiment(max_evaluations=20,
-                                                max_folds=20,
-                                                max_repeats=20,
-                                                random_state=5,
-                                                return_scores=True,
-                                                aggregation='mor',
-                                                aggregation_folds='mor',
-                                                feasible_fold_score_bounds=True,
-                                                feasible_dataset_score_bounds=True)
+                                        evaluation_params={'max_folds': 20,
+                                                            'max_repeats': 20,
+                                                            'aggregation': 'mor',
+                                                            'feasible_fold_score_bounds': True},
+                                        random_state=5,
+                                        return_scores=True,
+                                        aggregation='mor',
+                                        feasible_dataset_score_bounds=True)
 
     scores = round_scores(scores, 7)
 
@@ -133,7 +130,7 @@ def test_others():
     """
 
     experiment, scores = generate_experiment(aggregation='rom',
-                                                aggregation_folds='mor',
+                                                evaluation_params={'aggregation': 'mor'},
                                                 return_scores=True)
     with pytest.raises(ValueError):
         check_aggregated_scores(experiment=experiment,

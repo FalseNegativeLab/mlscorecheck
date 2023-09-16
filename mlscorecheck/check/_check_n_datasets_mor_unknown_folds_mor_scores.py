@@ -4,7 +4,8 @@ scores calculated by the mean of ratios aggregation
 in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 """
 
-from ._check_n_datasets_mor_known_folds_mor_scores import check_n_datasets_mor_known_folds_mor_scores
+from ._check_n_datasets_mor_known_folds_mor_scores \
+            import check_n_datasets_mor_known_folds_mor_scores
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import generate_experiments_with_all_kfolds
 
@@ -107,8 +108,8 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores,
     results = {'details': [],
                 'inconsistency': True}
 
-    for experiment in experiments:
-        result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
+    for experim in experiments:
+        result = check_n_datasets_mor_known_folds_mor_scores(experiment=experim,
                                                     scores=scores,
                                                     eps=eps,
                                                     timeout=timeout,

@@ -4,17 +4,7 @@ This module implements an abstraction for a dataset
 # disabling pylint false positives
 # pylint: disable=no-member
 
-import pulp as pl
-
-from ..individual import calculate_scores_for_lp, calculate_scores
-from ..core import (logger, init_random_state, dict_mean, round_scores, dict_minmax,
-                    NUMERICAL_TOLERANCE)
-from ..experiments import lookup_dataset
-
-from ._fold import Fold
-from ._folding_utils import _create_folds
-from ._linear_programming import add_bounds
-from ._utils import check_bounds, aggregated_scores, random_identifier
+from ._utils import random_identifier
 
 from ..experiments import dataset_statistics
 

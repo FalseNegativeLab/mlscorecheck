@@ -2,14 +2,6 @@
 This module implements some functionalities related to fold structures
 """
 
-import itertools
-import copy
-
-import numpy as np
-
-from ..core import init_random_state
-from ..experiments import dataset_statistics
-
 from ._fold import Fold
 from ._folding_utils import _create_folds
 

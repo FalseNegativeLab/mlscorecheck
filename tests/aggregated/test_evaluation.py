@@ -37,7 +37,7 @@ def test_evaluate_timeout():
     Testing the evaluate_timeout function
     """
 
-    class Mock:
+    class Mock: # pylint: disable=too-few-public-methods
         """
         Mock lp_problem class
         """
@@ -65,7 +65,7 @@ def test_instantiation(random_seed, aggregation):
     """
 
     dataset = generate_dataset(random_state=random_seed)
-    folding = generate_folding(dataset, random_state=random_seed)
+    folding = generate_folding(dataset=dataset, random_state=random_seed)
 
     evaluation = Evaluation(dataset, folding, aggregation=aggregation)
 
@@ -73,7 +73,8 @@ def test_instantiation(random_seed, aggregation):
 
     evaluation2 = Evaluation(**evaluation.to_dict())
 
-    assert evaluation.p == evaluation2.p and evaluation.n == evaluation2.n
+    assert evaluation.figures['p'] == evaluation2.figures['p']\
+            and evaluation.figures['n'] == evaluation2.figures['n']
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('aggregation', ['mor', 'rom'])
@@ -87,13 +88,13 @@ def test_sample_figures(random_seed, aggregation):
     """
 
     dataset = generate_dataset(random_state=random_seed)
-    folding = generate_folding(dataset, random_state=random_seed)
+    folding = generate_folding(dataset=dataset, random_state=random_seed)
 
     evaluation = Evaluation(dataset, folding, aggregation=aggregation)
 
     evaluation.sample_figures(random_state=random_seed).calculate_scores()
 
-    assert evaluation.tp >= 0 and evaluation.tn >= 0
+    assert evaluation.figures['tp'] >= 0 and evaluation.figures['tn'] >= 0
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
@@ -111,7 +112,7 @@ def test_linear_programming_success(subset, random_seed, aggregation, rounding_d
     """
 
     dataset = generate_dataset(random_state=random_seed)
-    folding = generate_folding(dataset, random_state=random_seed)
+    folding = generate_folding(dataset=dataset, random_state=random_seed)
 
     evaluation = Evaluation(dataset, folding, aggregation=aggregation)
 

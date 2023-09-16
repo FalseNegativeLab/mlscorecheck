@@ -4,7 +4,7 @@ scores calculated by the mean of ratios aggregation
 in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 """
 
-from ..aggregated import check_aggregated_scores, Experiment
+from ..aggregated import check_aggregated_scores
 from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_known_folds_mor_scores']

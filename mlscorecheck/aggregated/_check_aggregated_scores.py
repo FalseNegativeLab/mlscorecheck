@@ -65,9 +65,9 @@ def check_aggregated_scores(*,
 
     if experiment.aggregation == 'rom' \
         and any(evaluation.aggregation == 'mor' for evaluation in experiment.evaluations):
-            raise ValueError('experiment level MoR aggregation with dataset level RoM '\
-                'aggregation is an unlikely situation, it is not supported in this high level '\
-                'interface.')
+        raise ValueError('experiment level MoR aggregation with dataset level RoM '\
+            'aggregation is an unlikely situation, it is not supported in this high level '\
+            'interface.')
 
     solver_name = (PREFERRED_SOLVER if solver_name is None or solver_name not in solvers
                                     else solver_name)

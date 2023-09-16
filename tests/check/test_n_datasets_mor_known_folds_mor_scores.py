@@ -17,7 +17,7 @@ def test_consistency(random_seed, rounding_decimals):
     """
 
     experiment, scores = generate_experiment(aggregation='mor',
-                                            aggregation_folds='mor',
+                                            evaluation_params={'aggregation': 'mor'},
                                             rounding_decimals=rounding_decimals,
                                             random_state=random_seed,
                                             return_scores=True)
@@ -35,7 +35,7 @@ def test_failure(random_seed, rounding_decimals):
     Testing with an inconsistent setup
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                            aggregation_folds='mor',
+                                            evaluation_params={'aggregation': 'mor'},
                                             rounding_decimals=rounding_decimals,
                                             random_state=random_seed,
                                             return_scores=True)
@@ -55,11 +55,11 @@ def test_consistency_bounds(random_seed, rounding_decimals):
     Testing with a consistent setup and bounds
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='mor',
+                                                evaluation_params={'aggregation': 'mor',
+                                                            'feasible_fold_score_bounds': True},
                                                 rounding_decimals=rounding_decimals,
                                                 random_state=random_seed,
                                                 feasible_dataset_score_bounds=True,
-                                                feasible_fold_score_bounds=True,
                                                 return_scores=True)
 
     result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
@@ -76,11 +76,11 @@ def test_failure_bounds(random_seed, rounding_decimals):
     Testing with a inconsistent setup and bounds
     """
     experiment, scores = generate_experiment(aggregation='mor',
-                                                aggregation_folds='mor',
+                                                evaluation_params={'aggregation': 'mor',
+                                                            'feasible_fold_score_bounds': True},
                                                 rounding_decimals=rounding_decimals,
                                                 random_state=random_seed,
                                                 feasible_dataset_score_bounds=True,
-                                                feasible_fold_score_bounds=True,
                                                 return_scores=True)
 
     scores = {'acc': 0.5, 'sens': 0.1, 'spec': 0.2, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}

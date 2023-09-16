@@ -16,7 +16,7 @@ def test_consistency(random_seed, rounding_decimals):
     """
 
     experiment, scores = generate_experiment(aggregation='rom',
-                                            aggregation_folds='rom',
+                                            evaluation_params={'aggregation': 'rom'},
                                             random_state=random_seed,
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
@@ -35,7 +35,7 @@ def test_failure(random_seed, rounding_decimals):
     """
 
     experiment, scores = generate_experiment(aggregation='rom',
-                                            aggregation_folds='rom',
+                                            evaluation_params={'aggregation': 'rom'},
                                             random_state=random_seed,
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)

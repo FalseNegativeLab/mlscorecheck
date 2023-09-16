@@ -4,13 +4,11 @@ This module implements the abstraction for an Evaluation
 
 import pulp as pl
 
-from ._fold import Fold
 from ._dataset import Dataset
 from ._folding import Folding
-from ..core import (init_random_state, dict_mean, round_scores, dict_minmax,
-                    NUMERICAL_TOLERANCE, round_scores)
+from ..core import (init_random_state, dict_mean, round_scores,
+                    NUMERICAL_TOLERANCE)
 from ..individual import calculate_scores_for_lp
-from ._folding_utils import _create_folds
 from ._utils import check_bounds
 from ._linear_programming import add_bounds
 
@@ -18,7 +16,10 @@ class Evaluation:
     """
     Abstract representation of an evaluation
     """
-    def __init__(self, dataset: dict, folding: dict, aggregation: str, fold_score_bounds: dict=None):
+    def __init__(self, dataset: dict,
+                    folding: dict,
+                    aggregation: str,
+                    fold_score_bounds: dict=None):
         """
         Constructor of the object
 
@@ -38,13 +39,14 @@ class Evaluation:
             raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
                                 'aggregation, therefore, it is not supported.')
 
-        self.tp = None
-        self.tn = None
-        self.scores = None
-
         self.folds = self.folding.generate_folds(self.dataset, self.aggregation)
-        self.p = sum(fold.p for fold in self.folds)
-        self.n = sum(fold.n for fold in self.folds)
+
+        self.figures = {'tp': None,
+                        'tn': None,
+                        'p': sum(fold.p for fold in self.folds),
+                        'n': sum(fold.n for fold in self.folds)}
+
+        self.scores = None
 
     def to_dict(self):
         """
@@ -91,17 +93,14 @@ class Evaluation:
             fold.calculate_scores()
 
         if isinstance(self.folds[0].tp, pl.LpVariable):
-            self.tp = pl.lpSum(fold.tp for fold in self.folds)
-            self.tn = pl.lpSum(fold.tn for fold in self.folds)
+            self.figures['tp'] = pl.lpSum(fold.tp for fold in self.folds)
+            self.figures['tn'] = pl.lpSum(fold.tn for fold in self.folds)
         else:
-            self.tp = sum(fold.tp for fold in self.folds)
-            self.tn = sum(fold.tn for fold in self.folds)
+            self.figures['tp'] = sum(fold.tp for fold in self.folds)
+            self.figures['tn'] = sum(fold.tn for fold in self.folds)
 
         if self.aggregation == 'rom':
-            self.scores = calculate_scores_for_lp({'p': self.p,
-                                                    'n': self.n,
-                                                    'tp': self.tp,
-                                                    'tn': self.tn})
+            self.scores = calculate_scores_for_lp(self.figures)
         elif self.aggregation == 'mor':
             self.scores = dict_mean([fold.scores for fold in self.folds])
 
