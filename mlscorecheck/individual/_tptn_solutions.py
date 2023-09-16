@@ -6,7 +6,7 @@ This is a generated file, do not edit.
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
-from ._helper import is_zero, unify_results
+from ._utils import is_zero, unify_results
 from ._interval import sqrt
 
 __all__ = [

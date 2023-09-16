@@ -4,6 +4,8 @@ This module implements the problem solver
 
 from ..core import logger
 from ..individual import Solutions
+from ._algebra import Algebra
+from ._score_objects import Score
 
 __all__ = ['ProblemSolver',
             'collect_denominators_and_bases',
@@ -11,7 +13,11 @@ __all__ = ['ProblemSolver',
             'solve_order',
             'check_recurrent_solution']
 
-def _collect_denominators_and_bases(expression, denoms, bases, algebra, depth):
+def _collect_denominators_and_bases(expression,
+                                    denoms: list,
+                                    bases: list,
+                                    algebra: Algebra,
+                                    depth: int):
     """
     Recursive core of collecting all denominators and bases
 
@@ -43,7 +49,7 @@ def _collect_denominators_and_bases(expression, denoms, bases, algebra, depth):
             if not algebra.is_trivial(operand):
                 _collect_denominators_and_bases(operand, denoms, bases, algebra, depth+1)
 
-def collect_denominators_and_bases(expression, algebra):
+def collect_denominators_and_bases(expression, algebra: Algebra) -> (list, list):
     """
     Top level function for recursively collecting all denominators and bases
 
@@ -80,7 +86,7 @@ def collect_denominators_and_bases(expression, algebra):
 
     return denoms, bases
 
-def solve_order(score0, score1):
+def solve_order(score0: Score, score1: Score):
     """
     Determining the order the equations should be solved, based on using the shortest solution
     first
@@ -135,7 +141,7 @@ def solve_order(score0, score1):
     return (score0.equation_polynomial, score1.equation_polynomial,
             str(first_variable), str(second_variable))
 
-def check_recurrent_solution(symbol, symbols):
+def check_recurrent_solution(symbol: str, symbols: list) -> bool:
     """
     Checks and warns if the solution is recurrent in the variable
 
@@ -153,7 +159,7 @@ class ProblemSolver:
     The problem solver object, used to solve the individual problems with
     the aid of computer algebra systems
     """
-    def __init__(self, score0, score1):
+    def __init__(self, score0: Score, score1: Score):
         """
         The constructor of the object
 
@@ -291,7 +297,7 @@ class ProblemSolver:
                     for key, value in solution.items()}
             self.str_solutions.append(tmp)
 
-    def get_solution(self):
+    def get_solution(self) -> Solutions:
         """
         Transforms the solution into a solution object
 

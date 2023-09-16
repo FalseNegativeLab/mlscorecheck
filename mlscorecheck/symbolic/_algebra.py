@@ -24,7 +24,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def create_symbol(self, name, **kwargs):
+    def create_symbol(self, name: str, **kwargs):
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -87,7 +87,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def args(self, expression):
+    def args(self, expression) -> list:
         """
         The list of arguments
 
@@ -99,7 +99,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_trivial(self, expression):
+    def is_trivial(self, expression) -> bool:
         """
         Checks if the expression is trivial
 
@@ -111,7 +111,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_root(self, expression):
+    def is_root(self, expression) -> bool:
         """
         Checks if the expression is a root
 
@@ -123,7 +123,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_division(self, expression):
+    def is_division(self, expression) -> bool:
         """
         Checks if the expression is a division
 
@@ -135,7 +135,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_power(self, expression):
+    def is_power(self, expression) -> bool:
         """
         Checks if the expression is a power
 
@@ -147,7 +147,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def operands(self, expression):
+    def operands(self, expression) -> list:
         """
         Returns the list of operands
 
@@ -159,7 +159,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def free_symbols(self, expression):
+    def free_symbols(self, expression) -> list:
         """
         Get all free symbols in an expression
 
@@ -183,7 +183,7 @@ class SympyAlgebra(Algebra):
         self.algebra = importlib.import_module("sympy")
         self.sqrt = self.algebra.sqrt
 
-    def create_symbol(self, name, **kwargs):
+    def create_symbol(self, name: str, **kwargs):
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -255,7 +255,7 @@ class SympyAlgebra(Algebra):
         """
         return expression.subs(subs_dict)
 
-    def args(self, expression):
+    def args(self, expression) -> list:
         """
         The list of arguments
 
@@ -267,7 +267,7 @@ class SympyAlgebra(Algebra):
         """
         return expression.free_symbols
 
-    def is_trivial(self, expression):
+    def is_trivial(self, expression) -> bool:
         """
         Checks if the expression is trivial
         TODO: checking other constants
@@ -280,7 +280,7 @@ class SympyAlgebra(Algebra):
         """
         return True if expression is None else expression == 1
 
-    def is_root(self, expression):
+    def is_root(self, expression) -> bool:
         """
         Checks if the expression is a root
 
@@ -296,7 +296,7 @@ class SympyAlgebra(Algebra):
                 return True
         return False
 
-    def is_power(self, expression):
+    def is_power(self, expression) -> bool:
         """
         Checks whether the expression is a power
 
@@ -308,7 +308,7 @@ class SympyAlgebra(Algebra):
         """
         return isinstance(expression, self.algebra.core.power.Pow)
 
-    def is_division(self, expression):
+    def is_division(self, expression) -> bool:
         """
         Checks whether the expression is a division
 
@@ -331,7 +331,7 @@ class SympyAlgebra(Algebra):
                     return True
         return False
 
-    def operands(self, expression):
+    def operands(self, expression) -> list:
         """
         Returns the list of operands
 
@@ -343,7 +343,7 @@ class SympyAlgebra(Algebra):
         """
         return expression.args
 
-    def free_symbols(self, expression):
+    def free_symbols(self, expression) -> list:
         """
         Get all free symbols in an expression
 
@@ -453,7 +453,7 @@ class SageAlgebra(Algebra):
         """
         return expression.subs(subs_dict)
 
-    def args(self, expression):
+    def args(self, expression) -> list:
         """
         The list of arguments
 
@@ -465,7 +465,7 @@ class SageAlgebra(Algebra):
         """
         return set(expression.args())
 
-    def is_trivial(self, expression):
+    def is_trivial(self, expression) -> bool:
         """
         Checks if the expression is trivial
 
@@ -477,7 +477,7 @@ class SageAlgebra(Algebra):
         """
         return True if expression is None else expression.is_trivially_equal(1)
 
-    def is_root(self, expression):
+    def is_root(self, expression) -> bool:
         """
         Checks if the expression is a root
 
@@ -493,7 +493,7 @@ class SageAlgebra(Algebra):
                 return True
         return False
 
-    def is_power(self, expression):
+    def is_power(self, expression) -> bool:
         """
         Checks whether the expression is a power
 
@@ -506,7 +506,7 @@ class SageAlgebra(Algebra):
         return bool(hasattr(expression.operator(), '__qualname__')\
                     and expression.operator().__qualname__ == 'pow')
 
-    def is_division(self, expression):
+    def is_division(self, expression) -> bool:
         """
         Checks whether the expression is a division
 
@@ -536,7 +536,7 @@ class SageAlgebra(Algebra):
                         return True
         return False
 
-    def operands(self, expression):
+    def operands(self, expression) -> list:
         """
         Returns the list of operands
 
@@ -548,7 +548,7 @@ class SageAlgebra(Algebra):
         """
         return tuple(expression.operands())
 
-    def free_symbols(self, expression):
+    def free_symbols(self, expression) -> list:
         """
         Get all free symbols in an expression
 
@@ -594,7 +594,7 @@ class Symbols: # pylint: disable=too-many-instance-attributes
         """
         return self.algebra
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns a dictionary representation
 

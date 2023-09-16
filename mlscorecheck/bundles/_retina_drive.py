@@ -17,15 +17,15 @@ __all__ = ['drive_aggregated_fov_pixels',
             'drive_image',
             'filter_drive']
 
-def _drive_aggregated_test_scores(data,
-                                    scores,
+def _drive_aggregated_test_scores(data: list,
+                                    scores: dict,
                                     eps,
-                                    aggregation,
+                                    aggregation: str,
                                     *,
-                                    solver_name=None,
-                                    timeout=None,
-                                    verbosity=1,
-                                    numerical_tolerance=NUMERICAL_TOLERANCE):
+                                    solver_name: str = None,
+                                    timeout: int = None,
+                                    verbosity: int = 1,
+                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of the a dataset.
 
@@ -34,6 +34,16 @@ def _drive_aggregated_test_scores(data,
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the mode of aggregation ('mor'/'rom')
+
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity level of the pulp linear programming solver
+                            0: silent, non-zero: verbose.
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: the results of the analysis, the attribute ``inconsistency``
@@ -55,7 +65,7 @@ def _drive_aggregated_test_scores(data,
                                                 eps=eps,
                                                 experiment=experiment)
 
-def filter_drive(data, subset=None):
+def filter_drive(data: list, subset: list = None) -> list:
     """
     Filter a dataset
 
@@ -77,15 +87,15 @@ def filter_drive(data, subset=None):
                         '("train"/"test") and the image identifiers are specified properly')
     return result
 
-def drive_aggregated(scores,
+def drive_aggregated(scores: dict,
                         eps,
-                        image_set,
-                        subset=None,
+                        image_set: str,
+                        subset: list = None,
                         *,
-                        solver_name=None,
-                        timeout=None,
-                        verbosity=1,
-                        numerical_tolerance=NUMERICAL_TOLERANCE):
+                        solver_name: str = None,
+                        timeout: int = None,
+                        verbosity: int = 1,
+                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Testing the consistency of DRIVE scores with multiple
     aggregation techniques and with the field of view (FoV)
@@ -170,7 +180,10 @@ def drive_aggregated(scores,
             'rom_fov_pixels_inconsistency': results_fov_rom['inconsistency'],
             'rom_all_pixels_inconsistency': results_no_fov_rom['inconsistency']}
 
-def drive_image(scores, eps, image_set, identifier):
+def drive_image(scores: dict,
+                eps,
+                image_set: str,
+                identifier: str) -> dict:
     """
     Testing the consistency of DRIVE a drive image scores with multiple
     with the field of view (FoV) and without the field of view (no FoV).
@@ -179,9 +192,7 @@ def drive_image(scores, eps, image_set, identifier):
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
         image_set (str): the image set to test ('train'/'test')
-        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
-                            note that the identifiers need to be in accordance
-                            with the image_set
+        identifier (str): the identifier of the image (like '01' or '22')
 
     Returns:
         dict: the result of the analysis
@@ -202,16 +213,16 @@ def drive_image(scores, eps, image_set, identifier):
     return {'fov_pixels_inconsistency': results_fov['inconsistency'],
             'all_pixels_inconsistency': results_no_fov['inconsistency']}
 
-def drive_aggregated_fov_pixels(scores,
+def drive_aggregated_fov_pixels(scores: dict,
                                 eps,
-                                aggregation,
-                                image_set,
-                                subset=None,
+                                aggregation: str,
+                                image_set: str,
+                                subset: list = None,
                                 *,
-                                solver_name=None,
-                                timeout=None,
-                                verbosity=1,
-                                numerical_tolerance=NUMERICAL_TOLERANCE):
+                                solver_name: str = None,
+                                timeout: int = None,
+                                verbosity: int = 1,
+                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Testing the consistency of DRIVE scores with the field of view (FoV) pixels only.
     The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
@@ -266,16 +277,16 @@ def drive_aggregated_fov_pixels(scores,
                                             verbosity=verbosity,
                                             numerical_tolerance=numerical_tolerance)
 
-def drive_aggregated_all_pixels(scores,
+def drive_aggregated_all_pixels(scores: dict,
                                 eps,
-                                aggregation,
-                                image_set,
-                                subset=None,
+                                aggregation: str,
+                                image_set: str,
+                                subset: list = None,
                                 *,
-                                solver_name=None,
-                                timeout=None,
-                                verbosity=1,
-                                numerical_tolerance=NUMERICAL_TOLERANCE):
+                                solver_name: str = None,
+                                timeout: int = None,
+                                verbosity: int = 1,
+                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Testing the consistency of DRIVE scores with all pixels.
     The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
@@ -328,7 +339,10 @@ def drive_aggregated_all_pixels(scores,
                                             verbosity=verbosity,
                                             numerical_tolerance=numerical_tolerance)
 
-def drive_image_fov_pixels(scores, eps, image_set, identifier):
+def drive_image_fov_pixels(scores: dict,
+                            eps,
+                            image_set: list,
+                            identifier: str) -> dict:
     """
     Testing the consistency of DRIVE a drive image scores with the field of
     view (FoV) pixels only.
@@ -368,7 +382,10 @@ def drive_image_fov_pixels(scores, eps, image_set, identifier):
                                             testset=image,
                                             prefilter_by_pairs=True)
 
-def drive_image_all_pixels(scores, eps, image_set, identifier):
+def drive_image_all_pixels(scores: dict,
+                            eps,
+                            image_set: list,
+                            identifier: str) -> dict:
     """
     Testing the consistency of DRIVE a drive image scores
     without all pixels.

@@ -4,19 +4,21 @@ scores calculated by the mean-of-ratios aggregation
 in a kfold scenario on one single dataset.
 """
 
+import copy
+
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import check_aggregated_scores, Experiment
 
 __all__ = ['check_1_dataset_known_folds_mor_scores']
 
-def check_1_dataset_known_folds_mor_scores(evaluation,
-                                    scores,
+def check_1_dataset_known_folds_mor_scores(evaluation: dict,
+                                    scores: dict,
                                     eps,
                                     *,
-                                    solver_name=None,
-                                    timeout=None,
-                                    verbosity=1,
-                                    numerical_tolerance=NUMERICAL_TOLERANCE):
+                                    solver_name: str = None,
+                                    timeout: int = None,
+                                    verbosity: int = 1,
+                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
@@ -32,7 +34,7 @@ def check_1_dataset_known_folds_mor_scores(evaluation,
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        dataset (dict): the dataset specification
+        evaluation (dict): the specification of the evaluation
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
@@ -60,35 +62,35 @@ def check_1_dataset_known_folds_mor_scores(evaluation,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> dataset = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
+        >>> evaluation = {'dataset': {'p': 126, 'n': 131},
+                        'folding': {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                    eps=1e-3,
-                                                    dataset=dataset)
-        >>> result['inconsistency']
+        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                            scores=scores,
+                                                            eps=1e-3)
+        result['inconsistency']
         # False
 
-        >>> dataset = {'p': 398,
-                        'n': 569,
-                        'n_folds': 4,
-                        'n_repeats': 2,
-                        'folding': 'stratified_sklearn'}
+        >>> dataset = {'p': 398, 'n': 569}
+        >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+        >>> evaluation = {'dataset': dataset, 'folding': folding}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                    eps=1e-2,
-                                                    dataset=dataset)
+        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                            scores=scores,
+                                                            eps=1e-2)
         >>> result['inconsistency']
         # True
 
-        >>> dataset = {'name': 'common_datasets.glass_0_1_6_vs_2',
-                        'n_folds': 4,
-                        'n_repeats': 2,
-                        'folding': 'stratified_sklearn',
-                        'fold_score_bounds': {'acc': (0.8, 1.0)}}
+        >>> dataset = {'dataset_name': 'common_datasets.glass_0_1_6_vs_2'}
+        >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+        >>> evaluation = {'dataset': dataset,
+                            'folding': folding,
+                            'fold_score_bounds': {'acc': (0.8, 1.0)}}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
-        >>> result = check_1_dataset_kfold_mor_scores(scores=scores,
-                                                        eps=1e-2,
-                                                        dataset=dataset)
+        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+                                                            scores=scores,
+                                                            eps=1e-2,
+                                                            numerical_tolerance=1e-6)
         >>> result['inconsistency']
         # True
 
@@ -96,7 +98,8 @@ def check_1_dataset_known_folds_mor_scores(evaluation,
 
     if evaluation.get('aggregation', 'mor') != 'mor':
         raise ValueError("either don't specify the aggregation or set it to 'mor'")
-    evaluation = evaluation | {'aggregation': 'mor'}
+
+    evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary

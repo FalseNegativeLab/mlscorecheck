@@ -19,7 +19,7 @@ class Evaluation:
     def __init__(self, dataset: dict,
                     folding: dict,
                     aggregation: str,
-                    fold_score_bounds: dict=None):
+                    fold_score_bounds: dict = None):
         """
         Constructor of the object
 
@@ -48,7 +48,7 @@ class Evaluation:
 
         self.scores = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns the dictionary representation of the object
 
@@ -60,7 +60,7 @@ class Evaluation:
                 'fold_score_bounds': self.fold_score_bounds,
                 'aggregation': self.aggregation}
 
-    def sample_figures(self, random_state=None):
+    def sample_figures(self, random_state = None):
         """
         Samples the figures in the evaluation
 
@@ -79,12 +79,15 @@ class Evaluation:
 
         return self
 
-    def calculate_scores(self, rounding_decimals: int=None, score_subset: list=None):
+    def calculate_scores(self,
+                            rounding_decimals: int = None,
+                            score_subset: list = None) -> dict:
         """
         Calculates the scores
 
         Args:
             rounding_decimals (int|None): the number of decimals to round the scores to
+            score_subset (list): the list of scores to calculate scores for
 
         Returns:
             dict: the calculated scores
@@ -111,13 +114,15 @@ class Evaluation:
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
 
-    def init_lp(self, lp_problem: pl.LpProblem, scores=None):
+    def init_lp(self,
+                lp_problem: pl.LpProblem,
+                scores: dict = None) -> pl.LpProblem:
         """
         Initializes a linear programming problem
 
         Args:
             lp_problem (pl.LpProblem): the linear programming problem to initialize
-            scores (dict(str,float)): the scores used to estimate initial values
+            scores (dict(str,float)|None): the scores used to estimate initial values
 
         Returns:
             pl.LpProblem: the updated linear programming problem
@@ -133,7 +138,8 @@ class Evaluation:
 
         return lp_problem
 
-    def populate(self, lp_problem: pl.LpProblem):
+    def populate(self,
+                    lp_problem: pl.LpProblem):
         """
         Populates the evaluation with the figures in the solved linear programming problem
 
@@ -148,7 +154,8 @@ class Evaluation:
 
         return self
 
-    def check_bounds(self, numerical_tolerance: float=NUMERICAL_TOLERANCE):
+    def check_bounds(self,
+                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
         """
         Check the bounds in the problem
 

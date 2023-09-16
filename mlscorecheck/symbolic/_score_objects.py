@@ -56,17 +56,17 @@ class Score: # pylint: disable=too-many-instance-attributes
     The Score base class
     """
     def __init__(self,
-                    symbols,
-                    descriptor,
+                    symbols: Symbols,
+                    descriptor: dict,
                     *,
                     function,
-                    expression=None,
-                    equation=None):
+                    expression: str = None,
+                    equation: str = None):
         """
         Constructor of the base class
 
         Args:
-            symbols (Symbol): A Symbols object representing the base kit of symbols to use
+            symbols (Symbols): A Symbols object representing the base kit of symbols to use
             descriptor (dict): a dictionary descriptor of the score
             function (callable): the functional form
             expression (sympy_obj|sage_obj/None): the expression of the score
@@ -77,9 +77,9 @@ class Score: # pylint: disable=too-many-instance-attributes
 
         self.abbreviation = descriptor['abbreviation']
         self.name = descriptor['name']
-        self.nans = descriptor.get('nans', None)
-        self.synonyms = descriptor.get('synonyms', None)
-        self.complement = descriptor.get('complement', None)
+        self.nans = descriptor.get('nans')
+        self.synonyms = descriptor.get('synonyms')
+        self.complement = descriptor.get('complement')
         self.args = descriptor.get('args_standardized')
         self.range = (descriptor.get('lower_bound', -np.inf),
                         descriptor.get('upper_bound', np.inf))
@@ -597,7 +597,7 @@ class MatthewsCorrelationCoefficient(Score):
                         scores['mcc'],
                         function=functions['mcc'])
 
-def get_base_objects(algebraic_system='sympy'):
+def get_base_objects(algebraic_system: str = 'sympy') -> dict:
     """
     Returns the dict of basic score objects
 
@@ -620,7 +620,7 @@ def get_base_objects(algebraic_system='sympy'):
 
     return score_objects
 
-def get_all_objects(algebraic_system='sympy'):
+def get_all_objects(algebraic_system: str = 'sympy') -> dict:
     """
     Returns the dict of all score objects
 
@@ -636,7 +636,7 @@ def get_all_objects(algebraic_system='sympy'):
 
     return score_objects
 
-def get_objects_without_complements(algebraic_system='sympy'):
+def get_objects_without_complements(algebraic_system: str = 'sympy') -> dict:
     """
     Returns the dict of basic score objects without complements
 

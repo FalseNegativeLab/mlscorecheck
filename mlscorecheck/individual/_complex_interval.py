@@ -147,7 +147,7 @@ class ComplexInterval:
         """
         return str(f"[{str(self.real)}, {str(self.imag)}]")
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """
         The equality operator
 
@@ -162,7 +162,7 @@ class ComplexInterval:
 
         return self.real == other.real and self.imag == other.imag
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         """
         The non-equality operator
 

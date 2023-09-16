@@ -9,7 +9,7 @@ from importlib.resources import files
 
 __all__ = ['load_json']
 
-def load_json(directory, file):
+def load_json(directory: str, file: str) -> dict:
     """
     Load a JSON file from the package
 

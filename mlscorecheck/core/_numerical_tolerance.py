@@ -10,7 +10,7 @@ __all__ = ['NUMERICAL_TOLERANCE',
 
 NUMERICAL_TOLERANCE = 1e-6
 
-def check_uncertainty_and_tolerance(eps, numerical_tolerance):
+def check_uncertainty_and_tolerance(eps: float, numerical_tolerance: float):
     """
     Checking the relation of the numerical tolerance and the uncertainty
 
@@ -27,7 +27,7 @@ def check_uncertainty_and_tolerance(eps, numerical_tolerance):
         raise ValueError('The numerical tolerance is comparable to the numerical '\
                         'uncertainty. Please lower the numerical tolerance.')
 
-def update_uncertainty(eps, numerical_tolerance):
+def update_uncertainty(eps: float, numerical_tolerance: float):
     """
     Adjusts the specified uncertainty by the numerical tolerance
 

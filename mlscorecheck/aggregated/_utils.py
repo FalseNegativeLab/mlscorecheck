@@ -14,7 +14,7 @@ __all__ = ['random_identifier',
 
 aggregated_scores = ['acc', 'sens', 'spec', 'bacc']
 
-def random_identifier(length):
+def random_identifier(length: int):
     """
     Generating a random identifier
 
@@ -27,7 +27,9 @@ def random_identifier(length):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for _ in range(length))
 
-def check_bounds(scores, bounds, tolerance=1e-5):
+def check_bounds(scores: dict,
+                    bounds: dict = None,
+                    tolerance: float = 1e-5) -> bool:
     """
     Checks the bounds for the scores
 
@@ -53,7 +55,11 @@ def check_bounds(scores, bounds, tolerance=1e-5):
 
     return flag
 
-def compare_scores(scores0, scores1, eps, subset=None, tolerance=1e-5):
+def compare_scores(scores0: dict,
+                    scores1: dict,
+                    eps,
+                    subset: list = None,
+                    tolerance: float = 1e-5):
     """
     Compares two sets of scores
 

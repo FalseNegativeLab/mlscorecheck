@@ -11,13 +11,13 @@ __all__ = ['generate_problems',
             'generate_problem_and_scores']
 
 def generate_problem_and_scores(*,
-                                max_p=1000,
-                                max_n=1000,
-                                zeros=None,
-                                add_complements=None,
-                                score_subset=None,
-                                rounding_decimals=None,
-                                random_state=None):
+                                max_p: int = 1000,
+                                max_n: int = 1000,
+                                zeros: list = None,
+                                add_complements: bool = None,
+                                score_subset: list = None,
+                                rounding_decimals: int = None,
+                                random_state=None) -> (dict, dict):
     """
     Generates a random problem and random but feasible scores
 
@@ -46,11 +46,11 @@ def generate_problem_and_scores(*,
     return problem, scores
 
 def generate_1_problem(*,
-                        max_p=1000,
-                        max_n=1000,
-                        zeros=None,
-                        add_complements=False,
-                        random_state=None):
+                        max_p: int = 1000,
+                        max_n: int = 1000,
+                        zeros: list = None,
+                        add_complements: bool = False,
+                        random_state=None) -> dict:
     """
     Generates a random problem
 
@@ -96,12 +96,12 @@ def generate_1_problem(*,
     return result, {'p': result['p'], 'n': result['n']}
 
 def generate_problems(*,
-                        n_problems=1,
-                        max_p=1000,
-                        max_n=1000,
-                        zeros=None,
-                        add_complements=False,
-                        random_state=None):
+                        n_problems: int = 1,
+                        max_p: int = 1000,
+                        max_n: int = 1000,
+                        zeros: list = None,
+                        add_complements: bool = False,
+                        random_state=None) -> (dict, dict):
     """
     Generates a random problem
 

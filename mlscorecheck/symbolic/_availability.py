@@ -10,7 +10,7 @@ __all__ = ['symbolic_toolkits',
 
 symbolic_toolkits = []
 
-def check_importability(package):
+def check_importability(package: str) -> bool:
     """
     Tests the importability of a package
 
@@ -31,7 +31,7 @@ symbolic_toolkits.append(check_importability('sage'))
 
 symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
 
-def get_symbolic_toolkit():
+def get_symbolic_toolkit() -> str:
     """
     Returns the name of an available symbolic toolkit (in sympy, sage order)
 

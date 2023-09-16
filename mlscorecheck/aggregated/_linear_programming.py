@@ -13,7 +13,10 @@ __all__ = ['add_bounds',
             'solve',
             'create_lp_target']
 
-def add_bounds(lp_problem, variables, bounds, label):
+def add_bounds(lp_problem: pl.LpProblem,
+                variables: dict,
+                bounds: dict,
+                label: str) -> pl.LpProblem:
     """
     Adding bounds to a linear program
 
@@ -47,7 +50,10 @@ def add_bounds(lp_problem, variables, bounds, label):
     return lp_problem
 
 
-def create_lp_target(obj, scores, eps, lp_problem):
+def create_lp_target(obj,
+                        scores: dict,
+                        eps,
+                        lp_problem: pl.LpProblem) -> pl.LpProblem:
     """
     Add the target and the score conditions to the linear programming problem
 
@@ -70,7 +76,10 @@ def create_lp_target(obj, scores, eps, lp_problem):
 
     return lp_problem
 
-def solve(obj, scores, eps, solver=None):
+def solve(obj,
+            scores: dict,
+            eps,
+            solver = None) -> pl.LpProblem:
     """
     Solving a problem.
 
@@ -86,12 +95,12 @@ def solve(obj, scores, eps, solver=None):
     if not isinstance(eps, dict):
         eps = {key: eps for key in ['acc', 'sens', 'spec', 'bacc']}
 
-    lp_program = pl.LpProblem(f'feasibility_{random_identifier(8)}')
+    lp_problem = pl.LpProblem(f'feasibility_{random_identifier(8)}')
 
-    lp_program = obj.init_lp(lp_program, scores)
+    lp_problem = obj.init_lp(lp_problem, scores)
 
-    lp_program = create_lp_target(obj, scores, eps, lp_program)
+    lp_problem = create_lp_target(obj, scores, eps, lp_problem)
 
-    lp_program.solve(solver=solver)
+    lp_problem.solve(solver=solver)
 
-    return lp_program
+    return lp_problem

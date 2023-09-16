@@ -7,7 +7,7 @@ import numpy as np
 __all__ = ['dict_mean',
             'dict_minmax']
 
-def dict_mean(dicts):
+def dict_mean(dicts: list) -> dict:
     """
     Calculates the mean of scores in a dictionary
 
@@ -28,7 +28,7 @@ def dict_mean(dicts):
 
     return result
 
-def dict_minmax(dicts):
+def dict_minmax(dicts: list) -> dict:
     """
     Calculates the min-max of scores in a dictionary
 

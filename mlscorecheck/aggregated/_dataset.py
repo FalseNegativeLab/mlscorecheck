@@ -15,17 +15,17 @@ class Dataset:
     The abstract representation of a dataset
     """
     def __init__(self,
-                    p: int=None,
-                    n: int=None,
-                    dataset_name: str=None,
-                    identifier: str=None):
+                    p: int = None,
+                    n: int = None,
+                    dataset_name: str = None,
+                    identifier: str = None):
         """
         Constructor of a dataset
 
         Args:
             p (None|int): the number of positives
             n (None|int): the number of negatives
-            name (None|str): the name of the dataset in the mlscorecheck specification
+            dataset_name (None|str): the name of the dataset in the mlscorecheck specification
                             for example, 'common_datasets.ADA'
             identifier (None|str): the identifier of the dataset (randomly generated if
                                     None)
@@ -59,7 +59,7 @@ class Dataset:
             self.p = dataset['p']
             self.n = dataset['n']
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Dictionary representation of the dataset
 

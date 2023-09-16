@@ -22,7 +22,7 @@ class Experiment:
     def __init__(self,
                     evaluations: list,
                     aggregation: str,
-                    dataset_score_bounds: dict=None):
+                    dataset_score_bounds: dict = None):
         """
         Constructor of the experiment
 
@@ -46,7 +46,7 @@ class Experiment:
 
         self.scores = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns a dictionary representation of the object
 
@@ -57,7 +57,7 @@ class Experiment:
                 'dataset_score_bounds': self.dataset_score_bounds,
                 'aggregation': self.aggregation}
 
-    def sample_figures(self, random_state=None):
+    def sample_figures(self, random_state = None):
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -76,7 +76,9 @@ class Experiment:
 
         return self
 
-    def calculate_scores(self, rounding_decimals: int=None, score_subset: list=None):
+    def calculate_scores(self,
+                            rounding_decimals: int = None,
+                            score_subset: list = None) -> dict:
         """
         Calculates the scores
 
@@ -113,7 +115,9 @@ class Experiment:
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
 
-    def init_lp(self, lp_problem: pl.LpProblem, scores: dict=None):
+    def init_lp(self,
+                lp_problem: pl.LpProblem,
+                scores: dict = None) -> pl.LpProblem:
         """
         Initializes a linear programming problem
 
@@ -154,7 +158,7 @@ class Experiment:
 
         return self
 
-    def check_bounds(self, numerical_tolerance: float=NUMERICAL_TOLERANCE):
+    def check_bounds(self, numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
         """
         Check the bounds in the problem
 

@@ -18,15 +18,14 @@ __all__ = ['check_aggregated_scores']
 solvers = pl.listSolvers(onlyAvailable=True)
 PREFERRED_SOLVER = 'PULP_CBC_CMD' if 'PULP_CBC_CMD' in solvers else solvers[0]
 
-
 def check_aggregated_scores(*,
-                            experiment,
-                            scores,
+                            experiment: dict,
+                            scores: dict,
                             eps,
-                            solver_name=None,
-                            timeout=None,
-                            verbosity=1,
-                            numerical_tolerance=NUMERICAL_TOLERANCE):
+                            solver_name: str = None,
+                            timeout: int = None,
+                            verbosity: int = 1,
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Check aggregated scores
 
@@ -47,8 +46,11 @@ def check_aggregated_scores(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        bool[, dict]: a flag which is True if inconsistency is identified, False otherwise
-        and optionally the details in a dictionary
+        dict: the details of the test, under the key 'inconsistency', one can find
+        the flag indicating if inconsistency was identified
+
+    Raises:
+        ValueError: if the problem is not specified properly
     """
 
     check_uncertainty_and_tolerance(eps, numerical_tolerance)

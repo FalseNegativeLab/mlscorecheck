@@ -19,10 +19,10 @@ __all__ = ['generate_dataset',
             'get_fold_score_bounds',
             'get_dataset_score_bounds']
 
-def generate_dataset(max_p: int=500,
-                        max_n: int=500,
-                        random_state=None,
-                        no_name: bool=False):
+def generate_dataset(max_p: int = 500,
+                        max_n: int = 500,
+                        random_state = None,
+                        no_name: bool = False) -> dict:
     """
     Generate a random dataset specification
 
@@ -30,6 +30,8 @@ def generate_dataset(max_p: int=500,
         max_p (int): the maximum number of positives
         max_n (int): the maximum number of negatives
         random_state (None|int|np.random.RandomState): the random seed/state to be used
+        no_name (bool): if True, doesn't generate dataset specifications
+                        with ``dataset_name``
 
     Returns:
         dict: the dataset specification
@@ -45,11 +47,11 @@ def generate_dataset(max_p: int=500,
     return {'dataset_name': random_state.choice(list(dataset_statistics.keys()))}
 
 def generate_folding(*, dataset: dict,
-                        max_folds: int=10,
-                        max_repeats: int=5,
-                        strategies: list=None,
-                        random_state=None,
-                        no_folds: bool=False):
+                        max_folds: int = 10,
+                        max_repeats: int = 5,
+                        strategies: list = None,
+                        random_state = None,
+                        no_folds: bool = False) -> dict:
     """
     Generate a random folding specification for a dataset
 
@@ -59,6 +61,7 @@ def generate_folding(*, dataset: dict,
         max_repeats (int): the maximum number of repeats
         strategies (None|list): the list of potential folding strategies ('stratified_sklearn')
         random_state (None|int|np.random.RandomState): the random seed/state to be used
+        no_folds (bool): if True, doesn't generate folding with exact folds specifications
 
     Returns:
         dict: the folding specification
@@ -86,18 +89,18 @@ def generate_folding(*, dataset: dict,
 
     return {'folds': [fold.to_dict() for fold in folding.generate_folds(dataset, 'mor')]}
 
-def generate_evaluation(*, max_p: int=500,
-                            max_n: int=500,
-                            max_folds: int=10,
-                            max_repeats: int=5,
-                            strategies: list=None,
-                            feasible_fold_score_bounds: bool=None,
-                            aggregation: str=None,
-                            random_state=None,
-                            return_scores: bool=False,
-                            rounding_decimals: int=None,
-                            no_name: bool=False,
-                            no_folds: bool=False):
+def generate_evaluation(*, max_p: int = 500,
+                            max_n: int = 500,
+                            max_folds: int = 10,
+                            max_repeats: int = 5,
+                            strategies: list = None,
+                            feasible_fold_score_bounds: bool = None,
+                            aggregation: str = None,
+                            random_state = None,
+                            return_scores: bool = False,
+                            rounding_decimals: int = None,
+                            no_name: bool = False,
+                            no_folds: bool = False) -> dict:
     """
     Generate a random evaluation specification
 
@@ -114,6 +117,9 @@ def generate_evaluation(*, max_p: int=500,
                                 aggregation is used ('rom'/'mor')
         random_state (None|int|np.random.RandomState): the random seed/state to be used
         return_scores (bool): whether to return the scores (corresponding to the bounds) too
+        rounding_decimals (None|int): the number of decimals to round to
+        no_name (bool): if True, doesn't generate evaluations with ``dataset_name``
+        no_folds (bool): if True, doesn't generate foldings with a list of folds
 
     Returns:
         dict[,dict]: the evaluation specification (and the scores if the ``return_scores``
@@ -157,8 +163,8 @@ def generate_evaluation(*, max_p: int=500,
     return (result, scores) if return_scores else result
 
 def get_fold_score_bounds(evaluation: Evaluation,
-                            feasible: bool=True,
-                            numerical_tolerance: float=1*1e-1):
+                            feasible: bool = True,
+                            numerical_tolerance: float = 1*1e-1) -> dict:
     """
     Extract fold score bounds from an evaluation (sampled and scores computed)
 
@@ -183,34 +189,27 @@ def get_fold_score_bounds(evaluation: Evaluation,
 
     return score_bounds
 
-def generate_experiment(*, max_evaluations: int=5,
-                        evaluation_params = None,
-                        feasible_dataset_score_bounds: bool=None,
-                        aggregation: str=None,
-                        random_state=None,
-                        return_scores: bool=False,
-                        rounding_decimals: int=None):
+def generate_experiment(*, max_evaluations: int = 5,
+                        evaluation_params: dict = None,
+                        feasible_dataset_score_bounds: bool = None,
+                        aggregation: str = None,
+                        random_state = None,
+                        return_scores: bool = False,
+                        rounding_decimals: int = None) -> dict:
     """
     Generate a random experiment specification
 
     Args:
-        max_p (int): the maximum number of positives
-        max_n (int): the maximum number of negatives
-        max_folds (int): the maximum number of folds
-        max_repeats (int): the maximum number of repeats
-        strategies (None|list): the list of potential folding strategies ('stratified_sklearn')
-        feasible_fold_score_bounds (None|bool): If None, no fold_score_bounds are added, if True
-                                                feasible bounds are added, otherwise infeasible
-                                                ones
-        feasible_dataset_score_bounds (None|bool): If None, no dataset_score_bounds are added,
-                                                if True feasible bounds are added, otherwise
-                                                infeasible ones
-        aggregation_folds (None|str): if None a random aggregation is chosen for the folds,
-                                otherwise the specified aggregation is used ('rom'/'mor')
+        max_evaluations (int): the maximum number of evaluations
+        evaluation_params (dict|None): the parameters of ``generate_evaluations``
+        feasible_dataset_score_bounds (None|bool): whether to add feasible (``True``) or
+                                                    infeasible (``False``) score bounds. No
+                                                    bounds are added if None.
         aggregation (None|str): if None a random aggregation is chosen, otherwise the specified
                                 aggregation is used ('rom'/'mor')
         random_state (None|int|np.random.RandomState): the random seed/state to be used
         return_scores (bool): whether to return the scores (corresponding to the bounds) too
+        rounding_decimals (int|None): the number of decimals to round to
 
     Returns:
         dict[,dict]: the experiment specification (and the scores if the ``return_scores``
@@ -259,8 +258,8 @@ def generate_experiment(*, max_evaluations: int=5,
     return (experiment, scores) if return_scores else experiment
 
 def get_dataset_score_bounds(experiment: Experiment,
-                                feasible: bool=True,
-                                numerical_tolerance: float=2*1e-2):
+                                feasible: bool = True,
+                                numerical_tolerance: float = 2*1e-2) -> dict:
     """
     Extract fold score bounds from an experiment (sampled and scores computed)
 

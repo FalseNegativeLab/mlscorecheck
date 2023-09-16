@@ -20,7 +20,10 @@ class Fold:
     """
     Abstract representation of a fold
     """
-    def __init__(self, p: int, n: int, identifier: str=None):
+    def __init__(self,
+                    p: int,
+                    n: int,
+                    identifier: str = None):
         """
         Constructor of a fold
 
@@ -40,7 +43,7 @@ class Fold:
         self.variable_names = {'tp': f'tp_{self.identifier}'.replace('-', '_'),
                                 'tn': f'tn_{self.identifier}'.replace('-', '_')}
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Dictionary representation of the fold
 
@@ -51,7 +54,7 @@ class Fold:
                 'n': self.n,
                 'identifier': self.identifier}
 
-    def sample_figures(self, random_state=None):
+    def sample_figures(self, random_state = None):
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -68,9 +71,12 @@ class Fold:
 
         return self
 
-    def calculate_scores(self, rounding_decimals=None):
+    def calculate_scores(self, rounding_decimals: int = None) -> dict:
         """
         Calculate the scores for the fold
+
+        Args:
+            rounding_decimals (int|None): the number of decimals to round to
 
         Returns:
             dict: the scores
@@ -83,7 +89,7 @@ class Fold:
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
 
-    def init_lp(self, scores: dict=None):
+    def init_lp(self, scores: dict = None):
         """
         Initialize a linear programming problem by creating the variables for the fold
 
@@ -114,7 +120,7 @@ class Fold:
 
         self.calculate_scores()
 
-    def populate(self, lp_problem: pl.LpProblem):
+    def populate(self, lp_problem: pl.LpProblem) -> pl.LpProblem:
         """
         Populate the fold with the ``tp`` and ``tn`` values from the linear program
 

@@ -24,8 +24,8 @@ class Solution:
     non-zero and non-negative conditions as expressions
     """
     def __init__(self,
-                    solution,
-                    conditions=None):
+                    solution: dict,
+                    conditions: list = None):
         """
         Constructor of the solution
 
@@ -57,7 +57,7 @@ class Solution:
         return {'solution': self.solution,
                 'conditions': self.conditions}
 
-    def check_non_negative(self, value):
+    def check_non_negative(self, value) -> bool:
         """
         Checks the non-negativity condition
 
@@ -78,7 +78,7 @@ class Solution:
 
         return False
 
-    def check_non_zero(self, value):
+    def check_non_zero(self, value) -> bool:
         """
         Checks the non-zero condition
 
@@ -145,8 +145,8 @@ class Solutions:
     Represents all solutions to a particular problem
     """
     def __init__(self,
-                    scores,
-                    solutions):
+                    scores: list,
+                    solutions: list):
         """
         The constructor of the object
 
@@ -157,7 +157,7 @@ class Solutions:
         self.scores = scores
         self.solutions = [Solution(**sol) for sol in solutions]
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns a dictionary representation
 

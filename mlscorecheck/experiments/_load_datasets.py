@@ -36,7 +36,7 @@ def resolve_pn(dataset_conf):
 
     return result
 
-def lookup_dataset(dataset):
+def lookup_dataset(dataset: str) -> dict:
     """
     Look up a dataset
 

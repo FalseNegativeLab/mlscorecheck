@@ -6,7 +6,10 @@ from ..experiments import load_ehg
 
 from ..check import check_1_dataset_unknown_folds_mor_scores
 
-def check_ehg(scores, eps, n_folds, n_repeats):
+def check_ehg(scores: dict,
+                eps,
+                n_folds: int,
+                n_repeats: int) -> dict:
     """
     Checks the cross-validated EHG scores
 

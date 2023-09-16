@@ -8,7 +8,7 @@ import copy
 from ..core import NUMERICAL_TOLERANCE, logger, update_uncertainty
 
 from ._interval import Interval, IntervalUnion
-from ._helper import resolve_aliases_and_complements, create_intervals
+from ._utils import resolve_aliases_and_complements, create_intervals
 from ._tptn_solution_bundles import tptn_solutions, sens_tp, spec_tn, is_applicable_tptn
 from ._pair_solutions import solution_specifications
 
@@ -20,7 +20,13 @@ preferred_order = ['acc', 'sens', 'spec', 'bacc', 'npv', 'ppv', 'f1p', 'f1n', 'f
                     'fm', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor',
                     'ji', 'gm', 'upm', 'p4', 'kappa', 'mcc']
 
-def iterate_tptn(*, score, score_value, valid_pairs, sol_fun, params, iterate_by):
+def iterate_tptn(*,
+                    score: str,
+                    score_value: float,
+                    valid_pairs: dict,
+                    sol_fun,
+                    params: dict,
+                    iterate_by: str) -> dict:
     """
     Iterate through the potential values of tp or tn and construct feasible pairs
 
@@ -56,7 +62,10 @@ def iterate_tptn(*, score, score_value, valid_pairs, sol_fun, params, iterate_by
 
     return results
 
-def update_sens(p, valid_pairs, score_int, solve_for):
+def update_sens(p: int,
+                valid_pairs: dict,
+                score_int,
+                solve_for: str) -> dict:
     """
     Update sensitivity intervals
 
@@ -81,14 +90,17 @@ def update_sens(p, valid_pairs, score_int, solve_for):
 
     return valid_pairs
 
-def update_spec(n, valid_pairs, score_int, solve_for):
+def update_spec(n: int,
+                valid_pairs: dict,
+                score_int,
+                solve_for: str) -> dict:
     """
     Update specificity intervals
 
     Args:
         n (int): the number of negatives
         valid_pairs (dict(int,Interval|IntervalUnion)): the actual intervals
-        score_int (Interval): the score interval
+        score_int (Interval|IntervalUnion): the score interval
         solve_for (str): 'tp'/'tn' - the figure to solve for
 
     Returns:
@@ -106,7 +118,10 @@ def update_spec(n, valid_pairs, score_int, solve_for):
 
     return valid_pairs
 
-def initialize_valid_pairs(p, n, iterate_by, init_tptn_intervals):
+def initialize_valid_pairs(p: int,
+                            n: int,
+                            iterate_by: str,
+                            init_tptn_intervals: dict) -> dict:
     """
     Initializes the valid pairs, either from the original input or the
     prefiltered intervals.
@@ -137,14 +152,14 @@ def initialize_valid_pairs(p, n, iterate_by, init_tptn_intervals):
     init_interval = Interval(0, n+1) if iterate_by == 'tp' else Interval(0, p+1)
     return {key: init_interval for key in range(p+1 if iterate_by == 'tp' else n+1)}
 
-def _check_scores_tptn_pairs(p,
-                            n,
-                            scores,
+def _check_scores_tptn_pairs(p: int,
+                            n: int,
+                            scores: dict,
                             eps,
                             *,
-                            numerical_tolerance=NUMERICAL_TOLERANCE,
-                            solve_for=None,
-                            init_tptn_intervals=None):
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                            solve_for: str=None,
+                            init_tptn_intervals: dict=None) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
 
@@ -238,7 +253,7 @@ def _check_scores_tptn_pairs(p,
             'details': details,
             'n_valid_tptn_pairs': total_count}
 
-def check_all_negative_base(sols):
+def check_all_negative_base(sols: list) -> bool:
     """
     Check if all solutions have negative base
 
@@ -250,7 +265,7 @@ def check_all_negative_base(sols):
     """
     return all(sol.get('message') == 'negative base' for sol in sols)
 
-def check_any_zero_division(sols):
+def check_any_zero_division(sols: list) -> bool:
     """
     Check if any solution has zero division
 
@@ -262,7 +277,7 @@ def check_any_zero_division(sols):
     """
     return any(sol.get('message') == 'zero division' for sol in sols)
 
-def update_tptn(tp, tn, sols):
+def update_tptn(tp, tn, sols: list):
     """
     Updates the tp and tn intervals based on the solutions
 
@@ -285,12 +300,12 @@ def update_tptn(tp, tn, sols):
 
     return tp, tn
 
-def _check_scores_tptn_intervals(p,
-                                n,
-                                scores,
+def _check_scores_tptn_intervals(p: int,
+                                n: int,
+                                scores: dict,
                                 eps,
                                 *,
-                                numerical_tolerance=NUMERICAL_TOLERANCE):
+                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
 
@@ -372,14 +387,14 @@ def _check_scores_tptn_intervals(p,
             'tn': tn.to_tuple(),
             'details': details}
 
-def check_scores_tptn_pairs(p,
-                            n,
-                            scores,
+def check_scores_tptn_pairs(p: int,
+                            n: int,
+                            scores: dict,
                             eps,
                             *,
-                            numerical_tolerance=NUMERICAL_TOLERANCE,
-                            solve_for=None,
-                            prefilter_by_pairs=False):
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                            solve_for: str = None,
+                            prefilter_by_pairs: bool = False) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
 

@@ -14,10 +14,10 @@ class Folding:
     Abstract representation of a folding
     """
     def __init__(self,
-                    n_folds: int=None,
-                    n_repeats: int=None,
-                    folds: list=None,
-                    strategy: str=None):
+                    n_folds: int = None,
+                    n_repeats: int = None,
+                    folds: list = None,
+                    strategy: str = None):
         """
         Constructor of the folding
 
@@ -39,7 +39,7 @@ class Folding:
         self.folds = folds
         self.strategy = strategy
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Dictionary representation of the folding
 
@@ -51,7 +51,7 @@ class Folding:
                 'folds': self.folds,
                 'strategy': self.strategy}
 
-    def generate_folds(self, dataset: Dataset, aggregation: str):
+    def generate_folds(self, dataset: Dataset, aggregation: str) -> list:
         """
         Generates fold objects according to the folding
 
@@ -61,6 +61,9 @@ class Folding:
 
         Returns:
             list(Fold): the list of fold objects
+
+        Raises:
+            ValueError: if the problem is not specified correctly
         """
         if self.folds is not None:
             p = 0

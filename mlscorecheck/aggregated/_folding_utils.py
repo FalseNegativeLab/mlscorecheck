@@ -16,13 +16,13 @@ __all__ = ['stratified_configurations_sklearn',
             'fold_variations',
             'remainder_variations',
             'create_all_kfolds',
-            'generate_datasets_with_all_kfolds',
+            'generate_evaluations_with_all_kfolds',
             '_check_specification_and_determine_p_n',
             'generate_experiments_with_all_kfolds']
 
-def stratified_configurations_sklearn(p,
-                                        n,
-                                        n_splits):
+def stratified_configurations_sklearn(p: int,
+                                        n: int,
+                                        n_splits: int) -> list:
     """
     The sklearn stratification strategy
 
@@ -55,11 +55,11 @@ def stratified_configurations_sklearn(p,
 
     return results
 
-def determine_fold_configurations(p,
-                                    n,
-                                    n_folds,
-                                    n_repeats,
-                                    folding='stratified_sklearn'):
+def determine_fold_configurations(p: int,
+                                    n: int,
+                                    n_folds: int,
+                                    n_repeats: int,
+                                    folding: str = 'stratified_sklearn') -> list:
     """
     Determine fold configurations according to a folding
 
@@ -88,14 +88,14 @@ def determine_fold_configurations(p,
 
     return results
 
-def _create_folds(p,
-                    n,
+def _create_folds(p: int,
+                    n: int,
                     *,
-                    n_folds=None,
-                    n_repeats=None,
-                    folding=None,
-                    score_bounds=None,
-                    identifier=None):
+                    n_folds: int = None,
+                    n_repeats: int = None,
+                    folding: str = None,
+                    score_bounds: dict = None,
+                    identifier: str = None) -> list:
     """
     Given a dataset, adds folds to it
 
@@ -130,26 +130,29 @@ def _create_folds(p,
                                                 folding)
         n_fold = 0
         n_repeat = 0
-        for _, fold in enumerate(folds):
+        for fold in folds:
             fold['identifier'] = f'{identifier}_{n_repeat}_{n_fold}'
             n_fold += 1
             if n_fold % n_folds == 0:
                 n_fold = 0
                 n_repeat += 1
 
-    for _, fold in enumerate(folds):
+    for fold in folds:
         if score_bounds is not None:
             fold['score_bounds'] = {**score_bounds}
 
     return folds
 
-def fold_variations(n_items, n_folds, upper_bound_=None):
+def fold_variations(n_items: int,
+                    n_folds: int,
+                    upper_bound_: int = None) -> list:
     """
     Create a list of fold variations for ``n_item`` items and ``n_folds`` folds
 
     Args:
         n_items (int): the number of items
         n_folds (int): the number of folds
+        upper_bound_ (None|int): the upper bound of values
 
     Returns:
         list(list): the list of potential distributions of ``n_items``
@@ -175,7 +178,7 @@ def fold_variations(n_items, n_folds, upper_bound_=None):
 
     return total, all_configurations
 
-def remainder_variations(n_remainders, n_folds):
+def remainder_variations(n_remainders: int, n_folds: int) -> list:
     """
     Determines the potential distribution of ``n_remainders`` remainders into ``n_folds`` folds.
 
@@ -198,7 +201,7 @@ def remainder_variations(n_remainders, n_folds):
         lists.append(tmp)
     return lists
 
-def create_all_kfolds(p, n, n_folds):
+def create_all_kfolds(p: int, n: int, n_folds: int) -> (np.array, np.array):
     """
     Creates all potential foldings
 
@@ -231,12 +234,13 @@ def create_all_kfolds(p, n, n_folds):
 
     return np.vstack(positive_counts).tolist(), np.vstack(negative_counts).tolist()
 
-def _check_specification_and_determine_p_n(dataset, folding):
+def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int, int):
     """
     Checking if the dataset specification is correct and determining the p and n values
 
     Args:
-        dataset (dict): a dataset specification
+        dataset (dict): the dataset specification
+        folding (dict): the folding specification
 
     Returns:
         int, int: the number of positives and negatives
@@ -259,7 +263,7 @@ def _check_specification_and_determine_p_n(dataset, folding):
 
     return p, n
 
-def create_folding_combinations(evaluations, n_repeats):
+def create_folding_combinations(evaluations: dict, n_repeats: dict) -> list:
     """
     Generates all fold combinations according to n_repeats
 
@@ -288,14 +292,13 @@ def create_folding_combinations(evaluations, n_repeats):
 
     return all_results
 
-def generate_datasets_with_all_kfolds(evaluation):
+def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
     """
     From a dataset specification generates all datasets with all possible
     fold specifications.
 
     Args:
-        dataset (dict): a dataset specification
-        folding (dict): the folding specification
+        evaluation (dict): the specification of an evaluation
 
     Returns:
         list(dict): a list of dataset specifications
@@ -343,14 +346,13 @@ def generate_datasets_with_all_kfolds(evaluation):
 
     return all_results
 
-def generate_experiments_with_all_kfolds(experiment):
+def generate_experiments_with_all_kfolds(experiment: dict) -> list:
     """
     From a dataset specification generates all datasets with all possible
     fold specifications.
 
     Args:
-        dataset (dict): a dataset specification
-        folding (dict): the folding specification
+        experiment (dict): the specification of an experiment
 
     Returns:
         list(dict): a list of dataset specifications
@@ -358,7 +360,7 @@ def generate_experiments_with_all_kfolds(experiment):
     Raises:
         ValueError: if the specification is not suitable
     """
-    evaluations = [generate_datasets_with_all_kfolds(evaluation)
+    evaluations = [generate_evaluations_with_all_kfolds(evaluation)
                     for evaluation in experiment['evaluations']]
 
     results = []

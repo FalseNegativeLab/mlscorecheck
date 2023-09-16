@@ -12,7 +12,7 @@ from ..scores import score_specifications
 __all__ = ['calculate_scores',
             'calculate_scores_for_lp']
 
-def calculate_scores_for_lp(problem, score_subset=None):
+def calculate_scores_for_lp(problem: dict, score_subset: list = None) -> dict:
     """
     Calculate scores for a linear programming problem
 
@@ -32,10 +32,10 @@ def calculate_scores_for_lp(problem, score_subset=None):
 
     return scores if score_subset is None else {key: scores[key] for key in score_subset}
 
-def calculate_scores(problem,
+def calculate_scores(problem: dict,
                     *,
-                    rounding_decimals=None,
-                    additional_symbols=None):
+                    rounding_decimals: int = None,
+                    additional_symbols: dict = None) -> dict:
     """
     Calculates all scores with solutions
 

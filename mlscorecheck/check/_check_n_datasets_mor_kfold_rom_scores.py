@@ -4,19 +4,21 @@ scores calculated by the ratio of means aggregation
 in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 """
 
+import copy
+
 from ..aggregated import check_aggregated_scores
 from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_kfold_rom_scores']
 
-def check_n_datasets_mor_kfold_rom_scores(scores,
-                                            eps,
-                                            experiment,
-                                            *,
-                                            solver_name=None,
-                                            timeout=None,
-                                            verbosity=1,
-                                            numerical_tolerance=NUMERICAL_TOLERANCE):
+def check_n_datasets_mor_kfold_rom_scores(scores: dict,
+                                        eps,
+                                        experiment: dict,
+                                        *,
+                                        solver_name: str = None,
+                                        timeout: int = None,
+                                        verbosity: int = 1,
+                                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
@@ -27,7 +29,7 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        datasets (list): the dataset specification
+        experiment (dict): the experiment specification
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
@@ -55,60 +57,42 @@ def check_n_datasets_mor_kfold_rom_scores(scores,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> datasets = [{'p': 39, 'n': 822, 'n_folds': 8, 'n_repeats': 4,
-                        'folding': 'stratified_sklearn'},
-                        {'name': 'common_datasets.winequality-white-3_vs_7',
-                        'n_folds': 3,
-                        'n_repeats': 3,
-                        'folding': 'stratified_sklearn'}]
+        >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
+                        'folding': {'n_folds': 8, 'n_repeats': 4,
+                                    'strategy': 'stratified_sklearn'}}
+        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
+                        'folding': {'n_folds': 3, 'n_repeats': 3,
+                                    'strategy': 'stratified_sklearn'}}
+        >>> experiment = {'evaluations': [evaluation0, evaluation1],
+                            'dataset_score_bounds': {'acc': (0.5, 1.0)}}
         >>> scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
+        >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
                                                             eps=1e-3,
                                                             scores=scores)
         >>> result['inconsistency']
         # False
 
-        >>> datasets = [{'folds': [{'p': 22, 'n': 90},
-                                    {'p': 51, 'n': 45},
-                                    {'p': 78, 'n': 34},
-                                    {'p': 33, 'n': 89}]},
-                        {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
-                        'n_folds': 8,
-                        'n_repeats': 4,
-                        'folding': 'stratified_sklearn'}]
+        >>> evaluation0 = {'dataset': {'p': 184, 'n': 258},
+                        'folding': {'folds': [{'p': 22, 'n': 90},
+                                                {'p': 51, 'n': 45},
+                                                {'p': 78, 'n': 34},
+                                                {'p': 33, 'n': 89}]}}
+        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.yeast-1-2-8-9_vs_7'},
+                        'folding': {'n_folds': 8, 'n_repeats': 4, 'strategy': 'stratified_sklearn'}}
+        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
         >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                            eps=1e-3,
-                                                            scores=scores)
-        >>> result['inconsistency']
-        # False
-
-        >>> datasets = [{'folds': [{'p': 22, 'n': 90},
-                                    {'p': 51, 'n': 45},
-                                    {'p': 78, 'n': 34},
-                                    {'p': 33, 'n': 89}],
-                        'fold_score_bounds': {'acc': (0.8, 1.0)},
-                        'score_bounds': {'acc': (0.8, 1.0)}
-                        },
-                        {'name': 'common_datasets.yeast-1-2-8-9_vs_7',
-                        'n_folds': 8,
-                        'n_repeats': 4,
-                        'folding': 'stratified_sklearn',
-                        'fold_score_bounds': {'acc': (0.8, 1.0)},
-                        'score_bounds': {'acc': (0.8, 1.0)}
-                        }]
-        >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(datasets=datasets,
-                                                            eps=1e-3,
+        >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+                                                            eps=1e-4,
                                                             scores=scores)
         >>> result['inconsistency']
         # True
-
     """
     if any(evaluation.get('aggregation', 'rom') != 'rom'
             for evaluation in experiment['evaluations'])\
-            or experiment['aggregation'] != 'mor':
+            or experiment.get('aggregation', 'mor') != 'mor':
         raise ValueError('the aggregation specified in each dataset must be "rom" or nothing.')
+
+    experiment = copy.deepcopy(experiment)
 
     # adjusting the dataset specification to ensure the aggregation is set
     for evaluation in experiment['evaluations']:

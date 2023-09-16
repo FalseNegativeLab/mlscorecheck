@@ -11,12 +11,12 @@ from ..experiments import dataset_statistics
 
 __all__ = ['check_1_testset_no_kfold_scores']
 
-def check_1_testset_no_kfold_scores(scores,
+def check_1_testset_no_kfold_scores(scores: dict,
                                     eps,
-                                    testset,
+                                    testset: dict,
                                     *,
-                                    numerical_tolerance=NUMERICAL_TOLERANCE,
-                                    prefilter_by_pairs=True):
+                                    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                                    prefilter_by_pairs: bool = True) -> dict:
     """
     Use this check if the scores are calculated on one single test set
     with no kfolding or aggregation over multiple datasets.
@@ -31,26 +31,16 @@ def check_1_testset_no_kfold_scores(scores,
                                     orders of magnitude smaller than the uncertainty of the
                                     scores. It does ensure that the specificity of the test
                                     is 1, it might slightly decrease the sensitivity.
+        prefilter_by_pairs (bool): whether to do a prefiltering based on the score-pair tp-tn
+                                    solutions (faster)
 
     Returns:
-        dict:   a dictionary containing the details of the analysis, the boolean 'inconsistency'
-        attribute indicates if inconsistency was found. Additionally, the result contains
-        four more keys describing all details of the consistency check.
-        Under the key ``tests_succeeded`` one finds the list of all tests
-        (comparing the consistency of one score against two others) that passed.
-        Under the key ``tests_failed`` one finds the list of all tests
-        that failed. Consistency is identified if any of the tests fails.
-        Both lists contain entries describing the details of the test, e.g.,
-        what were the assumptions on the intervals of the given scores,
-        which formulas were applied and what was the reconstructed interval of
-        the target score.
-        Beyond the individual test cases, one finds two more keys, the
-        ``edge_cases`` contains the list of all scores which are edge cases
-        and might lead to underdetermined systems (by edge cases we mean the score
-        took its minimum or maximum value, which usually turns the tests ineffective).
-        The final key is ``underdetermined``, which is true if the system is
-        underdetermined, the values of the scores do not allow the checks to be
-        executed.
+        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
+        that the set of feasible ``tp``,``tn`` pairs is empty. The list under the key
+        ``details`` provides further details from the analysis of the scores one after the other.
+        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
+        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
+        by using the solutions for the score pairs.
 
     Raises:
         ValueError: if the problem is not specified properly
@@ -61,9 +51,10 @@ def check_1_testset_no_kfold_scores(scores,
         mlscorecheck.experiments.dataset_statistics.
 
         >>> result = check_1_testset_no_kfold_scores(
-                        scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
-                        eps=1e-2,
-                        testset={'p': 530, 'n': 902})
+            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
+            eps=1e-2,
+            testset={'p': 530, 'n': 902}
+        )
         >>> result['inconsistency']
         # False
 

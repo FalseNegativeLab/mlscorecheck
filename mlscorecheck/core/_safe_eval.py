@@ -5,7 +5,7 @@ This module implements functions for safe evaluations
 __all__ = ['safe_eval',
             'safe_call']
 
-def safe_eval(expression, subs):
+def safe_eval(expression: str, subs: dict):
     """
     Evaluates a str mathematical expression in a safe way
     # TODO: write better
@@ -20,7 +20,7 @@ def safe_eval(expression, subs):
 
     return eval(expression, subs) # pylint: disable=eval-used
 
-def check_applicability(params, non_applicable=None):
+def check_applicability(params: dict, non_applicable: list = None) -> bool:
     """
     Checks if a parameter configuration is applicable according to the
     non-applicability configurations
@@ -48,7 +48,7 @@ def check_applicability(params, non_applicable=None):
             return False
     return True
 
-def safe_call(function, params, non_applicable=None):
+def safe_call(function, params: dict, non_applicable: list = None):
     """
     Safe call to a function
 

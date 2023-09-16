@@ -8,7 +8,7 @@ __all__ = ['load_drive', 'load_ehg']
 
 from ..core import load_json
 
-def load_drive():
+def load_drive() -> dict:
     """
     Loading the drive experiments
 
@@ -23,7 +23,7 @@ def load_drive():
         'train_no_fov': load_json(prefix, 'drive_train_no_fov.json')
     }
 
-def load_ehg():
+def load_ehg() -> dict:
     """
     Loading the drive experiments
 

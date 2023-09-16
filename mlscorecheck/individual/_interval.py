@@ -46,7 +46,7 @@ class Interval:
             self.lower_bound = 1
             self.upper_bound = 0
 
-    def to_tuple(self):
+    def to_tuple(self) -> tuple:
         """
         Convert to tuple representation
 
@@ -55,7 +55,7 @@ class Interval:
         """
         return (self.lower_bound, self.upper_bound)
 
-    def contains(self, value):
+    def contains(self, value) -> bool:
         """
         Check if the interval contains the value
 
@@ -97,7 +97,7 @@ class Interval:
 
         return Interval(1, 0)
 
-    def integer(self):
+    def integer(self) -> int:
         """
         Check whether the interval fulfills integer conditions
 
@@ -118,7 +118,7 @@ class Interval:
         """
         return Interval(int(np.ceil(self.lower_bound)), int(np.floor(self.upper_bound)))
 
-    def integer_counts(self):
+    def integer_counts(self) -> int:
         """
         Returns the number of integers in the interval
 
@@ -130,7 +130,7 @@ class Interval:
             return integer.upper_bound - integer.lower_bound + 1
         return 0
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         """
         Checks if the interval is empty
 
@@ -294,7 +294,7 @@ class Interval:
 
         return other / self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         String representation of the object
 
@@ -303,7 +303,7 @@ class Interval:
         """
         return str(f"({str(self.lower_bound)}, {str(self.upper_bound)})")
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """
         Equality operator
 
@@ -317,7 +317,7 @@ class Interval:
             return False
         return self.lower_bound == other.lower_bound and self.upper_bound == other.upper_bound
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         """
         Non-equality operator
 
@@ -393,7 +393,7 @@ class IntervalUnion:
         if len(self.intervals) > 0:
             self.simplify()
 
-    def to_tuple(self):
+    def to_tuple(self) -> list:
         """
         Convert to tuple representation
 
@@ -439,7 +439,7 @@ class IntervalUnion:
 
         self.intervals = final_intervals
 
-    def contains(self, value):
+    def contains(self, value) -> bool:
         """
         Check if the interval contains the value
 
@@ -476,7 +476,7 @@ class IntervalUnion:
         return IntervalUnion([interval for interval in intersections
                                         if interval != Interval(1, 0)])
 
-    def integer(self):
+    def integer(self) -> bool:
         """
         Check whether the interval fulfills integer conditions
 
@@ -495,7 +495,7 @@ class IntervalUnion:
         """
         return IntervalUnion([interval.shrink_to_integers() for interval in self.intervals])
 
-    def integer_counts(self):
+    def integer_counts(self) -> int:
         """
         Returns the count of integers in the interval union
 
@@ -504,7 +504,7 @@ class IntervalUnion:
         """
         return sum(interval.integer_counts() for interval in self.intervals)
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         """
         Checking if the interval union is empty
 
@@ -670,7 +670,7 @@ class IntervalUnion:
         """
         return (-1)*self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         String representation of the object
 
@@ -680,7 +680,7 @@ class IntervalUnion:
         return ' | '.join([f'({interval.lower_bound}, {interval.upper_bound})'
                                                 for interval in self.intervals])
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """
         Equality operator
 
@@ -705,7 +705,7 @@ class IntervalUnion:
 
         return True
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         """
         Non-equality operator
 
