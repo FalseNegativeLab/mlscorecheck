@@ -21,7 +21,7 @@ def test_consistency(random_seed, rounding_decimals):
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_n_datasets_rom_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_rom_kfold_rom_scores(evaluations=experiment['evaluations'],
                                                     scores=scores,
                                                     eps=10**(-rounding_decimals))
 
@@ -42,7 +42,7 @@ def test_failure(random_seed, rounding_decimals):
 
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_n_datasets_rom_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_rom_kfold_rom_scores(evaluations=experiment['evaluations'],
                                                     scores=scores,
                                                     eps=10**(-rounding_decimals))
 
@@ -54,7 +54,6 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_rom_kfold_rom_scores(experiment={'aggregation': 'mor',
-                                                            'evaluations': []},
+        check_n_datasets_rom_kfold_rom_scores(evaluations=[{'aggregation': 'mor'}],
                                                 scores={},
                                                 eps=1e-4)

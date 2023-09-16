@@ -50,7 +50,8 @@ def check_1_dataset_rom_scores(dataset: dict,
     Examples:
         >>> dataset = {'dataset_name': 'common_datasets.monk-2'}
         >>> folding = {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}
-        >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667, 'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
+        >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
+                        'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
         >>> result = check_1_dataset_rom_scores(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,

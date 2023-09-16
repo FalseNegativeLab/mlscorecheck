@@ -63,7 +63,7 @@ def _drive_aggregated_test_scores(data: list,
                                                         numerical_tolerance=numerical_tolerance)
     return check_n_datasets_rom_kfold_rom_scores(scores=scores,
                                                 eps=eps,
-                                                experiment=experiment)
+                                                evaluations=experiment['evaluations'])
 
 def filter_drive(data: list, subset: list = None) -> list:
     """
