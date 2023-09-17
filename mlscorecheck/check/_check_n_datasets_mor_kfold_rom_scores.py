@@ -58,31 +58,34 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                            'folding': {'n_folds': 4, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                            'folding': {'n_folds': 3, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
+        >>> from mlscorecheck.check import check_n_datasets_mor_kfold_rom_scores
+        >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
+                            'folding': {'n_folds': 5, 'n_repeats': 3,
+                                        'strategy': 'stratified_sklearn'}}
+        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
+                            'folding': {'n_folds': 5, 'n_repeats': 3,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
-        >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
-                                                                scores=scores,
-                                                                eps=1e-3)
+        >>> scores = {'acc': 0.312, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
+        >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
+                                                            dataset_score_bounds={'acc': (0.0, 0.5)},
+                                                            eps=1e-4,
+                                                            scores=scores)
         >>> result['inconsistency']
         # False
 
-        >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                            'folding': {'n_folds': 4, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                            'folding': {'n_folds': 3, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
+        >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
+                            'folding': {'n_folds': 5, 'n_repeats': 3,
+                                        'strategy': 'stratified_sklearn'}}
+        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
+                            'folding': {'n_folds': 5, 'n_repeats': 3,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
-        >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
-                                                                scores=scores,
-                                                                eps=1e-3)
+        >>> scores = {'acc': 0.412, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
+        >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
+                                                            dataset_score_bounds={'acc': (0.5, 1.0)},
+                                                            eps=1e-4,
+                                                            scores=scores)
         >>> result['inconsistency']
         # True
     """

@@ -74,31 +74,26 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
         ValueError: if the problem is not specified properly
 
     Examples:
+        >>> from mlscorecheck.check import check_n_datasets_mor_unknown_folds_mor_scores
         >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                        'folding': {'n_folds': 4, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
+                        'folding': {'n_folds': 4, 'n_repeats': 1}}
         >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                        'folding': {'n_folds': 3, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
-
+                        'folding': {'n_folds': 3, 'n_repeats': 1}}
+        >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']
         # False
 
         >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                        'folding': {'n_folds': 4, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
+                        'folding': {'n_folds': 4, 'n_repeats': 1}}
         >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                        'folding': {'n_folds': 3, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
-
+                        'folding': {'n_folds': 3, 'n_repeats': 1}}
+        >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']

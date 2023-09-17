@@ -58,26 +58,26 @@ def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
 
     Examples:
         >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
-                            'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
+                        'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
         >>> evaluation1 = {'dataset': {'p': 781, 'n': 423},
-                            'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+                        'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
+        >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.61, 'sens': 0.709, 'spec': 0.461, 'bacc': 0.585}
-        >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
-                                                    scores=scores,
-                                                    eps=1e-3)
+        >>> result = check_n_datasets_mor_known_folds_mor_scores(evaluations=evaluations,
+                                                                scores=scores,
+                                                                eps=1e-3)
         >>> result['inconsistency']
         # False
 
         >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
-                            'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
+                        'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
         >>> evaluation1 = {'dataset': {'p': 781, 'n': 423},
-                            'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+                        'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
+        >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.71, 'sens': 0.709, 'spec': 0.461}
-        >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
-                                                    scores=scores,
-                                                    eps=1e-3)
+        >>> result = check_n_datasets_mor_known_folds_mor_scores(evaluations=evaluations,
+                                                            scores=scores,
+                                                            eps=1e-3)
         >>> result['inconsistency']
         # True
     """

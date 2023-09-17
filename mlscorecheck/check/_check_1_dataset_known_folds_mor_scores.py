@@ -86,16 +86,14 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
 
         >>> dataset = {'dataset_name': 'common_datasets.glass_0_1_6_vs_2'}
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
-
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
-
         >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
                                                             folding=folding,
                                                             fold_score_bounds={'acc': (0.8, 1.0)},
                                                             scores=scores,
                                                             eps=1e-2,
                                                             numerical_tolerance=1e-6)
-        result['inconsistency']
+        >>> result['inconsistency']
         # True
     """
 
