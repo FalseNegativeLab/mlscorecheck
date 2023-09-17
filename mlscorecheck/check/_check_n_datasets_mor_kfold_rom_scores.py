@@ -11,9 +11,9 @@ from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_kfold_rom_scores']
 
-def check_n_datasets_mor_kfold_rom_scores(scores: dict,
+def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
+                                        scores: dict,
                                         eps,
-                                        evaluations: list,
                                         dataset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
@@ -28,9 +28,9 @@ def check_n_datasets_mor_kfold_rom_scores(scores: dict,
     only if some of the acc, sens, spec and bacc scores are provided.
 
     Args:
+        evaluations (list(dict)): the list of evaluation specifications
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        experiment (dict): the experiment specification
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,

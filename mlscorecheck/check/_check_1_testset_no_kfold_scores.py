@@ -11,9 +11,9 @@ from ..experiments import dataset_statistics
 
 __all__ = ['check_1_testset_no_kfold_scores']
 
-def check_1_testset_no_kfold_scores(scores: dict,
+def check_1_testset_no_kfold_scores(testset: dict,
+                                    scores: dict,
                                     eps,
-                                    testset: dict,
                                     *,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE,
                                     prefilter_by_pairs: bool = True) -> dict:
@@ -22,10 +22,14 @@ def check_1_testset_no_kfold_scores(scores: dict,
     with no kfolding or aggregation over multiple datasets.
 
     Args:
-        scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
-                                    'bacc', 'npv', 'ppv', 'f1', 'fm')
-        eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)
         testset (dict): the specification of a testset with p, n or its name
+        scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa', 'p4'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
+        eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the

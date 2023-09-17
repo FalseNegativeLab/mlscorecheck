@@ -11,9 +11,9 @@ from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_known_folds_mor_scores']
 
-def check_n_datasets_mor_known_folds_mor_scores(scores: dict,
+def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
+                                        scores: dict,
                                         eps,
-                                        evaluations: dict,
                                         dataset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
@@ -27,9 +27,9 @@ def check_n_datasets_mor_known_folds_mor_scores(scores: dict,
     in the mean of ratios fashion.
 
     Args:
+        evaluations (list(dict)): the list of evaluation specifications
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        experiment (dict): the experiment specification
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the pulp linear programming solver,

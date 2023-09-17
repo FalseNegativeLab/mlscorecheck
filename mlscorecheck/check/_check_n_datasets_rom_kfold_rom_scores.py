@@ -12,9 +12,9 @@ from ..aggregated import Experiment
 
 __all__ = ['check_n_datasets_rom_kfold_rom_scores']
 
-def check_n_datasets_rom_kfold_rom_scores(scores: dict,
+def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
+                                            scores: dict,
                                             eps,
-                                            evaluations: list,
                                             *,
                                             numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
@@ -26,9 +26,14 @@ def check_n_datasets_rom_kfold_rom_scores(scores: dict,
     executed to see if the bound conditions can be satisfied.
 
     Args:
-        scores (dict(str,float)): the scores to check
+        evaluations (list(dict)): the specification of the evaluations
+        scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa', 'p4'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        evaluations (list[dict]): the specification of the evaluations
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the

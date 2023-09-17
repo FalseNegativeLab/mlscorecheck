@@ -28,7 +28,12 @@ def check_1_dataset_rom_scores(dataset: dict,
     Args:
         dataset (dict): the dataset specification
         folding (dict): the folding specification
-        scores (dict(str,float)): the scores to check
+        scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa', 'p4'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is

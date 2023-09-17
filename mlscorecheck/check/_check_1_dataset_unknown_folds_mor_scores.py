@@ -11,34 +11,34 @@ from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds
 __all__ = ['check_1_dataset_unknown_folds_mor_scores',
             'estimate_n_evaluations']
 
-def estimate_n_evaluations(evaluation: dict) -> int:
+def estimate_n_evaluations(dataset: dict, folding: dict) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
     Args:
-        evaluation (dict): an evaluation specification
+        dataset (dict): the dataset specification
+        folding (dict): the folding specification
 
     Returns:
         int: the estimated number of different fold configurations.
     """
-    dataset = Dataset(**evaluation['dataset'])
+    dataset = Dataset(**dataset)
     total = dataset.p + dataset.n
 
-    remainder = total % evaluation['folding'].get('n_folds', 1)
+    remainder = total % folding.get('n_folds', 1)
 
     n_remainder_variations = len(remainder_variations(remainder,
-                                                        evaluation['folding'].get('n_folds', 1)))
-    n_fold_variations = len(fold_variations(dataset.p, evaluation['folding'].get('n_folds', 1)))
-    n_repeats = evaluation['folding'].get('n_repeats', 1)
+                                                        folding.get('n_folds', 1)))
+    n_fold_variations = len(fold_variations(dataset.p, folding.get('n_folds', 1)))
+    n_repeats = folding.get('n_repeats', 1)
 
     return (n_remainder_variations * n_fold_variations)**n_repeats
 
 def check_1_dataset_unknown_folds_mor_scores(
-                                        scores: dict,
-                                        eps,
-                                        #evaluation: dict,
                                         dataset: dict,
                                         folding: dict,
+                                        scores: dict,
+                                        eps,
                                         fold_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
@@ -58,9 +58,10 @@ def check_1_dataset_unknown_folds_mor_scores(
     on the number of fold combinations.
 
     Args:
+        dataset (dict): the dataset specification
+        folding (dict): the folding specification
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        evaluation (dict): the evaluation specification
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
