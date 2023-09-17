@@ -74,6 +74,9 @@ def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
                                         'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
+        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+                                                            evaluations=evaluations,
+                                                            eps=1e-3)
         >>> result['inconsistency']
         # True
     """
