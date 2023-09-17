@@ -3,11 +3,9 @@ This module implements consistency testing for scores calculated in a k-fold cro
 scenario with unknown fold structures.
 """
 
-import copy
-
 from ..core import NUMERICAL_TOLERANCE, logger
 from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset, remainder_variations,
-                            fold_variations, Evaluation)
+                            fold_variations)
 from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
 __all__ = ['check_1_dataset_unknown_folds_mor_scores',
@@ -116,15 +114,16 @@ def check_1_dataset_unknown_folds_mor_scores(
 
     for evaluation_0 in evaluations:
         tmp = {'folds': evaluation_0['folding']['folds'],
-                'details': check_1_dataset_known_folds_mor_scores(scores=scores,
-                                                        eps=eps,
-                                                        dataset=evaluation_0['dataset'],
-                                                        folding=evaluation_0['folding'],
-                                                        fold_score_bounds=evaluation_0.get('fold_score_bounds'),
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity,
-                                                        numerical_tolerance=numerical_tolerance)}
+                'details': check_1_dataset_known_folds_mor_scores(
+                                    scores=scores,
+                                    eps=eps,
+                                    dataset=evaluation_0['dataset'],
+                                    folding=evaluation_0['folding'],
+                                    fold_score_bounds=evaluation_0.get('fold_score_bounds'),
+                                    solver_name=solver_name,
+                                    timeout=timeout,
+                                    verbosity=verbosity,
+                                    numerical_tolerance=numerical_tolerance)}
         results['details'].append(tmp)
         if not tmp['details']['inconsistency']:
             break

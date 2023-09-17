@@ -48,11 +48,12 @@ def test_success(random_seed: int, rounding_decimals: int):
 
     evaluation = evaluation.to_dict()
 
-    results = check_1_dataset_unknown_folds_mor_scores(scores=scores,
-                                                        eps=(10**(-rounding_decimals)),
-                                                        dataset=evaluation['dataset'],
-                                                        folding=evaluation['folding'],
-                                                        fold_score_bounds=evaluation.get('fold_score_bounds'))
+    results = check_1_dataset_unknown_folds_mor_scores(
+                        scores=scores,
+                        eps=(10**(-rounding_decimals)),
+                        dataset=evaluation['dataset'],
+                        folding=evaluation['folding'],
+                        fold_score_bounds=evaluation.get('fold_score_bounds'))
 
     assert not results['inconsistency']
 
@@ -84,22 +85,13 @@ def test_failure(random_seed: int, rounding_decimals: int):
     evaluation = evaluation.to_dict()
     del evaluation['aggregation']
 
-    results = check_1_dataset_unknown_folds_mor_scores(scores={'sens': 0.7,
-                                                                'spec': 0.7,
-                                                                'bacc': 0.6},
-                                                        eps=(10**(-rounding_decimals)),
-                                                        dataset=evaluation['dataset'],
-                                                        folding=evaluation['folding'],
-                                                        fold_score_bounds=evaluation.get('fold_score_bounds'))
+    results = check_1_dataset_unknown_folds_mor_scores(
+                        scores={'sens': 0.7,
+                                'spec': 0.7,
+                                'bacc': 0.6},
+                        eps=(10**(-rounding_decimals)),
+                        dataset=evaluation['dataset'],
+                        folding=evaluation['folding'],
+                        fold_score_bounds=evaluation.get('fold_score_bounds'))
 
     assert results['inconsistency']
-
-@pytest.mark.skip('dummy')
-def test_exception():
-    """
-    Testing if the exception is thrown
-    """
-    with pytest.raises(ValueError):
-        check_1_dataset_unknown_folds_mor_scores(evaluation={'aggregation': 'rom'},
-                                                    eps=1e-4,
-                                                    scores={})

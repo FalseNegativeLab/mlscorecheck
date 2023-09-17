@@ -108,7 +108,12 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_unknown_folds_mor_scores(experiment={'aggregation': 'rom',
-                                                                    'evaluations': []},
+        check_n_datasets_mor_unknown_folds_mor_scores(evaluations=[{'aggregation': 'rom'}],
+                                                        scores={},
+                                                        eps=1e-4)
+
+    with pytest.raises(ValueError):
+        check_n_datasets_mor_unknown_folds_mor_scores(evaluations=[{'aggregation': 'mor',
+                                                                    'fold_score_bounds': {}}],
                                                         scores={},
                                                         eps=1e-4)

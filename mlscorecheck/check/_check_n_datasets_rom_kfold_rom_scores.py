@@ -48,9 +48,11 @@ def check_n_datasets_rom_kfold_rom_scores(scores: dict,
 
     Examples:
         >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
-                            'folding': {'n_folds': 5, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}}
+                            'folding': {'n_folds': 5, 'n_repeats': 2,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
-                            'folding': {'n_folds': 5, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}}
+                            'folding': {'n_folds': 5, 'n_repeats': 2,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.631, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
         >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
@@ -60,9 +62,11 @@ def check_n_datasets_rom_kfold_rom_scores(scores: dict,
         # False
 
         >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
-                            'folding': {'n_folds': 5, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}}
+                            'folding': {'n_folds': 5, 'n_repeats': 2,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
-                            'folding': {'n_folds': 5, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}}
+                            'folding': {'n_folds': 5, 'n_repeats': 2,
+                                        'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
         >>> result['inconsistency']

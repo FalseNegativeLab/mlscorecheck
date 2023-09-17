@@ -103,14 +103,3 @@ def test_failure_bounds(random_seed: int, rounding_decimals: int):
                                                 timeout=1)
 
     assert result['inconsistency'] or result['lp_status'] == 'timeout'
-
-@pytest.mark.skip('dummy')
-def test_exception():
-    """
-    Testing the throwing of an exception
-    """
-
-    with pytest.raises(ValueError):
-        check_1_dataset_known_folds_mor_scores(evaluation={'aggregation': 'rom'},
-                                            scores={},
-                                            eps=1e-4)

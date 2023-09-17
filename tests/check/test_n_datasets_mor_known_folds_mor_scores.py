@@ -73,11 +73,12 @@ def test_consistency_bounds(random_seed: int, rounding_decimals: int):
                                                 feasible_dataset_score_bounds=True,
                                                 return_scores=True)
 
-    result = check_n_datasets_mor_known_folds_mor_scores(evaluations=experiment['evaluations'],
-                                                dataset_score_bounds=experiment['dataset_score_bounds'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals),
-                                                timeout=2)
+    result = check_n_datasets_mor_known_folds_mor_scores(
+                            evaluations=experiment['evaluations'],
+                            dataset_score_bounds=experiment['dataset_score_bounds'],
+                            scores=scores,
+                            eps=10**(-rounding_decimals),
+                            timeout=2)
 
     assert not result['inconsistency'] or result['lp_status'] == 'timeout'
 
@@ -100,11 +101,12 @@ def test_failure_bounds(random_seed: int, rounding_decimals: int):
 
     scores = {'acc': 0.5, 'sens': 0.1, 'spec': 0.2, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
 
-    result = check_n_datasets_mor_known_folds_mor_scores(evaluations=experiment['evaluations'],
-                                                dataset_score_bounds=experiment['dataset_score_bounds'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals),
-                                                timeout=2)
+    result = check_n_datasets_mor_known_folds_mor_scores(
+                                evaluations=experiment['evaluations'],
+                                dataset_score_bounds=experiment['dataset_score_bounds'],
+                                scores=scores,
+                                eps=10**(-rounding_decimals),
+                                timeout=2)
 
     assert result['inconsistency'] or result['lp_status'] == 'timeout'
 
@@ -114,7 +116,12 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_known_folds_mor_scores(experiment={'aggregation': 'rom',
-                                                            'evaluations': []},
+        check_n_datasets_mor_known_folds_mor_scores(evaluations=[{'aggregation': 'rom'}],
+                                                scores={},
+                                                eps=1e-4)
+
+    with pytest.raises(ValueError):
+        check_n_datasets_mor_known_folds_mor_scores(evaluations=[{'aggregation': 'mor',
+                                                                    'fold_score_bounds': {}}],
                                                 scores={},
                                                 eps=1e-4)

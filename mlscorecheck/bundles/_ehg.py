@@ -29,4 +29,5 @@ def check_ehg(scores: dict,
 
     return check_1_dataset_unknown_folds_mor_scores(scores=scores,
                                                     eps=eps,
-                                                    evaluation=evaluation)
+                                                    dataset=evaluation['dataset'],
+                                                    folding=evaluation['folding'])

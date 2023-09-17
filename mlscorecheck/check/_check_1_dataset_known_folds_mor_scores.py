@@ -4,8 +4,6 @@ scores calculated by the mean-of-ratios aggregation
 in a kfold scenario on one single dataset.
 """
 
-import copy
-
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import check_aggregated_scores, Experiment, Evaluation
 
