@@ -50,22 +50,20 @@ def check_1_testset_no_kfold_scores(testset: dict,
         ValueError: if the problem is not specified properly
 
     Examples:
-        Specify a testset either by the 'p' and 'n' scores, or the
-        name of the dataset. For the list of supported datasets see
-        mlscorecheck.experiments.dataset_statistics.
-
-        >>> result = check_1_testset_no_kfold_scores(
-            scores={'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32},
-            eps=1e-2,
-            testset={'p': 530, 'n': 902}
-        )
+        >>> from mlscorecheck.check import check_1_testset_no_kfold_scores
+        >>> testset = {'p': 530, 'n': 902}
+        >>> scores = {'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}
+        >>> result = check_1_testset_no_kfold_scores(testset=testset,
+                                                    scores=scores,
+                                                    eps=1e-2)
         >>> result['inconsistency']
         # False
 
-        >>> result = check_1_testset_no_kfold_scores(
-                        scores={'acc': 0.954, 'sens': 0.934, 'spec': 0.985, 'ppv': 0.901},
-                        eps=1e-3,
-                        testset={'name': 'common_datasets.ADA'})
+        >>> testset = {'p': 530, 'n': 902}
+        >>> scores = {'acc': 0.92, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}
+        >>> result = check_1_testset_no_kfold_scores(testset=testset,
+                                                    scores=scores,
+                                                    eps=1e-2)
         >>> result['inconsistency']
         # True
 
