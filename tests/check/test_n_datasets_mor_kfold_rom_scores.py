@@ -26,7 +26,7 @@ def test_consistency(random_seed: int, rounding_decimals: int):
                                                 rounding_decimals=rounding_decimals,
                                                 return_scores=True)
 
-    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_mor_kfold_rom_scores(evaluations=experiment['evaluations'],
                                                     scores=scores,
                                                     eps=10**(-rounding_decimals))
 
@@ -50,7 +50,7 @@ def test_failure(random_seed: int, rounding_decimals: int):
 
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_mor_kfold_rom_scores(evaluations=experiment['evaluations'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -73,7 +73,8 @@ def test_consistency_bounds(random_seed: int, rounding_decimals: int):
                                                 return_scores=True,
                                                 feasible_dataset_score_bounds=True)
 
-    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_mor_kfold_rom_scores(evaluations=experiment['evaluations'],
+                                                dataset_score_bounds=experiment['dataset_score_bounds'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=2)
@@ -97,7 +98,8 @@ def test_failure_bounds(random_seed: int, rounding_decimals: int):
                                                 return_scores=True,
                                                 feasible_dataset_score_bounds=False)
 
-    result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
+    result = check_n_datasets_mor_kfold_rom_scores(evaluations=experiment['evaluations'],
+                                                dataset_score_bounds=experiment['dataset_score_bounds'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=2)

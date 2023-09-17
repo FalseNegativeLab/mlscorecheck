@@ -7,7 +7,7 @@ import copy
 
 from ..core import NUMERICAL_TOLERANCE, logger
 from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset, remainder_variations,
-                            fold_variations)
+                            fold_variations, Evaluation)
 from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
 __all__ = ['check_1_dataset_unknown_folds_mor_scores',
@@ -38,7 +38,10 @@ def estimate_n_evaluations(evaluation: dict) -> int:
 def check_1_dataset_unknown_folds_mor_scores(
                                         scores: dict,
                                         eps,
-                                        evaluation: dict,
+                                        #evaluation: dict,
+                                        dataset: dict,
+                                        folding: dict,
+                                        fold_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
                                         timeout: int = None,
@@ -99,12 +102,17 @@ def check_1_dataset_unknown_folds_mor_scores(
         >>> result['inconsistency']
         # True
     """
-    if evaluation.get('aggregation', 'mor') != 'mor':
-        raise ValueError("either don't specify the aggregation or set it to 'mor'")
+    #if evaluation.get('aggregation', 'mor') != 'mor':
+    #    raise ValueError("either don't specify the aggregation or set it to 'mor'")
 
-    evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
+    #evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
 
-    evaluations = generate_evaluations_with_all_kfolds(evaluation)
+    evaluation = Evaluation(dataset=dataset,
+                            folding=folding,
+                            fold_score_bounds=fold_score_bounds,
+                            aggregation='mor')
+
+    evaluations = generate_evaluations_with_all_kfolds(evaluation.to_dict())
 
     logger.info('The total number of fold combinations: %d', len(evaluations))
 
@@ -114,7 +122,9 @@ def check_1_dataset_unknown_folds_mor_scores(
         tmp = {'folds': evaluation_0['folding']['folds'],
                 'details': check_1_dataset_known_folds_mor_scores(scores=scores,
                                                         eps=eps,
-                                                        evaluation=evaluation_0,
+                                                        dataset=evaluation_0['dataset'],
+                                                        folding=evaluation_0['folding'],
+                                                        fold_score_bounds=evaluation_0.get('fold_score_bounds'),
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,

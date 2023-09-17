@@ -12,7 +12,7 @@ from ._check_n_datasets_mor_known_folds_mor_scores \
             import check_n_datasets_mor_known_folds_mor_scores
 from ._check_1_dataset_unknown_folds_mor_scores import estimate_n_evaluations
 from ..core import NUMERICAL_TOLERANCE
-from ..aggregated import generate_experiments_with_all_kfolds
+from ..aggregated import generate_experiments_with_all_kfolds, Experiment
 
 __all__ = ['check_n_datasets_mor_unknown_folds_mor_scores',
             'estimate_n_experiments']
@@ -32,7 +32,8 @@ def estimate_n_experiments(experiment: dict) -> int:
 
 def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
                                         eps,
-                                        experiment: dict,
+                                        evaluations: dict,
+                                        dataset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
                                         timeout: int = None,
@@ -103,15 +104,19 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mor') != 'mor'
-            for evaluation in experiment['evaluations']) \
-            or experiment.get('aggregation', 'mor') != 'mor':
+    if any(evaluation.get('aggregation', 'mor') != 'mor' for evaluation in evaluations):
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
+    if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
+        raise ValueError('do not specify fold score bounds through this interface')
 
-    experiment = copy.deepcopy(experiment)
-    for evaluation in experiment['evaluations']:
+    evaluations = copy.deepcopy(evaluations)
+
+    for evaluation in evaluations:
         evaluation['aggregation'] = 'mor'
-    experiment['aggregation'] = 'mor'
+
+    experiment = {'evaluations': evaluations,
+                    'dataset_score_bounds': dataset_score_bounds,
+                    'aggregation': 'mor'}
 
     experiments = generate_experiments_with_all_kfolds(experiment=experiment)
 
@@ -119,7 +124,8 @@ def check_n_datasets_mor_unknown_folds_mor_scores(scores: dict,
                 'inconsistency': True}
 
     for experim in experiments:
-        result = check_n_datasets_mor_known_folds_mor_scores(experiment=experim,
+        result = check_n_datasets_mor_known_folds_mor_scores(evaluations=experim['evaluations'],
+                                                    dataset_score_bounds=experim.get('dataset_score_bounds'),
                                                     scores=scores,
                                                     eps=eps,
                                                     timeout=timeout,

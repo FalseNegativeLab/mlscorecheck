@@ -1,19 +1,20 @@
 """
 This module implements the top level check function for
 scores calculated by the ratio of means aggregation
-in a kfold scenarios and mean of ratios aggregation on multiple datastes.
+in a kfold scenarios and mean of ratios aggregation on multiple datasets.
 """
 
 import copy
 
-from ..aggregated import check_aggregated_scores
+from ..aggregated import check_aggregated_scores, Experiment
 from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_kfold_rom_scores']
 
 def check_n_datasets_mor_kfold_rom_scores(scores: dict,
                                         eps,
-                                        experiment: dict,
+                                        evaluations: list,
+                                        dataset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
                                         timeout: int = None,
@@ -87,6 +88,8 @@ def check_n_datasets_mor_kfold_rom_scores(scores: dict,
         >>> result['inconsistency']
         # True
     """
+
+    """
     if any(evaluation.get('aggregation', 'rom') != 'rom'
             for evaluation in experiment['evaluations'])\
             or experiment.get('aggregation', 'mor') != 'mor':
@@ -98,8 +101,24 @@ def check_n_datasets_mor_kfold_rom_scores(scores: dict,
     for evaluation in experiment['evaluations']:
         evaluation['aggregation'] = 'rom'
     experiment['aggregation'] = 'mor'
+    """
 
-    return check_aggregated_scores(experiment=experiment,
+    if any(evaluation.get('aggregation', 'rom') != 'rom' for evaluation in evaluations):
+        raise ValueError('the aggregation specified in each dataset must be "rom" or nothing.')
+
+    if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
+        raise ValueError('do not specify fold_score_bounds for a RoM evaluation')
+
+    evaluations = copy.deepcopy(evaluations)
+
+    for evaluation in evaluations:
+        evaluation['aggregation'] = 'rom'
+
+    experiment = Experiment(evaluations=evaluations,
+                            dataset_score_bounds=dataset_score_bounds,
+                            aggregation='mor')
+
+    return check_aggregated_scores(experiment=experiment.to_dict(),
                                     scores=scores,
                                     eps=eps,
                                     solver_name=solver_name,

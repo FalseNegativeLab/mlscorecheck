@@ -6,14 +6,15 @@ in a kfold scenarios and mean of ratios aggregation on multiple datastes.
 
 import copy
 
-from ..aggregated import check_aggregated_scores
+from ..aggregated import check_aggregated_scores, Experiment
 from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_n_datasets_mor_known_folds_mor_scores']
 
 def check_n_datasets_mor_known_folds_mor_scores(scores: dict,
                                         eps,
-                                        experiment: dict,
+                                        evaluations: dict,
+                                        dataset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
                                         timeout: int = None,
@@ -57,47 +58,44 @@ def check_n_datasets_mor_known_folds_mor_scores(scores: dict,
 
     Examples:
         >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
-                        'folding': {'folds': [{'p': 22, 'n': 23},
-                                                {'p': 96, 'n': 72}]}}
+                            'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
         >>> evaluation1 = {'dataset': {'p': 781, 'n': 423},
-                        'folding': {'n_folds': 1, 'n_repeats': 3}}
-        >>> evaluation2 = {'dataset': {'dataset_name': 'common_datasets.glass_0_6_vs_5'},
-                        'folding': {'n_folds': 6, 'n_repeats': 1,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1, evaluation2]}
-        >>> scores = {'acc': 0.541, 'sens': 0.32, 'spec': 0.728, 'bacc': 0.524}
+                            'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
+        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+        >>> scores = {'acc': 0.61, 'sens': 0.709, 'spec': 0.461, 'bacc': 0.585}
         >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
-                                                                scores=scores,
-                                                                eps=1e-3)
+                                                    scores=scores,
+                                                    eps=1e-3)
         >>> result['inconsistency']
         # False
 
-        >>> evaluation0 = {'dataset': {'dataset_name': 'common_datasets.ecoli_0_2_3_4_vs_5'},
-                        'folding': {'n_folds': 4, 'n_repeats': 3,
-                                    'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'p': 355, 'n': 438},
-                        'folding': {'n_folds': 1, 'n_repeats': 3}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1],
-                        'dataset_score_bounds': {'sens': (0.8, 1.0)}}
-        >>> scores = {'acc': 0.532, 'sens': 0.417, 'spec': 0.622, 'bacc': 0.519}
+        >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
+                            'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
+        >>> evaluation1 = {'dataset': {'p': 781, 'n': 423},
+                            'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
+        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
+        >>> scores = {'acc': 0.71, 'sens': 0.709, 'spec': 0.461}
         >>> result = check_n_datasets_mor_known_folds_mor_scores(experiment=experiment,
-                                                                scores=scores,
-                                                                eps=1e-3)
+                                                    scores=scores,
+                                                    eps=1e-3)
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mor') != 'mor'
-            for evaluation in experiment['evaluations']) \
-        or experiment.get('aggregation', 'mor') != 'mor':
+    if any(evaluation.get('aggregation', 'mor') != 'mor' for evaluation in evaluations):
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
+    if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
+        raise ValueError('do not specify fold_score_bounds through this interface')
 
-    experiment = copy.deepcopy(experiment)
+    evaluations = copy.deepcopy(evaluations)
 
-    for evaluation in experiment['evaluations']:
+    for evaluation in evaluations:
         evaluation['aggregation'] = 'mor'
-    experiment['aggregation'] = 'mor'
 
-    return check_aggregated_scores(experiment=experiment,
+    experiment = Experiment(evaluations=evaluations,
+                            dataset_score_bounds=dataset_score_bounds,
+                            aggregation='mor')
+
+    return check_aggregated_scores(experiment=experiment.to_dict(),
                                     scores=scores,
                                     eps=eps,
                                     solver_name=solver_name,

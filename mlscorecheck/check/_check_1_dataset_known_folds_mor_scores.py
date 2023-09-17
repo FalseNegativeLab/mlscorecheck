@@ -7,13 +7,15 @@ in a kfold scenario on one single dataset.
 import copy
 
 from ..core import NUMERICAL_TOLERANCE
-from ..aggregated import check_aggregated_scores, Experiment
+from ..aggregated import check_aggregated_scores, Experiment, Evaluation
 
 __all__ = ['check_1_dataset_known_folds_mor_scores']
 
-def check_1_dataset_known_folds_mor_scores(evaluation: dict,
+def check_1_dataset_known_folds_mor_scores(dataset: dict,
+                                    folding: dict,
                                     scores: dict,
                                     eps,
+                                    fold_score_bounds: dict = None,
                                     *,
                                     solver_name: str = None,
                                     timeout: int = None,
@@ -96,14 +98,19 @@ def check_1_dataset_known_folds_mor_scores(evaluation: dict,
 
     """
 
-    if evaluation.get('aggregation', 'mor') != 'mor':
-        raise ValueError("either don't specify the aggregation or set it to 'mor'")
+    #if evaluation.get('aggregation', 'mor') != 'mor':
+    #    raise ValueError("either don't specify the aggregation or set it to 'mor'")
 
-    evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
+    #evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(evaluations=[evaluation],
+    evaluation = Evaluation(dataset=dataset,
+                            folding=folding,
+                            fold_score_bounds=fold_score_bounds,
+                            aggregation='mor')
+
+    experiment = Experiment(evaluations=[evaluation.to_dict()],
                             aggregation='mor')
 
     return check_aggregated_scores(experiment=experiment.to_dict(),

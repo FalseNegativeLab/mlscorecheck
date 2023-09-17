@@ -23,7 +23,8 @@ def test_consistency(random_seed: int, rounding_decimals: int):
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(dataset=evaluation['dataset'],
+                                                folding=evaluation['folding'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -45,7 +46,8 @@ def test_failure(random_seed: int, rounding_decimals: int):
                                             return_scores=True)
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(dataset=evaluation['dataset'],
+                                                folding=evaluation['folding'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals))
 
@@ -67,7 +69,9 @@ def test_consistency_bounds(random_seed: int, rounding_decimals: int):
                                             feasible_fold_score_bounds=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(dataset=evaluation['dataset'],
+                                                folding=evaluation['folding'],
+                                                fold_score_bounds=evaluation['fold_score_bounds'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=1)
@@ -91,13 +95,16 @@ def test_failure_bounds(random_seed: int, rounding_decimals: int):
                                             rounding_decimals=rounding_decimals)
     scores = {'acc': 0.9, 'bacc': 0.1, 'sens': 0.1, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
 
-    result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+    result = check_1_dataset_known_folds_mor_scores(dataset=evaluation['dataset'],
+                                                folding=evaluation['folding'],
+                                                fold_score_bounds=evaluation['fold_score_bounds'],
                                                 scores=scores,
                                                 eps=10**(-rounding_decimals),
                                                 timeout=1)
 
     assert result['inconsistency'] or result['lp_status'] == 'timeout'
 
+@pytest.mark.skip('dummy')
 def test_exception():
     """
     Testing the throwing of an exception

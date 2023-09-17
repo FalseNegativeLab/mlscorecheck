@@ -74,7 +74,7 @@ def test_successful(random_seed: int):
     for evaluation in experiment['evaluations']:
         del evaluation['folding']['strategy']
 
-    results = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+    results = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=experiment['evaluations'],
                                                             scores=scores,
                                                             eps=1e-4)
 
@@ -96,7 +96,7 @@ def test_failure(random_seed: int):
 
     scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.05}
 
-    results = check_n_datasets_mor_unknown_folds_mor_scores(experiment=experiment,
+    results = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=experiment['evaluations'],
                                                             scores=scores,
                                                             eps=1e-4)
 
