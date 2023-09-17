@@ -489,6 +489,7 @@ In many cases, it is not stated explicitly if stratification was applied or not,
 Given a dataset and knowing that k-fold cross-validation was applied with MoR aggregation, but stratification is not mentioned, the following sample code demonstrates the use of the exhaustive test, with a consistent setup:
 
 .. code-block:: Python
+
     >>> from mlscorecheck.check import check_1_dataset_unknown_folds_mor_scores
 
     >>> evaluation = {'dataset': {'p': 126, 'n': 131},
