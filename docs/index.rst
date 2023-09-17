@@ -8,42 +8,37 @@ Welcome to mlscorecheck's documentation!
 
 .. toctree::
     :maxdepth: 2
-    :caption: Introduction
+    :caption: Getting started
 
-    introduction
+    00_introduction
 
 .. toctree::
     :maxdepth: 2
     :caption: Consistency testing
 
-    use_cases
-    specifying_datasets
-    consistency_checking
+    01a_requirements
+    01b_specifying_setup
+    01c_consistency_checking
 
 .. toctree::
     :maxdepth: 2
     :caption: Test bundles
 
-    retina
-    ehg
+    02a_bundle_intro
+    02b_retina
+    02c_ehg
 
 .. toctree::
     :maxdepth: 2
     :caption: API
 
-    api
+    03_api
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contribution
-
-    contribution
-
-.. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: References
 
-    references
+    05_references
 
 Indices and tables
 ==================

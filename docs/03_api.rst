@@ -7,11 +7,13 @@ Consistency testing (``check``)
 The test functions implemented in the ``mlscorecheck.check`` module.
 
 .. autofunction:: mlscorecheck.check.check_1_testset_no_kfold_scores
-.. autofunction:: mlscorecheck.check.check_1_dataset_kfold_rom_scores
-.. autofunction:: mlscorecheck.check.check_1_dataset_kfold_mor_scores
+.. autofunction:: mlscorecheck.check.check_1_dataset_rom_scores
+.. autofunction:: mlscorecheck.check.check_1_dataset_known_folds_mor_scores
+.. autofunction:: mlscorecheck.check.check_1_dataset_unknown_folds_mor_scores
 .. autofunction:: mlscorecheck.check.check_n_datasets_rom_kfold_rom_scores
 .. autofunction:: mlscorecheck.check.check_n_datasets_mor_kfold_rom_scores
-.. autofunction:: mlscorecheck.check.check_n_datasets_mor_kfold_mor_scores
+.. autofunction:: mlscorecheck.check.check_n_datasets_mor_known_folds_mor_scores
+.. autofunction:: mlscorecheck.check.check_n_datasets_mor_unknown_folds_mor_scores
 
 
 Test bundles (``bundles``)
@@ -35,6 +37,7 @@ EHG
 
 The test bundle dedicated to the testing of electrohsyterogram data.
 
+.. autofunction:: mlscorecheck.bundles.check_ehg
 
 
 Experiments (``experiments``)
@@ -64,8 +67,8 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.negative_predictive_value
 .. autofunction:: mlscorecheck.scores.f_beta_positive
 .. autofunction:: mlscorecheck.scores.f_beta_negative
-.. autofunction:: mlscorecheck.scores.f1_plus
-.. autofunction:: mlscorecheck.scores.f1_minus
+.. autofunction:: mlscorecheck.scores.f1_positive
+.. autofunction:: mlscorecheck.scores.f1_negative
 .. autofunction:: mlscorecheck.scores.unified_performance_measure
 .. autofunction:: mlscorecheck.scores.geometric_mean
 .. autofunction:: mlscorecheck.scores.fowlkes_mallows_index
@@ -93,8 +96,8 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.negative_predictive_value_standardized
 .. autofunction:: mlscorecheck.scores.f_beta_positive_standardized
 .. autofunction:: mlscorecheck.scores.f_beta_negative_standardized
-.. autofunction:: mlscorecheck.scores.f1_plus_standardized
-.. autofunction:: mlscorecheck.scores.f1_minus_standardized
+.. autofunction:: mlscorecheck.scores.f1_positive_standardized
+.. autofunction:: mlscorecheck.scores.f1_negative_standardized
 .. autofunction:: mlscorecheck.scores.unified_performance_measure_standardized
 .. autofunction:: mlscorecheck.scores.geometric_mean_standardized
 .. autofunction:: mlscorecheck.scores.fowlkes_mallows_index_standardized
@@ -114,90 +117,23 @@ Score functions (``scores``)
 Testing logic for individual scores (``individual``)
 ====================================================
 
-.. autofunction:: mlscorecheck.individual.check_individual_scores
-.. autofunction:: mlscorecheck.individual.check_2v1
-.. autofunction:: mlscorecheck.individual.create_intervals
-.. autofunction:: mlscorecheck.individual.create_problems_2
-.. autofunction:: mlscorecheck.individual.evaluate_1_solution
-.. autofunction:: mlscorecheck.individual.check_zero_division
-.. autofunction:: mlscorecheck.individual.check_negative_base
-.. autofunction:: mlscorecheck.individual.check_empty_interval
-.. autofunction:: mlscorecheck.individual.check_intersection
-.. autofunction:: mlscorecheck.individual.determine_edge_cases
-.. autofunction:: mlscorecheck.individual.resolve_aliases_and_complements
-.. autofunction:: mlscorecheck.individual.round_scores
-.. autofunction:: mlscorecheck.individual.calculate_scores_for_lp
-.. autofunction:: mlscorecheck.individual.calculate_scores
-.. autoclass:: mlscorecheck.individual.Expression
-    :members:
-.. autoclass:: mlscorecheck.individual.Interval
-    :members:
-.. autoclass:: mlscorecheck.individual.IntervalUnion
-    :members:
-.. autoclass:: mlscorecheck.individual.Solution
-    :members:
-.. autoclass:: mlscorecheck.individual.Solutions
-    :members:
-.. autofunction:: mlscorecheck.individual.load_solutions
-.. autofunction:: mlscorecheck.individual.generate_problems
-.. autofunction:: mlscorecheck.individual.generate_1_problem
-.. autofunction:: mlscorecheck.individual.generate_problem_and_scores
+The main, low level interface function of the module is ``check_scores_tptn_pairs``.
+
+.. autofunction:: mlscorecheck.individual.check_scores_tptn_pairs
 
 Testing logic for aggregated scores (``aggregated``)
 ====================================================
 
+The main, low level interface function of the module is ``check_aggregated_scores``.
+
 .. autofunction:: mlscorecheck.aggregated.check_aggregated_scores
-.. autoclass:: mlscorecheck.aggregated.Fold
-    :members:
 .. autoclass:: mlscorecheck.aggregated.Dataset
     :members:
-.. autofunction:: mlscorecheck.aggregated.generate_dataset_specification
-.. autofunction:: mlscorecheck.aggregated.create_folds_for_dataset
-.. autofunction:: mlscorecheck.aggregated.generate_dataset_and_scores
+.. autoclass:: mlscorecheck.aggregated.Folding
+    :members:
+.. autoclass:: mlscorecheck.aggregated.Fold
+    :members:
+.. autoclass:: mlscorecheck.aggregated.Evaluation
+    :members:
 .. autoclass:: mlscorecheck.aggregated.Experiment
     :members:
-.. autofunction:: mlscorecheck.aggregated.stratified_configurations_sklearn
-.. autofunction:: mlscorecheck.aggregated.determine_fold_configurations
-.. autofunction:: mlscorecheck.aggregated._create_folds
-.. autofunction:: mlscorecheck.aggregated.add_bounds
-.. autofunction:: mlscorecheck.aggregated.solve
-.. autofunction:: mlscorecheck.aggregated.create_lp_target
-.. autofunction:: mlscorecheck.aggregated.random_identifier
-.. autofunction:: mlscorecheck.aggregated.check_bounds
-.. autofunction:: mlscorecheck.aggregated.compare_scores
-.. autofunction:: mlscorecheck.aggregated.create_bounds
-
-Core functions (``core``)
-=========================
-
-.. autofunction:: mlscorecheck.core.dict_mean
-.. autofunction:: mlscorecheck.core.dict_minmax
-.. autofunction:: mlscorecheck.core.load_json
-.. autofunction:: mlscorecheck.core.check_uncertainty_and_tolerance
-.. autofunction:: mlscorecheck.core.update_uncertainty
-.. autofunction:: mlscorecheck.core.init_random_state
-.. autofunction:: mlscorecheck.core.round_scores
-.. autofunction:: mlscorecheck.core.safe_eval
-.. autofunction:: mlscorecheck.core.safe_call
-
-
-The symbolic toolkit
-********************
-
-The symbolic solver (``symbolic``)
-==================================
-
-.. automodule:: mlscorecheck.symbolic
-    :members:
-.. autoclass:: mlscorecheck.symbolic.Algebra
-    :members:
-.. autoclass:: mlscorecheck.symbolic.SympyAlgebra
-    :members:
-.. autoclass:: mlscorecheck.symbolic.SageAlgebra
-    :members:
-.. autoclass:: mlscorecheck.symbolic.Symbols
-    :members:
-.. autofunction:: mlscorecheck.symbolic.check_importability
-.. autofunction:: mlscorecheck.symbolic.get_symbolic_toolkit
-.. autoclass:: mlscorecheck.symbolic.ProblemSolver
-.. autofunction:: mlscorecheck.symbolic.collect_denominators_and_bases

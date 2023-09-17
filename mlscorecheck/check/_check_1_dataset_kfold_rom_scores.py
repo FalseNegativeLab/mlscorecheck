@@ -43,7 +43,7 @@ def check_1_dataset_rom_scores(dataset: dict,
 
     Returns:
         dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``,``tn`` pairs is empty. The list under the key
+        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
         ``details`` provides further details from the analysis of the scores one after the other.
         Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
         all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering

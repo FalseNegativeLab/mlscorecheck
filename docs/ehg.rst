@@ -1,3 +1,0 @@
-EHG (Electrohysterography)
-==========================
-
