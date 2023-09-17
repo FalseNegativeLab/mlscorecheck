@@ -34,9 +34,11 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
     scores over the folds are also provided.
 
     Args:
+        dataset (dict): the specification of the dataset
+        folding (dict): the specification of the folding
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        evaluation (dict): the specification of the evaluation
+        fold_score_bounds (dict): bounds on the scores in the folds
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
@@ -64,20 +66,21 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> evaluation = {'dataset': {'p': 126, 'n': 131},
-                        'folding': {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}}
+        >>> dataset = {'p': 126, 'n': 131}
+        >>> folding = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+                                                            folding=folding,
                                                             scores=scores,
                                                             eps=1e-3)
-        result['inconsistency']
+        >>> result['inconsistency']
         # False
 
         >>> dataset = {'p': 398, 'n': 569}
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
-        >>> evaluation = {'dataset': dataset, 'folding': folding}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+                                                            folding=folding,
                                                             scores=scores,
                                                             eps=1e-2)
         >>> result['inconsistency']
@@ -85,26 +88,19 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
 
         >>> dataset = {'dataset_name': 'common_datasets.glass_0_1_6_vs_2'}
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
-        >>> evaluation = {'dataset': dataset,
-                            'folding': folding,
-                            'fold_score_bounds': {'acc': (0.8, 1.0)}}
-        >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1p': 0.95}
-        >>> result = check_1_dataset_known_folds_mor_scores(evaluation=evaluation,
+
+        >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
+
+        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+                                                            folding=folding,
+                                                            fold_score_bounds={'acc': (0.8, 1.0)},
                                                             scores=scores,
                                                             eps=1e-2,
                                                             numerical_tolerance=1e-6)
-        >>> result['inconsistency']
+        result['inconsistency']
         # True
-
     """
 
-    #if evaluation.get('aggregation', 'mor') != 'mor':
-    #    raise ValueError("either don't specify the aggregation or set it to 'mor'")
-
-    #evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
-
-    # creating the experiment consisting of one single dataset, the
-    # outer level aggregation can be arbitrary
     evaluation = Evaluation(dataset=dataset,
                             folding=folding,
                             fold_score_bounds=fold_score_bounds,

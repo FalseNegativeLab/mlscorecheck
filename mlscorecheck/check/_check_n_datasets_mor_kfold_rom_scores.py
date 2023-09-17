@@ -58,49 +58,33 @@ def check_n_datasets_mor_kfold_rom_scores(scores: dict,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
-                        'folding': {'n_folds': 8, 'n_repeats': 4,
+        >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
+                            'folding': {'n_folds': 4, 'n_repeats': 1,
                                     'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
-                        'folding': {'n_folds': 3, 'n_repeats': 3,
+        >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
+                            'folding': {'n_folds': 3, 'n_repeats': 1,
                                     'strategy': 'stratified_sklearn'}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1],
-                            'dataset_score_bounds': {'acc': (0.5, 1.0)}}
-        >>> scores = {'acc': 0.548, 'sens': 0.593, 'spec': 0.546, 'bacc': 0.569}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
-                                                            eps=1e-3,
-                                                            scores=scores)
+        >>> evaluations = [evaluation0, evaluation1]
+        >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
+        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
+                                                                scores=scores,
+                                                                eps=1e-3)
         >>> result['inconsistency']
         # False
 
-        >>> evaluation0 = {'dataset': {'p': 184, 'n': 258},
-                        'folding': {'folds': [{'p': 22, 'n': 90},
-                                                {'p': 51, 'n': 45},
-                                                {'p': 78, 'n': 34},
-                                                {'p': 33, 'n': 89}]}}
-        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.yeast-1-2-8-9_vs_7'},
-                        'folding': {'n_folds': 8, 'n_repeats': 4, 'strategy': 'stratified_sklearn'}}
-        >>> experiment = {'evaluations': [evaluation0, evaluation1]}
-        >>> scores = {'acc': 0.552, 'sens': 0.555, 'spec': 0.556, 'bacc': 0.555}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(experiment=experiment,
-                                                            eps=1e-4,
-                                                            scores=scores)
+        >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
+                            'folding': {'n_folds': 4, 'n_repeats': 1,
+                                    'strategy': 'stratified_sklearn'}}
+        >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
+                            'folding': {'n_folds': 3, 'n_repeats': 1,
+                                    'strategy': 'stratified_sklearn'}}
+        >>> evaluations = [evaluation0, evaluation1]
+        >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
+        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
+                                                                scores=scores,
+                                                                eps=1e-3)
         >>> result['inconsistency']
         # True
-    """
-
-    """
-    if any(evaluation.get('aggregation', 'rom') != 'rom'
-            for evaluation in experiment['evaluations'])\
-            or experiment.get('aggregation', 'mor') != 'mor':
-        raise ValueError('the aggregation specified in each dataset must be "rom" or nothing.')
-
-    experiment = copy.deepcopy(experiment)
-
-    # adjusting the dataset specification to ensure the aggregation is set
-    for evaluation in experiment['evaluations']:
-        evaluation['aggregation'] = 'rom'
-    experiment['aggregation'] = 'mor'
     """
 
     if any(evaluation.get('aggregation', 'rom') != 'rom' for evaluation in evaluations):

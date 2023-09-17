@@ -83,10 +83,11 @@ def check_1_dataset_unknown_folds_mor_scores(
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> evaluation = {'dataset': {'p': 126, 'n': 131},
-                            'folding': {'n_folds': 2, 'n_repeats': 1}}
+        >>> dataset = {'p': 126, 'n': 131}
+        >>> folding = {'n_folds': 2, 'n_repeats': 1}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-        >>> result = check_1_dataset_unknown_folds_mor_scores(evaluation=evaluation,
+        >>> result = check_1_dataset_unknown_folds_mor_scores(dataset=dataset,
+                                                                folding=folding,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']
@@ -94,25 +95,20 @@ def check_1_dataset_unknown_folds_mor_scores(
 
         >>> dataset = {'p': 19, 'n': 97}
         >>> folding = {'n_folds': 3, 'n_repeats': 1}
-        >>> evaluation = {'dataset': dataset, 'folding': folding}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-        >>> result = check_1_dataset_unknown_folds_mor_scores(evaluation=evaluation,
-                                                            scores=scores,
-                                                            eps=1e-4)
+        >>> result = check_1_dataset_unknown_folds_mor_scores(dataset=dataset,
+                                                                folding=folding,
+                                                                scores=scores,
+                                                                eps=1e-4)
         >>> result['inconsistency']
         # True
     """
-    #if evaluation.get('aggregation', 'mor') != 'mor':
-    #    raise ValueError("either don't specify the aggregation or set it to 'mor'")
+    evaluation = {'dataset': dataset,
+                    'folding': folding,
+                    'fold_score_bounds': fold_score_bounds,
+                    'aggregation': 'mor'}
 
-    #evaluation = copy.deepcopy(evaluation) | {'aggregation': 'mor'}
-
-    evaluation = Evaluation(dataset=dataset,
-                            folding=folding,
-                            fold_score_bounds=fold_score_bounds,
-                            aggregation='mor')
-
-    evaluations = generate_evaluations_with_all_kfolds(evaluation.to_dict())
+    evaluations = generate_evaluations_with_all_kfolds(evaluation)
 
     logger.info('The total number of fold combinations: %d', len(evaluations))
 
