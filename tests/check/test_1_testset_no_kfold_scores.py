@@ -17,8 +17,8 @@ def test_parametrization():
     Testing the parametrization
     """
     with pytest.raises(ValueError):
-        check_1_testset_no_kfold_scores({},
-                                        1e-4,
+        check_1_testset_no_kfold_scores(scores={},
+                                        eps=1e-4,
                                         testset={'p': 5})
 
 def test_warnings():
@@ -35,7 +35,7 @@ def test_warnings():
 
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        result = check_1_testset_no_kfold_scores(scores,
+        result = check_1_testset_no_kfold_scores(scores=scores,
                                                 eps=1e-2,
                                                 testset=problem)
         assert len(warns) == 1
@@ -56,7 +56,7 @@ def test_consistent():
     scores['beta_negative'] = 2
     scores['beta_positive'] = 2
 
-    result = check_1_testset_no_kfold_scores(scores,
+    result = check_1_testset_no_kfold_scores(scores=scores,
                                             eps=eps,
                                             testset=problem)
 
@@ -78,7 +78,7 @@ def test_failure():
     scores['beta_negative'] = 2
     scores['beta_positive'] = 2
 
-    result = check_1_testset_no_kfold_scores(scores,
+    result = check_1_testset_no_kfold_scores(scores=scores,
                                                 eps=eps,
                                                 testset=problem)
 
@@ -94,7 +94,7 @@ def test_dataset():
                 'sens': 0.89,
                 'spec': 0.91}
 
-    result = check_1_testset_no_kfold_scores(scores,
+    result = check_1_testset_no_kfold_scores(scores=scores,
                                             eps=1e-2,
                                             testset=problem)
 
@@ -110,7 +110,7 @@ def test_dataset_failure():
                 'sens': 0.89,
                 'spec': 0.91}
 
-    result = check_1_testset_no_kfold_scores(scores,
+    result = check_1_testset_no_kfold_scores(scores=scores,
                                             eps=0.00001,
                                             testset=problem)
 

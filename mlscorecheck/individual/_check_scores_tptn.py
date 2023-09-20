@@ -323,6 +323,7 @@ def _check_scores_tptn_intervals(p: int,
         ``details`` provides further details from the analysis of the scores one after the other.
         Under the keys ``tp`` and ``tn`` one finds the final intervals or interval unions.
     """
+    logger.info("checking the scores %s", str(scores))
 
     # resolving aliases and complements
     scores = resolve_aliases_and_complements(scores)
@@ -364,14 +365,18 @@ def _check_scores_tptn_intervals(p: int,
             if check_all_negative_base(sols):
                 details.append(detail | {'inconsistency': True,
                                             'explanation': 'all solutions lead to negative bases'})
+                logger.info("all negative bases - iteration finished")
                 break
             if check_any_zero_division(sols):
                 details.append(detail | {'inconsistency': False,
                                             'explanation': 'zero division indicates an '\
                                                             'underdetermined system'})
+                logger.info("all zero divisions - iteration continued")
                 continue
 
+            logger.info('intervals before: %s, %s', str(tp.to_tuple()), str(tn.to_tuple()))
             tp, tn = update_tptn(tp, tn, sols)
+            logger.info('intervals after: %s, %s', str(tp.to_tuple()), str(tn.to_tuple()))
 
             details.append(detail | {
                             'tp_after': tp.to_tuple(),

@@ -17,17 +17,19 @@ from ..aggregated import generate_experiments_with_all_kfolds
 __all__ = ['check_n_datasets_mor_unknown_folds_mor_scores',
             'estimate_n_experiments']
 
-def estimate_n_experiments(experiment: dict) -> int:
+def estimate_n_experiments(evaluations: list) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
     Args:
-        evaluation (dict): an evaluation specification
+        evaluations (list): a list of evaluation specifications
 
     Returns:
         int: the estimated number of different fold configurations.
     """
-    counts = [estimate_n_evaluations(evaluation) for evaluation in experiment['evaluations']]
+    counts = [estimate_n_evaluations(dataset=evaluation['dataset'],
+                                        folding=evaluation['folding'])
+                for evaluation in evaluations]
     return np.prod(counts)
 
 def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,

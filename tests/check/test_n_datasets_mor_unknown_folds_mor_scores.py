@@ -16,11 +16,10 @@ def test_estimation():
     Testing the evaluation count estimation
     """
 
-    count = estimate_n_experiments(experiment={'evaluations':
-                                                [{'dataset': {'p': 5, 'n': 11},
+    count = estimate_n_experiments(evaluations=[{'dataset': {'p': 5, 'n': 11},
                                                 'folding': {'n_folds': 3, 'n_repeats': 2}},
                                                 {'dataset': {'p': 6, 'n': 9},
-                                                'folding': {'n_folds': 3, 'n_repeats': 2}}]})
+                                                'folding': {'n_folds': 3, 'n_repeats': 2}}])
 
     assert count == 144
 

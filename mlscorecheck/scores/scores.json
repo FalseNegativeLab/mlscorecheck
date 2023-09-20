@@ -305,7 +305,6 @@
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "tp/(tp + n - tn) + tn/(tn + p - tp) - 1",
             "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
-            "synonyms": ["delta_p"],
             "polynomial_equation": "mk*(tp + n - tn)*(tn + p - tp) - tp*(tn + p - tp) - tn*(tp + n - tn) + (tp + n - tn)*(tn + p - tp)",
             "higher_better": true,
             "description": "The markedness quantifies how marked a condition is for the predictor.",
@@ -457,8 +456,6 @@
         "kappa": {
             "name": "cohens_kappa",
             "abbreviation": "kappa",
-            "lower_bound": 0,
-            "upper_bound": 1,
             "nans": [{"tn": "n", "tp": 0}, {"tp": "p", "tn": 0}],
             "args": ["tp", "tn", "p", "n"],
             "formula": "(2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))",
