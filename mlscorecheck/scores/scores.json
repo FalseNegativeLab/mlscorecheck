@@ -1,4 +1,10 @@
 {
+    "citations": {
+        "scores": "@article{scores, doi = {10.1016/j.aci.2018.08.003}, url = {https://doi.org/10.1016/j.aci.2018.08.003}, year = {2020}, month = jul, publisher = {Emerald}, volume = {17}, number = {1}, pages = {168--192}, author = {Alaa Tharwat}, title = {Classification assessment methods}, journal = {Applied Computing and Informatics}}",
+        "upm": "@incollection{upm, doi = {10.1007/978-3-030-62365-4_10}, url = {https://doi.org/10.1007/978-3-030-62365-4_10}, year = {2020}, publisher = {Springer International Publishing}, pages = {104--112}, author = {Ana R. Redondo and Jorge Navarro and Rub{\\'{e}}n R. Fern{\\'{a}}ndez and Isaac Mart{\\'{\\i}}n de Diego and Javier M. Moguerza and Juan Jos{\\'{e}} Fern{\\'{a}}ndez-Mu{\\~{n}}oz}, title = {Unified Performance Measure for Binary Classification Problems}, booktitle = {Lecture Notes in Computer Science}}",
+        "fm": "@article{fm, doi = {10.1080/01621459.1983.10478008}, url = {https://doi.org/10.1080/01621459.1983.10478008}, year = {1983}, month = sep, publisher = {Informa {UK} Limited}, volume = {78}, number = {383}, pages = {553--569}, author = {E. B. Fowlkes and C. L. Mallows}, title = {A Method for Comparing Two Hierarchical Clusterings}, journal = {Journal of the American Statistical Association}}",
+        "kappa": "@article{kappa, doi = {10.11613/bm.2012.031}, url = {https://doi.org/10.11613/bm.2012.031}, year = {2012}, publisher = {Croatian Society for Medical Biochemistry and Laboratory Medicine}, pages = {276--282}, author = {Marry L. McHugh}, title = {Interrater reliability: the kappa statistic}, journal = {Biochemia Medica}}"
+    },
     "scores": {
         "acc": {
             "name": "accuracy",
@@ -11,7 +17,9 @@
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "(tp + tn)/(p + n)",
             "polynomial_equation": "acc*(p + n) - (tp + tn)",
-            "higher_better": true
+            "higher_better": true,
+            "description": "The proportion of correctly classified items.",
+            "citation": "scores"
         },
         "err": {
             "name": "error_rate",
@@ -24,7 +32,9 @@
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "1 - (tp + tn)/(p + n)",
             "polynomial_equation": "err*(p + n) - (p + n) + (tp + tn)",
-            "higher_better": false
+            "higher_better": false,
+            "description": "The proportion of incorrectly classified items.",
+            "citation": "scores"
         },
         "sens": {
             "name": "sensitivity",
@@ -38,7 +48,9 @@
             "formula_standardized": "tp/p",
             "synonyms": ["recall", "true_positive_rate"],
             "polynomial_equation": "sens*p - tp",
-            "higher_better": true
+            "higher_better": true,
+            "description": "The proportion of correctly classified positive items.",
+            "citation": "scores"
         },
         "fnr": {
             "name": "false_negative_rate",
@@ -52,7 +64,9 @@
             "formula_standardized": "1 - tp/p",
             "polynomial_equation": "fnr*p - p + tp",
             "synonyms": ["miss_rate"],
-            "higher_better": false
+            "higher_better": false,
+            "description": "The proportion of incorrectly classified positive items.",
+            "citation": "scores"
         },
         "fpr": {
             "name": "false_positive_rate",
@@ -66,7 +80,9 @@
             "formula_standardized": "1 - tn/n",
             "polynomial_equation": "fpr*n - n + tn",
             "synonyms": ["false_alarm", "fall_out"],
-            "higher_better": false
+            "higher_better": false,
+            "description": "The proportion of incorrectly classified negative items.",
+            "citation": "scores"
         },
         "spec": {
             "name": "specificity",
@@ -80,7 +96,9 @@
             "formula_standardized": "tn/n",
             "synonyms": ["selectivity", "true_negative_rate"],
             "polynomial_equation": "spec*n - tn",
-            "higher_better": true
+            "higher_better": true,
+            "description": "The proportion of correctly classified negative items.",
+            "citation": "scores"
         },
         "ppv": {
             "name": "positive_predictive_value",
@@ -97,7 +115,9 @@
             "synonyms": ["precision"],
             "polynomial_equation": "ppv * (tp + n - tn) - tp",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "The proportion of truly positive items among all items classified as positive.",
+            "citation": "scores"
         },
         "fdr": {
             "name": "false_discovery_rate",
@@ -113,7 +133,9 @@
             "nans_standardized": [{"tp": 0, "tn": "n"}],
             "polynomial_equation": "fdr * (tp + n - tn) - (tp + n - tn) + tp",
             "higher_better": false,
-            "dependency_breaks": [{"tp": 1.0}]
+            "dependency_breaks": [{"tp": 1.0}],
+            "description": "The proportion of truly negative items among all items classified as positive.",
+            "citation": "scores"
         },
         "for_": {
             "name": "false_omission_rate",
@@ -129,7 +151,9 @@
             "polynomial_equation": "for_ * (tn + p - tp) - (tn + p - tp) + tn",
             "nans_standardized": [{"tp": "p", "tn": 0}],
             "higher_better": false,
-            "dependency_breaks": [{"tn": 1.0}]
+            "dependency_breaks": [{"tn": 1.0}],
+            "description": "The proportion of truly positive items among all items classified as negative.",
+            "citation": "scores"
         },
         "npv": {
             "name": "negative_predictive_value",
@@ -145,31 +169,39 @@
             "nans_standardized": [{"tp": "p", "tn": 0}],
             "polynomial_equation": "npv * (tn + p - tp) - tn",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 1.0}]
+            "dependency_breaks": [{"tn": 1.0}],
+            "description": "The proportion of truly negative items among all items classified as negative.",
+            "citation": "scores"
         },
         "fbp": {
             "name": "f_beta_positive",
             "abbreviation": "fbp",
             "lower_bound": 0,
+            "upper_bound": 1,
             "args": ["tp", "fp", "p", "beta_positive"],
             "formula": "((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + fp)",
             "args_standardized": ["tp", "tn", "p", "n", "beta_positive"],
             "formula_standardized": "((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + n - tn)",
             "polynomial_equation": "fbp * (tp + beta_positive**2*p + n - tn) - ((1 + beta_positive**2)*tp)",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "The harmonic mean of true positive rate and sensitivity, when sensitivity is beta times more important than the true positive rate.",
+            "citation": "scores"
         },
         "fbn": {
             "name": "f_beta_negative",
             "abbreviation": "fbn",
             "lower_bound": 0,
+            "upper_bound": 1,
             "args": ["tn", "fn", "n", "beta_negative"],
             "formula": "((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + fn)",
             "args_standardized": ["tp", "tn", "p", "n", "beta_negative"],
             "formula_standardized": "((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + p - tp)",
             "polynomial_equation": "fbn * (tn + beta_negative**2*n + p - tp) - ((1 + beta_negative**2)*tn)",
             "higher_better": true,
-            "dependency_breaks": [{"tp": 0.0}]
+            "dependency_breaks": [{"tp": 0.0}],
+            "description": "The harmonic mean of true negative rate and specificity, when specificity is beta times more important than the true negative rate.",
+            "citation": "upm"
         },
         "f1p": {
             "name": "f1_positive",
@@ -182,7 +214,9 @@
             "synonyms": ["f1"],
             "polynomial_equation": "f1p * (tp + p + n - tn) - 2*tp",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "The harmonic mean of true positive rate and sensitivity.",
+            "citation": "scores"
         },
         "f1n": {
             "name": "f1_negative",
@@ -194,7 +228,9 @@
             "formula_standardized": "(2*tn) / (tn + n + p - tp)",
             "polynomial_equation": "f1n * (tn + n + p - tp) - 2*tn",
             "higher_better": true,
-            "dependency_breaks": [{"tp": 0.0}]
+            "dependency_breaks": [{"tp": 0.0}],
+            "description": "The harmonic mean of true negative rate and specificity.",
+            "citation": "upm"
         },
         "upm": {
             "name": "unified_performance_measure",
@@ -211,7 +247,9 @@
             "nans_standardized": [{"tp": 0, "tn": 0}],
             "polynomial_equation": "upm * (tn*(n + p - tn + tp) + tp*(n + p + tn - tp)) - 4*tp*tn",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}],
+            "description": "The harmonic mean of f1_negative and f1_positive.",
+            "citation": "upm"
         },
         "gm": {
             "name": "geometric_mean",
@@ -228,7 +266,9 @@
             "polynomial_equation": "gm**2 * p * n - tp * tn",
             "higher_better": true,
             "relationship_breaks": [0.0],
-            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}],
+            "description": "The geometric mean of sensitivity and specificity.",
+            "citation": "scores"
         },
         "fm": {
             "name": "fowlkes_mallows_index",
@@ -247,11 +287,14 @@
             "polynomial_equation": "fm**2 * (p*(n - tn + tp)) - tp**2",
             "higher_better": true,
             "relationship_breaks": [0.0],
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "The geometric mean of positive predictive value and sensitivity.",
+            "citation": "fm"
         },
         "mk": {
             "name": "markedness",
             "abbreviation": "mk",
+            "synonyms": ["delta_p"],
             "lower_bound": -1,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
@@ -264,7 +307,46 @@
             "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
             "synonyms": ["delta_p"],
             "polynomial_equation": "mk*(tp + n - tn)*(tn + p - tp) - tp*(tn + p - tp) - tn*(tp + n - tn) + (tp + n - tn)*(tn + p - tp)",
-            "higher_better": true
+            "higher_better": true,
+            "description": "The markedness quantifies how marked a condition is for the predictor.",
+            "citation": "mkbm"
+        },
+        "bm": {
+            "name": "bookmaker_informedness",
+            "abbreviation": "bm",
+            "lower_bound": -1,
+            "upper_bound": 1,
+            "args_short": ["tpr", "tnr"],
+            "formula_short": "tpr + tnr - 1",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "tp/p + tn/n - 1",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "tp/p + tn/n - 1",
+            "synonyms": ["informedness"],
+            "polynomial_equation": "bm*p*n - tp*n - tn*p + p*n",
+            "higher_better": true,
+            "description": "Quantifies how informed the classifier is for the specified condition.",
+            "citation": "mkbm"
+        },
+        "mcc": {
+            "name": "matthews_correlation_coefficient",
+            "abbreviation": "mcc",
+            "synonyms": ["phy_coefficient"],
+            "lower_bound": -1,
+            "upper_bound": 1,
+            "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
+            "sqrt": true,
+            "args_short": ["mk", "bm"],
+            "formula_short": "sqrt(mk*bm)",
+            "args": ["tp", "tn", "p", "n"],
+            "formula": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
+            "args_standardized": ["tp", "tn", "p", "n"],
+            "formula_standardized": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
+            "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
+            "polynomial_equation": "mcc**2 * (n*p*(n - tn + tp)*(p + tn - tp)) - (tn*tp - (n-tn)*(p-tp))**2",
+            "higher_better": true,
+            "description": "The Pearson correlation coefficient computed for the observed and predicted labels.",
+            "citation": "scores"
         },
         "lrp": {
             "name": "positive_likelihood_ratio",
@@ -281,7 +363,9 @@
             "nans_standardized": [{"tn": "n"}],
             "polynomial_equation": "lrp * ((n-tn)*p) - n*tp",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "Quantifies the probability of correct positive prediction relative to the probability of type I error.",
+            "citation": "scores"
         },
         "lrn": {
             "name": "negative_likelihood_ratio",
@@ -298,39 +382,9 @@
             "nans_standardized": [{"tn": 0}],
             "polynomial_equation": "lrn*(tn*p) - n*(p - tp)",
             "higher_better": false,
-            "dependency_breaks": [{"tn": "p"}]
-        },
-        "mcc": {
-            "name": "matthews_correlation_coefficient",
-            "abbreviation": "mcc",
-            "lower_bound": -1,
-            "upper_bound": 1,
-            "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
-            "sqrt": true,
-            "args_short": ["tpr", "tnr", "ppv", "npv", "fnr", "fpr", "for_", "fdr"],
-            "formula_short": "sqrt(tpr*tnr*ppv*npv) - sqrt(fnr*fpr*for_*fdr)",
-            "args": ["tp", "tn", "p", "n"],
-            "formula": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
-            "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "(tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))",
-            "nans_standardized": [{"tp": 0, "tn": "n"}, {"tp": "p", "tn": 0}],
-            "polynomial_equation": "mcc**2 * (n*p*(n - tn + tp)*(p + tn - tp)) - (tn*tp - (n-tn)*(p-tp))**2",
-            "higher_better": true
-        },
-        "bm": {
-            "name": "bookmaker_informedness",
-            "abbreviation": "bm",
-            "lower_bound": -1,
-            "upper_bound": 1,
-            "args_short": ["tpr", "tnr"],
-            "formula_short": "tpr + tnr - 1",
-            "args": ["tp", "tn", "p", "n"],
-            "formula": "tp/p + tn/n - 1",
-            "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "tp/p + tn/n - 1",
-            "synonyms": ["informedness"],
-            "polynomial_equation": "bm*p*n - tp*n - tn*p + p*n",
-            "higher_better": true
+            "dependency_breaks": [{"tn": "p"}],
+            "description": "Quantifies the probability of type II error relative to the probability of correct negative prediction.",
+            "citation": "scores"
         },
         "pt": {
             "name": "prevalence_threshold",
@@ -364,10 +418,13 @@
             "nans_standardized": [{"tn": "n"}, {"tp": "p"}],
             "polynomial_equation": "dor*(n-tn)*(p-tp) - tn*tp",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}],
+            "description": "The ratio of the odds that tha classifier correctly predicts a positive label to the odds of incorrectly predicting the positive label.",
+            "citation": "scores"
         },
         "ji": {
             "name": "jaccard_index",
+            "synonyms": ["ratio_of_verification", "critical_success_index", "Tanimoto_coefficient"],
             "abbreviation": "ji",
             "lower_bound": 0,
             "args": ["tp", "fp", "p"],
@@ -377,7 +434,9 @@
             "synonyms": ["threat_score"],
             "polynomial_equation": "ji*(n-tn+p) - tp",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}],
+            "description": "The intersection over the union respecting items predicted positive and observed positive.",
+            "citation": "scores"
         },
         "bacc": {
             "name": "balanced_accuracy",
@@ -391,11 +450,15 @@
             "args_standardized": ["tp", "tn", "p", "n"],
             "formula_standardized": "tp/(2*p) + tn/(2*n)",
             "polynomial_equation": "bacc*2*p*n - tp*n - tn*p",
-            "higher_better": true
+            "higher_better": true,
+            "description": "The mean of sensitivity and specificity.",
+            "citation": "scores"
         },
         "kappa": {
             "name": "cohens_kappa",
             "abbreviation": "kappa",
+            "lower_bound": 0,
+            "upper_bound": 1,
             "nans": [{"tn": "n", "tp": 0}, {"tp": "p", "tn": 0}],
             "args": ["tp", "tn", "p", "n"],
             "formula": "(2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))",
@@ -403,7 +466,9 @@
             "formula_standardized": "-2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)",
             "nans_standardized": [{"tn": "n", "tp": 0}, {"tp": "p", "tn": 0}],
             "polynomial_equation": "kappa * (n**2 - n*tn + n*tp + p**2 + p*tn - p*tp) + 2*(n*p - n*tp - p*tn)",
-            "higher_better": true
+            "higher_better": true,
+            "description": "Quantifies the agreement between the observed labeling and the labeling by the classifier, taking into account the probability of agreement by chance.",
+            "citation": "kappa"
         },
         "p4": {
             "name": "p4",
@@ -418,7 +483,9 @@
             "nans_standardized": [{"tp": 0, "tn": 0}, {"tp": "p", "tn": "n"}],
             "polynomial_equation": "p4 * (4*tp*tn + (tp + tn)*(p - tp + n - tn)) - 4*tp*tn",
             "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}]
+            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}],
+            "description": "The harmonic mean of sensitivity, specificity, positive predictive value and negative predictive value. Similar to f_1, but contains all elementary figures.",
+            "citation": "kappa"
         }
     }
 }
