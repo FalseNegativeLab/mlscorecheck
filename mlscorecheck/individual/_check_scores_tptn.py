@@ -251,7 +251,11 @@ def _check_scores_tptn_pairs(p: int,
 
     return {'inconsistency': len(valid_pairs) == 0,
             'details': details,
-            'n_valid_tptn_pairs': total_count}
+            'n_valid_tptn_pairs': total_count,
+            'iterate_by': iterate_by,
+            'solve_for': solve_for,
+            'valid_pair_evidence': (list(valid_pairs.keys())[0],
+                                    valid_pairs[list(valid_pairs.keys())[0]].to_tuple())}
 
 def check_all_negative_base(sols: list) -> bool:
     """

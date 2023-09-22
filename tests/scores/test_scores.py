@@ -35,7 +35,7 @@ for key, val in aliases.items():
 @pytest.mark.parametrize("score", list(scores.keys()))
 def test_score_and_standardized(score: str):
     """
-    This module tests a score against the standardized score
+    This function tests a score against the standardized score
 
     Args:
         score (str): the score to test
@@ -46,10 +46,30 @@ def test_score_and_standardized(score: str):
 
     assert abs(value - value_standard) < 1e-8
 
+@pytest.mark.parametrize("score", list(scores.keys()))
+def test_score_multiplication_invariance(score: str):
+    """
+    This function tests if the scores are invariant to multiplication
+
+    Args:
+        score (str): the score to test
+    """
+    evaluation_multiplied = {**evaluation}
+    evaluation_multiplied['tp'] = evaluation['tp'] * 5
+    evaluation_multiplied['tn'] = evaluation['tn'] * 5
+    evaluation_multiplied['fp'] = evaluation['fp'] * 5
+    evaluation_multiplied['fn'] = evaluation['fn'] * 5
+    evaluation_multiplied['p'] = evaluation['p'] * 5
+    evaluation_multiplied['n'] = evaluation['n'] * 5
+    value = safe_call(functions[score], evaluation)
+    value_mult = safe_call(functions[score], evaluation_multiplied)
+
+    assert abs(value - value_mult) < 1e-8
+
 @pytest.mark.parametrize("score", list(short_formula_scores.keys()))
 def test_short_formulas(score: str):
     """
-    This module tests a score against the short formula
+    This function tests a score against the short formula
 
     Args:
         score (str): the score to test
@@ -65,7 +85,7 @@ def test_short_formulas(score: str):
 @pytest.mark.parametrize("score", list(complement_scores.keys()))
 def test_short_complements(score: str):
     """
-    This module tests a score against the short formula
+    This function tests a score against the short formula
 
     Args:
         score (str): the score to test
