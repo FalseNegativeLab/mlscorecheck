@@ -68,9 +68,9 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.312, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
         >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
-                                                            dataset_score_bounds={'acc': (0.0, 0.5)},
-                                                            eps=1e-4,
-                                                            scores=scores)
+                                                        dataset_score_bounds={'acc': (0.0, 0.5)},
+                                                        eps=1e-4,
+                                                        scores=scores)
         >>> result['inconsistency']
         # False
 
@@ -83,9 +83,9 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.412, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
         >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
-                                                            dataset_score_bounds={'acc': (0.5, 1.0)},
-                                                            eps=1e-4,
-                                                            scores=scores)
+                                                        dataset_score_bounds={'acc': (0.5, 1.0)},
+                                                        eps=1e-4,
+                                                        scores=scores)
         >>> result['inconsistency']
         # True
     """
