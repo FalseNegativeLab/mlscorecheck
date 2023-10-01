@@ -223,7 +223,7 @@ def remove_duplicates(positives: list, negatives: list) -> (list, list):
 
     return tuple(list(map(list, zip(*list(map(lambda x: list(zip(*x)), results))))))
 
-def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
+def create_all_kfolds2(p: int, n: int, n_folds: int) -> (list, list):
     """
     Creates all potential foldings
 
@@ -256,6 +256,104 @@ def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
 
     return remove_duplicates(np.vstack(positive_counts).tolist(),
                                 np.vstack(negative_counts).tolist())
+
+class IntegerPartitioning:
+    def __init__(self, n, m):
+        self.n = n
+        self.m = m
+        self.x = [0]*(m+1)
+        self.s = [0]*(m+1)
+
+        for k in range(1, self.m):
+            self.x[k] = 1
+
+        self.x[self.m] = self.n - self.m + 1
+
+        for k in range(1, self.m + 1):
+            self.s[k] = self.x[k] + self.s[k-1]
+
+    def generate(self):
+        while True:
+            yield self.x[1:]
+
+            u = self.x[self.m]
+            k = self.m
+            while k > 0:
+                k = k - 1
+                if self.x[k] + 2 <= u:
+                    break
+
+            if k == 0:
+                return
+
+            f = self.x[k] + 1
+            s = self.s[k-1]
+            while k < self.m:
+                self.x[k] = f
+                s += f
+                self.s[k] = s
+                k += 1
+
+            self.x[self.m] = self.n - self.s[self.m-1]
+
+class FoldPartitioning:
+    def __init__(self):
+        pass
+
+    def generate(self, p, n, n_folds):
+        max_items = (p + n) // n_folds
+        remainder = (p + n) % n_folds
+
+        ipart = IntegerPartitioning(p, n_folds)
+
+        for ps in ipart.generate():
+            if (sum(item > max_items for item in ps) != 0
+                    or sum(item == max_items for item in ps) > remainder):
+                continue
+            #print(ps)
+
+            n_ordinary = len(ps) - sum(item == max_items for item in ps)
+            ns = [max_items - p_val + (idx >= n_ordinary) for idx, p_val in enumerate(ps)]
+
+            #print('ns', ns)
+            #print('n_ordinary', n_ordinary)
+
+            # distributing the remainders between 0:idx
+            #print('ps', ps[:n_ordinary])
+            #print(list(itertools.combinations(ps[:n_ordinary], remainder - (len(ps) - n_ordinary))))
+            combinations = {tuple(x) for x in itertools.combinations(ps[:n_ordinary],
+                                                                    remainder - (len(ps) - n_ordinary))}
+
+            n_variants = []
+            for comb in combinations:
+                #print('c', comb)
+                tmp = copy.copy(ns)
+                cdx = len(comb)-1
+                pdx = n_ordinary-1
+                while cdx >= 0 and pdx >= 0:
+                    if comb[cdx] == ps[pdx]:
+                        tmp[pdx] += 1
+                        pdx -= 1
+                        cdx -= 1
+                    elif comb[cdx] <= ps[pdx]:
+                        pdx -= 1
+                    elif ps[pdx] <= comb[cdx]:
+                        cdx -= 1
+
+                n_variants.append(tmp)
+
+            for ns in n_variants:
+                yield ps, ns
+
+def create_all_kfolds(p, n, n_folds):
+    positives = []
+    negatives = []
+
+    for pos, neg in FoldPartitioning().generate(p, n, n_folds):
+        positives.append(tuple(pos))
+        negatives.append(tuple(neg))
+
+    return positives, negatives
 
 def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int, int):
     """
@@ -341,7 +439,10 @@ def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
     else:
         evaluation['dataset']['identifier'] = random_identifier(6)
 
+    print(kfolds)
+
     for jdx, (positives, negatives) in enumerate(zip(*kfolds)):
+        print(positives, negatives)
         results.append({'dataset': copy.deepcopy(evaluation['dataset']),
                         'folding': {'folds': [
                             {'p': p_,
