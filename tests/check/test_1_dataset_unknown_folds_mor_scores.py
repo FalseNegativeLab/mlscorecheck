@@ -18,7 +18,7 @@ def test_estimation():
     count = estimate_n_evaluations(dataset={'p': 5, 'n': 11},
                                     folding={'n_folds': 3, 'n_repeats': 2})
 
-    assert count == 36
+    assert count == 16
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 @pytest.mark.parametrize('rounding_decimals', [4])

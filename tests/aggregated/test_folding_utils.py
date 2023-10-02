@@ -10,39 +10,36 @@ from sklearn.model_selection import StratifiedKFold
 from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         determine_fold_configurations,
                                         _create_folds,
-                                        fold_variations,
-                                        remainder_variations,
                                         create_all_kfolds,
                                         generate_evaluations_with_all_kfolds,
                                         _check_specification_and_determine_p_n)
-
-def test_fold_variations():
-    """
-    Testing the generation of fold variations
-    """
-    assert fold_variations(5, 3)[0] == 5
-
-def test_remainder_variations():
-    """
-    Testing the remainder variations
-    """
-    assert remainder_variations(2, 5) == [[1, 1, 0, 0, 0],
-                                            [1, 0, 1, 0, 0],
-                                            [1, 0, 0, 1, 0],
-                                            [1, 0, 0, 0, 1],
-                                            [0, 1, 1, 0, 0],
-                                            [0, 1, 0, 1, 0],
-                                            [0, 1, 0, 0, 1],
-                                            [0, 0, 1, 1, 0],
-                                            [0, 0, 1, 0, 1],
-                                            [0, 0, 0, 1, 1]]
-    assert remainder_variations(0, 5) == [[0, 0, 0, 0, 0]]
 
 def test_create_all_kfolds():
     """
     Testing the generation of all k-fold configurations
     """
     assert len(create_all_kfolds(5, 7, 3)) == 2
+
+def test_create_all_kfolds_many_p():
+    """
+    Testing the generation of all k-fold configurations with many p
+    """
+    assert len(create_all_kfolds(15, 7, 3)) == 2
+
+@pytest.mark.parametrize('random_seed', list(range(30)))
+def test_create_all_kfolds_many_p_many_folds(random_seed):
+    """
+    Testing the generation of all k-fold configurations with many p and many folds
+
+    Args:
+        random_seed (int): the random seed of the test
+    """
+
+    random_state = np.random.RandomState(random_seed)
+    p = random_state.randint(5, 30)
+    n = random_state.randint(5, 30)
+    n_folds = random_state.randint(2, 6)
+    assert len(create_all_kfolds(p, n, n_folds)) == 2
 
 def test_generate_datasets_with_all_kfolds():
     """

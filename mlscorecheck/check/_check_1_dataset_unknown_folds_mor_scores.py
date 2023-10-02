@@ -4,8 +4,8 @@ scenario with unknown fold structures.
 """
 
 from ..core import NUMERICAL_TOLERANCE, logger
-from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset, remainder_variations,
-                            fold_variations)
+from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset,
+                            fold_partitioning_generator)
 from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
 __all__ = ['check_1_dataset_unknown_folds_mor_scores',
@@ -23,16 +23,12 @@ def estimate_n_evaluations(dataset: dict, folding: dict) -> int:
         int: the estimated number of different fold configurations.
     """
     dataset = Dataset(**dataset)
-    total = dataset.p + dataset.n
-
-    remainder = total % folding.get('n_folds', 1)
-
-    n_remainder_variations = len(remainder_variations(remainder,
-                                                        folding.get('n_folds', 1)))
-    n_fold_variations = len(fold_variations(dataset.p, folding.get('n_folds', 1)))
+    n_folds = folding.get('n_folds', 1)
     n_repeats = folding.get('n_repeats', 1)
 
-    return (n_remainder_variations * n_fold_variations)**n_repeats
+    count = sum(1 for _ in fold_partitioning_generator(dataset.p, dataset.n, n_folds))
+
+    return count**n_repeats
 
 def check_1_dataset_unknown_folds_mor_scores(
                                         dataset: dict,

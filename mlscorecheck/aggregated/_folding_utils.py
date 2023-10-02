@@ -4,9 +4,6 @@ This module implements some functionalities related to folding
 
 import copy
 import itertools
-from functools import cmp_to_key
-
-import numpy as np
 
 from ..experiments import dataset_statistics
 from ._utils import random_identifier
@@ -14,8 +11,8 @@ from ._utils import random_identifier
 __all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations',
             '_create_folds',
-            'fold_variations',
-            'remainder_variations',
+            'integer_partitioning_generator',
+            'fold_partitioning_generator',
             'create_all_kfolds',
             'generate_evaluations_with_all_kfolds',
             '_check_specification_and_determine_p_n',
@@ -144,88 +141,106 @@ def _create_folds(p: int,
 
     return folds
 
-def fold_variations(n_items: int,
-                    n_folds: int,
-                    upper_bound_: int = None) -> list:
+def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-name
     """
-    Create a list of fold variations for ``n_item`` items and ``n_folds`` folds
+    Integer partitioning generator
+
+    Integer partitioning algorithm implemented following the algorithm on page 343 in
+    https://doi.org/10.1007/978-3-642-14764-7
 
     Args:
-        n_items (int): the number of items
+        n (int): the integer to partition
+        m (int): the number of partitions
+
+    Yields:
+        list: the next configuration
+    """
+    x = [0]*(m+1) # pylint: disable=invalid-name
+    s = [0]*(m+1) # pylint: disable=invalid-name
+
+    for k in range(1, m): # pylint: disable=invalid-name
+        x[k] = 1
+
+    x[m] = n - m + 1
+
+    for k in range(1, m + 1): # pylint: disable=invalid-name
+        s[k] = x[k] + s[k-1]
+
+    while True:
+        yield x[1:]
+
+        u = x[m] # pylint: disable=invalid-name
+        k = m # pylint: disable=invalid-name
+        while k > 0:
+            k = k - 1 # pylint: disable=invalid-name
+            if x[k] + 2 <= u:
+                break
+
+        if k == 0:
+            return
+
+        f = x[k] + 1 # pylint: disable=invalid-name
+        s_ = s[k-1] # pylint: disable=invalid-name
+        while k < m:
+            x[k] = f
+            s_ += f # pylint: disable=invalid-name
+            s[k] = s_
+            k += 1 # pylint: disable=invalid-name
+
+        x[m] = n - s[m-1]
+
+def fold_partitioning_generator(p, n, n_folds):
+    """
+    Generate the fold configurations
+
+    Args:
+        p (int): the number of positives
+        n (int): the number of negatives
         n_folds (int): the number of folds
-        upper_bound_ (None|int): the upper bound of values
 
-    Returns:
-        list(list): the list of potential distributions of ``n_items``
-        items into ``n_folds`` folds
+    Yields:
+        list, list: the next configurations' ``p`` and ``n`` counts
     """
-    if n_folds == 1:
-        return 1, [[n_items]]
-    if n_items == 1:
-        return 1, [[0]*(n_folds-1) + [1]]
+    max_items = (p + n) // n_folds
+    remainder = (p + n) % n_folds
 
-    upper_bound = min(n_items, upper_bound_ if upper_bound_ is not None else n_items)
-    lower_bound = int(np.ceil(n_items / n_folds))
+    for ps in integer_partitioning_generator(p, n_folds): # pylint: disable=invalid-name
+        if (sum(item > max_items for item in ps) != 0
+                or sum(item == max_items for item in ps) > remainder):
+            continue
 
-    total = 0
-    all_configurations = []
+        n_ordinary = len(ps) - sum(item == max_items for item in ps)
+        ns = [max_items - p_val + (idx >= n_ordinary) for idx, p_val in enumerate(ps)] # pylint: disable=invalid-name
 
-    for value in reversed(list(range(lower_bound, upper_bound+1))):
-        count, configurations = fold_variations(n_items - value, n_folds-1, value)
-        total += count
-        for conf in configurations:
-            conf.append(value)
-        all_configurations.extend(configurations)
+        # distributing the remainders between 0:idx
+        combinations = {tuple(x)
+                        for x in itertools.combinations(ps[:n_ordinary],
+                                                        remainder - (len(ps) - n_ordinary))}
 
-    return total, all_configurations
+        n_variants = []
+        for comb in combinations:
+            tmp = copy.copy(ns)
+            cdx = len(comb)-1
+            pdx = n_ordinary-1
+            while cdx >= 0 and pdx >= 0:
+                if comb[cdx] == ps[pdx]:
+                    tmp[pdx] += 1
+                    pdx -= 1
+                    cdx -= 1
+                elif comb[cdx] <= ps[pdx]:
+                    pdx -= 1
+                # this cannot happen seemingly:
+                #elif ps[pdx] <= comb[cdx]:
+                #    cdx -= 1
 
-def remainder_variations(n_remainders: int, n_folds: int) -> list:
+            n_variants.append(tmp)
+
+        for ns in n_variants: # pylint: disable=invalid-name
+            yield ps, ns
+
+def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
     """
-    Determines the potential distribution of ``n_remainders`` remainders into ``n_folds`` folds.
-
-    Args:
-        n_remainders (int): the number of remainders
-        n_folds (int): the number of folds
-
-    Returns:
-        list(list): the potential distributions of ``n_remainders`` counts into
-        ``n_folds`` folds.
-    """
-    indices = itertools.combinations(list(range(n_folds)), n_remainders)
-    combinations = list(indices)
-
-    lists = []
-    for index in list(combinations):
-        tmp = [0] * n_folds
-        for idx in index:
-            tmp[idx] = 1
-        lists.append(tmp)
-    return lists
-
-def remove_duplicates(positives: list, negatives: list) -> (list, list):
-    """
-    Remove the duplicate configurations
-
-    Args:
-        positives (list(list)): the list of positive count combinations
-        negatives (list(list)): the list of negative count combinations
-
-    Returns:
-        list(tuple), list(tuple): the lists of unique positive and negative count contributions
-    """
-    pairs = list(map(lambda x: list(zip(x[0], x[1])), list(zip(positives, negatives))))
-
-    pairs_sorted = list(map(lambda pair: sorted(pair, key=cmp_to_key(lambda x, y: x[0] - y[0]
-                                                        if x[0] - y[0] != 0
-                                                        else x[0] + x[1] - y[0] - y[1])), pairs))
-
-    results = [list(tmp2) for tmp2 in set(tuple(tmp) for tmp in pairs_sorted)]
-
-    return tuple(list(map(list, zip(*list(map(lambda x: list(zip(*x)), results))))))
-
-def create_all_kfolds2(p: int, n: int, n_folds: int) -> (list, list):
-    """
-    Creates all potential foldings
+    Create all kfold configurations
 
     Args:
         p (int): the number of positives
@@ -233,123 +248,13 @@ def create_all_kfolds2(p: int, n: int, n_folds: int) -> (list, list):
         n_folds (int): the number of folds
 
     Returns:
-        list(tuple), list(tuple): the counts of positives and negatives in the potential
-        foldings. The corresponding rows of the two list are the corresponding positive
-        and negative counts.
+        list, list: the lists of the counts of positives and negatives, the corresponding
+        entries of the list describe one folding
     """
-    total = p + n
-    items_per_fold = total // n_folds
-    remainder = total % n_folds
-
-    totals = np.array(remainder_variations(remainder, n_folds)) + items_per_fold
-    folds = np.array(fold_variations(p, n_folds)[1])
-
-    positive_counts = []
-    negative_counts = []
-
-    for total_counts in totals:
-        other = total_counts - folds
-        fold_mask = np.sum(folds > 0, axis=1)
-        other_mask = np.sum(other > 0, axis=1)
-        positive_counts.append(folds[(fold_mask == n_folds) & (other_mask == n_folds)])
-        negative_counts.append(other[(fold_mask == n_folds) & (other_mask == n_folds)])
-
-    return remove_duplicates(np.vstack(positive_counts).tolist(),
-                                np.vstack(negative_counts).tolist())
-
-class IntegerPartitioning:
-    def __init__(self, n, m):
-        self.n = n
-        self.m = m
-        self.x = [0]*(m+1)
-        self.s = [0]*(m+1)
-
-        for k in range(1, self.m):
-            self.x[k] = 1
-
-        self.x[self.m] = self.n - self.m + 1
-
-        for k in range(1, self.m + 1):
-            self.s[k] = self.x[k] + self.s[k-1]
-
-    def generate(self):
-        while True:
-            yield self.x[1:]
-
-            u = self.x[self.m]
-            k = self.m
-            while k > 0:
-                k = k - 1
-                if self.x[k] + 2 <= u:
-                    break
-
-            if k == 0:
-                return
-
-            f = self.x[k] + 1
-            s = self.s[k-1]
-            while k < self.m:
-                self.x[k] = f
-                s += f
-                self.s[k] = s
-                k += 1
-
-            self.x[self.m] = self.n - self.s[self.m-1]
-
-class FoldPartitioning:
-    def __init__(self):
-        pass
-
-    def generate(self, p, n, n_folds):
-        max_items = (p + n) // n_folds
-        remainder = (p + n) % n_folds
-
-        ipart = IntegerPartitioning(p, n_folds)
-
-        for ps in ipart.generate():
-            if (sum(item > max_items for item in ps) != 0
-                    or sum(item == max_items for item in ps) > remainder):
-                continue
-            #print(ps)
-
-            n_ordinary = len(ps) - sum(item == max_items for item in ps)
-            ns = [max_items - p_val + (idx >= n_ordinary) for idx, p_val in enumerate(ps)]
-
-            #print('ns', ns)
-            #print('n_ordinary', n_ordinary)
-
-            # distributing the remainders between 0:idx
-            #print('ps', ps[:n_ordinary])
-            #print(list(itertools.combinations(ps[:n_ordinary], remainder - (len(ps) - n_ordinary))))
-            combinations = {tuple(x) for x in itertools.combinations(ps[:n_ordinary],
-                                                                    remainder - (len(ps) - n_ordinary))}
-
-            n_variants = []
-            for comb in combinations:
-                #print('c', comb)
-                tmp = copy.copy(ns)
-                cdx = len(comb)-1
-                pdx = n_ordinary-1
-                while cdx >= 0 and pdx >= 0:
-                    if comb[cdx] == ps[pdx]:
-                        tmp[pdx] += 1
-                        pdx -= 1
-                        cdx -= 1
-                    elif comb[cdx] <= ps[pdx]:
-                        pdx -= 1
-                    elif ps[pdx] <= comb[cdx]:
-                        cdx -= 1
-
-                n_variants.append(tmp)
-
-            for ns in n_variants:
-                yield ps, ns
-
-def create_all_kfolds(p, n, n_folds):
     positives = []
     negatives = []
 
-    for pos, neg in FoldPartitioning().generate(p, n, n_folds):
+    for pos, neg in fold_partitioning_generator(p, n, n_folds):
         positives.append(tuple(pos))
         negatives.append(tuple(neg))
 
