@@ -43,7 +43,6 @@ __all__ = ['Score',
             'JaccardIndex',
             'BalancedAccuracy',
             'CohensKappa',
-            'P4',
             'get_base_objects',
             'get_all_objects',
             'get_objects_without_complements']
@@ -564,22 +563,6 @@ class CohensKappa(Score):
                         symbols,
                         scores['kappa'],
                         function=functions['kappa'])
-
-class P4(Score):
-    """
-    The P4 score
-    """
-    def __init__(self, symbols):
-        """
-        The constructor of the score
-
-        Args:
-            symbols (Symbols): the algebraic symbols to be used
-        """
-        Score.__init__(self,
-                        symbols,
-                        scores['p4'],
-                        function=functions['p4'])
 
 class MatthewsCorrelationCoefficient(Score):
     """

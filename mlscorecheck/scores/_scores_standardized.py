@@ -32,8 +32,7 @@ __all__ = [
 'diagnostic_odds_ratio_standardized',
 'jaccard_index_standardized',
 'balanced_accuracy_standardized',
-'cohens_kappa_standardized',
-'p4_standardized']
+'cohens_kappa_standardized']
 
 def accuracy_standardized(*, tp, tn, p, n):
     """
@@ -429,18 +428,3 @@ def cohens_kappa_standardized(*, tp, tn, p, n):
         int|float|Interval|IntervalUnion: the score
     """
     return -2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)
-
-def p4_standardized(*, tp, tn, p, n):
-    """
-    The standardized p4 score
-
-    Args:
-        tp (int|float|Interval|IntervalUnion): The number of true positives
-        tn (int|float|Interval|IntervalUnion): The number of true negatives
-        p (int|float|Interval|IntervalUnion): The number of positives
-        n (int|float|Interval|IntervalUnion): The number of negatives
-
-    Returns:
-        int|float|Interval|IntervalUnion: the score
-    """
-    return 4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))

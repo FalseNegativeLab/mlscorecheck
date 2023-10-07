@@ -64,12 +64,6 @@ __all__ = [
 "bacc_tn",
 "kappa_tp",
 "kappa_tn",
-"p4_tp_0",
-"p4_tp_1",
-"p4_tp",
-"p4_tn_0",
-"p4_tn_1",
-"p4_tn",
 "mcc_tp_0",
 "mcc_tp_1",
 "mcc_tp",
@@ -1069,116 +1063,6 @@ def kappa_tn(*, kappa, n, p, tp, **kwargs):
         return None
     return (kappa*n**2 + kappa*n*tp + kappa*p**2 - kappa*p*tp + 2*n*p - 2*n*tp)/(kappa*n - kappa*p + 2*p)
 
-def p4_tp_0(*, tn, n, p4, p, **kwargs):
-    """
-    Solves tp from the score p4
-
-    Args:
-        tn (int): the tn count
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tp
-    """
-    _ = kwargs
-    if is_zero(p4):
-        return None
-    return n/2 + p/2 + tn - 2*tn/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)
-
-def p4_tp_1(*, tn, n, p4, p, **kwargs):
-    """
-    Solves tp from the score p4
-
-    Args:
-        tn (int): the tn count
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tp
-    """
-    _ = kwargs
-    if is_zero(p4):
-        return None
-    return n/2 + p/2 + tn - 2*tn/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tn - 8*n*p4*tn + p**2*p4**2 + 8*p*p4**2*tn - 8*p*p4*tn - 16*p4*tn**2 + 16*tn**2)/(2*p4)
-
-def p4_tp(*, tn, n, p4, p, **kwargs):
-    """
-    Solves tp from the score p4
-
-    Args:
-        tn (int): the tn count
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tp
-    """
-    _ = kwargs
-    return unify_results([p4_tp_0(tn=tn, n=n, p4=p4, p=p),
-                          p4_tp_1(tn=tn, n=n, p4=p4, p=p)])
-def p4_tn_0(*, n, p4, p, tp, **kwargs):
-    """
-    Solves tn from the score p4
-
-    Args:
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        tp (int): the tp count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tn
-    """
-    _ = kwargs
-    if is_zero(p4):
-        return None
-    return n/2 + p/2 + tp - 2*tp/p4 - sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)
-
-def p4_tn_1(*, n, p4, p, tp, **kwargs):
-    """
-    Solves tn from the score p4
-
-    Args:
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        tp (int): the tp count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tn
-    """
-    _ = kwargs
-    if is_zero(p4):
-        return None
-    return n/2 + p/2 + tp - 2*tp/p4 + sqrt(n**2*p4**2 + 2*n*p*p4**2 + 8*n*p4**2*tp - 8*n*p4*tp + p**2*p4**2 + 8*p*p4**2*tp - 8*p*p4*tp - 16*p4*tp**2 + 16*tp**2)/(2*p4)
-
-def p4_tn(*, n, p4, p, tp, **kwargs):
-    """
-    Solves tn from the score p4
-
-    Args:
-        n (int): the n count
-        p4 (float|Interval|IntervalUnion): the value or interval for the score p4
-        p (int): the p count
-        tp (int): the tp count
-        kwargs (dict): additional keyword arguments
-
-    Returns:
-        float|Interval|IntervalUnion: the value or interval for tn
-    """
-    _ = kwargs
-    return unify_results([p4_tn_0(n=n, p4=p4, p=p, tp=tp),
-                          p4_tn_1(n=n, p4=p4, p=p, tp=tp)])
 def mcc_tp_0(*, mcc, n, tn, p, **kwargs):
     """
     Solves tp from the score mcc

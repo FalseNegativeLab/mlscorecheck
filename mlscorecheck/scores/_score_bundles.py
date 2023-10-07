@@ -24,7 +24,6 @@ from ._scores import (accuracy,
                         cohens_kappa,
                         geometric_mean,
                         unified_performance_measure,
-                        p4,
                         error_rate,
                         false_discovery_rate,
                         false_omission_rate,
@@ -52,7 +51,6 @@ from ._scores_standardized import (accuracy_standardized,
                         cohens_kappa_standardized,
                         geometric_mean_standardized,
                         unified_performance_measure_standardized,
-                        p4_standardized,
                         error_rate_standardized,
                         false_discovery_rate_standardized,
                         false_omission_rate_standardized,
@@ -97,7 +95,6 @@ score_functions_all = {'acc': accuracy,
                 'kappa': cohens_kappa,
                 'gm': geometric_mean,
                 'upm': unified_performance_measure,
-                'p4': p4,
                 'err': error_rate,
                 'fdr': false_discovery_rate,
                 'for_': false_omission_rate,
@@ -126,7 +123,6 @@ score_functions_standardized_all = {'acc': accuracy_standardized,
                 'kappa': cohens_kappa_standardized,
                 'gm': geometric_mean_standardized,
                 'upm': unified_performance_measure_standardized,
-                'p4': p4_standardized,
                 'err': error_rate_standardized,
                 'fdr': false_discovery_rate_standardized,
                 'for_': false_omission_rate_standardized,
@@ -138,7 +134,7 @@ score_functions_with_solutions = \
     {key: score_functions_all[key]
         for key in ['acc', 'sens', 'spec', 'npv', 'ppv', 'bacc', 'f1p', 'fm',
                     'f1n', 'fbp', 'fbn', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor', 'mcc',
-                    'ji', 'kappa', 'gm', 'upm', 'p4']}
+                    'ji', 'kappa', 'gm', 'upm']}
 
 # complement functions
 score_function_complement_functions = \
@@ -150,7 +146,7 @@ score_functions_without_complements = \
     {key: score_functions_all[key] for key in
                     ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1n',
                     'fbp', 'fbn', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
-                    'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}
+                    'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm']}
 
 # all score functions with complements
 score_functions_with_complements = \
@@ -166,7 +162,7 @@ score_functions_standardized_without_complements = \
     {key: score_functions_standardized_all[key] for key in
                     ['acc', 'sens', 'spec', 'npv', 'ppv', 'f1p', 'f1n',
                     'fbp', 'fbn', 'bacc', 'fm', 'bm', 'pt', 'lrp', 'lrn',
-                    'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm', 'p4']}
+                    'mk', 'dor', 'mcc', 'ji', 'kappa', 'gm', 'upm']}
 
 # all standardized score functions with complements
 score_functions_standardized_with_complements = \

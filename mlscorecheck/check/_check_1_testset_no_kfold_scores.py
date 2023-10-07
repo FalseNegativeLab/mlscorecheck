@@ -26,7 +26,7 @@ def check_1_testset_no_kfold_scores(testset: dict,
         scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
-                                    'bm', 'pt', 'dor', 'ji', 'kappa', 'p4'), when using
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
                                     f-beta positive or f-beta negative, also set
                                     'beta_positive' and 'beta_negative'.
         eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)

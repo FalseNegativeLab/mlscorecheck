@@ -201,14 +201,15 @@ def load_solutions():
 
     for sol in solutions_dict['solutions']:
         scores = list(sol['scores'])
-        results[tuple(sorted(scores))] = Solutions(**sol)
+        if not 'p4' in scores:
+            results[tuple(sorted(scores))] = Solutions(**sol)
 
     # removing the solutions containing complex values
     del results[('fm', 'gm')]
     del results[('fm', 'mk')]
-    del results[('fm', 'p4')] # goes to complex
+    #del results[('fm', 'p4')] # goes to complex
     del results[('fm', 'upm')] # goes to complex
-    del results[('dor', 'p4')] # goes to complex
+    #del results[('dor', 'p4')] # goes to complex
     del results[('dor', 'upm')] # goes to complex
     del results[('gm', 'mk')] # goes to complex
     del results[('gm', 'mcc')] # goes to complex when tn = 0 (maybe other times too)

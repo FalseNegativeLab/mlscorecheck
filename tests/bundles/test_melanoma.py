@@ -21,7 +21,7 @@ def test_isic2017m():
     Testing the ISIC2017 melanoma problem
     """
 
-    assert not check_isic2016(scores={'acc': 0.748,
+    assert not check_isic2017m(scores={'acc': 0.748,
                                     'sens': 0.538,
                                     'spec': 0.799},
                             eps=1e-3)['inconsistency']
@@ -31,7 +31,7 @@ def test_isic2017sk():
     Testing the ISIC2017 seborrheic keratosis problem
     """
 
-    assert not check_isic2016(scores={'acc': 0.711,
+    assert not check_isic2017sk(scores={'acc': 0.711,
                                     'sens': 0.8,
                                     'spec': 0.696},
                             eps=1e-3)['inconsistency']

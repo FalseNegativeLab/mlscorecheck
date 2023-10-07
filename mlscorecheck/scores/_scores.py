@@ -32,8 +32,7 @@ __all__ = [
 'diagnostic_odds_ratio',
 'jaccard_index',
 'balanced_accuracy',
-'cohens_kappa',
-'p4']
+'cohens_kappa']
 
 def accuracy(*, tp, tn, p, n):
     """
@@ -419,18 +418,3 @@ def cohens_kappa(*, tp, tn, p, n):
         int|float|Interval|IntervalUnion: the score
     """
     return (2*tn*tp - 2*(n - tn)*(p - tp))/(n*(n - tn + tp) + p*(p + tn - tp))
-
-def p4(*, tp, tn, p, n):
-    """
-    The p4 score
-
-    Args:
-        tp (int|float|Interval|IntervalUnion): The number of true positives
-        tn (int|float|Interval|IntervalUnion): The number of true negatives
-        p (int|float|Interval|IntervalUnion): The number of positives
-        n (int|float|Interval|IntervalUnion): The number of negatives
-
-    Returns:
-        int|float|Interval|IntervalUnion: the score
-    """
-    return 4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))

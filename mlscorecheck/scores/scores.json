@@ -237,6 +237,7 @@
         "upm": {
             "name": "unified_performance_measure",
             "abbreviation": "upm",
+            "synonyms": ["p4"],
             "lower_bound": 0,
             "nans": [{"tp": 0, "tn": 0}],
             "args_short": ["f1p", "f1n"],
@@ -332,7 +333,7 @@
         "mcc": {
             "name": "matthews_correlation_coefficient",
             "abbreviation": "mcc",
-            "synonyms": ["phy_coefficient"],
+            "synonyms": ["phi_coefficient"],
             "lower_bound": -1,
             "upper_bound": 1,
             "nans": [{"tp": 0, "fp": 0}, {"tn": 0, "fn": 0}],
@@ -468,23 +469,6 @@
             "polynomial_equation": "kappa * (n**2 - n*tn + n*tp + p**2 + p*tn - p*tp) + 2*(n*p - n*tp - p*tn)",
             "higher_better": true,
             "description": "Quantifies the agreement between the observed labeling and the labeling by the classifier, taking into account the probability of agreement by chance.",
-            "citation": "kappa"
-        },
-        "p4": {
-            "name": "p4",
-            "abbreviation": "p4",
-            "nans": [{"tp": 0, "tn": 0}, {"tp": "p", "tn": "n"}],
-            "lower_bound": 0,
-            "upper_bound": 1,
-            "args": ["tp", "tn", "p", "n"],
-            "formula": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))",
-            "args_standardized": ["tp", "tn", "p", "n"],
-            "formula_standardized": "4*tp*tn / (4*tp*tn + (tp + tn)*(p - tp + n - tn))",
-            "nans_standardized": [{"tp": 0, "tn": 0}, {"tp": "p", "tn": "n"}],
-            "polynomial_equation": "p4 * (4*tp*tn + (tp + tn)*(p - tp + n - tn)) - 4*tp*tn",
-            "higher_better": true,
-            "dependency_breaks": [{"tn": 0.0}, {"tp": 0.0}],
-            "description": "The harmonic mean of sensitivity, specificity, positive predictive value and negative predictive value. Similar to f_1, but contains all elementary figures.",
             "citation": "kappa"
         }
     }

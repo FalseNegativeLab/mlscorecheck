@@ -18,7 +18,7 @@ __all__ = ['check_scores_tptn_pairs',
 
 preferred_order = ['acc', 'sens', 'spec', 'bacc', 'npv', 'ppv', 'f1p', 'f1n', 'fbp', 'fbn',
                     'fm', 'bm', 'pt', 'lrp', 'lrn', 'mk', 'dor',
-                    'ji', 'gm', 'upm', 'p4', 'kappa', 'mcc']
+                    'ji', 'gm', 'upm', 'kappa', 'mcc']
 
 def iterate_tptn(*,
                     score: str,

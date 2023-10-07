@@ -43,9 +43,7 @@ from ._tptn_solutions import (mcc_tp,
                                 bacc_tp,
                                 bacc_tn,
                                 kappa_tp,
-                                kappa_tn,
-                                p4_tp,
-                                p4_tn)
+                                kappa_tn)
 
 __all__ = ['tp_solutions', 'tn_solutions', 'tptn_solutions', 'is_applicable_tptn']
 
@@ -88,8 +86,7 @@ tp_solutions = {'mcc': mcc_tp,
                 'dor': dor_tp,
                 'ji': ji_tp,
                 'bacc': bacc_tp,
-                'kappa': kappa_tp,
-                'p4': p4_tp}
+                'kappa': kappa_tp}
 
 tn_solutions = {'mcc': mcc_tn,
                 'acc': acc_tn,
@@ -111,12 +108,11 @@ tn_solutions = {'mcc': mcc_tn,
                 'dor': dor_tn,
                 'ji': ji_tn,
                 'bacc': bacc_tn,
-                'kappa': kappa_tn,
-                'p4': p4_tn}
+                'kappa': kappa_tn}
 
 tptn_solutions = {key: {'tp': tp_solutions.get(key),
                         'tn': tn_solutions.get(key)} for key in ['mcc', 'acc', 'spec', 'sens',
                                                             'ppv', 'npv', 'fbp', 'f1p', 'fbn',
                                                             'f1n', 'upm', 'gm', 'fm', 'mk', 'lrp',
                                                             'lrn', 'bm', 'pt', 'dor', 'ji',
-                                                            'bacc', 'kappa', 'p4']}
+                                                            'bacc', 'kappa']}

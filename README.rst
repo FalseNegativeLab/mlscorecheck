@@ -134,8 +134,7 @@ In general, there are three inputs to the consistency testing functions:
   * prevalence threshold (``pt``),
   * diagnostic odds ratio (``dor``),
   * jaccard index (``ji``),
-  * Cohen's kappa (``kappa``),
-  * P4 measure (``p4``);
+  * Cohen's kappa (``kappa``);
 
 * the estimated numerical uncertainty: the performance scores are usually shared with some finite precision, being rounded/ceiled/floored to ``k`` decimal places. The numerical uncertainty estimates the maximum difference of the reported score and its true value. For example, having the accuracy score 0.9489 published (4 decimal places), one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-4)/2). To be more conservative, one can assume that the score was ceiled or floored. In this case the numerical uncertainty becomes 0.0001 (10^(-4)).
 
@@ -225,7 +224,7 @@ Most of the performance scores are some sorts of ratios. When it comes to the ag
 The two types of tests
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Having one single testset, or a RoM type of aggregation (leading to one confusion matrix), one can iterate through all potential pairs of ``tp`` and ``tn`` values and check if any of them can produce the reported scores with the given numerical uncertainty. The test is sped up by using interval arithmetic to prevent the evaluation of all possible pairs. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``, ``p4``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` values.
+Having one single testset, or a RoM type of aggregation (leading to one confusion matrix), one can iterate through all potential pairs of ``tp`` and ``tn`` values and check if any of them can produce the reported scores with the given numerical uncertainty. The test is sped up by using interval arithmetic to prevent the evaluation of all possible pairs. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` values.
 
 With a MoR type of aggregation, only the averages of scores over folds or datasets are available. In this case the reconstruction of fold level or dataset level confusion matrices is possible only for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear programming. Based on the reported scores and the folding structures, these tests formulate a linear (integer) program of all confusion matrix entries and checks if the program is feasible to result in the reported values with the estimated numerical uncertainties.
 
