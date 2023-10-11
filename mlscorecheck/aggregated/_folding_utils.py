@@ -189,54 +189,46 @@ def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-na
 
         x[m] = n - s[m-1]
 
-def fold_partitioning_generator(p, n, n_folds):
-    """
-    Generate the fold configurations
+def fold_partitioning_generator(p, n, k):
+    k_div = (p + n) // k
+    k_mod = (p + n) % k
 
-    Args:
-        p (int): the number of positives
-        n (int): the number of negatives
-        n_folds (int): the number of folds
+    k_b = k - k_mod
+    k_a = k_mod
+    c_a = k_div + 1
+    c_b = k_div
 
-    Yields:
-        list, list: the next configurations' ``p`` and ``n`` counts
-    """
-    max_items = (p + n) // n_folds
-    remainder = (p + n) % n_folds
+    total_a = k_a * c_a
+    total_b = k_b * c_b
 
-    for ps in integer_partitioning_generator(p, n_folds): # pylint: disable=invalid-name
-        if (sum(item > max_items for item in ps) != 0
-                or sum(item == max_items for item in ps) > remainder):
-            continue
+    max_n_b = min(total_b - k_b, n - k_a)
+    min_n_a = n - max_n_b
+    max_p_a = total_a - min_n_a
+    max_p_b = min(total_b - k_b, p - k_a)
+    min_p_a = p - max_p_b
 
-        n_ordinary = len(ps) - sum(item == max_items for item in ps)
-        ns = [max_items - p_val + (idx >= n_ordinary) for idx, p_val in enumerate(ps)] # pylint: disable=invalid-name
+    for p_a in range(min_p_a, max_p_a + 1):
+        p_b = p - p_a
 
-        # distributing the remainders between 0:idx
-        combinations = {tuple(x)
-                        for x in itertools.combinations(ps[:n_ordinary],
-                                                        remainder - (len(ps) - n_ordinary))}
+        for ps_a in integer_partitioning_generator(p_a, k_a):
+            if any(tmp >= c_a for tmp in ps_a):
+                continue
 
-        n_variants = []
-        for comb in combinations:
-            tmp = copy.copy(ns)
-            cdx = len(comb)-1
-            pdx = n_ordinary-1
-            while cdx >= 0 and pdx >= 0:
-                if comb[cdx] == ps[pdx]:
-                    tmp[pdx] += 1
-                    pdx -= 1
-                    cdx -= 1
-                elif comb[cdx] <= ps[pdx]:
-                    pdx -= 1
-                # this cannot happen seemingly:
-                #elif ps[pdx] <= comb[cdx]:
-                #    cdx -= 1
+            ns_a = [c_a - tmp for tmp in ps_a]
 
-            n_variants.append(tmp)
+            for ps_b in integer_partitioning_generator(p_b, k_b):
 
-        for ns in n_variants: # pylint: disable=invalid-name
-            yield ps, ns
+                if any(tmp >= c_b for tmp in ps_b):
+                    continue
+
+                ns_b = [c_b - tmp for tmp in ps_b]
+
+                ps_all = ps_a + ps_b
+                ns_all = ns_a + ns_b
+
+                res = sorted(list(zip(ps_all, ns_all)), key=lambda x: (x[0], x[1]))
+
+                yield list(zip(*res))
 
 def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
     """
