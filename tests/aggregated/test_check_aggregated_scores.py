@@ -38,6 +38,8 @@ def test_check_timeout():
                             'lp_configuration_bounds_match': True,
                             'lp_configuration': None})
 
+    assert check_timeout({'lp_status': 'timeout'})
+
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 @pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
