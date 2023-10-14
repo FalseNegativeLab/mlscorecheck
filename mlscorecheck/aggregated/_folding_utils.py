@@ -18,7 +18,8 @@ __all__ = ['stratified_configurations_sklearn',
             'create_all_kfolds',
             'generate_evaluations_with_all_kfolds',
             '_check_specification_and_determine_p_n',
-            'generate_experiments_with_all_kfolds']
+            'generate_experiments_with_all_kfolds',
+            'determine_min_max_p']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -184,13 +185,15 @@ def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-na
 
         x[m] = n - s[m-1]
 
-def all_integer_partitioning_generator(n, k): # pylint: disable=invalid-name
+def all_integer_partitioning_generator(n, k, non_zero, max_count): # pylint: disable=invalid-name
     """
     Generate all integer partitioning of n to k parts (including 0 parts)
 
     Args:
         n (int): the integer to partition
         k (int): the maximum number of parts
+        non_zero (bool): True if all parts must be greater than zero, False otherwise
+        max_count (int): the maximum value a part can take
 
     Yields:
         list: the list of parts
@@ -198,31 +201,12 @@ def all_integer_partitioning_generator(n, k): # pylint: disable=invalid-name
     if n == 0:
         yield [0] * k
     else:
-        for m in range(1, min(k+1, n+1)):# pylint: disable=invalid-name
+        lower_bound = min(k, n) if non_zero else 1
+        upper_bound = min(k, n) + 1
+        for m in range(lower_bound, upper_bound):# pylint: disable=invalid-name
             for positives in integer_partitioning_generator(n, m):
-                yield [0] * (k - m) + positives
-
-def invalid_p_counts(p_values, max_value, p_zero, n_zero):
-    """
-    Checks if the p counts are invalid for a certain configuration
-
-    Args:
-        p_values (list): p values
-        max_values (int): the number of elements in a fold
-        p_zero (bool): whether any p can be zero
-        n_zero (bool): whether any n can be zero
-
-    Returns:
-        bool: True if the counts are invalid, False otherwise
-    """
-
-    if n_zero and any(tmp > max_value for tmp in p_values):
-        return True
-
-    if (not n_zero) and any(tmp >= max_value for tmp in p_values):
-        return True
-
-    return not p_zero and any(tmp == 0 for tmp in p_values)
+                if all(pos <= max_count for pos in positives):
+                    yield [0] * (k - m) + positives
 
 def not_enough_mixed_folds(p_values, n_values):
     """
@@ -239,7 +223,7 @@ def not_enough_mixed_folds(p_values, n_values):
     return len(p_values) > 1 and sum(p_tmp > 0 and n_tmp > 0
                                         for p_tmp, n_tmp in zip(p_values, n_values)) < 2
 
-def determine_min_max_p(*, p, n, k_a, k_b, c_a, c_b, p_zero, n_zero): # pylint: disable=too-many-locals
+def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero): # pylint: disable=too-many-locals
     """
     Determines the minimum and maximum number of positives that can appear in folds
     of type A
@@ -250,31 +234,22 @@ def determine_min_max_p(*, p, n, k_a, k_b, c_a, c_b, p_zero, n_zero): # pylint: 
         k_a (int): the number of folds of type A
         k_b (int): the number of folds of type B
         c_a (int): the count of elements in folds of type A
-        c_b (int): the count of elements in folds of type B
-        p_zero (bool): whether any p can be zero
-        n_zero (bool): whether any n can be zero
+        p_non_zero (bool): whether all p should be non-zero
+        n_non_zero (bool): whether all n should be non-zero
 
     Returns:
         int, int: the minimum and maximum number of positives in all folds of
                     type A
     """
-    min_n_b = 0 if n_zero else k_b
-    min_n_a = 0 if n_zero else k_a
-    min_p_b = 0 if p_zero else k_b
-    min_p_a = 0 if p_zero else k_a
 
     total_a = k_a * c_a
-    total_b = k_b * c_b
 
-    max_n_b = min(total_b - min_n_b, n - min_n_a)
-    min_n_a = n - max_n_b
-    max_p_a = total_a - min_n_a
-    max_p_b = min(total_b - min_p_b, p - min_p_a)
-    min_p_a = p - max_p_b
+    min_p_a = max(p_non_zero*k_a, total_a - (n - n_non_zero*k_b))
+    max_p_a = min(p - p_non_zero*k_b, total_a - n_non_zero*k_a)
 
     return min_p_a, max_p_a
 
-def fold_partitioning_generator(p, n, k, p_zero=False, n_zero=False): #pylint: disable=invalid-name,too-many-locals
+def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True): #pylint: disable=invalid-name,too-many-locals
     """
     Generates the fold partitioning
 
@@ -301,24 +276,17 @@ def fold_partitioning_generator(p, n, k, p_zero=False, n_zero=False): #pylint: d
                                             k_a=k_a,
                                             k_b=k_b,
                                             c_a=c_a,
-                                            c_b=c_b,
-                                            p_zero=p_zero,
-                                            n_zero=n_zero)
+                                            p_non_zero=p_non_zero,
+                                            n_non_zero=n_non_zero)
 
     for p_a in range(min_p_a, max_p_a + 1):
         p_b = p - p_a
 
-        for ps_a in all_integer_partitioning_generator(p_a, k_a):
-
-            if invalid_p_counts(ps_a, c_a, p_zero, n_zero):
-                continue
+        for ps_a in all_integer_partitioning_generator(p_a, k_a, p_non_zero, c_a - n_non_zero):
 
             ns_a = [c_a - tmp for tmp in ps_a]
 
-            for ps_b in all_integer_partitioning_generator(p_b, k_b):
-
-                if invalid_p_counts(ps_b, c_b, p_zero, n_zero):
-                    continue
+            for ps_b in all_integer_partitioning_generator(p_b, k_b, p_non_zero, c_b - n_non_zero):
 
                 ns_b = [c_b - tmp for tmp in ps_b]
 
@@ -342,9 +310,8 @@ def create_all_kfolds(p: int,
         p (int): the number of positives
         n (int): the number of negatives
         n_folds (int): the number of folds
-        allow_zeros (bool): if False, each fold has at least 1 positive and 1 negative,
-                            otherwise, 0 positives and negatives are allowed but at least
-                            2 folds must be there with at least 1 elements from both
+        p_zero (bool): if True, p can be zero in some folds
+        n_zero (bool): if True, n can be zero in some folds
 
     Returns:
         list, list: the lists of the counts of positives and negatives, the corresponding
@@ -353,7 +320,7 @@ def create_all_kfolds(p: int,
     positives = []
     negatives = []
 
-    for pos, neg in fold_partitioning_generator(p, n, n_folds, p_zero, n_zero):
+    for pos, neg in fold_partitioning_generator(p, n, n_folds, not p_zero, not n_zero):
         positives.append(tuple(pos))
         negatives.append(tuple(neg))
 

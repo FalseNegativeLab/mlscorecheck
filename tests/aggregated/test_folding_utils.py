@@ -2,6 +2,8 @@
 This module tests the operations related to fold structures
 """
 
+import itertools
+
 import pytest
 
 import numpy as np
@@ -13,7 +15,8 @@ from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         create_all_kfolds,
                                         generate_evaluations_with_all_kfolds,
                                         fold_partitioning_generator,
-                                        _check_specification_and_determine_p_n)
+                                        _check_specification_and_determine_p_n,
+                                        determine_min_max_p)
 
 def test_create_all_kfolds():
     """
@@ -187,21 +190,116 @@ def test_fold_partitioning_generator():
     Testing the fold partitioning generator
     """
 
-    folds = fold_partitioning_generator(6, 6, 3, False, False)
+    folds = fold_partitioning_generator(6, 6, 3, True, True)
 
     assert all((not any_zero(fold[0])) and (not any_zero(fold[1])) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, True, False))
+    folds = list(fold_partitioning_generator(6, 6, 3, False, True))
 
     assert all(not any_zero(fold[1]) for fold in folds)
     assert any(any_zero(fold[0]) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, False, True))
+    folds = list(fold_partitioning_generator(6, 6, 3, True, False))
 
     assert all(not any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, True, True))
+    folds = list(fold_partitioning_generator(6, 6, 3, False, False))
 
     assert any(any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
+
+def exhaustive_min_max_p(*, p, k_a, k_b, c_a, c_b, p_non_zero, n_non_zero): # pylint: disable=too-many-locals
+    """
+    Exhaustive search for the minimum and maximum p in folds of type A
+
+    Args:
+        p (int): the overall number of positives
+        k_a (int): the number of folds of type A
+        k_b (int): the number of folds of type B
+        c_a (int): the count of elements in folds of type A
+        c_b (int): the count of elements in folds of type B
+        p_non_zero (bool): wether p can be zero in any fold (False if not)
+        n_non_zero (bool): wether n can be zero in any fold (False if not)
+
+    Returns:
+        int, int: the minimum and maximum number of positives total in folds of
+        type A
+    """
+    a_folds_p = [list(range(p+1))] * k_a
+    b_folds_p = [list(range(p+1))] * k_b
+
+    min_p_a = p
+    max_p_a = 0
+
+    for p_a in itertools.product(*a_folds_p):
+        if any(p_tmp > c_a or (p_non_zero and p_tmp == 0) for p_tmp in p_a):
+            continue
+        p_a_sum = sum(p_a)
+        if p_a_sum > k_a * c_a or p_a_sum > p:
+            continue
+
+        n_a = [c_a - p_tmp for p_tmp in p_a]
+
+        for p_b in itertools.product(*b_folds_p):
+            if any(p_tmp > c_b or (p_non_zero and p_tmp == 0) for p_tmp in p_b):
+                continue
+            p_b_sum = sum(p_b)
+
+            if p_b_sum > k_b * c_b or p_b_sum != p - p_a_sum:
+                continue
+
+            n_b = [c_b - p_tmp for p_tmp in p_b]
+
+            n_all = n_a + n_b
+
+            if n_non_zero and any(n_tmp == 0 for n_tmp in n_all):
+                continue
+
+            if sum(p_a) < min_p_a:
+                min_p_a = sum(p_a)
+            if sum(p_a) > max_p_a:
+                max_p_a = sum(p_a)
+
+    return min_p_a, max_p_a
+
+@pytest.mark.parametrize('p', list(range(2, 20, 3)))
+@pytest.mark.parametrize('n', list(range(5, 30, 3)))
+@pytest.mark.parametrize('k', list(range(2, 6)))
+@pytest.mark.parametrize('p_non_zero', [True, False])
+@pytest.mark.parametrize('n_non_zero', [True, False])
+def test_determine_min_max_p(p, n, k, p_non_zero, n_non_zero): # pylint: disable=invalid-name
+    """
+    Testing the determination of minimum and maximum p with exhaustive search
+
+    Args:
+        p (int): the number of positives
+        n (int): the number of negatives
+        k (int): the number of folds
+        p_non_zero (bool): wether p can be zero in any fold (False if not)
+        n_non_zero (bool): wether n can be zero in any fold (False if not)
+    """
+    if (p_non_zero and p < k) or (n_non_zero and n < k):
+        return
+
+    k_div = (p + n) // k
+    k_mod = (p + n) % k
+
+    k_b = k - k_mod
+    k_a = k_mod
+    c_a = k_div + 1
+    c_b = k_div
+    min_p, max_p = determine_min_max_p(p=p, n=n,
+                                        k_a=k_a, k_b=k_b,
+                                        c_a=c_a,
+                                        p_non_zero=p_non_zero,
+                                        n_non_zero=n_non_zero)
+
+    min_p_full, max_p_full = exhaustive_min_max_p(p=p,
+                                        k_a=k_a, k_b=k_b,
+                                        c_a=c_a, c_b=c_b,
+                                        p_non_zero=p_non_zero,
+                                        n_non_zero=n_non_zero)
+
+    assert min_p == min_p_full
+    assert max_p == max_p_full
