@@ -9,7 +9,7 @@ from ._folding import Folding
 from ..core import (init_random_state, dict_mean, round_scores,
                     NUMERICAL_TOLERANCE)
 from ..individual import calculate_scores_for_lp
-from ._utils import check_bounds
+from ._utils import check_bounds, aggregated_scores
 from ._linear_programming import add_bounds
 
 class Evaluation:
@@ -60,7 +60,7 @@ class Evaluation:
                 'fold_score_bounds': self.fold_score_bounds,
                 'aggregation': self.aggregation}
 
-    def sample_figures(self, random_state = None):
+    def sample_figures(self, random_state = None, score_subset: list = None):
         """
         Samples the figures in the evaluation
 
@@ -75,7 +75,7 @@ class Evaluation:
         for fold in self.folds:
             fold.sample_figures(random_state)
 
-        self.calculate_scores()
+        self.calculate_scores(score_subset=score_subset)
 
         return self
 
@@ -92,8 +92,11 @@ class Evaluation:
         Returns:
             dict: the calculated scores
         """
+
+        score_subset = aggregated_scores if score_subset is None else score_subset
+
         for fold in self.folds:
-            fold.calculate_scores()
+            fold.calculate_scores(score_subset=score_subset)
 
         if isinstance(self.folds[0].tp, pl.LpVariable):
             self.figures['tp'] = pl.lpSum(fold.tp for fold in self.folds)
@@ -103,13 +106,9 @@ class Evaluation:
             self.figures['tn'] = sum(fold.tn for fold in self.folds)
 
         if self.aggregation == 'rom':
-            self.scores = calculate_scores_for_lp(self.figures)
+            self.scores = calculate_scores_for_lp(self.figures, score_subset=score_subset)
         elif self.aggregation == 'mor':
             self.scores = dict_mean([fold.scores for fold in self.folds])
-
-        self.scores = (self.scores if score_subset is None
-                        else {key: value for key, value in self.scores.items()
-                                            if key in score_subset})
 
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
@@ -131,7 +130,11 @@ class Evaluation:
         for fold in self.folds:
             fold.init_lp(scores=scores)
 
-        self.calculate_scores()
+        score_subset = aggregated_scores
+        if scores is not None:
+            score_subset = list(set(scores.keys()).intersection(set(aggregated_scores)))
+
+        self.calculate_scores(score_subset=score_subset)
 
         for fold in self.folds:
             add_bounds(lp_problem, fold.scores, self.fold_score_bounds, fold.identifier)

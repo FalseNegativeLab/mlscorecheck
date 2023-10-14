@@ -103,7 +103,8 @@ def check_1_dataset_unknown_folds_mor_scores(
                     'fold_score_bounds': fold_score_bounds,
                     'aggregation': 'mor'}
 
-    evaluations = generate_evaluations_with_all_kfolds(evaluation)
+    evaluations = generate_evaluations_with_all_kfolds(evaluation,
+                                                        available_scores=list(scores.keys()))
 
     logger.info('The total number of fold combinations: %d', len(evaluations))
 

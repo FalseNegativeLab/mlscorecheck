@@ -12,7 +12,7 @@ import pulp as pl
 from ..core import (init_random_state, round_scores)
 from ..individual import calculate_scores_for_lp
 
-from ._utils import random_identifier
+from ._utils import random_identifier, aggregated_scores
 
 __all__ = ['Fold']
 
@@ -71,23 +71,51 @@ class Fold:
 
         return self
 
-    def calculate_scores(self, rounding_decimals: int = None) -> dict:
+    def calculate_scores(self,
+                            rounding_decimals: int = None,
+                            score_subset: list = None) -> dict:
         """
         Calculate the scores for the fold
 
         Args:
             rounding_decimals (int|None): the number of decimals to round to
+            score_subset (list): the subset of scores to calculate
 
         Returns:
             dict: the scores
         """
+        score_subset = score_subset if score_subset is not None else aggregated_scores
+
         self.scores = calculate_scores_for_lp({'p': self.p,
                                                 'n': self.n,
                                                 'tp': self.tp,
-                                                'tn': self.tn})
+                                                'tn': self.tn},
+                                                score_subset=score_subset)
 
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
+
+    def set_initial_values(self, scores):
+        """
+        Sets the initial values for the tp and tn variables
+
+        Args:
+            scores (dict): the dictionary of scores
+        """
+        if 'acc' in scores:
+            tp_init = scores['acc'] * self.p
+            tn_init = scores['acc'] * self.n
+        if 'bacc' in scores:
+            tp_init = scores['bacc'] * self.p
+            tn_init = scores['bacc'] * self.n
+
+        if 'sens' in scores:
+            tp_init = scores['sens'] * self.p
+        if 'spec' in scores:
+            tn_init = scores['spec'] * self.n
+
+        self.tp.setInitialValue(int(tp_init))
+        self.tn.setInitialValue(int(tn_init))
 
     def init_lp(self, scores: dict = None):
         """
@@ -103,22 +131,13 @@ class Fold:
         self.tn = pl.LpVariable(self.variable_names['tn'], 0, self.n, pl.LpInteger)
 
         if scores is not None:
-            if 'acc' in scores:
-                tp_init = scores['acc'] * self.p
-                tn_init = scores['acc'] * self.n
-            if 'bacc' in scores:
-                tp_init = scores['bacc'] * self.p
-                tn_init = scores['bacc'] * self.n
+            self.set_initial_values(scores)
 
-            if 'sens' in scores:
-                tp_init = scores['sens'] * self.p
-            if 'spec' in scores:
-                tn_init = scores['spec'] * self.n
+        score_subset = aggregated_scores
+        if scores is not None:
+            score_subset = list(set(scores.keys()).intersection(set(aggregated_scores)))
 
-            self.tp.setInitialValue(int(tp_init))
-            self.tn.setInitialValue(int(tn_init))
-
-        self.calculate_scores()
+        self.calculate_scores(score_subset=score_subset)
 
     def populate(self, lp_problem: pl.LpProblem) -> pl.LpProblem:
         """

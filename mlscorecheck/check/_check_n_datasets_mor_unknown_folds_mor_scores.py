@@ -115,21 +115,22 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
                     'dataset_score_bounds': dataset_score_bounds,
                     'aggregation': 'mor'}
 
-    experiments = generate_experiments_with_all_kfolds(experiment=experiment)
+    experiments = generate_experiments_with_all_kfolds(experiment=experiment,
+                                                        available_scores=list(scores.keys()))
 
     results = {'details': [],
                 'inconsistency': True}
 
-    for experim in experiments:
+    for experiment in experiments:
         result = check_n_datasets_mor_known_folds_mor_scores(
-                                        evaluations=experim['evaluations'],
-                                        dataset_score_bounds=experim.get('dataset_score_bounds'),
-                                        scores=scores,
-                                        eps=eps,
-                                        timeout=timeout,
-                                        solver_name=solver_name,
-                                        verbosity=verbosity,
-                                        numerical_tolerance=numerical_tolerance)
+                                    evaluations=experiment['evaluations'],
+                                    dataset_score_bounds=experiment.get('dataset_score_bounds'),
+                                    scores=scores,
+                                    eps=eps,
+                                    timeout=timeout,
+                                    solver_name=solver_name,
+                                    verbosity=verbosity,
+                                    numerical_tolerance=numerical_tolerance)
 
         results['details'].append(result)
         results['inconsistency'] = results['inconsistency'] and result['inconsistency']

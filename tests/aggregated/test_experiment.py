@@ -177,8 +177,8 @@ def test_linear_programming_success_with_bounds(subset: list,
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
                                                 return_scores=True,
-                                                feasible_dataset_score_bounds=True)
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                                feasible_dataset_score_bounds=True,
+                                                score_subset=subset)
 
     experiment = Experiment(**experiment)
 
@@ -209,8 +209,8 @@ def test_linear_programming_failure_with_bounds(subset: list,
     experiment, scores = generate_experiment(random_state=random_seed,
                                                 aggregation=aggregation,
                                                 return_scores=True,
-                                                feasible_dataset_score_bounds=False)
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                                feasible_dataset_score_bounds=False,
+                                                score_subset=subset)
 
     experiment = Experiment(**experiment)
 
@@ -244,8 +244,8 @@ def test_linear_programming_success_both_bounds(subset: list,
                                                             'feasible_fold_score_bounds': True},
                                         return_scores=True,
                                         rounding_decimals=rounding_decimals,
-                                        feasible_dataset_score_bounds=True)
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                        feasible_dataset_score_bounds=True,
+                                        score_subset=subset)
 
     experiment = Experiment(**experiment)
 
@@ -282,8 +282,8 @@ def test_linear_programming_failure_both_bounds(subset: list,
                                                             'feasible_fold_score_bounds': True},
                                         return_scores=True,
                                         rounding_decimals=rounding_decimals,
-                                        feasible_dataset_score_bounds=False)
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                        feasible_dataset_score_bounds=False,
+                                        score_subset=subset)
 
     experiment = Experiment(**experiment)
 

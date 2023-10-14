@@ -34,18 +34,20 @@ def add_bounds(lp_problem: pl.LpProblem,
         return lp_problem
 
     for variable in bounds:
-
-        if bounds[variable][0] is not None and not np.isnan(bounds[variable][0]):
-            logger.info('%s: adding lower bound %s for %s',
-                        label, str(bounds[variable][0]), variable)
-            lp_problem += bounds[variable][0] <= variables[variable]
-        else:
-            logger.info('%s: No lower bound for variable %s', label, variable)
-        if bounds[variable][1] is not None and not np.isnan(bounds[variable][1]):
-            logger.info('%s: adding upper bound %s for %s', label, bounds[variable][1], variable)
-            lp_problem += variables[variable] <= bounds[variable][1]
-        else:
-            logger.info('%s: No upper bound for variable %s', label, variable)
+        if variable in variables:
+            if bounds[variable][0] is not None and not np.isnan(bounds[variable][0]):
+                logger.info('%s: adding lower bound %s for %s',
+                            label, str(bounds[variable][0]), variable)
+                lp_problem += bounds[variable][0] <= variables[variable]
+            else:
+                logger.info('%s: No lower bound for variable %s', label, variable)
+            if bounds[variable][1] is not None and not np.isnan(bounds[variable][1]):
+                logger.info('%s: adding upper bound %s for %s', label,
+                                                                bounds[variable][1],
+                                                                variable)
+                lp_problem += variables[variable] <= bounds[variable][1]
+            else:
+                logger.info('%s: No upper bound for variable %s', label, variable)
 
     return lp_problem
 
@@ -67,7 +69,7 @@ def create_lp_target(obj,
         pl.LpProblem: the updated linear programming problem
     """
     for key in scores:
-        if key in ['acc', 'sens', 'spec', 'bacc']:
+        if key in ['acc', 'sens', 'spec', 'bacc'] and key in obj.scores:
             lp_problem += obj.scores[key] >= scores[key] - eps[key]
             lp_problem += obj.scores[key] <= scores[key] + eps[key]
 

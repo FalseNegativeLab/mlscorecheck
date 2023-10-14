@@ -39,7 +39,7 @@ class Solution:
         # extracting all symbols
         self.all_symbols = set()
 
-        for _, item in self.solution.items():
+        for item in self.solution.values():
             self.all_symbols = self.all_symbols.union(item['symbols'])
 
         for cond in self.conditions:
@@ -88,14 +88,10 @@ class Solution:
         Returns:
             bool: True if the condition fails, False otherwise
         """
-        if isinstance(value, (Interval, IntervalUnion)):
-            if value.contains(0):
-                return True
-        else:
-            if abs(value) < 1e-8:
-                return True
-
-        return False
+        return ((isinstance(value, (Interval, IntervalUnion))
+                and value.contains(0))
+                or (not isinstance(value, (Interval, IntervalUnion))
+                and abs(value) < 1e-8))
 
     def evaluate(self, subs):
         """
@@ -201,7 +197,7 @@ def load_solutions():
 
     for sol in solutions_dict['solutions']:
         scores = list(sol['scores'])
-        if not 'p4' in scores:
+        if 'p4' not in scores:
             results[tuple(sorted(scores))] = Solutions(**sol)
 
     # removing the solutions containing complex values

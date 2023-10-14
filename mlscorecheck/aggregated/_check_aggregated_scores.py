@@ -79,7 +79,7 @@ def check_aggregated_scores(*,
     result = solve(experiment, scores, eps, solver)
 
     populated = experiment.populate(result)
-    populated.calculate_scores()
+    populated.calculate_scores(score_subset=list(scores.keys()))
     configuration_details = populated.check_bounds()
 
     if result.status == 1:

@@ -1,0 +1,10 @@
+{
+    "version": "0.2",
+    "ignorePaths": ["notebooks/development/*"],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [],
+    "ignoreWords": ["foldings", "bacc", "kfold", "kfolds", "mlscorecheck", "nans",
+                    "minmax", "assemblance", "bincount", "hstack"],
+    "import": []
+}

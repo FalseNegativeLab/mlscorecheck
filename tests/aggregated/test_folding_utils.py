@@ -12,6 +12,7 @@ from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         _create_folds,
                                         create_all_kfolds,
                                         generate_evaluations_with_all_kfolds,
+                                        fold_partitioning_generator,
                                         _check_specification_and_determine_p_n)
 
 def test_create_all_kfolds():
@@ -47,21 +48,34 @@ def test_generate_datasets_with_all_kfolds():
     """
     evaluation = {'dataset': {'p': 5, 'n': 7}, 'folding': {'n_folds': 3}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation)
+    datasets = generate_evaluations_with_all_kfolds(evaluation,
+                                                    available_scores=['acc', 'bacc',
+                                                                        'sens', 'spec'])
     assert len(datasets) == 2
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation)
+    datasets = generate_evaluations_with_all_kfolds(evaluation,
+                                                    available_scores=['acc', 'bacc',
+                                                                        'sens', 'spec'])
     assert len(datasets) == 4
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2},
                     'fold_score_bounds': {'acc': (0.0, 1.0)}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation)
+    datasets = generate_evaluations_with_all_kfolds(evaluation,
+                                                    available_scores=['acc', 'bacc',
+                                                                        'sens', 'spec'])
     assert 'fold_score_bounds' in datasets[0]
+
+    evaluation = {'dataset': {'dataset_name': 'common_datasets.appendicitis'},
+                    'folding': {'n_folds': 3}}
+
+    datasets = generate_evaluations_with_all_kfolds(evaluation,
+                                                    available_scores=['acc', 'bacc',
+                                                                        'sens', 'spec'])
 
 def test_exceptions():
     """
@@ -76,9 +90,6 @@ def test_exceptions():
 
     with pytest.raises(ValueError):
         _check_specification_and_determine_p_n({'p': 2, 'n': 5, 'dataset_name': 'dummy'}, {})
-
-    generate_evaluations_with_all_kfolds({'dataset': {'dataset_name': 'common_datasets.ADA'},
-                                        'folding': {'n_folds': 2, 'n_repeats': 1}})
 
 def test_create_folds():
     """
@@ -114,30 +125,29 @@ def sklearn_configurations(y_labels, n_splits):
     """
     validator = StratifiedKFold(n_splits=n_splits)
 
-    results = []
+    return [tuple(np.bincount(y_labels[test]).tolist())
+            for _, test in validator.split(y_labels, y_labels, y_labels)]
 
-    for _, test in validator.split(y_labels, y_labels, y_labels):
-        results.append(tuple(np.bincount(y_labels[test]).tolist()))
-
-    return results
-
-def test_stratified_configurations_sklearn():
+@pytest.mark.parametrize('random_state', list(range(500)))
+def test_stratified_configurations_sklearn(random_state):
     """
     Testing the determination of the stratified sklearn fold configurations
+
+    Args:
+        random_state (int): the random seed to use
     """
 
-    random_state = np.random.RandomState(5)
+    random_state = np.random.RandomState(random_state)
 
-    for _ in range(1000):
-        n_splits = random_state.randint(2, 40)
-        n_items = random_state.randint(n_splits * 2, n_splits*100)
-        n_1 = random_state.randint(n_splits, n_items - n_splits + 1)
-        n_0 = n_items - n_1
+    n_splits = random_state.randint(2, 40)
+    n_items = random_state.randint(n_splits * 2, n_splits*100)
+    n_1 = random_state.randint(n_splits, n_items - n_splits + 1)
+    n_0 = n_items - n_1
 
-        y_labels = np.hstack([np.repeat(0, n_0), np.repeat(1, n_1)])
+    y_labels = np.hstack([np.repeat(0, n_0), np.repeat(1, n_1)])
 
-        assert stratified_configurations_sklearn(n_1, n_0, n_splits) \
-                    == sklearn_configurations(y_labels, n_splits)
+    assert stratified_configurations_sklearn(n_1, n_0, n_splits) \
+                == sklearn_configurations(y_labels, n_splits)
 
 def test_determine_fold_configurations():
     """
@@ -152,3 +162,46 @@ def test_determine_fold_configurations():
 
     with pytest.raises(ValueError):
         determine_fold_configurations(10, 20, 4, 1, 'dummy')
+
+def any_zero(values):
+    """
+    Tests is any of the values is zero
+
+    Args:
+        values (list): a list of values
+
+    Returns:
+        bool: True if any of the values is zero, False otherwise
+    """
+    return any(val == 0 for val in values)
+
+def test_any_zero():
+    """
+    Testing the any_zero function
+    """
+    assert any_zero([0, 1])
+    assert not any_zero([1, 1])
+
+def test_fold_partitioning_generator():
+    """
+    Testing the fold partitioning generator
+    """
+
+    folds = fold_partitioning_generator(6, 6, 3, False, False)
+
+    assert all((not any_zero(fold[0])) and (not any_zero(fold[1])) for fold in folds)
+
+    folds = list(fold_partitioning_generator(6, 6, 3, True, False))
+
+    assert all(not any_zero(fold[1]) for fold in folds)
+    assert any(any_zero(fold[0]) for fold in folds)
+
+    folds = list(fold_partitioning_generator(6, 6, 3, False, True))
+
+    assert all(not any_zero(fold[0]) for fold in folds)
+    assert any(any_zero(fold[1]) for fold in folds)
+
+    folds = list(fold_partitioning_generator(6, 6, 3, True, True))
+
+    assert any(any_zero(fold[0]) for fold in folds)
+    assert any(any_zero(fold[1]) for fold in folds)

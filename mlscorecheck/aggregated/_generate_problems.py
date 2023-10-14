@@ -89,7 +89,7 @@ def generate_folding(*, dataset: dict,
 
     return {'folds': [fold.to_dict() for fold in folding.generate_folds(dataset, 'mor')]}
 
-def generate_evaluation(*, max_p: int = 500,
+def generate_evaluation(*, max_p: int = 500, # pylint: disable=too-many-locals
                             max_n: int = 500,
                             max_folds: int = 10,
                             max_repeats: int = 5,
@@ -100,7 +100,8 @@ def generate_evaluation(*, max_p: int = 500,
                             return_scores: bool = False,
                             rounding_decimals: int = None,
                             no_name: bool = False,
-                            no_folds: bool = False) -> dict:
+                            no_folds: bool = False,
+                            score_subset: list = None) -> dict:
     """
     Generate a random evaluation specification
 
@@ -151,12 +152,14 @@ def generate_evaluation(*, max_p: int = 500,
         scores['beta_positive'] = 2
         scores['beta_negative'] = 2
     else:
-        scores = evaluation.calculate_scores(rounding_decimals)
+        scores = evaluation.calculate_scores(rounding_decimals,
+                                                score_subset=score_subset)
 
     if feasible_fold_score_bounds is None:
         result['fold_score_bounds'] = None
     else:
-        result['fold_score_bounds'] = get_fold_score_bounds(evaluation, feasible_fold_score_bounds)
+        result['fold_score_bounds'] = get_fold_score_bounds(evaluation,
+                                                            feasible_fold_score_bounds)
 
     result['aggregation'] = aggregation
 
@@ -195,7 +198,8 @@ def generate_experiment(*, max_evaluations: int = 5,
                         aggregation: str = None,
                         random_state = None,
                         return_scores: bool = False,
-                        rounding_decimals: int = None) -> dict:
+                        rounding_decimals: int = None,
+                        score_subset: list = None) -> dict:
     """
     Generate a random experiment specification
 
@@ -238,7 +242,8 @@ def generate_experiment(*, max_evaluations: int = 5,
         scores['beta_positive'] = 2
         scores['beta_negative'] = 2
     else:
-        scores = experiment.calculate_scores(rounding_decimals)
+        scores = experiment.calculate_scores(rounding_decimals,
+                                                score_subset=score_subset)
 
     if evaluation_params.get('feasible_fold_score_bounds') is not None:
         for idx, evaluation in enumerate(experiment.evaluations):

@@ -5,7 +5,7 @@ calculation of scores
 
 import math
 
-from ..core import safe_call, round_scores
+from ..core import safe_call, round_scores, logger
 from ..scores import score_functions_with_solutions
 from ..scores import score_specifications
 
@@ -23,14 +23,33 @@ def calculate_scores_for_lp(problem: dict, score_subset: list = None) -> dict:
     Returns:
         dict(str,float): the calculated scores
     """
+    if score_subset is None:
+        score_subset = ['acc', 'sens', 'spec', 'bacc']
 
-    scores = {'acc': (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n'])),
-            'sens': (problem['tp']) * (1.0 / problem['p']),
-            'spec': (problem['tn']) * (1.0 / problem['n']),
-            'bacc': ((problem['tp'] * (1.0 / problem['p'])) \
-                        + (problem['tn'] * (1.0 / problem['n']))) / 2}
+    scores = {}
 
-    return scores if score_subset is None else {key: scores[key] for key in score_subset}
+    if 'acc' in score_subset:
+        scores['acc'] = (problem['tp'] + problem['tn']) * (1.0 / (problem['p'] + problem['n']))
+    if 'sens' in score_subset:
+        if problem['p'] > 0:
+            scores['sens'] = (problem['tp']) * (1.0 / problem['p'])
+        else:
+            logger.info('sens cannot be computed since p (%d) is zero', problem["p"])
+    if 'spec' in score_subset:
+        if problem['n'] > 0:
+            scores['spec'] = (problem['tn']) * (1.0 / problem['n'])
+        else:
+            logger.info('spec cannot be computed since n (%d) is zero', problem["n"])
+    if 'bacc' in score_subset:
+        if problem['p'] > 0 and problem['n'] > 0:
+            scores['bacc'] = ((problem['tp'] * (1.0 / problem['p'])) \
+                            + (problem['tn'] * (1.0 / problem['n']))) / 2
+        else:
+            logger.info('bacc cannot be computed since p (%d) or n (%d) is zero',
+                        problem['p'],
+                        problem['n'])
+
+    return scores
 
 def calculate_scores(problem: dict,
                     *,
@@ -58,7 +77,7 @@ def calculate_scores(problem: dict,
         additional['fn'] = problem['p'] - problem['tp']
 
     results = {score: safe_call(function,
-                                {**problem, **additional, **additional_symbols},
+                                problem | additional | additional_symbols,
                                 score_specifications[score].get('nans'))
                 for score, function in score_functions_with_solutions.items()}
 

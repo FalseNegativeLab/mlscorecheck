@@ -5,6 +5,7 @@ This module implements some functionalities related to folding
 import copy
 import itertools
 
+from ..core import logger
 from ..experiments import dataset_statistics
 from ._utils import random_identifier
 
@@ -12,6 +13,7 @@ __all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations',
             '_create_folds',
             'integer_partitioning_generator',
+            'all_integer_partitioning_generator',
             'fold_partitioning_generator',
             'create_all_kfolds',
             'generate_evaluations_with_all_kfolds',
@@ -32,10 +34,8 @@ def stratified_configurations_sklearn(p: int,
     Returns:
         list(tuple): the list of the structure of the folds
     """
-    p_base = p // n_splits
-    n_base = n // n_splits
-    p_remainder = p % n_splits
-    n_remainder = n % n_splits
+    p_base, p_remainder = divmod(p, n_splits)
+    n_base, n_remainder = divmod(n, n_splits)
 
     results = [(n_base, p_base)] * n_splits
 
@@ -74,17 +74,12 @@ def determine_fold_configurations(p: int,
     Raises:
         ValueError: if the folding is not supported
     """
-    if folding == 'stratified_sklearn':
-        confs = stratified_configurations_sklearn(p=p, n=n, n_splits=n_folds)
-        confs = [{'n': conf[0], 'p': conf[1]} for conf in confs]
-        results = []
-        for _ in range(n_repeats):
-            for item in confs:
-                results.append({**item})
-    else:
+    if folding != 'stratified_sklearn':
         raise ValueError(f'folding strategy {folding} is not supported yet')
 
-    return results
+    configurations = stratified_configurations_sklearn(p=p, n=n, n_splits=n_folds)
+    configurations = [{'n': conf[0], 'p': conf[1]} for conf in configurations]
+    return [{**item} for item in configurations for _ in range(n_repeats)]
 
 def _create_folds(p: int,
                     n: int,
@@ -155,8 +150,8 @@ def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-na
     Yields:
         list: the next configuration
     """
-    x = [0]*(m+1) # pylint: disable=invalid-name
-    s = [0]*(m+1) # pylint: disable=invalid-name
+    x = [0] * (m+1) # pylint: disable=invalid-name
+    s = [0] * (m+1) # pylint: disable=invalid-name
 
     for k in range(1, m): # pylint: disable=invalid-name
         x[k] = 1
@@ -172,7 +167,7 @@ def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-na
         u = x[m] # pylint: disable=invalid-name
         k = m # pylint: disable=invalid-name
         while k > 0:
-            k = k - 1 # pylint: disable=invalid-name
+            k -= 1 # pylint: disable=invalid-name
             if x[k] + 2 <= u:
                 break
 
@@ -189,7 +184,110 @@ def integer_partitioning_generator(n: int, m: int): # pylint: disable=invalid-na
 
         x[m] = n - s[m-1]
 
-def fold_partitioning_generator(p, n, k):
+def all_integer_partitioning_generator(n, k): # pylint: disable=invalid-name
+    """
+    Generate all integer partitioning of n to k parts (including 0 parts)
+
+    Args:
+        n (int): the integer to partition
+        k (int): the maximum number of parts
+
+    Yields:
+        list: the list of parts
+    """
+    if n == 0:
+        yield [0] * k
+    else:
+        for m in range(1, min(k+1, n+1)):# pylint: disable=invalid-name
+            for positives in integer_partitioning_generator(n, m):
+                yield [0] * (k - m) + positives
+
+def invalid_p_counts(p_values, max_value, p_zero, n_zero):
+    """
+    Checks if the p counts are invalid for a certain configuration
+
+    Args:
+        p_values (list): p values
+        max_values (int): the number of elements in a fold
+        p_zero (bool): whether any p can be zero
+        n_zero (bool): whether any n can be zero
+
+    Returns:
+        bool: True if the counts are invalid, False otherwise
+    """
+
+    if n_zero and any(tmp > max_value for tmp in p_values):
+        return True
+
+    if (not n_zero) and any(tmp >= max_value for tmp in p_values):
+        return True
+
+    return not p_zero and any(tmp == 0 for tmp in p_values)
+
+def not_enough_mixed_folds(p_values, n_values):
+    """
+    Checks if there are enough folds with both positive and negative samples
+
+    Args:
+        p_values (list): the list of counts of positives
+        n_values (list): the list of counts of negatives
+
+    Returns:
+        bool: True, if the configuration is incorrect, False otherwise
+    """
+
+    return len(p_values) > 1 and sum(p_tmp > 0 and n_tmp > 0
+                                        for p_tmp, n_tmp in zip(p_values, n_values)) < 2
+
+def determine_min_max_p(*, p, n, k_a, k_b, c_a, c_b, p_zero, n_zero): # pylint: disable=too-many-locals
+    """
+    Determines the minimum and maximum number of positives that can appear in folds
+    of type A
+
+    Args:
+        p (int): the total number of positives
+        n (int): the total number of negatives
+        k_a (int): the number of folds of type A
+        k_b (int): the number of folds of type B
+        c_a (int): the count of elements in folds of type A
+        c_b (int): the count of elements in folds of type B
+        p_zero (bool): whether any p can be zero
+        n_zero (bool): whether any n can be zero
+
+    Returns:
+        int, int: the minimum and maximum number of positives in all folds of
+                    type A
+    """
+    min_n_b = 0 if n_zero else k_b
+    min_n_a = 0 if n_zero else k_a
+    min_p_b = 0 if p_zero else k_b
+    min_p_a = 0 if p_zero else k_a
+
+    total_a = k_a * c_a
+    total_b = k_b * c_b
+
+    max_n_b = min(total_b - min_n_b, n - min_n_a)
+    min_n_a = n - max_n_b
+    max_p_a = total_a - min_n_a
+    max_p_b = min(total_b - min_p_b, p - min_p_a)
+    min_p_a = p - max_p_b
+
+    return min_p_a, max_p_a
+
+def fold_partitioning_generator(p, n, k, p_zero=False, n_zero=False): #pylint: disable=invalid-name,too-many-locals
+    """
+    Generates the fold partitioning
+
+    Args:
+        p (int): the number of positives
+        n (int): the number of negatives
+        k (int): the number of folds
+        p_zero (bool): whether any p can be zero
+        n_zero (bool): whether any n can be zero
+
+    Yields:
+        list, list: the list of positive and negative counts in folds
+    """
     k_div = (p + n) // k
     k_mod = (p + n) % k
 
@@ -198,27 +296,28 @@ def fold_partitioning_generator(p, n, k):
     c_a = k_div + 1
     c_b = k_div
 
-    total_a = k_a * c_a
-    total_b = k_b * c_b
-
-    max_n_b = min(total_b - k_b, n - k_a)
-    min_n_a = n - max_n_b
-    max_p_a = total_a - min_n_a
-    max_p_b = min(total_b - k_b, p - k_a)
-    min_p_a = p - max_p_b
+    min_p_a, max_p_a = determine_min_max_p(p=p,
+                                            n=n,
+                                            k_a=k_a,
+                                            k_b=k_b,
+                                            c_a=c_a,
+                                            c_b=c_b,
+                                            p_zero=p_zero,
+                                            n_zero=n_zero)
 
     for p_a in range(min_p_a, max_p_a + 1):
         p_b = p - p_a
 
-        for ps_a in integer_partitioning_generator(p_a, k_a):
-            if any(tmp >= c_a for tmp in ps_a):
+        for ps_a in all_integer_partitioning_generator(p_a, k_a):
+
+            if invalid_p_counts(ps_a, c_a, p_zero, n_zero):
                 continue
 
             ns_a = [c_a - tmp for tmp in ps_a]
 
-            for ps_b in integer_partitioning_generator(p_b, k_b):
+            for ps_b in all_integer_partitioning_generator(p_b, k_b):
 
-                if any(tmp >= c_b for tmp in ps_b):
+                if invalid_p_counts(ps_b, c_b, p_zero, n_zero):
                     continue
 
                 ns_b = [c_b - tmp for tmp in ps_b]
@@ -226,11 +325,16 @@ def fold_partitioning_generator(p, n, k):
                 ps_all = ps_a + ps_b
                 ns_all = ns_a + ns_b
 
-                res = sorted(list(zip(ps_all, ns_all)), key=lambda x: (x[0], x[1]))
+                if not_enough_mixed_folds(ps_all, ns_all):
+                    continue
 
-                yield list(zip(*res))
+                yield ps_all, ns_all
 
-def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
+def create_all_kfolds(p: int,
+                        n: int,
+                        n_folds: int,
+                        p_zero: bool = False,
+                        n_zero: bool = False) -> (list, list):
     """
     Create all kfold configurations
 
@@ -238,6 +342,9 @@ def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
         p (int): the number of positives
         n (int): the number of negatives
         n_folds (int): the number of folds
+        allow_zeros (bool): if False, each fold has at least 1 positive and 1 negative,
+                            otherwise, 0 positives and negatives are allowed but at least
+                            2 folds must be there with at least 1 elements from both
 
     Returns:
         list, list: the lists of the counts of positives and negatives, the corresponding
@@ -246,7 +353,7 @@ def create_all_kfolds(p: int, n: int, n_folds: int) -> (list, list):
     positives = []
     negatives = []
 
-    for pos, neg in fold_partitioning_generator(p, n, n_folds):
+    for pos, neg in fold_partitioning_generator(p, n, n_folds, p_zero, n_zero):
         positives.append(tuple(pos))
         negatives.append(tuple(neg))
 
@@ -270,9 +377,9 @@ def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int
         raise ValueError('do not specify the "folds" key for the generation of folds')
     if (dataset.get('p') is not None and dataset.get('n') is None)\
         or (dataset.get('p') is None and dataset.get('n') is not None):
-        raise ValueError('either specifiy both "p" and "n" or None of them')
+        raise ValueError('either specify both "p" and "n" or None of them')
     if dataset.get('dataset_name') is not None and dataset.get('p') is not None:
-        raise ValueError('either specificy "dataset_name" or "p" and "n"')
+        raise ValueError('either specify "dataset_name" or "p" and "n"')
 
     p = (dataset_statistics[dataset['dataset_name']]["p"]
             if dataset.get('dataset_name') is not None else dataset["p"])
@@ -310,13 +417,15 @@ def create_folding_combinations(evaluations: dict, n_repeats: dict) -> list:
 
     return all_results
 
-def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
+def generate_evaluations_with_all_kfolds(evaluation: dict,
+                                            available_scores: list) -> list:
     """
-    From a dataset specification generates all datasets with all possible
+    From an evaluation specification generates all datasets with all possible
     fold specifications.
 
     Args:
         evaluation (dict): the specification of an evaluation
+        available_scores (list): the list of available scores
 
     Returns:
         list(dict): a list of dataset specifications
@@ -327,8 +436,23 @@ def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
     p, n = _check_specification_and_determine_p_n(evaluation.get('dataset'),
                                                     evaluation.get('folding'))
 
-    kfolds = create_all_kfolds(p=p, n=n, n_folds=evaluation['folding'].get('n_folds', 1))
-    results = []
+    p_zero = False
+    n_zero = False
+
+    if 'sens' not in available_scores and 'bacc' not in available_scores:
+        p_zero = True
+        logger.info('sens and bacc not among the reported scores, p=0 folds are also considered')
+    if 'spec' not in available_scores and 'bacc' not in available_scores:
+        n_zero = True
+        logger.info('spec and bacc not among the reported scores, n=0 folds are also considered')
+
+    kfolds = create_all_kfolds(p=p,
+                                n=n,
+                                n_folds=evaluation['folding'].get('n_folds', 1),
+                                p_zero=p_zero,
+                                n_zero=n_zero)
+
+    logger.info('the overall number of k-fold configurations: %d', len(kfolds))
 
     if evaluation['dataset'].get('dataset_name') is not None:
         evaluation['dataset']['identifier'] = \
@@ -336,24 +460,21 @@ def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
     else:
         evaluation['dataset']['identifier'] = random_identifier(6)
 
-    print(kfolds)
-
-    for jdx, (positives, negatives) in enumerate(zip(*kfolds)):
-        print(positives, negatives)
-        results.append({'dataset': copy.deepcopy(evaluation['dataset']),
-                        'folding': {'folds': [
-                            {'p': p_,
-                            'n': n_,
-                            'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}"}
-                            for idx, (p_, n_) in enumerate(zip(positives,
-                                                                negatives))]}})
+    results = [{'dataset': copy.deepcopy(evaluation['dataset']),
+                'folding': {'folds': [
+                    {'p': p_,
+                        'n': n_,
+                        'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}"}
+                    for idx, (p_, n_) in enumerate(zip(positives,
+                                                        negatives))]}}
+                for jdx, (positives, negatives) in enumerate(zip(*kfolds))]
 
     if evaluation['folding'].get('n_repeats', 1) == 1:
         for result in results:
             result['aggregation'] = evaluation.get('aggregation')
         return results
 
-    # multiplicating the folds structures as many times as many repetitions there are
+    # multiplication of the folds structures as many times as many repetitions there are
     n_repeats = evaluation['folding'].get('n_repeats', 1) - 1
 
     all_results = create_folding_combinations(results, n_repeats)
@@ -367,7 +488,8 @@ def generate_evaluations_with_all_kfolds(evaluation: dict) -> list:
 
     return all_results
 
-def generate_experiments_with_all_kfolds(experiment: dict) -> list:
+def generate_experiments_with_all_kfolds(experiment: dict,
+                                            available_scores: list) -> list:
     """
     From a dataset specification generates all datasets with all possible
     fold specifications.
@@ -381,14 +503,10 @@ def generate_experiments_with_all_kfolds(experiment: dict) -> list:
     Raises:
         ValueError: if the specification is not suitable
     """
-    evaluations = [generate_evaluations_with_all_kfolds(evaluation)
+    evaluations = [generate_evaluations_with_all_kfolds(evaluation, available_scores)
                     for evaluation in experiment['evaluations']]
 
-    results = []
-
-    for evals in itertools.product(*evaluations):
-        results.append({'evaluations': evals,
-                        'dataset_score_bounds': experiment.get('dataset_score_bounds'),
-                        'aggregation': experiment['aggregation']})
-
-    return results
+    return [{'evaluations': evaluations,
+                'dataset_score_bounds': experiment.get('dataset_score_bounds'),
+                'aggregation': experiment['aggregation']}
+                for evaluations in itertools.product(*evaluations)]

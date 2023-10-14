@@ -251,9 +251,8 @@ def test_linear_programming_success_bounds(subset: list,
                                             aggregation=aggregation,
                                             feasible_fold_score_bounds=True,
                                             rounding_decimals=rounding_decimals,
-                                            return_scores=True)
-
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                            return_scores=True,
+                                            score_subset=subset)
 
     evaluation = Evaluation(**evaluation)
 
@@ -288,9 +287,8 @@ def test_linear_programming_failure_bounds(subset: list,
                                             aggregation=aggregation,
                                             feasible_fold_score_bounds=False,
                                             rounding_decimals=rounding_decimals,
-                                            return_scores=True)
-
-    scores = {key: value for key, value in scores.items() if key in subset}
+                                            return_scores=True,
+                                            score_subset=subset)
 
     evaluation = Evaluation(**evaluation)
 

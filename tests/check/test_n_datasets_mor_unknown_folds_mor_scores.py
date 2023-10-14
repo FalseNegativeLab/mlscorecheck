@@ -11,6 +11,8 @@ from mlscorecheck.check import (check_n_datasets_mor_unknown_folds_mor_scores,
 from mlscorecheck.aggregated import (generate_experiments_with_all_kfolds,
                                         generate_experiment)
 
+subsets = [['acc', 'sens', 'spec', 'bacc'], ['acc', 'sens'], ['acc', 'spec'], ['acc']]
+
 def test_estimation():
     """
     Testing the evaluation count estimation
@@ -23,13 +25,16 @@ def test_estimation():
 
     assert count == 144
 
-def generate_test_case(random_seed: int, rounding_decimals: int) -> (dict, dict):
+def generate_test_case(random_seed: int,
+                        rounding_decimals: int,
+                        score_subset: list) -> (dict, dict):
     """
     Generate one random test case
 
     Args:
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
+        score_subset (list): the list of scores to be used
 
     Returns:
         dict, dict: the experiment specification and the scores
@@ -50,7 +55,8 @@ def generate_test_case(random_seed: int, rounding_decimals: int) -> (dict, dict)
                                                 aggregation='mor',
                                                 return_scores=True)
 
-    while len(generate_experiments_with_all_kfolds(experiment)) > 1000\
+    while len(generate_experiments_with_all_kfolds(experiment,
+                                                    score_subset)) > 1000\
         or len(experiment['evaluations']) == 1:
         experiment, scores = generate_experiment(random_state=random_state,
                                                 rounding_decimals=rounding_decimals,
@@ -58,20 +64,44 @@ def generate_test_case(random_seed: int, rounding_decimals: int) -> (dict, dict)
                                                 max_evaluations=2,
                                                 aggregation='mor',
                                                 return_scores=True)
+    scores = {key: value for key, value in scores.items() if key in score_subset}
     return experiment, scores
 
+def remove_strategy_from_folding(experiment):
+    """
+    Removes the "strategy" from the folding
+
+    Args:
+        experiment (dict): an experiment specification
+    """
+    for evaluation in experiment['evaluations']:
+        del evaluation['folding']['strategy']
+
+def test_remove_strategy_from_folding():
+    """
+    Testing the remove_strategy_from_folding function
+    """
+    experiment = {'evaluations': [{'folding': {'strategy': 'dummy0'}},
+                                    {'folding': {'strategy': 'dummy1'}}]}
+
+    remove_strategy_from_folding(experiment)
+
+    assert 'strategy' not in experiment['evaluations'][0]['folding']
+    assert 'strategy' not in experiment['evaluations'][1]['folding']
+
 @pytest.mark.parametrize('random_seed', list(range(5)))
-def test_successful(random_seed: int):
+@pytest.mark.parametrize('subset', subsets)
+def test_successful(random_seed: int, subset: list):
     """
     Testing a successful scenario
 
     Args:
         random_seed (int): the random seed to use
+        subset (list): the subset of scores to be used
     """
-    experiment, scores = generate_test_case(random_seed, 4)
+    experiment, scores = generate_test_case(random_seed, 4, score_subset=subset)
 
-    for evaluation in experiment['evaluations']:
-        del evaluation['folding']['strategy']
+    remove_strategy_from_folding(experiment)
 
     results = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=experiment['evaluations'],
                                                             scores=scores,
@@ -80,18 +110,19 @@ def test_successful(random_seed: int):
     assert not results['inconsistency']
 
 @pytest.mark.parametrize('random_seed', list(range(5)))
-def test_failure(random_seed: int):
+@pytest.mark.parametrize('subset', subsets)
+def test_failure(random_seed: int, subset: list):
     """
     Testing a failure
 
     Args:
         random_seed (int): the random seed to use
+        subset (list): the subset of scores to be used
     """
 
-    experiment, scores = generate_test_case(random_seed, 4)
+    experiment, scores = generate_test_case(random_seed, 4, score_subset=subset)
 
-    for evaluation in experiment['evaluations']:
-        del evaluation['folding']['strategy']
+    remove_strategy_from_folding(experiment)
 
     scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.05}
 

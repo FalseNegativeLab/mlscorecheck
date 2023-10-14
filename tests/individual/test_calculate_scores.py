@@ -20,3 +20,9 @@ def test_calculate_scores_for_lp():
     """
     scores = calculate_scores_for_lp({'p': 40, 'n': 20, 'tp': 34, 'tn': 13})
     assert len(scores) == 4
+
+    scores = calculate_scores_for_lp({'p': 0, 'n': 20, 'tp': 0, 'tn': 13})
+    assert len(scores) == 2
+
+    scores = calculate_scores_for_lp({'p': 4, 'n': 0, 'tp': 3, 'tn': 0})
+    assert len(scores) == 2

@@ -10,7 +10,7 @@ from ..individual import calculate_scores_for_lp
 
 from ._evaluation import Evaluation
 
-from ._utils import check_bounds
+from ._utils import check_bounds, aggregated_scores
 from ._linear_programming import add_bounds
 
 __all__ = ['Experiment']
@@ -57,7 +57,7 @@ class Experiment:
                 'dataset_score_bounds': self.dataset_score_bounds,
                 'aggregation': self.aggregation}
 
-    def sample_figures(self, random_state = None):
+    def sample_figures(self, random_state = None, score_subset: list = None):
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -70,9 +70,9 @@ class Experiment:
         random_state = init_random_state(random_state)
 
         for evaluation in self.evaluations:
-            evaluation.sample_figures(random_state)
+            evaluation.sample_figures(random_state, score_subset=score_subset)
 
-        self.calculate_scores()
+        self.calculate_scores(score_subset=score_subset)
 
         return self
 
@@ -89,8 +89,11 @@ class Experiment:
         Returns:
             dict(str,float): the scores
         """
+        score_subset = ['acc', 'sens', 'spec', 'bacc'] if score_subset is None else score_subset
+        score_subset = [score for score in score_subset if score in ['acc', 'sens', 'spec', 'bacc']]
+
         for evaluation in self.evaluations:
-            evaluation.calculate_scores()
+            evaluation.calculate_scores(score_subset=score_subset)
 
         if isinstance(self.evaluations[0].folds[0].tp, pl.LpVariable):
             self.figures['tp'] = pl.lpSum(evaluation.figures['tp']
@@ -104,13 +107,10 @@ class Experiment:
                                         for evaluation in self.evaluations)
 
         if self.aggregation == 'rom':
-            self.scores = calculate_scores_for_lp(self.figures)
+            self.scores = calculate_scores_for_lp(self.figures,
+                                                    score_subset=score_subset)
         elif self.aggregation == 'mor':
             self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
-
-        self.scores = (self.scores if score_subset is None
-                        else {key: value for key, value in self.scores.items()
-                                            if key in score_subset})
 
         return self.scores if rounding_decimals is None else round_scores(self.scores,
                                                                             rounding_decimals)
@@ -133,7 +133,11 @@ class Experiment:
             evaluation.init_lp(lp_problem,
                                 scores=scores)
 
-        self.calculate_scores()
+        score_subset = aggregated_scores
+        if scores is not None:
+            score_subset = list(set(scores.keys()).intersection(set(aggregated_scores)))
+
+        self.calculate_scores(score_subset=score_subset)
 
         for evaluation in self.evaluations:
             add_bounds(lp_problem,
