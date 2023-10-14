@@ -202,15 +202,15 @@ def all_integer_partitioning_generator(n, k, non_zero, max_count): # pylint: dis
         yield [0] * k
     else:
         lower_bound = min(k, n) if non_zero else 1
-        upper_bound = min(k, n) + 1
-        for m in range(lower_bound, upper_bound):# pylint: disable=invalid-name
+        upper_bound = min(k, n)
+        for m in range(lower_bound, upper_bound + 1):# pylint: disable=invalid-name
             for positives in integer_partitioning_generator(n, m):
                 if all(pos <= max_count for pos in positives):
                     yield [0] * (k - m) + positives
 
-def not_enough_mixed_folds(p_values, n_values):
+def not_enough_diverse_folds(p_values, n_values):
     """
-    Checks if there are enough folds with both positive and negative samples
+    Checks if there are enough folds with positive and negative samples
 
     Args:
         p_values (list): the list of counts of positives
@@ -220,8 +220,7 @@ def not_enough_mixed_folds(p_values, n_values):
         bool: True, if the configuration is incorrect, False otherwise
     """
 
-    return len(p_values) > 1 and sum(p_tmp > 0 and n_tmp > 0
-                                        for p_tmp, n_tmp in zip(p_values, n_values)) < 2
+    return len(p_values) > 1 and (sum(p_tmp > 0 for p_tmp in p_values) < 2 or sum(n_tmp > 0 for n_tmp in n_values) < 2)
 
 def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero): # pylint: disable=too-many-locals
     """
