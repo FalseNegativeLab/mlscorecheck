@@ -292,7 +292,7 @@ def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True): #pyl
                 ps_all = ps_a + ps_b
                 ns_all = ns_a + ns_b
 
-                if not_enough_mixed_folds(ps_all, ns_all):
+                if not_enough_diverse_folds(ps_all, ns_all):
                     continue
 
                 yield ps_all, ns_all
