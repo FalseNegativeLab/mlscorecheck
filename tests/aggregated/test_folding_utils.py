@@ -181,6 +181,27 @@ def test_fold_partitioning_generator():
     assert any(any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
 
+def test_fold_partitioning_generator_p_min():
+    """
+    Testing the fold partitioning generator with p_min
+    """
+
+    folds = fold_partitioning_generator(6, 6, 3, True, True, p_min=2)
+
+    assert len(list(folds)) == 1
+
+    folds = list(fold_partitioning_generator(6, 6, 3, False, True, p_min=2))
+
+    assert len(list(folds)) == 1
+
+    folds = list(fold_partitioning_generator(6, 6, 3, True, False, p_min=2))
+
+    assert len(list(folds)) == 1
+
+    folds = list(fold_partitioning_generator(6, 6, 3, False, False, p_min=2))
+
+    assert len(list(folds)) == 1
+
 def exhaustive_min_max_p(*, p, k_a, k_b, c_a, c_b, p_non_zero, n_non_zero): # pylint: disable=too-many-locals
     """
     Exhaustive search for the minimum and maximum p in folds of type A
