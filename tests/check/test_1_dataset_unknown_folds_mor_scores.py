@@ -18,7 +18,8 @@ def test_estimation():
     """
 
     count = estimate_n_evaluations(dataset={'p': 5, 'n': 11},
-                                    folding={'n_folds': 3, 'n_repeats': 2})
+                                    folding={'n_folds': 3, 'n_repeats': 2},
+                                    available_scores=['acc', 'sens', 'spec'])
 
     assert count == 16
 

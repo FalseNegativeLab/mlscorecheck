@@ -4,29 +4,36 @@ scenario with unknown fold structures.
 """
 
 from ..core import NUMERICAL_TOLERANCE, logger
-from ..aggregated import (generate_evaluations_with_all_kfolds, Dataset,
-                            fold_partitioning_generator)
+from ..aggregated import (Dataset,
+                            repeated_kfolds_generator,
+                            kfolds_generator)
 from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
 
 __all__ = ['check_1_dataset_unknown_folds_mor_scores',
             'estimate_n_evaluations']
 
-def estimate_n_evaluations(dataset: dict, folding: dict) -> int:
+def estimate_n_evaluations(dataset: dict,
+                            folding: dict,
+                            available_scores: list = None) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
     Args:
         dataset (dict): the dataset specification
         folding (dict): the folding specification
+        available_scores (list): the list of available scores
 
     Returns:
         int: the estimated number of different fold configurations.
     """
     dataset = Dataset(**dataset)
-    n_folds = folding.get('n_folds', 1)
     n_repeats = folding.get('n_repeats', 1)
 
-    count = sum(1 for _ in fold_partitioning_generator(dataset.p, dataset.n, n_folds))
+    available_scores = [] if available_scores is None else available_scores
+
+    count = sum(1 for _ in kfolds_generator({'dataset': dataset.to_dict(),
+                                                'folding': folding},
+                                            available_scores))
 
     return count**n_repeats
 
@@ -103,14 +110,10 @@ def check_1_dataset_unknown_folds_mor_scores(
                     'fold_score_bounds': fold_score_bounds,
                     'aggregation': 'mor'}
 
-    evaluations = generate_evaluations_with_all_kfolds(evaluation,
-                                                        available_scores=list(scores.keys()))
-
-    logger.info('The total number of fold combinations: %d', len(evaluations))
-
     results = {'details': []}
 
-    for evaluation_0 in evaluations:
+    for evaluation_0 in repeated_kfolds_generator(evaluation,
+                                                    list(scores.keys())):
         tmp = {'folds': evaluation_0['folding']['folds'],
                 'details': check_1_dataset_known_folds_mor_scores(
                                     scores=scores,

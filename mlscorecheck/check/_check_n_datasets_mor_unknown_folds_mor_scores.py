@@ -12,12 +12,13 @@ from ._check_n_datasets_mor_known_folds_mor_scores \
             import check_n_datasets_mor_known_folds_mor_scores
 from ._check_1_dataset_unknown_folds_mor_scores import estimate_n_evaluations
 from ..core import NUMERICAL_TOLERANCE
-from ..aggregated import generate_experiments_with_all_kfolds
+from ..aggregated import (experiment_kfolds_generator)
 
 __all__ = ['check_n_datasets_mor_unknown_folds_mor_scores',
             'estimate_n_experiments']
 
-def estimate_n_experiments(evaluations: list) -> int:
+def estimate_n_experiments(evaluations: list,
+                            available_scores: list = None) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
@@ -27,8 +28,11 @@ def estimate_n_experiments(evaluations: list) -> int:
     Returns:
         int: the estimated number of different fold configurations.
     """
+    available_scores = [] if available_scores is None else available_scores
+
     counts = [estimate_n_evaluations(dataset=evaluation['dataset'],
-                                        folding=evaluation['folding'])
+                                        folding=evaluation['folding'],
+                                        available_scores=available_scores)
                 for evaluation in evaluations]
     return np.prod(counts)
 
@@ -115,13 +119,11 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
                     'dataset_score_bounds': dataset_score_bounds,
                     'aggregation': 'mor'}
 
-    experiments = generate_experiments_with_all_kfolds(experiment=experiment,
-                                                        available_scores=list(scores.keys()))
-
     results = {'details': [],
                 'inconsistency': True}
 
-    for experiment in experiments:
+    for experiment in experiment_kfolds_generator(experiment,
+                                                    list(scores.keys())):
         result = check_n_datasets_mor_known_folds_mor_scores(
                                     evaluations=experiment['evaluations'],
                                     dataset_score_bounds=experiment.get('dataset_score_bounds'),

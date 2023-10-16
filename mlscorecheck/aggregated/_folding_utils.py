@@ -15,11 +15,11 @@ __all__ = ['stratified_configurations_sklearn',
             'integer_partitioning_generator',
             'all_integer_partitioning_generator',
             'fold_partitioning_generator',
-            'create_all_kfolds',
-            'generate_evaluations_with_all_kfolds',
             '_check_specification_and_determine_p_n',
-            'generate_experiments_with_all_kfolds',
-            'determine_min_max_p']
+            'determine_min_max_p',
+            'kfolds_generator',
+            'repeated_kfolds_generator',
+            'experiment_kfolds_generator']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -248,7 +248,7 @@ def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero): # pylin
 
     return min_p_a, max_p_a
 
-def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True): #pylint: disable=invalid-name,too-many-locals
+def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1): #pylint: disable=invalid-name,too-many-locals
     """
     Generates the fold partitioning
 
@@ -278,14 +278,23 @@ def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True): #pyl
                                             p_non_zero=p_non_zero,
                                             n_non_zero=n_non_zero)
 
+    #print(min_p_a, max_p_a)
+
     for p_a in range(min_p_a, max_p_a + 1):
         p_b = p - p_a
 
         for ps_a in all_integer_partitioning_generator(p_a, k_a, p_non_zero, c_a - n_non_zero):
+            #print(ps_a)
+
+            if any(p_tmp < p_min for p_tmp in ps_a):
+                continue
 
             ns_a = [c_a - tmp for tmp in ps_a]
 
             for ps_b in all_integer_partitioning_generator(p_b, k_b, p_non_zero, c_b - n_non_zero):
+
+                if any(p_tmp < p_min for p_tmp in ps_b):
+                    continue
 
                 ns_b = [c_b - tmp for tmp in ps_b]
 
@@ -296,34 +305,6 @@ def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True): #pyl
                     continue
 
                 yield ps_all, ns_all
-
-def create_all_kfolds(p: int,
-                        n: int,
-                        n_folds: int,
-                        p_zero: bool = False,
-                        n_zero: bool = False) -> (list, list):
-    """
-    Create all kfold configurations
-
-    Args:
-        p (int): the number of positives
-        n (int): the number of negatives
-        n_folds (int): the number of folds
-        p_zero (bool): if True, p can be zero in some folds
-        n_zero (bool): if True, n can be zero in some folds
-
-    Returns:
-        list, list: the lists of the counts of positives and negatives, the corresponding
-        entries of the list describe one folding
-    """
-    positives = []
-    negatives = []
-
-    for pos, neg in fold_partitioning_generator(p, n, n_folds, not p_zero, not n_zero):
-        positives.append(tuple(pos))
-        negatives.append(tuple(neg))
-
-    return positives, negatives
 
 def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int, int):
     """
@@ -354,50 +335,22 @@ def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int
 
     return p, n
 
-def create_folding_combinations(evaluations: dict, n_repeats: dict) -> list:
+def kfolds_generator(evaluation: dict,
+                        available_scores: list,
+                        repeat_idx=0):
     """
-    Generates all fold combinations according to n_repeats
+    Generates the fold configurations
 
     Args:
-        evaluations (list(Evaluation)): the list of evaluations with different fold structures
-        n_repeats (int): the number of repetitions to add
-
-    Returns:
-        list(Evaluations): the list of evaluations with all fold combinations
-    """
-    all_results = copy.deepcopy(evaluations)
-
-    while n_repeats > 0:
-        tmp = []
-        for one_result in all_results:
-            for res in evaluations:
-                tmp_res = copy.deepcopy(one_result)
-                to_add = copy.deepcopy(res['folding']['folds'])
-                for fold in to_add:
-                    fold['identifier'] = f'{fold["identifier"]}_r{n_repeats}'
-                tmp_res['folding']['folds'].extend(to_add)
-
-                tmp.append(tmp_res)
-        all_results = tmp
-        n_repeats -= 1
-
-    return all_results
-
-def generate_evaluations_with_all_kfolds(evaluation: dict,
-                                            available_scores: list) -> list:
-    """
-    From an evaluation specification generates all datasets with all possible
-    fold specifications.
-
-    Args:
-        evaluation (dict): the specification of an evaluation
+        evaluation (dict): the evaluation to generate the configurations for
         available_scores (list): the list of available scores
+        repeat_idx (int): the index of the repeat
 
     Returns:
-        list(dict): a list of dataset specifications
+        Generator: the generator
 
-    Raises:
-        ValueError: if the specification is not suitable
+    Yields:
+        list(dict): the list of fold specifications
     """
     p, n = _check_specification_and_determine_p_n(evaluation.get('dataset'),
                                                     evaluation.get('folding'))
@@ -412,67 +365,68 @@ def generate_evaluations_with_all_kfolds(evaluation: dict,
         n_zero = True
         logger.info('spec and bacc not among the reported scores, n=0 folds are also considered')
 
-    kfolds = create_all_kfolds(p=p,
-                                n=n,
-                                n_folds=evaluation['folding'].get('n_folds', 1),
-                                p_zero=p_zero,
-                                n_zero=n_zero)
-
-    logger.info('the overall number of k-fold configurations: %d', len(kfolds))
-
     if evaluation['dataset'].get('dataset_name') is not None:
         evaluation['dataset']['identifier'] = \
             f'{evaluation["dataset"]["dataset_name"]}_{random_identifier(3)}'
     else:
         evaluation['dataset']['identifier'] = random_identifier(6)
 
-    results = [{'dataset': copy.deepcopy(evaluation['dataset']),
-                'folding': {'folds': [
-                    {'p': p_,
-                        'n': n_,
-                        'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}"}
-                    for idx, (p_, n_) in enumerate(zip(positives,
-                                                        negatives))]}}
-                for jdx, (positives, negatives) in enumerate(zip(*kfolds))]
+    for jdx, (ps, ns) in enumerate(fold_partitioning_generator(p=p,
+                                                n=n,
+                                                k=evaluation['folding'].get('n_folds', 1),
+                                                p_non_zero=not p_zero,
+                                                n_non_zero=not n_zero)):
+        yield [{'p': p_,
+                'n': n_,
+                'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}_r{repeat_idx}"}
+                for idx, (p_, n_) in enumerate(zip(ps, ns))]
 
-    if evaluation['folding'].get('n_repeats', 1) == 1:
-        for result in results:
-            result['aggregation'] = evaluation.get('aggregation')
-        return results
-
-    # multiplication of the folds structures as many times as many repetitions there are
-    n_repeats = evaluation['folding'].get('n_repeats', 1) - 1
-
-    all_results = create_folding_combinations(results, n_repeats)
-
-    # adding fold bounds
-    if evaluation.get('fold_score_bounds') is not None:
-        for result in all_results:
-            result['fold_score_bounds'] = {**evaluation['fold_score_bounds']}
-    for result in all_results:
-        result['aggregation'] = evaluation.get('aggregation')
-
-    return all_results
-
-def generate_experiments_with_all_kfolds(experiment: dict,
-                                            available_scores: list) -> list:
+def repeated_kfolds_generator(evaluation: dict,
+                                available_scores: list):
     """
-    From a dataset specification generates all datasets with all possible
-    fold specifications.
+    Generates the evaluation variations
 
     Args:
-        experiment (dict): the specification of an experiment
+        evaluation (dict): the evaluation to generate the configurations for
+        available_scores (list): the list of available scores
 
     Returns:
-        list(dict): a list of dataset specifications
+        Generator: the generator
 
-    Raises:
-        ValueError: if the specification is not suitable
+    Yields:
+        dict: one evaluation
     """
-    evaluations = [generate_evaluations_with_all_kfolds(evaluation, available_scores)
-                    for evaluation in experiment['evaluations']]
+    n_repeats = evaluation['folding'].get('n_repeats', 1)
 
-    return [{'evaluations': evaluations,
+    generators = [kfolds_generator(evaluation, available_scores, idx) for idx in range(n_repeats)]
+
+    print(generators)
+
+    for folds in itertools.product(*generators):
+        yield {'dataset': copy.deepcopy(evaluation['dataset']),
+                'folding': {
+                    'folds': [fold for fold_list in folds for fold in fold_list]},
+                'fold_score_bounds': copy.deepcopy(evaluation.get('fold_score_bounds')),
+                'aggregation': evaluation.get('aggregation')}
+
+def experiment_kfolds_generator(experiment: dict,
+                                available_scores: list):
+    """
+    Generates the experiment variations
+
+    Args:
+        experiment (dict): the experiment to generate the configurations for
+        available_scores (list): the list of available scores
+
+    Returns:
+        Generator: the generator
+
+    Yields:
+        dict: one experiment
+    """
+    generators = [repeated_kfolds_generator(evaluation, available_scores)
+                    for evaluation in experiment['evaluations']]
+    for evaluations in itertools.product(*generators):
+        yield {'evaluations': list(evaluations),
                 'dataset_score_bounds': experiment.get('dataset_score_bounds'),
                 'aggregation': experiment['aggregation']}
-                for evaluations in itertools.product(*evaluations)]

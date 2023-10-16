@@ -8,8 +8,7 @@ import numpy as np
 
 from mlscorecheck.check import (check_n_datasets_mor_unknown_folds_mor_scores,
                                 estimate_n_experiments)
-from mlscorecheck.aggregated import (generate_experiments_with_all_kfolds,
-                                        generate_experiment)
+from mlscorecheck.aggregated import (generate_experiment)
 
 subsets = [['acc', 'sens', 'spec', 'bacc'], ['acc', 'sens'], ['acc', 'spec'], ['acc']]
 
@@ -21,7 +20,8 @@ def test_estimation():
     count = estimate_n_experiments(evaluations=[{'dataset': {'p': 5, 'n': 11},
                                                 'folding': {'n_folds': 3, 'n_repeats': 2}},
                                                 {'dataset': {'p': 6, 'n': 9},
-                                                'folding': {'n_folds': 3, 'n_repeats': 2}}])
+                                                'folding': {'n_folds': 3, 'n_repeats': 2}}],
+                                    available_scores=['acc', 'sens', 'spec'])
 
     assert count == 144
 
@@ -55,8 +55,10 @@ def generate_test_case(random_seed: int,
                                                 aggregation='mor',
                                                 return_scores=True)
 
-    while len(generate_experiments_with_all_kfolds(experiment,
-                                                    score_subset)) > 1000\
+    n_experiments = estimate_n_experiments(experiment['evaluations'],
+                                            list(scores.keys()))
+
+    while n_experiments > 1000\
         or len(experiment['evaluations']) == 1:
         experiment, scores = generate_experiment(random_state=random_state,
                                                 rounding_decimals=rounding_decimals,
@@ -64,6 +66,9 @@ def generate_test_case(random_seed: int,
                                                 max_evaluations=2,
                                                 aggregation='mor',
                                                 return_scores=True)
+
+        n_experiments = estimate_n_experiments(experiment['evaluations'],
+                                                list(scores.keys()))
     scores = {key: value for key, value in scores.items() if key in score_subset}
     return experiment, scores
 

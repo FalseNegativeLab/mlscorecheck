@@ -12,38 +12,10 @@ from sklearn.model_selection import StratifiedKFold
 from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         determine_fold_configurations,
                                         _create_folds,
-                                        create_all_kfolds,
-                                        generate_evaluations_with_all_kfolds,
+                                        repeated_kfolds_generator,
                                         fold_partitioning_generator,
                                         _check_specification_and_determine_p_n,
                                         determine_min_max_p)
-
-def test_create_all_kfolds():
-    """
-    Testing the generation of all k-fold configurations
-    """
-    assert len(create_all_kfolds(5, 7, 3)) == 2
-
-def test_create_all_kfolds_many_p():
-    """
-    Testing the generation of all k-fold configurations with many p
-    """
-    assert len(create_all_kfolds(15, 7, 3)) == 2
-
-@pytest.mark.parametrize('random_seed', list(range(30)))
-def test_create_all_kfolds_many_p_many_folds(random_seed):
-    """
-    Testing the generation of all k-fold configurations with many p and many folds
-
-    Args:
-        random_seed (int): the random seed of the test
-    """
-
-    random_state = np.random.RandomState(random_seed)
-    p = random_state.randint(5, 30)
-    n = random_state.randint(5, 30)
-    n_folds = random_state.randint(2, 6)
-    assert len(create_all_kfolds(p, n, n_folds)) == 2
 
 def test_generate_datasets_with_all_kfolds():
     """
@@ -51,34 +23,34 @@ def test_generate_datasets_with_all_kfolds():
     """
     evaluation = {'dataset': {'p': 5, 'n': 7}, 'folding': {'n_folds': 3}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation,
-                                                    available_scores=['acc', 'bacc',
-                                                                        'sens', 'spec'])
+    datasets = list(repeated_kfolds_generator(evaluation,
+                                                available_scores=['acc', 'bacc',
+                                                                    'sens', 'spec']))
     assert len(datasets) == 2
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation,
-                                                    available_scores=['acc', 'bacc',
-                                                                        'sens', 'spec'])
+    datasets = list(repeated_kfolds_generator(evaluation,
+                                                available_scores=['acc', 'bacc',
+                                                                    'sens', 'spec']))
     assert len(datasets) == 4
 
     evaluation = {'dataset': {'p': 5, 'n': 7},
                     'folding': {'n_folds': 3, 'n_repeats': 2},
                     'fold_score_bounds': {'acc': (0.0, 1.0)}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation,
-                                                    available_scores=['acc', 'bacc',
-                                                                        'sens', 'spec'])
+    datasets = list(repeated_kfolds_generator(evaluation,
+                                                available_scores=['acc', 'bacc',
+                                                                    'sens', 'spec']))
     assert 'fold_score_bounds' in datasets[0]
 
     evaluation = {'dataset': {'dataset_name': 'common_datasets.appendicitis'},
                     'folding': {'n_folds': 3}}
 
-    datasets = generate_evaluations_with_all_kfolds(evaluation,
-                                                    available_scores=['acc', 'bacc',
-                                                                        'sens', 'spec'])
+    datasets = list(repeated_kfolds_generator(evaluation,
+                                                available_scores=['acc', 'bacc',
+                                                                    'sens', 'spec']))
 
 def test_exceptions():
     """
