@@ -186,19 +186,19 @@ def test_fold_partitioning_generator_p_min():
     Testing the fold partitioning generator with p_min
     """
 
-    folds = fold_partitioning_generator(6, 6, 3, True, True, p_min=2)
+    folds = fold_partitioning_generator(6, 7, 3, True, True, p_min=2)
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 6, 3, False, True, p_min=2))
+    folds = list(fold_partitioning_generator(6, 7, 3, False, True, p_min=2))
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 6, 3, True, False, p_min=2))
+    folds = list(fold_partitioning_generator(6, 7, 3, True, False, p_min=2))
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 6, 3, False, False, p_min=2))
+    folds = list(fold_partitioning_generator(6, 7, 3, False, False, p_min=2))
 
     assert len(list(folds)) == 1
 
