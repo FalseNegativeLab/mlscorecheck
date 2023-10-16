@@ -278,13 +278,10 @@ def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True, p_min
                                             p_non_zero=p_non_zero,
                                             n_non_zero=n_non_zero)
 
-    #print(min_p_a, max_p_a)
-
     for p_a in range(min_p_a, max_p_a + 1):
         p_b = p - p_a
 
         for ps_a in all_integer_partitioning_generator(p_a, k_a, p_non_zero, c_a - n_non_zero):
-            #print(ps_a)
 
             if any(p_tmp < p_min for p_tmp in ps_a):
                 continue
