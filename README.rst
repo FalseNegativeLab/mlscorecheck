@@ -47,7 +47,7 @@ Testing is as simple as the following example shows: the tested scores are incon
     result['inconsistency']
     # True
 
-The consistency tests are numerical and **not** statistical: if inconsistencies are identified, it means that either the assumptions on the evaluation protocol or the reported scores are incorrect.
+The consistency tests are numerical and **not** statistical: if inconsistencies are identified, it means that either the assumptions on the experimental setup or the reported scores are incorrect.
 
 Latest news
 ===========
