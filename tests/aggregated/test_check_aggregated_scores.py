@@ -42,7 +42,7 @@ def test_check_timeout():
 
 @pytest.mark.parametrize('random_seed', random_seeds)
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
-@pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
+@pytest.mark.parametrize('aggregations', [('som', 'som'), ('mos', 'mos'), ('mos', 'som')])
 def test_check_aggregated_scores_feasible(random_seed: int,
                                             rounding_decimals: int,
                                             aggregations: tuple):
@@ -71,7 +71,7 @@ def test_check_aggregated_scores_feasible(random_seed: int,
     assert check_timeout(details)
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
+@pytest.mark.parametrize('aggregations', [('som', 'som'), ('mos', 'mos'), ('mos', 'som')])
 def test_check_aggregated_scores_feasible_custom_solver(random_seed: int, aggregations: tuple):
     """
     Testing the top level aggregated check function with a feasible problem
@@ -98,7 +98,7 @@ def test_check_aggregated_scores_feasible_custom_solver(random_seed: int, aggreg
     assert check_timeout(details)
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregations', [('rom', 'rom'), ('mor', 'mor'), ('mor', 'rom')])
+@pytest.mark.parametrize('aggregations', [('som', 'som'), ('mos', 'mos'), ('mos', 'som')])
 def test_check_aggregated_scores_infeasible(random_seed: int, aggregations: tuple):
     """
     Testing the top level aggregated check function with an infeasible problem
@@ -132,11 +132,11 @@ def test_check_aggregated_scores_timeout():
     experiment, scores = generate_experiment(max_evaluations=20,
                                         evaluation_params={'max_folds': 20,
                                                             'max_repeats': 20,
-                                                            'aggregation': 'mor',
+                                                            'aggregation': 'mos',
                                                             'feasible_fold_score_bounds': True},
                                         random_state=5,
                                         return_scores=True,
-                                        aggregation='mor',
+                                        aggregation='mos',
                                         feasible_dataset_score_bounds=True)
 
     scores = round_scores(scores, 7)
@@ -169,8 +169,8 @@ def test_others():
     Testing other functionalities
     """
 
-    experiment, scores = generate_experiment(aggregation='rom',
-                                                evaluation_params={'aggregation': 'mor'},
+    experiment, scores = generate_experiment(aggregation='som',
+                                                evaluation_params={'aggregation': 'mos'},
                                                 return_scores=True)
     with pytest.raises(ValueError):
         check_aggregated_scores(experiment=experiment,
@@ -185,9 +185,9 @@ def test_aggregated_success_with_p_zero():
     folds = [{'p': 0, 'n': 5}, {'p': 5, 'n': 10}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     experiment = Experiment(**experiment)
 
@@ -214,9 +214,9 @@ def test_aggregated_failure_with_p_zero():
     folds = [{'p': 0, 'n': 5}, {'p': 5, 'n': 10}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     scores = {'acc': 0.9584, 'spec': 0.9576}
 
@@ -236,9 +236,9 @@ def test_aggregated_success_with_n_zero():
     folds = [{'p': 2, 'n': 0}, {'p': 3, 'n': 15}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     experiment = Experiment(**experiment)
 
@@ -265,9 +265,9 @@ def test_aggregated_failure_with_n_zero():
     folds = [{'p': 2, 'n': 0}, {'p': 3, 'n': 15}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     scores = {'acc': 0.9584, 'sens': 0.9576}
 
@@ -287,9 +287,9 @@ def test_aggregated_success_with_n_or_p_zero():
     folds = [{'p': 5, 'n': 0}, {'p': 0, 'n': 15}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     experiment = Experiment(**experiment)
 
@@ -316,9 +316,9 @@ def test_aggregated_failure_with_n_or_p_zero():
     folds = [{'p': 5, 'n': 0}, {'p': 0, 'n': 15}, {'p': 5, 'n': 5}]
     evaluation = {'dataset': dataset,
                     'folding': {'folds': folds},
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
     experiment = {'evaluations': [evaluation],
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     scores = {'acc': 0.9584}
 

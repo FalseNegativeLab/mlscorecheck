@@ -6,8 +6,8 @@ segmentation drive dataset
 from ..core import NUMERICAL_TOLERANCE, logger
 from ..experiments import load_drive
 from ..check import (check_1_testset_no_kfold_scores,
-                        check_n_datasets_mor_kfold_rom_scores,
-                        check_n_datasets_rom_kfold_rom_scores)
+                        check_n_datasets_mos_kfold_som_scores,
+                        check_n_datasets_som_kfold_som_scores)
 
 __all__ = ['drive_aggregated_fov_pixels',
             'drive_aggregated_all_pixels',
@@ -33,7 +33,7 @@ def _drive_aggregated_test_scores(data: list,
         data (list(dict)): the datasets
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the mode of aggregation ('mor'/'rom')
+        aggregation (str): the mode of aggregation ('mos'/'som')
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
@@ -50,17 +50,17 @@ def _drive_aggregated_test_scores(data: list,
     """
     experiment = {'evaluations': [{'dataset': dataset,
                                     'folding': {'n_folds': 1, 'n_repeats': 1},
-                                    'aggregation': 'rom'} for dataset in data],
+                                    'aggregation': 'som'} for dataset in data],
                     'aggregation': aggregation}
-    if aggregation == 'mor':
-        return check_n_datasets_mor_kfold_rom_scores(scores=scores,
+    if aggregation == 'mos':
+        return check_n_datasets_mos_kfold_som_scores(scores=scores,
                                                         eps=eps,
                                                         evaluations=experiment['evaluations'],
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
                                                         numerical_tolerance=numerical_tolerance)
-    return check_n_datasets_rom_kfold_rom_scores(scores=scores,
+    return check_n_datasets_som_kfold_som_scores(scores=scores,
                                                 eps=eps,
                                                 evaluations=experiment['evaluations'])
 
@@ -128,45 +128,45 @@ def drive_aggregated(scores: dict,
         >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                             eps=1e-4,
                             image_set='test')
-        # {'mor_fov_pixels_inconsistency': True,
-            'mor_all_pixels_inconsistency': True,
-            'rom_fov_pixels_inconsistency': True,
-            'rom_all_pixels_inconsistency': True}
+        # {'mos_fov_pixels_inconsistency': True,
+            'mos_all_pixels_inconsistency': True,
+            'som_fov_pixels_inconsistency': True,
+            'som_all_pixels_inconsistency': True}
     """
-    logger.info('testing MoR FoV pixels')
-    results_fov_mor = drive_aggregated_fov_pixels(scores=scores,
+    logger.info('testing MoS FoV pixels')
+    results_fov_mos = drive_aggregated_fov_pixels(scores=scores,
                                                 eps=eps,
-                                                aggregation='mor',
+                                                aggregation='mos',
                                                 image_set=image_set,
                                                 subset=subset,
                                                 solver_name=solver_name,
                                                 timeout=timeout,
                                                 verbosity=verbosity,
                                                 numerical_tolerance=numerical_tolerance)
-    logger.info('testing MoR all pixels')
-    results_no_fov_mor = drive_aggregated_all_pixels(scores=scores,
+    logger.info('testing MoS all pixels')
+    results_no_fov_mos = drive_aggregated_all_pixels(scores=scores,
                                                     eps=eps,
-                                                    aggregation='mor',
+                                                    aggregation='mos',
                                                     image_set=image_set,
                                                     subset=subset,
                                                     solver_name=solver_name,
                                                     timeout=timeout,
                                                     verbosity=verbosity,
                                                     numerical_tolerance=numerical_tolerance)
-    logger.info('testing RoM FoV pixels')
-    results_fov_rom = drive_aggregated_fov_pixels(scores=scores,
+    logger.info('testing SoM FoV pixels')
+    results_fov_som = drive_aggregated_fov_pixels(scores=scores,
                                                 eps=eps,
-                                                aggregation='rom',
+                                                aggregation='som',
                                                 image_set=image_set,
                                                 subset=subset,
                                                 solver_name=solver_name,
                                                 timeout=timeout,
                                                 verbosity=verbosity,
                                                 numerical_tolerance=numerical_tolerance)
-    logger.info('testing RoM all pixels')
-    results_no_fov_rom = drive_aggregated_all_pixels(scores=scores,
+    logger.info('testing SoM all pixels')
+    results_no_fov_som = drive_aggregated_all_pixels(scores=scores,
                                                     eps=eps,
-                                                    aggregation='rom',
+                                                    aggregation='som',
                                                     image_set=image_set,
                                                     subset=subset,
                                                     solver_name=solver_name,
@@ -174,10 +174,10 @@ def drive_aggregated(scores: dict,
                                                     verbosity=verbosity,
                                                     numerical_tolerance=numerical_tolerance)
 
-    return {'mor_fov_pixels_inconsistency': results_fov_mor['inconsistency'],
-            'mor_all_pixels_inconsistency': results_no_fov_mor['inconsistency'],
-            'rom_fov_pixels_inconsistency': results_fov_rom['inconsistency'],
-            'rom_all_pixels_inconsistency': results_no_fov_rom['inconsistency']}
+    return {'mos_fov_pixels_inconsistency': results_fov_mos['inconsistency'],
+            'mos_all_pixels_inconsistency': results_no_fov_mos['inconsistency'],
+            'som_fov_pixels_inconsistency': results_fov_som['inconsistency'],
+            'som_all_pixels_inconsistency': results_no_fov_som['inconsistency']}
 
 def drive_image(scores: dict,
                 eps,
@@ -229,7 +229,7 @@ def drive_aggregated_fov_pixels(scores: dict,
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the aggregation technique ('mor'/'rom')
+        aggregation (str): the aggregation technique ('mos'/'som')
         image_set (str): the image set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
                             note that the identifiers need to be in accordance
@@ -262,7 +262,7 @@ def drive_aggregated_fov_pixels(scores: dict,
         # True
     """
     assert image_set in ('train', 'test')
-    assert aggregation in ('mor', 'rom')
+    assert aggregation in ('mos', 'som')
 
     data = load_drive()[f'{image_set}_fov']['images']
     data = filter_drive(data, subset)
@@ -293,7 +293,7 @@ def drive_aggregated_all_pixels(scores: dict,
     Args:
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the aggregation technique ('mor'/'rom')
+        aggregation (str): the aggregation technique ('mos'/'som')
         image_set (str): the image set to test ('train'/'test')
         subset (list|None): the list of identifiers to involve
         solver_name (None|str): the solver to use
@@ -324,7 +324,7 @@ def drive_aggregated_all_pixels(scores: dict,
         # True
     """
     assert image_set in ('train', 'test')
-    assert aggregation in ('mor', 'rom')
+    assert aggregation in ('mos', 'som')
 
     data = load_drive()[f'{image_set}_no_fov']['images']
     data = filter_drive(data, subset)

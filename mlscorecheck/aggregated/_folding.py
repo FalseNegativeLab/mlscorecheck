@@ -57,7 +57,7 @@ class Folding:
 
         Args:
             dataset (Dataset): the dataset to generate folds for
-            aggregation (str): the type of aggregation ('mor'/'rom')
+            aggregation (str): the type of aggregation ('mos'/'som')
 
         Returns:
             list(Fold): the list of fold objects
@@ -81,12 +81,12 @@ class Folding:
 
         p, n = dataset.p, dataset.n
 
-        if aggregation == 'rom':
+        if aggregation == 'som':
             return [Fold(p=p * self.n_repeats,
                         n=n * self.n_repeats,
                         identifier=dataset.identifier)]
 
-        if aggregation == 'mor':
+        if aggregation == 'mos':
             folds = _create_folds(p=p,
                                     n=n,
                                     n_folds=self.n_folds,

@@ -1,5 +1,5 @@
 """
-This module tests the accuracy score reported from a mean-of-ratios
+This module tests the accuracy score reported from a mean-of-scores
 k-fold evaluation with unknown folds.
 """
 
@@ -8,9 +8,9 @@ import itertools
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import Evaluation
 
-__all__ = ['check_1_dataset_unknown_folds_mor_acc_score']
+__all__ = ['check_1_dataset_unknown_folds_mos_acc_score']
 
-def check_1_dataset_unknown_folds_mor_acc_score(evaluation,
+def check_1_dataset_unknown_folds_mos_acc_score(evaluation,
                                                 acc,
                                                 eps,
                                                 numerical_tolerance=NUMERICAL_TOLERANCE):

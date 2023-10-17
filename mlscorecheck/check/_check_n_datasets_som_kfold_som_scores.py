@@ -1,6 +1,6 @@
 """
 This module implements the top level check function for
-scores calculated by the ratio-of-means aggregation
+scores calculated by the score-of-means aggregation
 in a kfold scenario on one single dataset.
 """
 
@@ -10,9 +10,9 @@ from ..core import NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
 from ..aggregated import Experiment
 
-__all__ = ['check_n_datasets_rom_kfold_rom_scores']
+__all__ = ['check_n_datasets_som_kfold_som_scores']
 
-def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
+def check_n_datasets_som_kfold_som_scores(evaluations: list,
                                             scores: dict,
                                             eps,
                                             *,
@@ -20,7 +20,7 @@ def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
-    over the folds and datasets in the ratio of means fashion. If
+    over the folds and datasets in the score of means fashion. If
     score bounds are specified and some of the 'acc', 'sens', 'spec' and
     'bacc' scores are supplied, the linear programming based check is
     executed to see if the bound conditions can be satisfied.
@@ -60,7 +60,7 @@ def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
                                         'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.631, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+        >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
                                                             evaluations=evaluations,
                                                             eps=1e-3)
         >>> result['inconsistency']
@@ -74,25 +74,25 @@ def check_n_datasets_rom_kfold_rom_scores(evaluations: list,
                                         'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-        >>> result = check_n_datasets_rom_kfold_rom_scores(scores=scores,
+        >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
                                                             evaluations=evaluations,
                                                             eps=1e-3)
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'rom') != 'rom' for evaluation in evaluations):
+    if any(evaluation.get('aggregation', 'som') != 'som' for evaluation in evaluations):
         raise ValueError('the aggregation specifications cannot be anything else '\
                             'but "rom"')
 
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'rom'
+        evaluation['aggregation'] = 'som'
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
     experiment = Experiment(evaluations=evaluations,
-                            aggregation='rom')
+                            aggregation='som')
 
     # executing the individual tests
     return check_scores_tptn_pairs(scores=scores,

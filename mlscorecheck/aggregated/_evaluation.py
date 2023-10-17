@@ -26,7 +26,7 @@ class Evaluation:
         Args:
             dataset (dict): the dataset specification
             folding (dict): the folding specification
-            aggregation (str): the mode of aggregation over the folds ('mor'/'rom')
+            aggregation (str): the mode of aggregation over the folds ('mos'/'som')
             fold_score_bounds(None|dict(str,tuple(float,float))): the bounds on the scores
                                                                 for the folds
         """
@@ -35,8 +35,8 @@ class Evaluation:
         self.fold_score_bounds = fold_score_bounds
         self.aggregation = aggregation
 
-        if aggregation == 'rom' and fold_score_bounds is not None:
-            raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
+        if aggregation == 'som' and fold_score_bounds is not None:
+            raise ValueError('It is unlikely that fold score bounds are set for a SoM '\
                                 'aggregation, therefore, it is not supported.')
 
         self.folds = self.folding.generate_folds(self.dataset, self.aggregation)
@@ -105,9 +105,9 @@ class Evaluation:
             self.figures['tp'] = sum(fold.tp for fold in self.folds)
             self.figures['tn'] = sum(fold.tn for fold in self.folds)
 
-        if self.aggregation == 'rom':
+        if self.aggregation == 'som':
             self.scores = calculate_scores_for_lp(self.figures, score_subset=score_subset)
-        elif self.aggregation == 'mor':
+        elif self.aggregation == 'mos':
             self.scores = dict_mean([fold.scores for fold in self.folds])
 
         return self.scores if rounding_decimals is None else round_scores(self.scores,

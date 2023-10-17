@@ -54,7 +54,7 @@ def test_evaluate_timeout():
         assert len(warn) == 1
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 def test_instantiation(random_seed: int, aggregation: str):
     """
     Testing the instantiation of evaluations
@@ -77,14 +77,14 @@ def test_instantiation(random_seed: int, aggregation: str):
             and evaluation.figures['n'] == evaluation2.figures['n']
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 def test_sample_figures(random_seed: int, aggregation: str):
     """
     Testing the sampling of figures
 
     Args:
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
     """
 
     dataset = generate_dataset(random_state=random_seed)
@@ -98,7 +98,7 @@ def test_sample_figures(random_seed: int, aggregation: str):
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 def test_linear_programming_success(subset: list,
                                     random_seed: int,
@@ -110,7 +110,7 @@ def test_linear_programming_success(subset: list,
     Args:
         subset (list): the score subset
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
         rounding_decimals (int): the number of decimals to round to
     """
 
@@ -140,7 +140,7 @@ def test_linear_programming_success(subset: list,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 @pytest.mark.parametrize('rounding_decimals', [2, 3, 4])
 def test_linear_programming_evaluation_generation_success(subset: list,
                                                             random_seed: int,
@@ -152,7 +152,7 @@ def test_linear_programming_evaluation_generation_success(subset: list,
     Args:
         subset (list): the score subset
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
         rounding_decimals (int): the number of decimals to round to
     """
 
@@ -179,7 +179,7 @@ def test_linear_programming_evaluation_generation_success(subset: list,
                             tolerance=1e-6)
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 def test_linear_programming_evaluation_generation_failure(random_seed: int,
                                                             aggregation: str):
     """
@@ -187,7 +187,7 @@ def test_linear_programming_evaluation_generation_failure(random_seed: int,
 
     Args:
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
     """
 
     evaluation = generate_evaluation(random_state=random_seed,
@@ -206,14 +206,14 @@ def test_linear_programming_evaluation_generation_failure(random_seed: int,
     assert lp_program.status == -1
 
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor', 'rom'])
+@pytest.mark.parametrize('aggregation', ['mos', 'som'])
 def test_get_fold_score_bounds(random_seed: int, aggregation: str):
     """
     Testing the extraction of fold score bounds
 
     Args:
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
     """
 
     evaluation = generate_evaluation(random_state=random_seed,
@@ -230,7 +230,7 @@ def test_get_fold_score_bounds(random_seed: int, aggregation: str):
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor'])
+@pytest.mark.parametrize('aggregation', ['mos'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_success_bounds(subset: list,
                                             random_seed: int,
@@ -243,7 +243,7 @@ def test_linear_programming_success_bounds(subset: list,
     Args:
         subset (list): the score subset
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
         rounding_decimals (int): the number of decimals to round to
     """
 
@@ -266,7 +266,7 @@ def test_linear_programming_success_bounds(subset: list,
 
 @pytest.mark.parametrize('subset', two_combs + three_combs + four_combs)
 @pytest.mark.parametrize('random_seed', random_seeds)
-@pytest.mark.parametrize('aggregation', ['mor'])
+@pytest.mark.parametrize('aggregation', ['mos'])
 @pytest.mark.parametrize('rounding_decimals', [3, 4])
 def test_linear_programming_failure_bounds(subset: list,
                                             random_seed: int,
@@ -279,7 +279,7 @@ def test_linear_programming_failure_bounds(subset: list,
     Args:
         subset (list): the score subset
         random_seed (int): the random seed to use
-        aggregation (str): the aggregation to use ('mor'/'rom')
+        aggregation (str): the aggregation to use ('mos'/'som')
         rounding_decimals (int): the number of decimals to round to
     """
 
@@ -305,7 +305,7 @@ def test_others():
     Testing other functionalities
     """
 
-    evaluation = generate_evaluation(aggregation='rom',
+    evaluation = generate_evaluation(aggregation='som',
                                         feasible_fold_score_bounds=True)
     with pytest.raises(ValueError):
         Evaluation(**evaluation)

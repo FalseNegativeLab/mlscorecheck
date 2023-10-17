@@ -4,7 +4,7 @@ Test functions for the EHG problem
 
 from ..core import NUMERICAL_TOLERANCE
 from ..experiments import load_ehg
-from ..check import check_1_dataset_unknown_folds_mor_scores
+from ..check import check_1_dataset_unknown_folds_mos_scores
 
 __all__ = ['check_ehg']
 
@@ -41,7 +41,7 @@ def check_ehg(scores: dict,
     evaluation = {'dataset': load_ehg(),
                     'folding': {'n_folds': n_folds, 'n_repeats': n_repeats}}
 
-    return check_1_dataset_unknown_folds_mor_scores(scores=scores,
+    return check_1_dataset_unknown_folds_mos_scores(scores=scores,
                                                     eps=eps,
                                                     dataset=evaluation['dataset'],
                                                     folding=evaluation['folding'],

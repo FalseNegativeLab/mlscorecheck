@@ -1,12 +1,12 @@
 """
-Testing the case with multiple datasets and unknown folds in MoR aggregations
+Testing the case with multiple datasets and unknown folds in MoS aggregations
 """
 
 import pytest
 
 import numpy as np
 
-from mlscorecheck.check import (check_n_datasets_mor_unknown_folds_mor_scores,
+from mlscorecheck.check import (check_n_datasets_mos_unknown_folds_mos_scores,
                                 estimate_n_experiments)
 from mlscorecheck.aggregated import (generate_experiment)
 
@@ -43,7 +43,7 @@ def generate_test_case(random_seed: int,
                         'max_n': 200,
                         'max_folds': 4,
                         'max_repeats': 1,
-                        'aggregation': 'mor',
+                        'aggregation': 'mos',
                         'no_folds': True,
                         'no_name': True}
 
@@ -52,7 +52,7 @@ def generate_test_case(random_seed: int,
                                                 rounding_decimals=rounding_decimals,
                                                 evaluation_params=evaluation_params,
                                                 max_evaluations=2,
-                                                aggregation='mor',
+                                                aggregation='mos',
                                                 return_scores=True)
 
     n_experiments = estimate_n_experiments(experiment['evaluations'],
@@ -64,7 +64,7 @@ def generate_test_case(random_seed: int,
                                                 rounding_decimals=rounding_decimals,
                                                 evaluation_params=evaluation_params,
                                                 max_evaluations=2,
-                                                aggregation='mor',
+                                                aggregation='mos',
                                                 return_scores=True)
 
         n_experiments = estimate_n_experiments(experiment['evaluations'],
@@ -72,7 +72,7 @@ def generate_test_case(random_seed: int,
     scores = {key: value for key, value in scores.items() if key in score_subset}
     return experiment, scores
 
-def remove_strategy_from_folding(experiment):
+def remove_strategy_fsom_folding(experiment):
     """
     Removes the "strategy" from the folding
 
@@ -82,14 +82,14 @@ def remove_strategy_from_folding(experiment):
     for evaluation in experiment['evaluations']:
         del evaluation['folding']['strategy']
 
-def test_remove_strategy_from_folding():
+def test_remove_strategy_fsom_folding():
     """
-    Testing the remove_strategy_from_folding function
+    Testing the remove_strategy_fsom_folding function
     """
     experiment = {'evaluations': [{'folding': {'strategy': 'dummy0'}},
                                     {'folding': {'strategy': 'dummy1'}}]}
 
-    remove_strategy_from_folding(experiment)
+    remove_strategy_fsom_folding(experiment)
 
     assert 'strategy' not in experiment['evaluations'][0]['folding']
     assert 'strategy' not in experiment['evaluations'][1]['folding']
@@ -106,9 +106,9 @@ def test_successful(random_seed: int, subset: list):
     """
     experiment, scores = generate_test_case(random_seed, 4, score_subset=subset)
 
-    remove_strategy_from_folding(experiment)
+    remove_strategy_fsom_folding(experiment)
 
-    results = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=experiment['evaluations'],
+    results = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=experiment['evaluations'],
                                                             scores=scores,
                                                             eps=1e-4)
 
@@ -127,11 +127,11 @@ def test_failure(random_seed: int, subset: list):
 
     experiment, scores = generate_test_case(random_seed, 4, score_subset=subset)
 
-    remove_strategy_from_folding(experiment)
+    remove_strategy_fsom_folding(experiment)
 
     scores = {'acc': 0.9, 'sens': 0.1, 'spec': 0.1, 'bacc': 0.05}
 
-    results = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=experiment['evaluations'],
+    results = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=experiment['evaluations'],
                                                             scores=scores,
                                                             eps=1e-4)
 
@@ -143,12 +143,12 @@ def test_exception():
     """
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_unknown_folds_mor_scores(evaluations=[{'aggregation': 'rom'}],
+        check_n_datasets_mos_unknown_folds_mos_scores(evaluations=[{'aggregation': 'som'}],
                                                         scores={},
                                                         eps=1e-4)
 
     with pytest.raises(ValueError):
-        check_n_datasets_mor_unknown_folds_mor_scores(evaluations=[{'aggregation': 'mor',
+        check_n_datasets_mos_unknown_folds_mos_scores(evaluations=[{'aggregation': 'mos',
                                                                     'fold_score_bounds': {}}],
                                                         scores={},
                                                         eps=1e-4)

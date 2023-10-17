@@ -1,7 +1,7 @@
 """
 This module implements the top level check function for
-scores calculated by the ratio of means aggregation
-in a kfold scenarios and mean of ratios aggregation on multiple datasets.
+scores calculated by the score of means aggregation
+in a kfold scenarios and mean of scores aggregation on multiple datasets.
 """
 
 import copy
@@ -9,9 +9,9 @@ import copy
 from ..aggregated import check_aggregated_scores, Experiment
 from ..core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_n_datasets_mor_kfold_rom_scores']
+__all__ = ['check_n_datasets_mos_kfold_som_scores']
 
-def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
+def check_n_datasets_mos_kfold_som_scores(evaluations: list,
                                         scores: dict,
                                         eps,
                                         dataset_score_bounds: dict = None,
@@ -23,8 +23,8 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
-    over the folds in the ratio of means fashion and over the datasets
-    in the mean of ratios fashion. This aggregated check can be applied
+    over the folds in the score of means fashion and over the datasets
+    in the mean of scores fashion. This aggregated check can be applied
     only if some of the acc, sens, spec and bacc scores are provided.
 
     Args:
@@ -58,7 +58,7 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> from mlscorecheck.check import check_n_datasets_mor_kfold_rom_scores
+        >>> from mlscorecheck.check import check_n_datasets_mos_kfold_som_scores
         >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
                             'folding': {'n_folds': 5, 'n_repeats': 3,
                                         'strategy': 'stratified_sklearn'}}
@@ -67,7 +67,7 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
                                         'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.312, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_kfold_som_scores(evaluations=evaluations,
                                                         dataset_score_bounds={'acc': (0.0, 0.5)},
                                                         eps=1e-4,
                                                         scores=scores)
@@ -82,7 +82,7 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
                                         'strategy': 'stratified_sklearn'}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.412, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
-        >>> result = check_n_datasets_mor_kfold_rom_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_kfold_som_scores(evaluations=evaluations,
                                                         dataset_score_bounds={'acc': (0.5, 1.0)},
                                                         eps=1e-4,
                                                         scores=scores)
@@ -90,20 +90,20 @@ def check_n_datasets_mor_kfold_rom_scores(evaluations: list,
         # True
     """
 
-    if any(evaluation.get('aggregation', 'rom') != 'rom' for evaluation in evaluations):
+    if any(evaluation.get('aggregation', 'som') != 'som' for evaluation in evaluations):
         raise ValueError('the aggregation specified in each dataset must be "rom" or nothing.')
 
     if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
-        raise ValueError('do not specify fold_score_bounds for a RoM evaluation')
+        raise ValueError('do not specify fold_score_bounds for a SoM evaluation')
 
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'rom'
+        evaluation['aggregation'] = 'som'
 
     experiment = Experiment(evaluations=evaluations,
                             dataset_score_bounds=dataset_score_bounds,
-                            aggregation='mor')
+                            aggregation='mos')
 
     return check_aggregated_scores(experiment=experiment.to_dict(),
                                     scores=scores,

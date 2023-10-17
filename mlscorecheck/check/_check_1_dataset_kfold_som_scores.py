@@ -1,6 +1,6 @@
 """
 This module implements the top level check function for
-scores calculated by the ratio-of-means aggregation
+scores calculated by the score-of-means aggregation
 in a kfold scenario on one single dataset.
 """
 
@@ -8,9 +8,9 @@ from ..core import NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
 from ..aggregated import Experiment
 
-__all__ = ['check_1_dataset_rom_scores']
+__all__ = ['check_1_dataset_som_scores']
 
-def check_1_dataset_rom_scores(dataset: dict,
+def check_1_dataset_som_scores(dataset: dict,
                                 folding: dict,
                                 scores: dict,
                                 eps,
@@ -19,7 +19,7 @@ def check_1_dataset_rom_scores(dataset: dict,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
-    over the folds in the ratio of means fashion. All pairs of
+    over the folds in the score of means fashion. All pairs of
     the supported individual scores are checked against all other as in
     the 1_dataset_no_kfold case, however, additionally, if score_bounds
     are specified in the folds, the aggregated check is also executed
@@ -57,7 +57,7 @@ def check_1_dataset_rom_scores(dataset: dict,
         >>> folding = {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}
         >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
                         'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
-        >>> result = check_1_dataset_rom_scores(dataset=dataset,
+        >>> result = check_1_dataset_som_scores(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,
                                                 eps=1e-3)
@@ -67,7 +67,7 @@ def check_1_dataset_rom_scores(dataset: dict,
         >>> dataset = {'p': 10, 'n': 20}
         >>> folding = {'n_folds': 5, 'n_repeats': 1}
         >>> scores = {'acc': 0.428, 'npv': 0.392, 'bacc': 0.442, 'f1p': 0.391}
-        >>> result = check_1_dataset_rom_scores(dataset=dataset,
+        >>> result = check_1_dataset_som_scores(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,
                                                 eps=1e-3)
@@ -83,8 +83,8 @@ def check_1_dataset_rom_scores(dataset: dict,
     # outer level aggregation can be arbitrary
     experiment = Experiment(evaluations=[{'dataset': dataset,
                                             'folding': folding,
-                                            'aggregation': 'rom'}],
-                            aggregation='rom')
+                                            'aggregation': 'som'}],
+                            aggregation='som')
 
     # executing the individual tests
     return check_scores_tptn_pairs(scores=scores,

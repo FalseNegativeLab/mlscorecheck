@@ -1,20 +1,20 @@
 """
 This module implements the top level check function for
-scores calculated by the mean of ratios aggregation
-in a kfold scenarios and mean of ratios aggregation on multiple datasets.
+scores calculated by the mean of scores aggregation
+in a kfold scenarios and mean of scores aggregation on multiple datasets.
 """
 
 import copy
 
 import numpy as np
 
-from ._check_n_datasets_mor_known_folds_mor_scores \
-            import check_n_datasets_mor_known_folds_mor_scores
-from ._check_1_dataset_unknown_folds_mor_scores import estimate_n_evaluations
+from ._check_n_datasets_mos_known_folds_mos_scores \
+            import check_n_datasets_mos_known_folds_mos_scores
+from ._check_1_dataset_unknown_folds_mos_scores import estimate_n_evaluations
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import (experiment_kfolds_generator)
 
-__all__ = ['check_n_datasets_mor_unknown_folds_mor_scores',
+__all__ = ['check_n_datasets_mos_unknown_folds_mos_scores',
             'estimate_n_experiments']
 
 def estimate_n_experiments(evaluations: list,
@@ -36,7 +36,7 @@ def estimate_n_experiments(evaluations: list,
                 for evaluation in evaluations]
     return np.prod(counts)
 
-def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
+def check_n_datasets_mos_unknown_folds_mos_scores(evaluations: list,
                                         scores: dict,
                                         eps,
                                         dataset_score_bounds: dict = None,
@@ -48,8 +48,8 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
-    over the folds in the mean of ratios fashion and over the datasets
-    in the mean of ratios fashion.
+    over the folds in the mean of scores fashion and over the datasets
+    in the mean of scores fashion.
 
     Note that depending on the number of the minority instances and on the
     folding structure, this test might lead to enormous execution times.
@@ -80,14 +80,14 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> from mlscorecheck.check import check_n_datasets_mor_unknown_folds_mor_scores
+        >>> from mlscorecheck.check import check_n_datasets_mos_unknown_folds_mos_scores
         >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
                         'folding': {'n_folds': 4, 'n_repeats': 1}}
         >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
                         'folding': {'n_folds': 3, 'n_repeats': 1}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=evaluations,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']
@@ -99,13 +99,13 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
                         'folding': {'n_folds': 3, 'n_repeats': 1}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
-        >>> result = check_n_datasets_mor_unknown_folds_mor_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=evaluations,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mor') != 'mor' for evaluation in evaluations):
+    if any(evaluation.get('aggregation', 'mos') != 'mos' for evaluation in evaluations):
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
     if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
         raise ValueError('do not specify fold score bounds through this interface')
@@ -113,18 +113,18 @@ def check_n_datasets_mor_unknown_folds_mor_scores(evaluations: list,
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'mor'
+        evaluation['aggregation'] = 'mos'
 
     experiment = {'evaluations': evaluations,
                     'dataset_score_bounds': dataset_score_bounds,
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     results = {'details': [],
                 'inconsistency': True}
 
     for experiment in experiment_kfolds_generator(experiment,
                                                     list(scores.keys())):
-        result = check_n_datasets_mor_known_folds_mor_scores(
+        result = check_n_datasets_mos_known_folds_mos_scores(
                                     evaluations=experiment['evaluations'],
                                     dataset_score_bounds=experiment.get('dataset_score_bounds'),
                                     scores=scores,

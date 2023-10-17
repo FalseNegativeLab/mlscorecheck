@@ -32,9 +32,9 @@ A similar functionality is provided for the aggregated scores calculated on the 
     >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                         eps=1e-4,
                         bundle='test')
-    # {'mor_fov_inconsistency': True,
-    #   'mor_no_fov_inconsistency': True,
-    #   'rom_fov_inconsistency': True,
-    #   'rom_no_fov_inconsistency': True}
+    # {'mos_fov_inconsistency': True,
+    #   'mos_no_fov_inconsistency': True,
+    #   'som_fov_inconsistency': True,
+    #   'som_no_fov_inconsistency': True}
 
 The results here show that the reported scores could not be the result of any aggregation of any evaluation methodologies.

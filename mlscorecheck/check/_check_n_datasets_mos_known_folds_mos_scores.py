@@ -1,7 +1,7 @@
 """
 This module implements the top level check function for
-scores calculated by the mean of ratios aggregation
-in a kfold scenarios and mean of ratios aggregation on multiple datastes.
+scores calculated by the mean of scores aggregation
+in a kfold scenarios and mean of scores aggregation on multiple datastes.
 """
 
 import copy
@@ -9,9 +9,9 @@ import copy
 from ..aggregated import check_aggregated_scores, Experiment
 from ..core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_n_datasets_mor_known_folds_mor_scores']
+__all__ = ['check_n_datasets_mos_known_folds_mos_scores']
 
-def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
+def check_n_datasets_mos_known_folds_mos_scores(evaluations: list,
                                         scores: dict,
                                         eps,
                                         dataset_score_bounds: dict = None,
@@ -23,8 +23,8 @@ def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
-    over the folds in the mean of ratios fashion and over the datasets
-    in the mean of ratios fashion.
+    over the folds in the mean of scores fashion and over the datasets
+    in the mean of scores fashion.
 
     Args:
         evaluations (list(dict)): the list of evaluation specifications
@@ -63,7 +63,7 @@ def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
                         'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.61, 'sens': 0.709, 'spec': 0.461, 'bacc': 0.585}
-        >>> result = check_n_datasets_mor_known_folds_mor_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_known_folds_mos_scores(evaluations=evaluations,
                                                                 scores=scores,
                                                                 eps=1e-3)
         >>> result['inconsistency']
@@ -75,13 +75,13 @@ def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
                         'folding': {'folds': [{'p': 300, 'n': 200}, {'p': 481, 'n': 223}]}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.71, 'sens': 0.709, 'spec': 0.461}
-        >>> result = check_n_datasets_mor_known_folds_mor_scores(evaluations=evaluations,
+        >>> result = check_n_datasets_mos_known_folds_mos_scores(evaluations=evaluations,
                                                             scores=scores,
                                                             eps=1e-3)
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mor') != 'mor' for evaluation in evaluations):
+    if any(evaluation.get('aggregation', 'mos') != 'mos' for evaluation in evaluations):
         raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
     if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
         raise ValueError('do not specify fold_score_bounds through this interface')
@@ -89,11 +89,11 @@ def check_n_datasets_mor_known_folds_mor_scores(evaluations: list,
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'mor'
+        evaluation['aggregation'] = 'mos'
 
     experiment = Experiment(evaluations=evaluations,
                             dataset_score_bounds=dataset_score_bounds,
-                            aggregation='mor')
+                            aggregation='mos')
 
     return check_aggregated_scores(experiment=experiment.to_dict(),
                                     scores=scores,

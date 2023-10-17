@@ -44,17 +44,17 @@ def test_generate_folds():
     folding = Folding(n_folds=5, n_repeats=3, strategy='stratified_sklearn')
     dataset = Dataset(p=5, n=10)
 
-    assert len(folding.generate_folds(dataset, 'rom')) == 1
-    assert len(folding.generate_folds(dataset, 'mor')) == 15
+    assert len(folding.generate_folds(dataset, 'som')) == 1
+    assert len(folding.generate_folds(dataset, 'mos')) == 15
 
     with pytest.raises(ValueError):
         folding.generate_folds(dataset=dataset, aggregation='dummy')
 
     folding = Folding(folds=[{'p': 5, 'n': 10}, {'p': 10, 'n': 20}])
-    assert len(folding.generate_folds(dataset=dataset, aggregation='rom')) == 2
+    assert len(folding.generate_folds(dataset=dataset, aggregation='som')) == 2
 
     with pytest.raises(ValueError):
-        folding.generate_folds(dataset=Dataset(p=4, n=21), aggregation='rom')
+        folding.generate_folds(dataset=Dataset(p=4, n=21), aggregation='som')
 
 @pytest.mark.parametrize('random_seed', range(10))
 def test_generate_folding(random_seed: int):

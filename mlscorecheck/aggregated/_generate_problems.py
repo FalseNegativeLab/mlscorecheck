@@ -87,7 +87,7 @@ def generate_folding(*, dataset: dict,
                         n_repeats=n_repeats,
                         strategy=strategy)
 
-    return {'folds': [fold.to_dict() for fold in folding.generate_folds(dataset, 'mor')]}
+    return {'folds': [fold.to_dict() for fold in folding.generate_folds(dataset, 'mos')]}
 
 def generate_evaluation(*, max_p: int = 500, # pylint: disable=too-many-locals
                             max_n: int = 500,
@@ -115,7 +115,7 @@ def generate_evaluation(*, max_p: int = 500, # pylint: disable=too-many-locals
                                                 feasible bounds are added, otherwise infeasible
                                                 ones
         aggregation (None|str): if None a random aggregation is chosen, otherwise the specified
-                                aggregation is used ('rom'/'mor')
+                                aggregation is used ('som'/'mos')
         random_state (None|int|np.random.RandomState): the random seed/state to be used
         return_scores (bool): whether to return the scores (corresponding to the bounds) too
         rounding_decimals (None|int): the number of decimals to round to
@@ -139,13 +139,13 @@ def generate_evaluation(*, max_p: int = 500, # pylint: disable=too-many-locals
                                         random_state=random_state,
                                         no_folds=no_folds)
 
-    aggregation = aggregation if aggregation is not None else random_state.choice(['rom', 'mor'])
+    aggregation = aggregation if aggregation is not None else random_state.choice(['som', 'mos'])
 
     evaluation = Evaluation(dataset=result['dataset'],
                             folding=result['folding'],
                             aggregation=aggregation).sample_figures(random_state)
 
-    if aggregation == 'rom':
+    if aggregation == 'som':
         scores = calculate_scores(problem=evaluation.figures | {'beta_positive': 2,
                                                                 'beta_negative': 2},
                                     rounding_decimals=rounding_decimals)
@@ -210,7 +210,7 @@ def generate_experiment(*, max_evaluations: int = 5,
                                                     infeasible (``False``) score bounds. No
                                                     bounds are added if None.
         aggregation (None|str): if None a random aggregation is chosen, otherwise the specified
-                                aggregation is used ('rom'/'mor')
+                                aggregation is used ('som'/'mos')
         random_state (None|int|np.random.RandomState): the random seed/state to be used
         return_scores (bool): whether to return the scores (corresponding to the bounds) too
         rounding_decimals (int|None): the number of decimals to round to
@@ -227,7 +227,7 @@ def generate_experiment(*, max_evaluations: int = 5,
     n_evaluations = random_state.randint(1, max_evaluations+1)
 
     aggregation = (aggregation if aggregation is not None
-                            else random_state.choice(['rom', 'mor']))
+                            else random_state.choice(['som', 'mos']))
 
     evaluations = [generate_evaluation(**evaluation_params,
                                         random_state=random_state)
@@ -235,7 +235,7 @@ def generate_experiment(*, max_evaluations: int = 5,
 
     experiment = Experiment(evaluations=evaluations,
                                 aggregation=aggregation).sample_figures(random_state)
-    if aggregation == 'rom':
+    if aggregation == 'som':
         scores = calculate_scores(problem=experiment.figures | {'beta_positive': 2,
                                                                 'beta_negative': 2},
                                     rounding_decimals=rounding_decimals)

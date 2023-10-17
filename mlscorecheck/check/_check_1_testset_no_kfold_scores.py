@@ -79,7 +79,7 @@ def check_1_testset_no_kfold_scores(testset: dict,
         or ('folds' in testset) or ('aggregation' in testset):
         warnings.warn('Additional fields beyond ("p", "n") or "name" present ' \
                         'in the specification, you might want to use another check '\
-                        'function specialized to datasets (e.g. check_kfold_mor_scores)')
+                        'function specialized to datasets (e.g. check_kfold_mos_scores)')
 
     p = testset.get('p')
     n = testset.get('n')

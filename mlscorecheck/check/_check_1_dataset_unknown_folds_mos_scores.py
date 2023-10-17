@@ -7,9 +7,9 @@ from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import (Dataset,
                             repeated_kfolds_generator,
                             kfolds_generator)
-from ._check_1_dataset_known_folds_mor_scores import check_1_dataset_known_folds_mor_scores
+from ._check_1_dataset_known_folds_mos_scores import check_1_dataset_known_folds_mos_scores
 
-__all__ = ['check_1_dataset_unknown_folds_mor_scores',
+__all__ = ['check_1_dataset_unknown_folds_mos_scores',
             'estimate_n_evaluations']
 
 def estimate_n_evaluations(dataset: dict,
@@ -37,7 +37,7 @@ def estimate_n_evaluations(dataset: dict,
 
     return count**n_repeats
 
-def check_1_dataset_unknown_folds_mor_scores(
+def check_1_dataset_unknown_folds_mos_scores(
                                         dataset: dict,
                                         folding: dict,
                                         scores: dict,
@@ -50,7 +50,7 @@ def check_1_dataset_unknown_folds_mor_scores(
                                         numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores calculated in a k-fold cross validation on a single
-    dataset, in a mean-of-ratios fashion, without knowing the folding strategy.
+    dataset, in a mean-of-scores fashion, without knowing the folding strategy.
     The function generates all possible foldings of k-valid folds and evaluates the
     consistency on each of them. The scores are inconsistent if all the k-fold configurations
     lead to inconsistencies identified.
@@ -78,7 +78,7 @@ def check_1_dataset_unknown_folds_mor_scores(
     Returns:
         dict: the dictionary of the results of the analysis, the
         ``inconsistency`` entry indicates if inconsistencies have
-        been found. The details of the mean-of-ratios checks and all fold configurations
+        been found. The details of the mean-of-scores checks and all fold configurations
         can be found under the ``details`` key.
 
     Raises:
@@ -88,7 +88,7 @@ def check_1_dataset_unknown_folds_mor_scores(
         >>> dataset = {'p': 126, 'n': 131}
         >>> folding = {'n_folds': 2, 'n_repeats': 1}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-        >>> result = check_1_dataset_unknown_folds_mor_scores(dataset=dataset,
+        >>> result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
                                                                 folding=folding,
                                                                 scores=scores,
                                                                 eps=1e-3)
@@ -98,7 +98,7 @@ def check_1_dataset_unknown_folds_mor_scores(
         >>> dataset = {'p': 19, 'n': 97}
         >>> folding = {'n_folds': 3, 'n_repeats': 1}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-        >>> result = check_1_dataset_unknown_folds_mor_scores(dataset=dataset,
+        >>> result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
                                                                 folding=folding,
                                                                 scores=scores,
                                                                 eps=1e-4)
@@ -108,7 +108,7 @@ def check_1_dataset_unknown_folds_mor_scores(
     evaluation = {'dataset': dataset,
                     'folding': folding,
                     'fold_score_bounds': fold_score_bounds,
-                    'aggregation': 'mor'}
+                    'aggregation': 'mos'}
 
     results = {'details': []}
 
@@ -116,7 +116,7 @@ def check_1_dataset_unknown_folds_mor_scores(
     for evaluation_0 in repeated_kfolds_generator(evaluation,
                                                     list(scores.keys())):
         tmp = {'folds': evaluation_0['folding']['folds'],
-                'details': check_1_dataset_known_folds_mor_scores(
+                'details': check_1_dataset_known_folds_mos_scores(
                                     scores=scores,
                                     eps=eps,
                                     dataset=evaluation_0['dataset'],

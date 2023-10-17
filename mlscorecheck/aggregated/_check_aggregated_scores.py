@@ -65,9 +65,9 @@ def check_aggregated_scores(*,
 
     experiment = Experiment(**experiment) if isinstance(experiment, dict) else experiment
 
-    if experiment.aggregation == 'rom' \
-        and any(evaluation.aggregation == 'mor' for evaluation in experiment.evaluations):
-        raise ValueError('experiment level MoR aggregation with dataset level RoM '\
+    if experiment.aggregation == 'som' \
+        and any(evaluation.aggregation == 'mos' for evaluation in experiment.evaluations):
+        raise ValueError('experiment level MoS aggregation with dataset level SoM '\
             'aggregation is an unlikely situation, it is not supported in this high level '\
             'interface.')
 

@@ -1,12 +1,12 @@
 """
-Testing the test functionality with MoR aggregation and unknown folds
+Testing the test functionality with MoS aggregation and unknown folds
 """
 
 import pytest
 
 import numpy as np
 
-from mlscorecheck.check import (check_1_dataset_unknown_folds_mor_scores,
+from mlscorecheck.check import (check_1_dataset_unknown_folds_mos_scores,
                                 estimate_n_evaluations)
 from mlscorecheck.aggregated import Evaluation
 
@@ -46,14 +46,14 @@ def test_success(random_seed: int, rounding_decimals: int, subset: list):
 
     evaluation = Evaluation(dataset=dataset,
                             folding=folding,
-                            aggregation='mor')
+                            aggregation='mos')
     evaluation.sample_figures(score_subset=subset)
 
     scores = evaluation.calculate_scores(rounding_decimals, score_subset=subset)
 
     evaluation = evaluation.to_dict()
 
-    results = check_1_dataset_unknown_folds_mor_scores(
+    results = check_1_dataset_unknown_folds_mos_scores(
                         scores=scores,
                         eps=(10**(-rounding_decimals)),
                         dataset=evaluation['dataset'],
@@ -86,7 +86,7 @@ def test_failure(random_seed: int, rounding_decimals: int, subset: list):
 
     evaluation = Evaluation(dataset=dataset,
                             folding=folding,
-                            aggregation='mor')
+                            aggregation='mos')
     evaluation.sample_figures(score_subset=subset)
 
     evaluation = evaluation.to_dict()
@@ -95,7 +95,7 @@ def test_failure(random_seed: int, rounding_decimals: int, subset: list):
     scores = {'sens': 0.7, 'spec': 0.7, 'bacc': 0.6, 'acc': 0.1234}
     scores = {key: value for key, value in scores.items() if key in subset}
 
-    results = check_1_dataset_unknown_folds_mor_scores(
+    results = check_1_dataset_unknown_folds_mos_scores(
                         scores=scores,
                         eps=(10**(-rounding_decimals)),
                         dataset=evaluation['dataset'],

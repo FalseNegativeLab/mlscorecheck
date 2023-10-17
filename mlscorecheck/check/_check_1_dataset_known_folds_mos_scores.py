@@ -1,15 +1,15 @@
 """
 This module implements the top level check function for
-scores calculated by the mean-of-ratios aggregation
+scores calculated by the mean-of-scores aggregation
 in a kfold scenario on one single dataset.
 """
 
 from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import check_aggregated_scores, Experiment, Evaluation
 
-__all__ = ['check_1_dataset_known_folds_mor_scores']
+__all__ = ['check_1_dataset_known_folds_mos_scores']
 
-def check_1_dataset_known_folds_mor_scores(dataset: dict,
+def check_1_dataset_known_folds_mos_scores(dataset: dict,
                                     folding: dict,
                                     scores: dict,
                                     eps,
@@ -22,7 +22,7 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
-    over the folds in the mean of ratios fashion. Note that this
+    over the folds in the mean of scores fashion. Note that this
     test can only check the consistency of the 'acc', 'sens', 'spec'
     and 'bacc' scores. Note that without bounds, if there is a large
     number of folds, it is likely that there will be a configuration
@@ -67,7 +67,7 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
         >>> dataset = {'p': 126, 'n': 131}
         >>> folding = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
-        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+        >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
                                                             folding=folding,
                                                             scores=scores,
                                                             eps=1e-3)
@@ -77,7 +77,7 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
         >>> dataset = {'p': 398, 'n': 569}
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
-        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+        >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
                                                             folding=folding,
                                                             scores=scores,
                                                             eps=1e-2)
@@ -87,7 +87,7 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
         >>> dataset = {'dataset_name': 'common_datasets.glass_0_1_6_vs_2'}
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
-        >>> result = check_1_dataset_known_folds_mor_scores(dataset=dataset,
+        >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
                                                             folding=folding,
                                                             fold_score_bounds={'acc': (0.8, 1.0)},
                                                             scores=scores,
@@ -100,10 +100,10 @@ def check_1_dataset_known_folds_mor_scores(dataset: dict,
     evaluation = Evaluation(dataset=dataset,
                             folding=folding,
                             fold_score_bounds=fold_score_bounds,
-                            aggregation='mor')
+                            aggregation='mos')
 
     experiment = Experiment(evaluations=[evaluation.to_dict()],
-                            aggregation='mor')
+                            aggregation='mos')
 
     return check_aggregated_scores(experiment=experiment.to_dict(),
                                         scores=scores,

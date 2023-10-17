@@ -28,15 +28,15 @@ class Experiment:
 
         Args:
             evaluations (list(dict)): a list of evaluation specifications
-            aggregation (str): the mode of aggregation ('mor'/'rom')
+            aggregation (str): the mode of aggregation ('mos'/'som')
             dataset_score_bounds (None|dict): the score bounds on the dataset scores
         """
         self.evaluations = [Evaluation(**evaluation) for evaluation in evaluations]
         self.dataset_score_bounds = dataset_score_bounds
         self.aggregation = aggregation
 
-        if aggregation == 'rom' and dataset_score_bounds is not None:
-            raise ValueError('It is unlikely that fold score bounds are set for a RoM '\
+        if aggregation == 'som' and dataset_score_bounds is not None:
+            raise ValueError('It is unlikely that fold score bounds are set for a SoM '\
                                 'aggregation, therefore, it is not supported.')
 
         self.figures = {'tp': None,
@@ -106,10 +106,10 @@ class Experiment:
             self.figures['tn'] = sum(evaluation.figures['tn']
                                         for evaluation in self.evaluations)
 
-        if self.aggregation == 'rom':
+        if self.aggregation == 'som':
             self.scores = calculate_scores_for_lp(self.figures,
                                                     score_subset=score_subset)
-        elif self.aggregation == 'mor':
+        elif self.aggregation == 'mos':
             self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
 
         return self.scores if rounding_decimals is None else round_scores(self.scores,
