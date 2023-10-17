@@ -62,6 +62,7 @@ Contents
 ========
 
 The contents of the repository:
+
 * ``mlscorecheck`` folder: the implementation of the consistency tests;
 * ``notebooks/illustration`` folder: the notebooks containing all working sample codes used throughout this README and the ReadTheDocs documentation;
 * ``notebooks/utils`` folder: utilities related to generate the algebraic solutions of the score functions, as well as the summary tables used for illustration;
