@@ -3,7 +3,7 @@ This module implements consistency testing for scores calculated in a k-fold cro
 scenario with unknown fold structures.
 """
 
-from ..core import NUMERICAL_TOLERANCE, logger
+from ..core import NUMERICAL_TOLERANCE
 from ..aggregated import (Dataset,
                             repeated_kfolds_generator,
                             kfolds_generator)

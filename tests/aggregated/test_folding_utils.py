@@ -162,21 +162,21 @@ def test_fold_partitioning_generator():
     Testing the fold partitioning generator
     """
 
-    folds = fold_partitioning_generator(6, 6, 3, True, True)
+    folds = fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=True, n_non_zero=True)
 
     assert all((not any_zero(fold[0])) and (not any_zero(fold[1])) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, False, True))
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=True))
 
     assert all(not any_zero(fold[1]) for fold in folds)
     assert any(any_zero(fold[0]) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, True, False))
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=True, n_non_zero=False))
 
     assert all(not any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
 
-    folds = list(fold_partitioning_generator(6, 6, 3, False, False))
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=False))
 
     assert any(any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
@@ -186,19 +186,22 @@ def test_fold_partitioning_generator_p_min():
     Testing the fold partitioning generator with p_min
     """
 
-    folds = fold_partitioning_generator(6, 7, 3, True, True, p_min=2)
+    folds = fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=True, n_non_zero=True, p_min=2)
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 7, 3, False, True, p_min=2))
+    folds = list(fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=False, n_non_zero=True,
+                                                p_min=2))
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 7, 3, True, False, p_min=2))
+    folds = list(fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=True, n_non_zero=False,
+                                                p_min=2))
 
     assert len(list(folds)) == 1
 
-    folds = list(fold_partitioning_generator(6, 7, 3, False, False, p_min=2))
+    folds = list(fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=False, n_non_zero=False,
+                                                p_min=2))
 
     assert len(list(folds)) == 1
 

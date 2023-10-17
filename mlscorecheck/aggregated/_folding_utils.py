@@ -220,7 +220,8 @@ def not_enough_diverse_folds(p_values, n_values):
         bool: True, if the configuration is incorrect, False otherwise
     """
 
-    return len(p_values) > 1 and (sum(p_tmp > 0 for p_tmp in p_values) < 2 or sum(n_tmp > 0 for n_tmp in n_values) < 2)
+    return (len(p_values) > 1 and (sum(p_tmp > 0 for p_tmp in p_values) < 2
+                                    or sum(n_tmp > 0 for n_tmp in n_values) < 2))
 
 def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero): # pylint: disable=too-many-locals
     """
@@ -248,7 +249,7 @@ def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero): # pylin
 
     return min_p_a, max_p_a
 
-def fold_partitioning_generator(p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1): #pylint: disable=invalid-name,too-many-locals
+def fold_partitioning_generator(*, p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1): #pylint: disable=invalid-name,too-many-locals
     """
     Generates the fold partitioning
 
@@ -368,7 +369,7 @@ def kfolds_generator(evaluation: dict,
     else:
         evaluation['dataset']['identifier'] = random_identifier(6)
 
-    for jdx, (ps, ns) in enumerate(fold_partitioning_generator(p=p,
+    for jdx, (p_vals, n_vals) in enumerate(fold_partitioning_generator(p=p,
                                                 n=n,
                                                 k=evaluation['folding'].get('n_folds', 1),
                                                 p_non_zero=not p_zero,
@@ -376,7 +377,7 @@ def kfolds_generator(evaluation: dict,
         yield [{'p': p_,
                 'n': n_,
                 'identifier': f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}_r{repeat_idx}"}
-                for idx, (p_, n_) in enumerate(zip(ps, ns))]
+                for idx, (p_, n_) in enumerate(zip(p_vals, n_vals))]
 
 def repeated_kfolds_generator(evaluation: dict,
                                 available_scores: list):
