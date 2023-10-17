@@ -23,8 +23,8 @@ class Symbols:  # pylint: disable=too-many-instance-attributes
         self.algebraic_system = algebraic_system
         if algebraic_system == 'sympy':
             self.algebra = SympyAlgebra()
-        elif algebraic_system == 'sage':
-            self.algebra = SageAlgebra()
+        elif algebraic_system == 'sage': # pragma: no cover
+            self.algebra = SageAlgebra() # pragma: no cover
 
         self.tp = self.algebra.create_symbol('tp', nonnegative=True, real=True)
         self.tn = self.algebra.create_symbol('tn', nonnegative=True, real=True)
