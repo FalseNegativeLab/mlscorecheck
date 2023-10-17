@@ -58,6 +58,15 @@ If you use the package, please consider citing the following paper:
     year={2023}
   }
 
+Contents
+========
+
+The contents of the repository:
+* ``mlscorecheck`` folder: the implementation of the consistency tests;
+* ``notebooks/illustration`` folder: the notebooks containing all working sample codes used throughout this README and the ReadTheDocs documentation;
+* ``notebooks/utils`` folder: utilities related to generate the algebraic solutions of the score functions, as well as the summary tables used for illustration;
+* ``tests`` folder: the unit and functional tests covering each line of code of the package.
+
 Installation
 ============
 
@@ -223,16 +232,16 @@ When it comes to the aggregation of scores (either over multiple folds, multiple
 The two types of tests
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Having one single testset, or a SoM type of aggregation (leading to one confusion matrix), one can iterate through all potential confusion matrices and check if any of them can produce the reported scores with the given numerical uncertainty. The test is sped up by using interval arithmetic. This test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` parameters.
+In the context of a single testset or a Score of Means (SoM) aggregation, which results in one confusion matrix, one can systematically iterate through all potential confusion matrices to assess whether any of them can generate the reported scores within the specified numerical uncertainty. To expedite this process, the test leverages interval arithmetic. The test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` parameters.
 
-With a MoS type of aggregation, only the averages of scores over folds or datasets are available. In this case the reconstruction of fold level or dataset level confusion matrices is possible only for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear integer programming. Based on the reported scores and the folding structures, these tests formulate a linear integer program of all confusion matrix entries and check if the program is feasible to result in the reported values with the estimated numerical uncertainties.
+With a MoS type of aggregation, only the averages of scores over folds or datasets are available. In this case, it is feasible to reconstruct fold-level or dataset-level confusion matrices for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear integer programming. These tests formulate a linear integer program based on the reported scores and the experimental setup, and check if the program is feasible to produce the reported values within the estimated numerical uncertainties.
 
-1 testset with no kfold
-^^^^^^^^^^^^^^^^^^^^^^^
+1 testset with no k-fold
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation are calculated and reported.
+A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation (as a binary classification of pixels) are calculated and reported.
 
-In the example below, the scores values are generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
+In the example below, the scores are artificially generated to be consistent, and accordingly, the test did not identify inconsistencies at the ``1e-2`` level of numerical uncertainty.
 
 .. code-block:: Python
 
@@ -264,10 +273,10 @@ If one of the scores is altered, like accuracy is changed to 0.92, the configura
 
 As the ``inconsistency`` flag shows, here inconsistencies were identified, there are no such ``tp`` and ``tn`` combinations which would end up with the reported scores. Either the assumption on the properties of the dataset, or the scores are incorrect.
 
-1 dataset with kfold mean-of-ratios (MoS)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1 dataset with k-fold, mean-of-scores (MoS)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the ``tp`` and ``tn`` parameters of all folds and checks its feasibility.
+This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the true positive and true negative parameters of all folds and checks its feasibility.
 
 In the example below, a consistent set of figures is tested:
 
@@ -287,7 +296,7 @@ In the example below, a consistent set of figures is tested:
     >>> result['inconsistency']
     # False
 
-As one can from the output flag, there are no inconsistencies identified. The ``result`` dict contains some further details of the test. Most importantly, under the key ``lp_status`` one can find the status of the linear programming solver, and under the key ``lp_configuration``, one can find the values of all ``tp`` and ``tn`` variables in all folds at the time of the termination of the solver, and additionally, all scores are calculated for the folds and the entire dataset, too.
+As indicated by the output flag, no inconsistencies were identified. The ``result`` dictionary contains some further details of the test. Most notably, under the ``lp_status`` key, one can find the status of the linear programming solver. Additionally, under the ``lp_configuration`` key, one can find the values of all true positive and true negative variables in all folds at the time of the termination of the solver. Furthermore, all scores are calculated for the individual folds and the entire dataset, as well.
 
 If one of the scores is adjusted, for example, sensitivity is changed to 0.568, the configuration becomes infeasible:
 
@@ -301,8 +310,8 @@ If one of the scores is adjusted, for example, sensitivity is changed to 0.568, 
     >>> result['inconsistency']
     # True
 
-Finally, we mention that if there are hints for bounds on the scores in the folds (for example, the minimum and maximum scores across the folds are reported), one can add these figures to strengthen the test. In the next example, score bounds on the accuracy have been added to each fold, that means the test checks if the reported scores can be satisfied
-with a ``tp`` and ``tn`` configuration under given these lower and upper bounds:
+Finally, we mention that if there are hints for bounds on the scores in the folds (for example, when the minimum and maximum scores across the folds are reported), one can add these figures to strengthen the test. In the next example, score bounds on accuracy have been added to each fold. This means the test checks if the reported scores can be achieved
+with a true positive and true negative configuration with the specified lower and upper bounds for the scores in the individual folds:
 
 .. code-block:: Python
 
@@ -325,7 +334,7 @@ Note that in this example, although ``f1`` is provided, it is completely ignored
 1 dataset with kfold ratio-of-means (SoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When the scores are calculated in the Ratio-of-Means (SoM) manner in a k-fold scenario, it means that the total confusion matrix (``tp`` and ``tn`` values) of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
+When the scores are calculated in the Score-of-Means (SoM) manner in a k-fold scenario, it means that the total confusion matrix of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold scheme multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
 
 For example, testing a consistent scenario:
 
@@ -423,7 +432,7 @@ This scenario is about performance scores calculated for each dataset individual
     >>> result['inconsistency']
     # False
 
-However, if one of the scores is adjusted a little (accuracy changed to 0.412 and the score bounds also changed), the configuration becomes unfeasible:
+However, if one of the scores is adjusted a little (accuracy changed to 0.412 and the score bounds also changed), the configuration becomes infeasible:
 
 .. code-block:: Python
 
@@ -559,9 +568,9 @@ Experts in various fields are kindly invited to contribute further test bundles 
 Retinal vessel segmentation
 ---------------------------
 
-One such field is the segmentation of retinal vessels [RV]_, where the authors have the freedom of either include or exclude certain parts of the images (the pixels outside the Field-of-View) from the evaluation, rendering the reported scores incomparable. In order to facilitate the objective comparison, evaluation and interpretation of reported scores, we provide two functions to check the internal consistency of scores reported for the DRIVE retinal vessel segmentation dataset.
+One such field is retinal vessel segmentation [RV]_, where the authors have the option to include or exclude certain parts of the images (the pixels outside the Field-of-View), making the reported scores incomparable. To facilitate the meaningful comparison, evaluation and interpretation of reported scores, we provide two functions to check the internal consistency of scores reported for the DRIVE retinal vessel segmentation dataset.
 
-The first function enables the testing of performance scores reported for certain test images, the two tests executed assume the use of the FoV mask (excluding the pixels outside the FoV) and the neglection of the FoV mask (including the pixels outside the FoV). As the following example shows, one simply supplies the scores and specifies the images (whether it is from the 'test' or 'train' subset and the identifier of the image) and gets back if inconsistency is identified with any of the two assumptions.
+The first function enables the testing of performance scores reported for specific test images. Two tests are executed, one assuming the use of the FoV mask (excluding the pixels outside the FoV) and the other assuming the neglect of the FoV mask (including the pixels outside the FoV). As the following example illustrates, one simply provides the scores and specifies the image (whether it is from the 'test' or 'train' subset and the image identifier) and the consistency results with the two assumptions are returned.
 
 .. code-block:: Python
 
@@ -573,7 +582,7 @@ The first function enables the testing of performance scores reported for certai
                     identifier='01')
     # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
 
-The interpretation of these results is that the reported scores are inconsistent with any of the reasonable evaluation methodolgoies.
+The interpretation of these results is that the reported scores are inconsistent with any of the reasonable evaluation methodologies.
 
 A similar functionality is provided for the aggregated scores calculated on the DRIVE images, in this case the two assumptions of using the pixels outside the FoV is extended with two assumptions on the way of aggregation.
 
@@ -609,7 +618,7 @@ For illustration, given a set of scores reported in a real paper, the test below
 Contribution
 ============
 
-We kindly encourage any experts to provide further, field specific dataset and experiment specifications and test bundles to facilitate the reporting of clean and reproducible results in anything related to binary classification!
+We kindly encourage any experts to provide further, field specific dataset and experiment specifications and test bundles to facilitate the reporting of clean and reproducible results in any field related to binary classification!
 
 References
 **********
