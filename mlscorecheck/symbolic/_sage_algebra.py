@@ -1,5 +1,8 @@
 """
 This module implements the sage algebra wrapper
+
+Sage works only on Linux and MacOS, also requires some preparation there,
+so the sage-related codes are excluded from the coverage report.
 """
 
 __all__ = ['SageAlgebra']
