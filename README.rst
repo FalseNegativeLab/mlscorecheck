@@ -42,9 +42,7 @@ Testing is as simple as the following example shows: the tested scores are incon
     from mlscorecheck.check import check_1_testset_no_kfold_scores
 
     result = check_1_testset_no_kfold_scores(testset={'p': 100, 'n': 200},
-                                             scores={'acc': 0.9567,
-                                                     'sens': 0.8545,
-                                                     'spec': 0.9734}
+                                             scores={'acc': 0.9567, 'sens': 0.8545, 'spec': 0.9734},
                                              eps=1e-4)
     result['inconsistency']
     # True
