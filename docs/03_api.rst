@@ -32,8 +32,8 @@ Retinal Vessel Segmentation
 .. autofunction:: mlscorecheck.bundles.drive_image_all_pixels
 
 
-EHG
----
+Preterm delivery prediction by EHG signals
+------------------------------------------
 
 The test bundle dedicated to the testing of electrohsyterogram data.
 
@@ -82,7 +82,6 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.jaccard_index
 .. autofunction:: mlscorecheck.scores.balanced_accuracy
 .. autofunction:: mlscorecheck.scores.cohens_kappa
-.. autofunction:: mlscorecheck.scores.p4
 
 .. autofunction:: mlscorecheck.scores.accuracy_standardized
 .. autofunction:: mlscorecheck.scores.error_rate_standardized
@@ -111,7 +110,6 @@ Score functions (``scores``)
 .. autofunction:: mlscorecheck.scores.jaccard_index_standardized
 .. autofunction:: mlscorecheck.scores.balanced_accuracy_standardized
 .. autofunction:: mlscorecheck.scores.cohens_kappa_standardized
-.. autofunction:: mlscorecheck.scores.p4_standardized
 
 
 Testing logic for individual scores (``individual``)

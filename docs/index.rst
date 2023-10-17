@@ -27,18 +27,14 @@ Welcome to mlscorecheck's documentation!
     02a_bundle_intro
     02b_retina
     02c_ehg
+    02d_contribution
+    05_references
 
 .. toctree::
     :maxdepth: 2
     :caption: API
 
     03_api
-
-.. toctree::
-    :maxdepth: 1
-    :caption: References
-
-    05_references
 
 Indices and tables
 ==================

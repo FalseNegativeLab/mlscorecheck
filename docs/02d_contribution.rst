@@ -1,4 +1,4 @@
-Add a test bundles suitable for your field!
--------------------------------------------
+Add a test bundle suitable for your field!
+------------------------------------------
 
-Experts and scientists are invited to prepare test bundles (specify the usual experimental setup and its alternatives) to aid the fast consistency testing of performance scores in their field of expertise.
+We kindly encourage any experts to provide further, field specific dataset and experiment specifications and test bundles to facilitate the reporting of clean and reproducible results in any field related to binary classification!

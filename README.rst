@@ -218,8 +218,8 @@ A dataset and a folding constitute an *evaluation*, and many of the test functio
                     "folding": {"n_folds": 5, "n_repeats": 1,
                                 "strategy": "stratified_sklearn"}}
 
-Checking the consistency of performance scores
-----------------------------------------------
+Testing the consistency of performance scores
+---------------------------------------------
 
 Numerous experimental setups are supported by the package. In this section we go through them one by one giving some examples of possible use cases.
 
