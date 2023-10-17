@@ -5,3 +5,5 @@
 .coverage
 *.pickle
 docs/_build/*
+dist/*
+build/*
