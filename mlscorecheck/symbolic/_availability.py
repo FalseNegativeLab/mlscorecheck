@@ -26,10 +26,9 @@ def check_importability(package: str):
         _ = importlib.import_module(package)
         return package
     except ModuleNotFoundError:
-        logger.info('module not available %s', package)
         return None
 
-symbolic_toolkits.append(check_importability('sympy'))
+symbolic_toolkits.append(check_importability('simpy'))
 symbolic_toolkits.append(check_importability('sage'))
 
 symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
