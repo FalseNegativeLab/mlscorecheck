@@ -109,7 +109,7 @@ The majority of performance scores are calculated from the binary confusion matr
 
 For further information, see
 
-* ReadTheDocs full documentation:
+* ReadTheDocs full documentation: https://mlscorecheck.readthedocs.io/en/latest/
 * The preprint:
 
 Use cases
