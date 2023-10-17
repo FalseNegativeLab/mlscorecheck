@@ -25,7 +25,7 @@
 .. _License: https://img.shields.io/badge/license-MIT-brightgreen
 
 .. |Gitter| image:: https://badges.gitter.im/mlscorecheck.svg
-.. _Gitter: https://gitter.im/mlscorecheck?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. _Gitter: https://app.gitter.im/#/room/!AmkvUevcfkobbwcNWS:gitter.im
 
 mlscorecheck: testing the consistency of binary classification performance scores
 *********************************************************************************
