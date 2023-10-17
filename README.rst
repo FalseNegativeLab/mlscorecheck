@@ -40,7 +40,7 @@ The consistency tests are numerical and **not** statistical: if inconsistencies 
 Latest news
 ===========
 
-* the 0.1.0 version of the package is released
+* the 0.1.1 version of the package is released
 * the paper describing the numerical techniques is available as a preprint at:
 
 Citation
