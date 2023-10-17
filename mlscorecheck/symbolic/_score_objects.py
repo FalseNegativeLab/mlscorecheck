@@ -12,7 +12,7 @@ from ..scores import score_specifications
 from ..scores import score_functions_standardized_with_complements
 from ..scores import score_functions_without_complements
 
-from ._algebra import Symbols
+from ._symbols import Symbols
 
 __all__ = ['Score',
             'PositiveLikelihoodRatio',
