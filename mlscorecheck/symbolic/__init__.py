@@ -7,11 +7,8 @@ cannot be used.
 
 from ._algebra import *
 from ._sympy_algebra import *
+from ._sage_algebra import *
 from ._symbols import *
 from ._score_objects import *
 from ._solver import *
 from ._availability import *
-
-if 'sage' in symbolic_toolkits:
-    from ._sage_algebra import *
-

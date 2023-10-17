@@ -4,11 +4,9 @@ This module implements the wrapper for the symbols
 
 __all__ = ['Symbols']
 
-from ._availability import symbolic_toolkits
 from ._sympy_algebra import SympyAlgebra
 
-if 'sage' in symbolic_toolkits:
-    from ._sage_algebra import SageAlgebra
+from ._sage_algebra import SageAlgebra
 
 
 class Symbols:  # pylint: disable=too-many-instance-attributes
