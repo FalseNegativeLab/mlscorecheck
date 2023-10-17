@@ -4,13 +4,15 @@ This module implements a function to check if a symbolic toolkit is available
 
 import importlib
 
+from ..core import logger
+
 __all__ = ['symbolic_toolkits',
             'get_symbolic_toolkit',
             'check_importability']
 
 symbolic_toolkits = []
 
-def check_importability(package: str) -> bool:
+def check_importability(package: str):
     """
     Tests the importability of a package
 
@@ -24,6 +26,7 @@ def check_importability(package: str) -> bool:
         _ = importlib.import_module(package)
         return package
     except ModuleNotFoundError:
+        logger.info('module not available %s', package)
         return None
 
 symbolic_toolkits.append(check_importability('sympy'))
