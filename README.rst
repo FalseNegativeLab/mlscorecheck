@@ -15,7 +15,7 @@
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/mlscorecheck/badge/?version=latest
 .. _ReadTheDocs: https://mlscorecheck.readthedocs.io/en/latest/?badge=latest
 
-.. |PythonVersion| image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-brightgreen
+.. |PythonVersion| image:: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-brightgreen
 .. _PythonVersion: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-brightgreen
 
 .. |PyPi| image:: https://badge.fury.io/py/mlscorecheck.svg
