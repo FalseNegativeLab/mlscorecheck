@@ -6,7 +6,7 @@
 .. |GitHub| image:: https://github.com/gykovacs/mlscorecheck/workflows/Python%20package/badge.svg?branch=main
 .. _GitHub: https://github.com/gykovacs/mlscorecheck/workflows/Python%20package/badge.svg?branch=main
 
-.. |Codecov| image:: https://codecov.io/gh/FalseNegativeLab/mlscorecheck/branch/master/graph/badge.svg?token=GQNNasvi4z
+.. |Codecov| image:: https://codecov.io/gh/FalseNegativeLab/mlscorecheck/graph/badge.svg?token=27TEFPV0P7
 .. _Codecov: https://codecov.io/gh/FalseNegativeLab/mlscorecheck
 
 .. |pylint| image:: https://img.shields.io/badge/pylint-10.0-brightgreen
