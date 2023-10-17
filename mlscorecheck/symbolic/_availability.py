@@ -4,8 +4,6 @@ This module implements a function to check if a symbolic toolkit is available
 
 import importlib
 
-from ..core import logger
-
 __all__ = ['symbolic_toolkits',
             'get_symbolic_toolkit',
             'check_importability']
