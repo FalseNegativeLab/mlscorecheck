@@ -5,10 +5,11 @@ This module implements a function to check if a symbolic toolkit is available
 import importlib
 
 __all__ = ['symbolic_toolkits',
-            'get_symbolic_toolkit',
-            'check_importability']
+           'get_symbolic_toolkit',
+           'check_importability']
 
 symbolic_toolkits = []
+
 
 def check_importability(package: str):
     """
@@ -26,10 +27,12 @@ def check_importability(package: str):
     except ModuleNotFoundError:
         return None
 
-symbolic_toolkits.append(check_importability('simpy'))
+
+symbolic_toolkits.append(check_importability('sympy'))
 symbolic_toolkits.append(check_importability('sage'))
 
 symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
+
 
 def get_symbolic_toolkit() -> str:
     """
