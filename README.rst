@@ -599,8 +599,8 @@ A similar functionality is provided for the aggregated scores calculated on the 
 
 The results here show that the reported scores could not be the result of any aggregation of any evaluation methodologies.
 
-EHG
----
+Preterm delivery prediction from electrohysterogram (EHG) signals
+-----------------------------------------------------------------
 
 Electrohysterogram classification for the prediction of preterm delivery in pregnancy became a popular area for the applications of minority oversampling, however, it turned out that there were overly optimistic classification results reported due to systematic data leakage in the data preparation process [EHG]_. In [EHG]_, the implementations were replicated and it was shown that there is a decent gap in terms of performance when the data is prepared properly. However, data leakage changes the statistics of the dataset being cross-validated. Hence, the problematic scores could be identified with the tests implemented in the ``mlscorecheck`` package. In order to facilitate the use of the tools for this purpose, some functionalities have been prepared with the dataset already pre-populated.
 
