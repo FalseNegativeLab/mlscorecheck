@@ -1,0 +1,181 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from mlscorecheck.aggregated import (fold_partitioning_generator,\n",
+    "                                        generate_evaluations_with_all_kfolds,\n",
+    "                                        _check_specification_and_determine_p_n,\n",
+    "                                        random_identifier)\n",
+    "from mlscorecheck.core import logger\n",
+    "import copy"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def kfolds_generator_1(evaluation: dict,\n",
+    "                        available_scores: list):\n",
+    "    p, n = _check_specification_and_determine_p_n(evaluation.get('dataset'),\n",
+    "                                                    evaluation.get('folding'))\n",
+    "\n",
+    "    p_zero = False\n",
+    "    n_zero = False\n",
+    "\n",
+    "    if 'sens' not in available_scores and 'bacc' not in available_scores:\n",
+    "        p_zero = True\n",
+    "        logger.info('sens and bacc not among the reported scores, p=0 folds are also considered')\n",
+    "    if 'spec' not in available_scores and 'bacc' not in available_scores:\n",
+    "        n_zero = True\n",
+    "        logger.info('spec and bacc not among the reported scores, n=0 folds are also considered')\n",
+    "\n",
+    "    if evaluation['dataset'].get('dataset_name') is not None:\n",
+    "        evaluation['dataset']['identifier'] = \\\n",
+    "            f'{evaluation[\"dataset\"][\"dataset_name\"]}_{random_identifier(3)}'\n",
+    "    else:\n",
+    "        evaluation['dataset']['identifier'] = random_identifier(6)\n",
+    "\n",
+    "    for jdx, (ps, ns) in enumerate(fold_partitioning_generator(p=p,\n",
+    "                                                n=n,\n",
+    "                                                k=evaluation['folding'].get('n_folds', 1),\n",
+    "                                                p_non_zero=not p_zero,\n",
+    "                                                n_non_zero=not n_zero)):\n",
+    "        yield {'dataset': copy.deepcopy(evaluation['dataset']),\n",
+    "                'folding': {\n",
+    "                    'folds': [{'p': p_, \n",
+    "                                'n': n_, \n",
+    "                                'identifier': f\"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}\"}\n",
+    "                                for idx, (p_, n_) in enumerate(zip(ps, ns))]},\n",
+    "                'fold_score_bounds': copy.deepcopy(evaluation.get('fold_score_bounds')),\n",
+    "                'aggregation': evaluation.get('aggregation')}\n",
+    "\n",
+    "import itertools\n",
+    "\n",
+    "def kfolds_generator_repeated(evaluation: dict,\n",
+    "                                available_scores: list):\n",
+    "    n_repeats = evaluation['folding'].get('n_repeats', 1)\n",
+    "    \n",
+    "    generators = [kfolds_generator_1(evaluation, available_scores) for _ in range(n_repeats)]\n",
+    "    \n",
+    "    print(generators)\n",
+    "    \n",
+    "    yield itertools.product(*generators)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "2023-10-16 09:51:05,702:INFO:sens and bacc not among the reported scores, p=0 folds are also considered\n",
+      "2023-10-16 09:51:05,704:INFO:spec and bacc not among the reported scores, n=0 folds are also considered\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[{'dataset': {'p': 10, 'n': 20, 'identifier': 'mfampy'},\n",
+       "  'folding': {'folds': [{'p': 1, 'n': 14, 'identifier': 'mfampy_f0_k0'},\n",
+       "    {'p': 9, 'n': 6, 'identifier': 'mfampy_f1_k0'}]}},\n",
+       " {'dataset': {'p': 10, 'n': 20, 'identifier': 'mfampy'},\n",
+       "  'folding': {'folds': [{'p': 2, 'n': 13, 'identifier': 'mfampy_f0_k1'},\n",
+       "    {'p': 8, 'n': 7, 'identifier': 'mfampy_f1_k1'}]}},\n",
+       " {'dataset': {'p': 10, 'n': 20, 'identifier': 'mfampy'},\n",
+       "  'folding': {'folds': [{'p': 3, 'n': 12, 'identifier': 'mfampy_f0_k2'},\n",
+       "    {'p': 7, 'n': 8, 'identifier': 'mfampy_f1_k2'}]}},\n",
+       " {'dataset': {'p': 10, 'n': 20, 'identifier': 'mfampy'},\n",
+       "  'folding': {'folds': [{'p': 4, 'n': 11, 'identifier': 'mfampy_f0_k3'},\n",
+       "    {'p': 6, 'n': 9, 'identifier': 'mfampy_f1_k3'}]}},\n",
+       " {'dataset': {'p': 10, 'n': 20, 'identifier': 'mfampy'},\n",
+       "  'folding': {'folds': [{'p': 5, 'n': 10, 'identifier': 'mfampy_f0_k4'},\n",
+       "    {'p': 5, 'n': 10, 'identifier': 'mfampy_f1_k4'}]}}]"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "list(kfolds_generator_1(evaluation={'dataset': {'p': 10, 'n': 20}, 'folding': {'n_folds': 2}},\n",
+    "                    available_scores=['acc']))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "2023-10-16 09:55:04,434:INFO:sens and bacc not among the reported scores, p=0 folds are also considered\n",
+      "2023-10-16 09:55:04,436:INFO:spec and bacc not among the reported scores, n=0 folds are also considered\n",
+      "2023-10-16 09:55:04,437:INFO:sens and bacc not among the reported scores, p=0 folds are also considered\n",
+      "2023-10-16 09:55:04,438:INFO:spec and bacc not among the reported scores, n=0 folds are also considered\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[<generator object kfolds_generator_1 at 0x7fb771260a50>, <generator object kfolds_generator_1 at 0x7fb771260ac0>]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[<itertools.product at 0x7fb77141f6c0>]"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "list(kfolds_generator_repeated(evaluation={'dataset': {'p': 10, 'n': 20}, 'folding': {'n_folds': 2, 'n_repeats': 2}},\n",
+    "                    available_scores=['acc']))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "mlscorecheck",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

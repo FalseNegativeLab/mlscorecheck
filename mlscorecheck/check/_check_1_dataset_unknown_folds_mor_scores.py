@@ -112,6 +112,7 @@ def check_1_dataset_unknown_folds_mor_scores(
 
     results = {'details': []}
 
+    idx = 0
     for evaluation_0 in repeated_kfolds_generator(evaluation,
                                                     list(scores.keys())):
         tmp = {'folds': evaluation_0['folding']['folds'],
@@ -124,10 +125,12 @@ def check_1_dataset_unknown_folds_mor_scores(
                                     solver_name=solver_name,
                                     timeout=timeout,
                                     verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)}
+                                    numerical_tolerance=numerical_tolerance),
+                'configuration_id': idx}
         results['details'].append(tmp)
         if not tmp['details']['inconsistency']:
             break
+        idx += 1
 
     results['inconsistency'] = all(tmp['details']['inconsistency'] for tmp in results['details'])
 

@@ -394,17 +394,23 @@ def repeated_kfolds_generator(evaluation: dict,
         dict: one evaluation
     """
     n_repeats = evaluation['folding'].get('n_repeats', 1)
-
     generators = [kfolds_generator(evaluation, available_scores, idx) for idx in range(n_repeats)]
 
-    print(generators)
+    if n_repeats > 1:
 
-    for folds in itertools.product(*generators):
-        yield {'dataset': copy.deepcopy(evaluation['dataset']),
-                'folding': {
-                    'folds': [fold for fold_list in folds for fold in fold_list]},
-                'fold_score_bounds': copy.deepcopy(evaluation.get('fold_score_bounds')),
-                'aggregation': evaluation.get('aggregation')}
+        for folds in itertools.product(*generators):
+            yield {'dataset': copy.deepcopy(evaluation['dataset']),
+                    'folding': {
+                        'folds': [fold for fold_list in folds for fold in fold_list]},
+                    'fold_score_bounds': copy.deepcopy(evaluation.get('fold_score_bounds')),
+                    'aggregation': evaluation.get('aggregation')}
+    else:
+        for fold_list in generators[0]:
+            yield {'dataset': copy.deepcopy(evaluation['dataset']),
+                    'folding': {
+                        'folds': fold_list},
+                    'fold_score_bounds': copy.deepcopy(evaluation.get('fold_score_bounds')),
+                    'aggregation': evaluation.get('aggregation')}
 
 def experiment_kfolds_generator(experiment: dict,
                                 available_scores: list):

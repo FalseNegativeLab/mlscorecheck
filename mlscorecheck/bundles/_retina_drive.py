@@ -34,7 +34,6 @@ def _drive_aggregated_test_scores(data: list,
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty
         aggregation (str): the mode of aggregation ('mor'/'rom')
-
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
