@@ -34,7 +34,7 @@ Latest news
 ===========
 
 * the 0.1.0 version of the package is released
-* the paper describing the implemented techniques is available as a preprint at:
+* the paper describing the implemented techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 
 Installation
 ============
