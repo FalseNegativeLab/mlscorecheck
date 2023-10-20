@@ -53,7 +53,7 @@ Latest news
 ===========
 
 * the 0.1.1 version of the package is released
-* the paper describing the numerical techniques is available as a preprint at:
+* the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 
 Citation
 ========
@@ -122,7 +122,7 @@ The majority of performance scores are calculated from the binary confusion matr
 For further information, see
 
 * ReadTheDocs full documentation: https://mlscorecheck.readthedocs.io/en/latest/
-* The preprint:
+* The preprint: https://arxiv.org/abs/2310.12527
 
 Use cases
 =========
