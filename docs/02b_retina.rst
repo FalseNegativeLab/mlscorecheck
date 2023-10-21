@@ -11,7 +11,7 @@ The first function enables the testing of performance scores reported for specif
 
     >>> drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
                     eps=1e-4,
-                    bundle='test',
+                    image_set='test',
                     identifier='01')
     # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
 
@@ -23,7 +23,7 @@ A similar functionality is provided for the aggregated scores calculated on the 
 
     >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                         eps=1e-4,
-                        bundle='test')
+                        image_set='test')
     # {'mos_fov_inconsistency': True,
     #   'mos_no_fov_inconsistency': True,
     #   'som_fov_inconsistency': True,

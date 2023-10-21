@@ -136,11 +136,11 @@ For example, testing a consistent scenario:
     >>> result['inconsistency']
     # False
 
-If one of the scores is adjusted, for example, negative predictive value is changed to 0.744, the configuration becomes inconsistent:
+If one of the scores is adjusted, for example, negative predictive value is changed to 0.754, the configuration becomes inconsistent:
 
 .. code-block:: Python
 
-    >>> {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
+    >>> {'spec': 0.668, 'npv': 0.754, 'ppv': 0.667,
             'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
     >>> result = check_1_dataset_som_scores(dataset=dataset,
@@ -280,12 +280,13 @@ Given a dataset and knowing that k-fold cross-validation was applied with MoS ag
 
     >>> from mlscorecheck.check import check_1_dataset_unknown_folds_mos_scores
 
-    >>> evaluation = {'dataset': {'p': 126, 'n': 131},
-                    'folding': {'n_folds': 2, 'n_repeats': 1}}
+    >>> dataset = {'p': 126, 'n': 131}
+    >>> folding = {'n_folds': 2, 'n_repeats': 1}
 
     >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
 
-    >>> result = check_1_dataset_unknown_folds_mos_scores(evaluation=evaluation,
+    >>> result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
+                                                        folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
     >>> result['inconsistency']

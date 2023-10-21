@@ -342,7 +342,7 @@ with a true positive and true negative configuration with the specified lower an
 
 Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four linear scores.
 
-1 dataset with kfold ratio-of-means (SoM)
+1 dataset with kfold score-of-means (SoM)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When the scores are calculated in the Score-of-Means (SoM) manner in a k-fold scenario, it means that the total confusion matrix of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold scheme multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
@@ -366,11 +366,11 @@ For example, testing a consistent scenario:
     result['inconsistency']
     # False
 
-If one of the scores is adjusted, for example, negative predictive value is changed to 0.744, the configuration becomes inconsistent:
+If one of the scores is adjusted, for example, negative predictive value is changed to 0.754, the configuration becomes inconsistent:
 
 .. code-block:: Python
 
-    scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
+    scores = {'spec': 0.668, 'npv': 0.754, 'ppv': 0.667,
             'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
     result = check_1_dataset_som_scores(dataset=dataset,
@@ -510,12 +510,13 @@ Given a dataset and knowing that k-fold cross-validation was applied with MoS ag
 
     from mlscorecheck.check import check_1_dataset_unknown_folds_mos_scores
 
-    evaluation = {'dataset': {'p': 126, 'n': 131},
-                    'folding': {'n_folds': 2, 'n_repeats': 1}}
+    dataset = {'p': 126, 'n': 131}
+    folding = {'n_folds': 2, 'n_repeats': 1}
 
     scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
 
-    result = check_1_dataset_unknown_folds_mos_scores(evaluation=evaluation,
+    result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
+                                                        folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
     result['inconsistency']
@@ -589,7 +590,7 @@ The first function enables the testing of performance scores reported for specif
 
     drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
                 eps=1e-4,
-                bundle='test',
+                image_set='test',
                 identifier='01')
     # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
 
@@ -601,7 +602,7 @@ A similar functionality is provided for the aggregated scores calculated on the 
 
     drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
                     eps=1e-4,
-                    bundle='test')
+                    image_set='test')
     # {'mos_fov_inconsistency': True,
     #   'mos_no_fov_inconsistency': True,
     #   'som_fov_inconsistency': True,
