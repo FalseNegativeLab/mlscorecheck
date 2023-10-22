@@ -1,0 +1,230 @@
+{
+  "images": [
+    {
+      "identifier": "13_h",
+      "p": 712528,
+      "n": 7472816
+    },
+    {
+      "identifier": "01_g",
+      "p": 547632,
+      "n": 7637712
+    },
+    {
+      "identifier": "02_g",
+      "p": 609722,
+      "n": 7575622
+    },
+    {
+      "identifier": "04_h",
+      "p": 771601,
+      "n": 7413743
+    },
+    {
+      "identifier": "03_g",
+      "p": 472735,
+      "n": 7712609
+    },
+    {
+      "identifier": "08_h",
+      "p": 821627,
+      "n": 7363717
+    },
+    {
+      "identifier": "06_g",
+      "p": 559765,
+      "n": 7625579
+    },
+    {
+      "identifier": "15_g",
+      "p": 599188,
+      "n": 7586156
+    },
+    {
+      "identifier": "14_h",
+      "p": 714054,
+      "n": 7471290
+    },
+    {
+      "identifier": "08_g",
+      "p": 555558,
+      "n": 7629786
+    },
+    {
+      "identifier": "12_g",
+      "p": 676424,
+      "n": 7508920
+    },
+    {
+      "identifier": "05_g",
+      "p": 535051,
+      "n": 7650293
+    },
+    {
+      "identifier": "15_h",
+      "p": 641245,
+      "n": 7544099
+    },
+    {
+      "identifier": "09_g",
+      "p": 541943,
+      "n": 7643401
+    },
+    {
+      "identifier": "02_h",
+      "p": 808438,
+      "n": 7376906
+    },
+    {
+      "identifier": "01_h",
+      "p": 833888,
+      "n": 7351456
+    },
+    {
+      "identifier": "13_g",
+      "p": 556981,
+      "n": 7628363
+    },
+    {
+      "identifier": "11_h",
+      "p": 765355,
+      "n": 7419989
+    },
+    {
+      "identifier": "14_g",
+      "p": 578169,
+      "n": 7607175
+    },
+    {
+      "identifier": "09_h",
+      "p": 636468,
+      "n": 7548876
+    },
+    {
+      "identifier": "07_g",
+      "p": 532784,
+      "n": 7652560
+    },
+    {
+      "identifier": "07_h",
+      "p": 729013,
+      "n": 7456331
+    },
+    {
+      "identifier": "04_g",
+      "p": 526916,
+      "n": 7658428
+    },
+    {
+      "identifier": "12_h",
+      "p": 859295,
+      "n": 7326049
+    },
+    {
+      "identifier": "03_h",
+      "p": 864171,
+      "n": 7321173
+    },
+    {
+      "identifier": "05_h",
+      "p": 738786,
+      "n": 7446558
+    },
+    {
+      "identifier": "06_h",
+      "p": 829870,
+      "n": 7355474
+    },
+    {
+      "identifier": "10_g",
+      "p": 536598,
+      "n": 7648746
+    },
+    {
+      "identifier": "11_g",
+      "p": 625693,
+      "n": 7559651
+    },
+    {
+      "identifier": "10_h",
+      "p": 705438,
+      "n": 7479906
+    },
+    {
+      "identifier": "09_dr",
+      "p": 554447,
+      "n": 7630897
+    },
+    {
+      "identifier": "08_dr",
+      "p": 615777,
+      "n": 7569567
+    },
+    {
+      "identifier": "01_dr",
+      "p": 416282,
+      "n": 7769062
+    },
+    {
+      "identifier": "03_dr",
+      "p": 494400,
+      "n": 7690944
+    },
+    {
+      "identifier": "12_dr",
+      "p": 556724,
+      "n": 7628620
+    },
+    {
+      "identifier": "15_dr",
+      "p": 535043,
+      "n": 7650301
+    },
+    {
+      "identifier": "10_dr",
+      "p": 714889,
+      "n": 7470455
+    },
+    {
+      "identifier": "07_dr",
+      "p": 636359,
+      "n": 7548985
+    },
+    {
+      "identifier": "05_dr",
+      "p": 508978,
+      "n": 7676366
+    },
+    {
+      "identifier": "02_dr",
+      "p": 521878,
+      "n": 7663466
+    },
+    {
+      "identifier": "13_dr",
+      "p": 559479,
+      "n": 7625865
+    },
+    {
+      "identifier": "06_dr",
+      "p": 617966,
+      "n": 7567378
+    },
+    {
+      "identifier": "14_dr",
+      "p": 624936,
+      "n": 7560408
+    },
+    {
+      "identifier": "11_dr",
+      "p": 692937,
+      "n": 7492407
+    },
+    {
+      "identifier": "04_dr",
+      "p": 462179,
+      "n": 7723165
+    }
+  ],
+  "citation": "@article{hrf,\n  doi = {10.1155/2013/154860},\n  url = {https://doi.org/10.1155/2013/154860},\n  year = {2013},\n  publisher = {Hindawi Limited},\n  volume = {2013},\n  pages = {1--11},\n  author = {A. Budai and R. Bock and A. Maier and J. Hornegger and G. Michelson},\n  title = {Robust Vessel Segmentation in Fundus Images},\n  journal = {International Journal of Biomedical Imaging}\n}"
+}

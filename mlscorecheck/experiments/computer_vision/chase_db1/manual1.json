@@ -1,0 +1,145 @@
+{
+  "images": [
+    {
+      "identifier": "11R",
+      "p": 51133,
+      "n": 907907
+    },
+    {
+      "identifier": "07L",
+      "p": 74699,
+      "n": 884341
+    },
+    {
+      "identifier": "14R",
+      "p": 56109,
+      "n": 902931
+    },
+    {
+      "identifier": "09R",
+      "p": 48819,
+      "n": 910221
+    },
+    {
+      "identifier": "01L",
+      "p": 66885,
+      "n": 892155
+    },
+    {
+      "identifier": "02L",
+      "p": 77820,
+      "n": 881220
+    },
+    {
+      "identifier": "04L",
+      "p": 75168,
+      "n": 883872
+    },
+    {
+      "identifier": "12R",
+      "p": 70491,
+      "n": 888549
+    },
+    {
+      "identifier": "06R",
+      "p": 71768,
+      "n": 887272
+    },
+    {
+      "identifier": "02R",
+      "p": 74890,
+      "n": 884150
+    },
+    {
+      "identifier": "01R",
+      "p": 72838,
+      "n": 886202
+    },
+    {
+      "identifier": "03L",
+      "p": 75196,
+      "n": 883844
+    },
+    {
+      "identifier": "08R",
+      "p": 60935,
+      "n": 898105
+    },
+    {
+      "identifier": "05R",
+      "p": 81663,
+      "n": 877377
+    },
+    {
+      "identifier": "06L",
+      "p": 72636,
+      "n": 886404
+    },
+    {
+      "identifier": "04R",
+      "p": 73824,
+      "n": 885216
+    },
+    {
+      "identifier": "10L",
+      "p": 60076,
+      "n": 898964
+    },
+    {
+      "identifier": "03R",
+      "p": 72421,
+      "n": 886619
+    },
+    {
+      "identifier": "10R",
+      "p": 59371,
+      "n": 899669
+    },
+    {
+      "identifier": "13R",
+      "p": 60625,
+      "n": 898415
+    },
+    {
+      "identifier": "12L",
+      "p": 69032,
+      "n": 890008
+    },
+    {
+      "identifier": "07R",
+      "p": 72968,
+      "n": 886072
+    },
+    {
+      "identifier": "13L",
+      "p": 58984,
+      "n": 900056
+    },
+    {
+      "identifier": "05L",
+      "p": 75941,
+      "n": 883099
+    },
+    {
+      "identifier": "09L",
+      "p": 48524,
+      "n": 910516
+    },
+    {
+      "identifier": "14L",
+      "p": 66013,
+      "n": 893027
+    },
+    {
+      "identifier": "08L",
+      "p": 62026,
+      "n": 897014
+    },
+    {
+      "identifier": "11L",
+      "p": 51119,
+      "n": 907921
+    }
+  ],
+  "citation": "@ARTICLE{chase_db1,\n  author={Fraz, Muhammad Moazam and Remagnino, Paolo and Hoppe, Andreas and Uyyanonvara, Bunyarit and Rudnicka, Alicja R. and Owen, Christopher G. and Barman, Sarah A.},\n  journal={IEEE Transactions on Biomedical Engineering}, \n  title={An Ensemble Classification-Based Approach Applied to Retinal Blood Vessel Segmentation}, \n  year={2012},\n  volume={59},\n  number={9},\n  pages={2538-2548},\n  doi={10.1109/TBME.2012.2205687}}"
+}

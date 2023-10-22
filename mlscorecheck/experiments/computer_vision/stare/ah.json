@@ -1,0 +1,105 @@
+{
+  "images": [
+    {
+      "p": 37701,
+      "n": 385799,
+      "identifier": "im0235"
+    },
+    {
+      "p": 33310,
+      "n": 390190,
+      "identifier": "im0082"
+    },
+    {
+      "p": 31615,
+      "n": 391885,
+      "identifier": "im0081"
+    },
+    {
+      "p": 38257,
+      "n": 385243,
+      "identifier": "im0005"
+    },
+    {
+      "p": 43243,
+      "n": 380257,
+      "identifier": "im0240"
+    },
+    {
+      "p": 18245,
+      "n": 405255,
+      "identifier": "im0319"
+    },
+    {
+      "p": 29496,
+      "n": 394004,
+      "identifier": "im0044"
+    },
+    {
+      "p": 28261,
+      "n": 395239,
+      "identifier": "im0324"
+    },
+    {
+      "p": 37903,
+      "n": 385597,
+      "identifier": "im0255"
+    },
+    {
+      "p": 28205,
+      "n": 395295,
+      "identifier": "im0002"
+    },
+    {
+      "p": 38360,
+      "n": 385140,
+      "identifier": "im0236"
+    },
+    {
+      "p": 31395,
+      "n": 392105,
+      "identifier": "im0004"
+    },
+    {
+      "p": 32751,
+      "n": 390749,
+      "identifier": "im0163"
+    },
+    {
+      "p": 34057,
+      "n": 389443,
+      "identifier": "im0139"
+    },
+    {
+      "p": 21418,
+      "n": 402082,
+      "identifier": "im0291"
+    },
+    {
+      "p": 25345,
+      "n": 398155,
+      "identifier": "im0003"
+    },
+    {
+      "p": 33799,
+      "n": 389701,
+      "identifier": "im0001"
+    },
+    {
+      "p": 30180,
+      "n": 393320,
+      "identifier": "im0162"
+    },
+    {
+      "p": 36571,
+      "n": 386929,
+      "identifier": "im0239"
+    },
+    {
+      "p": 33941,
+      "n": 389559,
+      "identifier": "im0077"
+    }
+  ],
+  "citation": "@article{stare,\n  doi = {10.1109/42.845178},\n  url = {https://doi.org/10.1109/42.845178},\n  year = {2000},\n  month = mar,\n  publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},\n  volume = {19},\n  number = {3},\n  pages = {203--210},\n  author = {A.D. Hoover and V. Kouznetsova and M. Goldbaum},\n  title = {Locating blood vessels in retinal images by piecewise threshold probing of a matched filter response},\n  journal = {{IEEE} Transactions on Medical Imaging}\n}"
+}
