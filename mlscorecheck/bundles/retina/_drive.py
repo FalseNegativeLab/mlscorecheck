@@ -3,9 +3,9 @@ This module implements the test suit for the retina vessel
 segmentation drive dataset
 """
 
-from ..core import NUMERICAL_TOLERANCE, logger
-from ..experiments import load_drive
-from ..check import (check_1_testset_no_kfold_scores,
+from ...core import NUMERICAL_TOLERANCE, logger
+from ...experiments import load_drive
+from ...check import (check_1_testset_no_kfold_scores,
                         check_n_datasets_mos_kfold_som_scores,
                         check_n_datasets_som_kfold_som_scores)
 

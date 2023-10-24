@@ -2,10 +2,9 @@
 This module implements the test bundles related to melanoma classification
 """
 
-from ..check import check_1_testset_no_kfold_scores
-from ..experiments import (load_isic2016,
-                            load_isic2017m,
-                            load_isic2017sk)
+from ...check import check_1_testset_no_kfold_scores
+from ...experiments import (load_isic2016,
+                            load_isic2017)
 
 __all__ = ['check_isic2016',
             'check_isic2017m',
@@ -29,7 +28,7 @@ def check_isic2017m(*, scores, eps):
     """
 
     return check_1_testset_no_kfold_scores(scores=scores,
-                                            testset=load_isic2017m(),
+                                            testset=load_isic2017()['m'],
                                             eps=eps)
 
 def check_isic2017sk(*, scores, eps):
@@ -40,5 +39,5 @@ def check_isic2017sk(*, scores, eps):
     """
 
     return check_1_testset_no_kfold_scores(scores=scores,
-                                            testset=load_isic2017sk(),
+                                            testset=load_isic2017()['sk'],
                                             eps=eps)

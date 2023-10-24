@@ -380,6 +380,69 @@ If one of the scores is adjusted, for example, negative predictive value is chan
     result['inconsistency']
     # True
 
+n testsets without k-folding, SoM over the testsets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario there are n different testsets, the classifier is evaluated on each testsets, and the scores are aggregated by the SoM aggregation. This scenario is similar to the "1 dataset k-fold SoM" case, except the scores are aggregated over testsets rather than folds. The output of the test is structured similarly as in the "1 dataset k-fold SoM" case. In the following example, a consistent case is tested.
+
+.. code-block:: Python
+
+    from mlscorecheck.check import check_n_testsets_som_no_kfold_scores
+
+    testsets = [{'p': 405, 'n': 223}, {'p': 3, 'n': 422}, {'p': 109, 'n': 404}]
+    scores = {'acc': 0.4719, 'npv': 0.6253, 'f1p': 0.3091}
+
+    results = check_n_testsets_som_no_kfold_scores(testsets=testsets,
+                                        scores=scores,
+                                        eps=0.0001)
+    results["inconsistency"]
+    # False
+
+If one of the scores is slightly adjusted, for example, ``npv`` changed to 0.6263, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    scores['npv'] = 0.6263
+
+    results = check_n_testsets_som_no_kfold_scores(testsets=testsets,
+                                        scores=scores,
+                                        eps=0.0001)
+    results["inconsistency"]
+    # True
+
+n testsets without k-folding, MoS over the testsets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This scenario is analogous to the "n testsets without k-folding, SoM" scenario, except the aggregation over the testsets is carried out with the MoS approach. The output is structured similarly to the output of the "1 dataset k-fold MoS" scenario. In the first example, a feasible scenario is tested.
+
+.. code-block:: Python
+
+    from mlscorecheck.check import check_n_testsets_mos_no_kfold_scores
+
+    testsets = [{'p': 349, 'n': 50},
+                {'p': 478, 'n': 323},
+                {'p': 324, 'n': 83},
+                {'p': 123, 'n': 145}]
+
+    scores = {'acc': 0.6441, 'sens': 0.6706, 'spec': 0.3796, 'bacc': 0.5251}
+    results = check_n_testsets_mos_no_kfold_scores(testsets=testsets,
+                                                    scores=scores,
+                                                    eps=0.0001)
+    results["inconsistency"]
+    # False
+
+If one of the scores is slightly adjusted, for example, ``sens`` is updated to 0.6756, the configuration becomes infeasible.
+
+.. code-block:: Python
+
+    scores['sens'] = 0.6756
+
+    results = check_n_testsets_mos_no_kfold_scores(testsets=testsets,
+                                                    scores=scores,
+                                                    eps=0.0001)
+    results["inconsistency"]
+    # True
+
 n datasets with k-folds, SoM over datasets and SoM over folds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

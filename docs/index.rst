@@ -3,6 +3,9 @@
     You can adapt this file completely to your liking, but it should at least
     contain the root `toctree` directive.
 
+.. raw:: html
+    :file: ga4.html
+
 Welcome to mlscorecheck's documentation!
 ==========================================
 

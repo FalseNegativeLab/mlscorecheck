@@ -2,9 +2,9 @@
 Testing the test functionalities for the ISIC melanoma datasets
 """
 
-from mlscorecheck.bundles import (check_isic2016,
-                                    check_isic2017m,
-                                    check_isic2017sk)
+from mlscorecheck.bundles.skinlesion import (check_isic2016,
+                                            check_isic2017m,
+                                            check_isic2017sk)
 
 def test_isic2016():
     """

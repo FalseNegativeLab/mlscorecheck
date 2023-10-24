@@ -4,9 +4,9 @@ Testing the retina drive check bundle
 
 import pytest
 
-from mlscorecheck.bundles import (drive_aggregated,
-                                    drive_image,
-                                    filter_drive)
+from mlscorecheck.bundles.retina import (drive_aggregated,
+                                        drive_image,
+                                        filter_drive)
 
 def test_filter():
     """

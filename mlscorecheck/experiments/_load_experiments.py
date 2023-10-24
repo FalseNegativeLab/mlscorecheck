@@ -4,13 +4,115 @@ This module implements the loading of complete experimental settings
 
 import os
 
-__all__ = ['load_drive',
+__all__ = ['get_experiment',
+            'load_drive',
             'load_ehg',
             'load_isic2016',
-            'load_isic2017m',
-            'load_isic2017sk']
+            'load_isic2017',
+            'load_stare',
+            'load_chase_db1',
+            'load_diaretdb0',
+            'load_diaretdb1',
+            'load_hrf',
+            'load_drishti_gs']
 
 from ..core import load_json
+
+experiments = {}
+
+def get_experiment(name):
+    if name in experiments:
+        return experiments[name]
+
+    if name == 'retina.drive':
+        experiments[name] = load_drive()
+    elif name == 'retina.stare':
+        experiments[name] = load_stare()
+    elif name == 'retina.chase_db1':
+        experiments[name] = load_chase_db1()
+    elif name == 'retina.diaretdb0':
+        experiments[name] = load_diaretdb0()
+    elif name == 'retina.diaretdb1':
+        experiments[name] = load_diaretdb1()
+    elif name == 'retina.hrf':
+        experiments[name] = load_hrf()
+    elif name == 'retina.drishti_gs':
+        experiments[name] = load_drishti_gs()
+    elif name == 'ehg.ehg':
+        experiments[name] = load_ehg()
+    elif name == 'skinlesion.isic2016':
+        experiments[name] = load_isic2016()
+    elif name == 'skinlesion.isic2017':
+        experiments[name] = load_isic2017()
+    else:
+        raise ValueError(f'unknown dataset {name}')
+
+    return experiments[name]
+
+def load_chase_db1() -> dict:
+    """
+    Loading the chase db1 specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'chase_db1')
+    return {'manual1': load_json(prefix, 'manual1.json'),
+            'manual2': load_json(prefix, 'manual2.json')}
+
+def load_diaretdb0() -> dict:
+    """
+    Loading the diaretdb0 specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'diaretdb0')
+    return load_json(prefix, 'diaretdb0.json')
+
+def load_diaretdb1() -> dict:
+    """
+    Loading the diaretdb1 specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'diaretdb1')
+    return {'train': load_json(prefix, 'diaretdb1_train.json'),
+            'test': load_json(prefix, 'diaretdb1_test.json')}
+
+def load_drishti_gs() -> dict:
+    """
+    Loading the drishti_gs specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'drishti_gs')
+    return {'train': load_json(prefix, 'drishti_gs_train.json'),
+            'test': load_json(prefix, 'drishti_gs_test.json')}
+
+def load_hrf() -> dict:
+    """
+    Loading the hrf specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'hrf')
+    return {'fov': load_json(prefix, 'with_fov.json'),
+            'all': load_json(prefix, 'without_fov.json')}
+
+def load_stare() -> dict:
+    """
+    Loading the stare specifications
+
+    Returns:
+        dict: the experiment specifications
+    """
+    prefix = os.path.join('experiments', 'retina', 'stare')
+    return {'ah': load_json(prefix, 'ah.json'),
+            'vk': load_json(prefix, 'vk.json')}
 
 def load_drive() -> dict:
     """
@@ -19,7 +121,7 @@ def load_drive() -> dict:
     Returns:
         dict: the drive experiments
     """
-    prefix = os.path.join('experiments', 'computer_vision', 'drive')
+    prefix = os.path.join('experiments', 'retina', 'drive')
     return {
         'test_fov': load_json(prefix, 'drive_test_fov.json'),
         'test_no_fov': load_json(prefix, 'drive_test_no_fov.json'),
@@ -34,7 +136,7 @@ def load_ehg() -> dict:
     Returns:
         dict: the drive experiments
     """
-    prefix = os.path.join('experiments', 'machine_learning')
+    prefix = os.path.join('experiments', 'ehg')
     return load_json(prefix, 'ehg.json')
 
 def load_isic2016() -> dict:
@@ -44,10 +146,10 @@ def load_isic2016() -> dict:
     Returns:
         dict: the testset
     """
-    prefix = os.path.join('experiments', 'computer_vision')
+    prefix = os.path.join('experiments', 'skinlesion', 'isic2016')
     return load_json(prefix, 'isic2016.json')
 
-def load_isic2017m() -> dict:
+def load_isic2017() -> dict:
     """
     Loading the ISIC 2017 skin lesion testset for the binary
     classification task of recognizing melanoma
@@ -55,16 +157,6 @@ def load_isic2017m() -> dict:
     Returns:
         dict: the testset
     """
-    prefix = os.path.join('experiments', 'computer_vision')
-    return load_json(prefix, 'isic2017m.json')
-
-def load_isic2017sk() -> dict:
-    """
-    Loading the ISIC 2017 skin lesion testset for the binary
-    classification task of recognizing seborrheic keratosis
-
-    Returns:
-        dict: the testset
-    """
-    prefix = os.path.join('experiments', 'computer_vision')
-    return load_json(prefix, 'isic2017sk.json')
+    prefix = os.path.join('experiments', 'skinlesion', 'isic2017')
+    return {'m': load_json(prefix, 'isic2017m.json'),
+            'sk': load_json(prefix, 'isic2017sk.json')}

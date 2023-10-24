@@ -1,3 +1,6 @@
+.. raw:: html
+    :file: ga4.html
+
 The main interface
 ******************
 
@@ -24,12 +27,12 @@ The test bundles dedicated to specific problems in the ``mlscorecheck.bundles`` 
 Retinal Vessel Segmentation
 ---------------------------
 
-.. autofunction:: mlscorecheck.bundles.drive_aggregated
-.. autofunction:: mlscorecheck.bundles.drive_aggregated_fov_pixels
-.. autofunction:: mlscorecheck.bundles.drive_aggregated_all_pixels
-.. autofunction:: mlscorecheck.bundles.drive_image
-.. autofunction:: mlscorecheck.bundles.drive_image_fov_pixels
-.. autofunction:: mlscorecheck.bundles.drive_image_all_pixels
+.. autofunction:: mlscorecheck.bundles.retina.drive_aggregated
+.. autofunction:: mlscorecheck.bundles.retina.drive_aggregated_fov_pixels
+.. autofunction:: mlscorecheck.bundles.retina.drive_aggregated_all_pixels
+.. autofunction:: mlscorecheck.bundles.retina.drive_image
+.. autofunction:: mlscorecheck.bundles.retina.drive_image_fov_pixels
+.. autofunction:: mlscorecheck.bundles.retina.drive_image_all_pixels
 
 
 Preterm delivery prediction by EHG signals
@@ -37,7 +40,7 @@ Preterm delivery prediction by EHG signals
 
 The test bundle dedicated to the testing of electrohsyterogram data.
 
-.. autofunction:: mlscorecheck.bundles.check_ehg
+.. autofunction:: mlscorecheck.bundles.ehg.check_ehg
 
 
 Experiments (``experiments``)

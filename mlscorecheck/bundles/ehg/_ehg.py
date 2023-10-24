@@ -2,9 +2,9 @@
 Test functions for the EHG problem
 """
 
-from ..core import NUMERICAL_TOLERANCE
-from ..experiments import load_ehg
-from ..check import check_1_dataset_unknown_folds_mos_scores
+from ...core import NUMERICAL_TOLERANCE
+from ...experiments import load_ehg
+from ...check import check_1_dataset_unknown_folds_mos_scores
 
 __all__ = ['check_ehg']
 

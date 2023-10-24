@@ -2,7 +2,7 @@
 Testing the EHG testing
 """
 
-from mlscorecheck.bundles import check_ehg
+from mlscorecheck.bundles.ehg import check_ehg
 
 def test_check_ehg():
     """

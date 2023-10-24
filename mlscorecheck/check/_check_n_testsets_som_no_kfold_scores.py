@@ -1,32 +1,29 @@
 """
 This module implements the top level check function for
 scores calculated by the score-of-means aggregation
-in a kfold scenario on multiple datasets.
+over multiple testsets.
 """
-
-import copy
 
 from ..core import NUMERICAL_TOLERANCE
 from ..individual import check_scores_tptn_pairs
-from ..aggregated import Experiment
+from ..aggregated import Experiment, Dataset
 
-__all__ = ['check_n_datasets_som_kfold_som_scores']
+__all__ = ['check_n_testsets_som_no_kfold_scores']
 
-def check_n_datasets_som_kfold_som_scores(evaluations: list,
-                                            scores: dict,
-                                            eps,
-                                            *,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+def check_n_testsets_som_no_kfold_scores(testsets: list,
+                                        scores: dict,
+                                        eps,
+                                        *,
+                                        numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
-    Checking the consistency of scores calculated by applying k-fold
-    cross validation to multiple datasets and aggregating the figures
-    over the folds and datasets in the score of means fashion. If
+    Checking the consistency of scores calculated by aggregating the figures
+    over testsets in the score of means fashion. If
     score bounds are specified and some of the 'acc', 'sens', 'spec' and
     'bacc' scores are supplied, the linear programming based check is
     executed to see if the bound conditions can be satisfied.
 
     Args:
-        evaluations (list(dict)): the specification of the evaluations
+        datasets (list(dict)): the specification of the evaluations
         scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
@@ -52,42 +49,28 @@ def check_n_datasets_som_kfold_som_scores(evaluations: list,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
-                            'folding': {'n_folds': 5, 'n_repeats': 2,
-                                        'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
-                            'folding': {'n_folds': 5, 'n_repeats': 2,
-                                        'strategy': 'stratified_sklearn'}}
-        >>> evaluations = [evaluation0, evaluation1]
-        >>> scores = {'acc': 0.631, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-        >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
-                                                            evaluations=evaluations,
+        >>> testsets = [{'p': 405, 'n': 223}, {'p': 3, 'n': 422}, {'p': 109, 'n': 404}]
+        >>> scores = {'acc': 0.4719, 'npv': 0.6253, 'f1p': 0.3091}
+        >>> result = check_n_datasets_som_no_kfold_scores(testsets=testsets,
+                                                            scores=scores,
                                                             eps=1e-3)
         >>> result['inconsistency']
         # False
 
-        >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
-                            'folding': {'n_folds': 5, 'n_repeats': 2,
-                                        'strategy': 'stratified_sklearn'}}
-        >>> evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
-                            'folding': {'n_folds': 5, 'n_repeats': 2,
-                                        'strategy': 'stratified_sklearn'}}
-        >>> evaluations = [evaluation0, evaluation1]
-        >>> scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-        >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
-                                                            evaluations=evaluations,
+        >>> scores['npv'] = 0.6263
+        >>> result = check_n_datasets_som_no_kfold_scores(testsets=testsets,
+                                                            scores=scores,
                                                             eps=1e-3)
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'som') != 'som' for evaluation in evaluations):
-        raise ValueError('the aggregation specifications cannot be anything else '\
-                            'but "rom"')
 
-    evaluations = copy.deepcopy(evaluations)
+    datasets = [Dataset(**dataset) for dataset in testsets]
 
-    for evaluation in evaluations:
-        evaluation['aggregation'] = 'som'
+    evaluations = [{'dataset': dataset.to_dict(),
+                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n}]},
+                    'aggregation': 'mos'}
+                    for dataset in datasets]
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
