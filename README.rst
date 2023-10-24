@@ -64,7 +64,7 @@ If you use the package, please consider citing the following paper:
 
   @article{mlscorecheck,
     author={Gy\"orgy Kov\'acs and Attila Fazekas},
-    title={Checking the internal consistency of reported performance scores in binary classification},
+    title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
     year={2023}
   }
 
