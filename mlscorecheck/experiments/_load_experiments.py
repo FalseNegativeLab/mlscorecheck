@@ -6,7 +6,7 @@ import os
 
 __all__ = ['get_experiment',
             'load_drive',
-            'load_ehg',
+            'load_tpehg',
             'load_isic2016',
             'load_isic2017',
             'load_stare',
@@ -40,8 +40,8 @@ def get_experiment(name):
         experiments[name] = load_hrf()
     elif name == 'retina.drishti_gs':
         experiments[name] = load_drishti_gs()
-    elif name == 'ehg.ehg':
-        experiments[name] = load_ehg()
+    elif name == 'ehg.tpehg':
+        experiments[name] = load_tpehg()
     elif name == 'skinlesion.isic2016':
         experiments[name] = load_isic2016()
     elif name == 'skinlesion.isic2017':
@@ -140,7 +140,7 @@ def load_drive() -> dict:
     return results
 
 
-def load_ehg() -> dict:
+def load_tpehg() -> dict:
     """
     Loading the drive experiments
 
@@ -148,7 +148,7 @@ def load_ehg() -> dict:
         dict: the drive experiments
     """
     prefix = os.path.join('experiments', 'ehg')
-    return load_json(prefix, 'ehg.json')
+    return load_json(prefix, 'tpehg.json')
 
 
 def load_isic2016() -> dict:
@@ -171,5 +171,4 @@ def load_isic2017() -> dict:
         dict: the testset
     """
     prefix = os.path.join('experiments', 'skinlesion', 'isic2017')
-    return {'m': load_json(prefix, 'isic2017m.json'),
-            'sk': load_json(prefix, 'isic2017sk.json')}
+    return load_json(prefix, 'isic2017.json')

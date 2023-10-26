@@ -37,10 +37,7 @@ def _prepare_testsets_drishti_gs(subset,
         subset = [subset] if isinstance(subset, str) else subset
         entries = {}
         for identifier in subset:
-            if identifier in data['train']:
-                entries[identifier] = data['train'][identifier]
-            elif identifier in data['test']:
-                entries[identifier] = data['test'][identifier]
+            entries[identifier] = data['train'].get(identifier, data['test'].get(identifier))
 
     threshold = 255 * confidence
     testsets = []

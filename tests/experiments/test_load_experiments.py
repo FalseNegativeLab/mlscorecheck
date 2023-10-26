@@ -5,7 +5,7 @@ This module tests the loading of experiments
 import pytest
 
 from mlscorecheck.experiments import (load_drive,
-                                        load_ehg,
+                                        load_tpehg,
                                         load_stare,
                                         load_isic2016,
                                         load_isic2017,
@@ -23,7 +23,7 @@ from mlscorecheck.experiments import (load_drive,
                                     'retina.diaretdb1',
                                     'retina.hrf',
                                     'retina.drishti_gs',
-                                    'ehg.ehg',
+                                    'ehg.tpehg',
                                     'skinlesion.isic2016',
                                     'skinlesion.isic2017'])
 def test_get_experiment(key):
@@ -106,9 +106,9 @@ def test_load_drive():
 
     assert len(load_drive()) == 4
 
-def test_load_ehg():
+def test_load_tpehg():
     """
     Testing the loading of the EHG dataset
     """
 
-    assert 'p' in load_ehg()
+    assert 'p' in load_tpehg()

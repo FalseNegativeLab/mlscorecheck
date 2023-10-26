@@ -3,12 +3,12 @@ Test functions for the EHG problem
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...experiments import load_ehg
+from ...experiments import get_experiment
 from ...check import check_1_dataset_unknown_folds_mos_scores
 
-__all__ = ['check_ehg']
+__all__ = ['check_tpehg']
 
-def check_ehg(scores: dict,
+def check_tpehg(scores: dict,
                 eps,
                 n_folds: int,
                 n_repeats: int,
@@ -38,7 +38,7 @@ def check_ehg(scores: dict,
     Returns:
         dict: the result of the consistency testing
     """
-    evaluation = {'dataset': load_ehg(),
+    evaluation = {'dataset': get_experiment('ehg.tpehg'),
                     'folding': {'n_folds': n_folds, 'n_repeats': n_repeats}}
 
     return check_1_dataset_unknown_folds_mos_scores(scores=scores,
