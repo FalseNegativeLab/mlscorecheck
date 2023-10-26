@@ -2,6 +2,8 @@
 This module tests the loading of experiments
 """
 
+import pytest
+
 from mlscorecheck.experiments import (load_drive,
                                         load_ehg,
                                         load_stare,
@@ -11,7 +13,35 @@ from mlscorecheck.experiments import (load_drive,
                                         load_diaretdb0,
                                         load_diaretdb1,
                                         load_hrf,
-                                        load_drishti_gs)
+                                        load_drishti_gs,
+                                        get_experiment)
+
+@pytest.mark.parametrize('key', ['retina.drive',
+                                    'retina.stare',
+                                    'retina.chase_db1',
+                                    'retina.diaretdb0',
+                                    'retina.diaretdb1',
+                                    'retina.hrf',
+                                    'retina.drishti_gs',
+                                    'ehg.ehg',
+                                    'skinlesion.isic2016',
+                                    'skinlesion.isic2017'])
+def test_get_experiment(key):
+    """
+    Testing the get experiment function
+    """
+
+    # called twice to cover the caching
+    assert len(get_experiment(key)) > 0
+    assert len(get_experiment(key)) > 0
+
+def test_get_experiment_exception():
+    """
+    Testing if get_experiment throws the exception
+    """
+
+    with pytest.raises(ValueError):
+        get_experiment('dummy')
 
 def test_load_drishti_gs():
     """

@@ -3,9 +3,11 @@ This module implements some functionalities to generate random datasets, folding
 evaluations and experiments.
 """
 
-from ..core import (init_random_state, dict_minmax)
+import numpy as np
+
+from ..core import (init_random_state, dict_minmax, dict_mean, round_scores)
 from ..experiments import dataset_statistics
-from ..individual import calculate_scores
+from ..individual import calculate_scores, calculate_scores_for_lp
 
 from ._dataset import Dataset
 from ._folding import Folding
@@ -17,7 +19,8 @@ __all__ = ['generate_dataset',
             'generate_evaluation',
             'generate_experiment',
             'get_fold_score_bounds',
-            'get_dataset_score_bounds']
+            'get_dataset_score_bounds',
+            'generate_scores_for_testsets']
 
 def generate_dataset(max_p: int = 500,
                         max_n: int = 500,
@@ -287,3 +290,45 @@ def get_dataset_score_bounds(experiment: Experiment,
         score_bounds[key] = (value[1], 1.0)
 
     return score_bounds
+
+def generate_scores_for_testsets(testsets,
+                                    rounding_decimals=None,
+                                    subset=None,
+                                    random_state=None,
+                                    aggregation='mos'):
+    """
+    Sample scores for testsets
+
+    Args:
+        testsets (list(dict)): the list of testsets
+        rounding_decimals (None|int): the number of decimals to round to
+        subset (None|list): the subset of scores
+        aggregation (str): the mode of aggregation ('mos'/'som')
+        random_state (None|int|np.random.RandomState): the random state/seed to use
+
+    Returns:
+        dict: the scores
+    """
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    subset = subset if subset is not None else ['acc', 'sens', 'spec']
+
+    testsets = [{'p': testset['p'], 'n': testset['n']} for testset in testsets]
+    for testset in testsets:
+        testset['tp'] = random_state.randint(testset['p'] + 1)
+        testset['tn'] = random_state.randint(testset['n'] + 1)
+
+    if aggregation == 'mos':
+        scores = [calculate_scores_for_lp(testset) for testset in testsets]
+        scores = round_scores(dict_mean(scores), rounding_decimals=rounding_decimals)
+        return {key: value for key, value in scores.items() if key in subset}
+
+    mean_figures = dict_mean(testsets)
+
+    scores = calculate_scores(mean_figures | {'beta_positive': 2, 'beta_negative': 2},
+                                rounding_decimals=rounding_decimals,
+                                subset=subset)
+
+    return {key: value for key, value in scores.items()} |\
+            {'beta_positive': 2, 'beta_negative': 2}

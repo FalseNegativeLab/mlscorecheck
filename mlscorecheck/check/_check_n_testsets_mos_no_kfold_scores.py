@@ -11,7 +11,7 @@ __all__ = ['check_n_testsets_mos_no_kfold_scores']
 def check_n_testsets_mos_no_kfold_scores(testsets: list,
                                         scores: dict,
                                         eps,
-                                        dataset_score_bounds: dict = None,
+                                        testset_score_bounds: dict = None,
                                         *,
                                         solver_name: str = None,
                                         timeout: int = None,
@@ -26,6 +26,8 @@ def check_n_testsets_mos_no_kfold_scores(testsets: list,
         testsets (list(dict)): the list of testset specifications
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        testset_score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the testsets
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
@@ -81,7 +83,7 @@ def check_n_testsets_mos_no_kfold_scores(testsets: list,
                     for dataset in datasets]
 
     experiment = Experiment(evaluations=evaluations,
-                            dataset_score_bounds=dataset_score_bounds,
+                            dataset_score_bounds=testset_score_bounds,
                             aggregation='mos')
 
     return check_aggregated_scores(experiment=experiment.to_dict(),

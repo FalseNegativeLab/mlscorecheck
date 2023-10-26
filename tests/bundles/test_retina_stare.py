@@ -1,13 +1,13 @@
 """
-This file tests the test bundle for the DRIVE dataset
+This file tests the test bundle for the STARE dataset
 """
 
 import pytest
 
 import numpy as np
 
-from mlscorecheck.bundles.retina import (check_drive_vessel_image,
-                                            check_drive_vessel_aggregated)
+from mlscorecheck.bundles.retina import (check_stare_vessel_image,
+                                            check_stare_vessel_aggregated)
 
 from mlscorecheck.experiments import get_experiment
 
@@ -22,27 +22,27 @@ def test_success_mos(random_state):
         random_state (int): the random seed to use
     """
 
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets(data,
+    scores = generate_scores_for_testsets(dataah,
                                             aggregation='mos',
                                             rounding_decimals=4,
                                             random_state=random_state)
-    results = check_drive_vessel_aggregated(imageset='train',
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset='all',
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4,
                                         verbosity=0)
 
-    assert not results['inconsistency']['inconsistency_fov_mos']
+    assert not results['inconsistency']['inconsistency_mos']
 
-    results = check_drive_vessel_aggregated(imageset=[img['identifier'] for img in data],
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset=[img['identifier'] for img in dataah],
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4,
                                         verbosity=0)
 
-    assert not results['inconsistency']['inconsistency_fov_mos']
+    assert not results['inconsistency']['inconsistency_mos']
 
 @pytest.mark.parametrize('random_state', [1, 2, 3, 4, 5])
 def test_failure_mos(random_state):
@@ -53,29 +53,29 @@ def test_failure_mos(random_state):
         random_state (int): the random seed to use
     """
 
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets(data,
+    scores = generate_scores_for_testsets(dataah,
                                             aggregation='mos',
                                             rounding_decimals=4,
                                             random_state=random_state)
     scores['acc'] = (1.0 + scores['spec'])/2.0
 
-    results = check_drive_vessel_aggregated(imageset='train',
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset='all',
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4,
                                         verbosity=0)
 
-    assert results['inconsistency']['inconsistency_fov_mos']
+    assert results['inconsistency']['inconsistency_mos']
 
-    results = check_drive_vessel_aggregated(imageset=[img['identifier'] for img in data],
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset=[img['identifier'] for img in dataah],
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4,
                                         verbosity=0)
 
-    assert results['inconsistency']['inconsistency_fov_mos']
+    assert results['inconsistency']['inconsistency_mos']
 
 @pytest.mark.parametrize('random_state', [1, 2, 3, 4, 5])
 def test_success_som(random_state):
@@ -86,26 +86,26 @@ def test_success_som(random_state):
         random_state (int): the random seed to use
     """
 
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets(data,
+    scores = generate_scores_for_testsets(dataah,
                                             aggregation='som',
                                             rounding_decimals=4,
                                             random_state=random_state)
 
-    results = check_drive_vessel_aggregated(imageset='train',
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset='all',
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4)
 
-    assert not results['inconsistency']['inconsistency_fov_som']
+    assert not results['inconsistency']['inconsistency_som']
 
-    results = check_drive_vessel_aggregated(imageset=[img['identifier'] for img in data],
-                                        annotator=1,
+    results = check_stare_vessel_aggregated(imageset=[img['identifier'] for img in dataah],
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4)
 
-    assert not results['inconsistency']['inconsistency_fov_som']
+    assert not results['inconsistency']['inconsistency_som']
 
 @pytest.mark.parametrize('random_state', [1, 2, 3, 4, 5])
 def test_failure_som(random_state):
@@ -116,27 +116,28 @@ def test_failure_som(random_state):
         random_state (int): the random seed to use
     """
 
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets(data,
+    scores = generate_scores_for_testsets(dataah,
                                             aggregation='som',
                                             rounding_decimals=4,
                                             random_state=random_state)
+
     scores['acc'] = (1.0 + scores['spec'])/2.0
 
-    results = check_drive_vessel_aggregated(imageset='train',
-                                            annotator=1,
+    results = check_stare_vessel_aggregated(imageset='all',
+                                            annotator='ah',
                                             scores=scores,
                                             eps=1e-4)
 
-    assert results['inconsistency']['inconsistency_fov_som']
+    assert results['inconsistency']['inconsistency_som']
 
-    results = check_drive_vessel_aggregated(imageset=[img['identifier'] for img in data],
-                                            annotator=1,
+    results = check_stare_vessel_aggregated(imageset=[img['identifier'] for img in dataah],
+                                            annotator='ah',
                                             scores=scores,
                                             eps=1e-4)
 
-    assert results['inconsistency']['inconsistency_fov_som']
+    assert results['inconsistency']['inconsistency_som']
 
 @pytest.mark.parametrize('random_state', [1, 2, 3, 4, 5])
 def test_success_image(random_state):
@@ -147,19 +148,19 @@ def test_success_image(random_state):
         random_state (int): the random seed to use
     """
 
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets([data[0]],
+    scores = generate_scores_for_testsets([dataah[0]],
                                             aggregation='som',
                                             rounding_decimals=4,
                                             random_state=random_state)
 
-    results = check_drive_vessel_image(image_identifier=data[0]['identifier'],
-                                        annotator=1,
+    results = check_stare_vessel_image(image_identifier=dataah[0]['identifier'],
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4)
 
-    assert not results['inconsistency']['inconsistency_fov']
+    assert not results['inconsistency']
 
 @pytest.mark.parametrize('random_state', [1, 2, 3, 4, 5])
 def test_failure_image(random_state):
@@ -169,18 +170,18 @@ def test_failure_image(random_state):
     Args:
         random_state (int): the random seed to use
     """
-    data = get_experiment('retina.drive')[(1, 'fov')]['train']['images']
+    dataah = get_experiment('retina.stare')['ah']['images']
 
-    scores = generate_scores_for_testsets([data[0]],
+    scores = generate_scores_for_testsets([dataah[0]],
                                             aggregation='som',
                                             rounding_decimals=4,
                                             random_state=random_state)
 
     scores['acc'] = (1.0 + scores['spec'])/2.0
 
-    results = check_drive_vessel_image(image_identifier=data[0]['identifier'],
-                                        annotator=1,
+    results = check_stare_vessel_image(image_identifier=dataah[0]['identifier'],
+                                        annotator='ah',
                                         scores=scores,
                                         eps=1e-4)
 
-    assert results['inconsistency']['inconsistency_fov']
+    assert results['inconsistency']

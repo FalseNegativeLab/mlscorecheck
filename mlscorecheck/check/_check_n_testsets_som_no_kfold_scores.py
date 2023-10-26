@@ -14,7 +14,8 @@ def check_n_testsets_som_no_kfold_scores(testsets: list,
                                         scores: dict,
                                         eps,
                                         *,
-                                        numerical_tolerance: float = NUMERICAL_TOLERANCE):
+                                        numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                                        prefilter_by_pairs=True):
     """
     Checking the consistency of scores calculated by aggregating the figures
     over testsets in the score of means fashion. If
@@ -36,6 +37,8 @@ def check_n_testsets_som_no_kfold_scores(testsets: list,
                                     orders of magnitude smaller than the uncertainty of the
                                     scores. It does ensure that the specificity of the test
                                     is 1, it might slightly decrease the sensitivity.
+        prefilter_by_pairs (bool): whether to prefilter the solution space by pair
+                                    solutions when possible to speed up the process
 
     Returns:
         dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
@@ -82,4 +85,5 @@ def check_n_testsets_som_no_kfold_scores(testsets: list,
                                             eps=eps,
                                             p=experiment.figures['p'],
                                             n=experiment.figures['n'],
-                                            numerical_tolerance=numerical_tolerance)
+                                            numerical_tolerance=numerical_tolerance,
+                                            prefilter_by_pairs=prefilter_by_pairs)

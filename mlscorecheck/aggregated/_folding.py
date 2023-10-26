@@ -72,7 +72,9 @@ class Folding:
                 p += fold['p']
                 n += fold['n']
 
-            if (p % dataset.p != 0) or (n % dataset.n != 0) or (p // dataset.p != n // dataset.n):
+            if ((dataset.p != p) and (p % dataset.p != 0)) \
+                or ((dataset.n != n) and (n % dataset.n != 0)) \
+                or (dataset.p > 0 and dataset.n > 0 and (p // dataset.p != n // dataset.n)):
                 raise ValueError("The total p and n figures in the folds are not "\
                                     "multiples of the dataset's p and n figures "\
                                     f"{p}, {dataset.p}, {n}, {dataset.n}")

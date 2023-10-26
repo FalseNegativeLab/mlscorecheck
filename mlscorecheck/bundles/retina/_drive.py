@@ -3,41 +3,72 @@ This module implements the test suit for the retina vessel
 segmentation drive dataset
 """
 
-from ...core import NUMERICAL_TOLERANCE, logger
-from ...experiments import load_drive
+from ...core import NUMERICAL_TOLERANCE
+from ...experiments import get_experiment
 from ...check import (check_1_testset_no_kfold_scores,
-                        check_n_datasets_mos_kfold_som_scores,
-                        check_n_datasets_som_kfold_som_scores)
+                        check_n_testsets_mos_no_kfold_scores,
+                        check_n_testsets_som_no_kfold_scores)
 
-__all__ = ['drive_aggregated_fov_pixels',
-            'drive_aggregated_all_pixels',
-            'drive_image_fov_pixels',
-            'drive_image_all_pixels',
-            'drive_aggregated',
-            'drive_image',
-            'filter_drive']
+__all__ = ['check_drive_vessel_aggregated_mos_assumption',
+            'check_drive_vessel_aggregated_som_assumption',
+            'check_drive_vessel_aggregated',
+            'check_drive_vessel_image_assumption',
+            'check_drive_vessel_image',
+            '_filter_drive']
 
-def _drive_aggregated_test_scores(data: list,
-                                    scores: dict,
-                                    eps,
-                                    aggregation: str,
-                                    *,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+def _filter_drive(data, imageset, annotator, assumption):
     """
-    Checking the consistency of the a dataset.
+    Filters the DRIVE dataset
 
     Args:
-        data (list(dict)): the datasets
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the mode of aggregation ('mos'/'som')
+        data (dict): all data
+        imageset (str|list): the subset specification
+        annotator (int): the annotation to use (1/2)
+        assumption (str): the assumption to test ('fov'/'all')
+
+    Returns:
+        list: the image subset specification
+    """
+    if isinstance(imageset, str) and imageset in {'train', 'test'}:
+        return data[(annotator, assumption)][imageset]['images']
+
+    testsets = []
+    subset_train = data[(annotator, assumption)]['train']['images']
+    subset_test = data[(annotator, assumption)]['test']['images']
+    testsets = [entry for entry in subset_train if entry['identifier'] in imageset]\
+                + [entry for entry in subset_test if entry['identifier'] in imageset]
+
+    return testsets
+
+
+def check_drive_vessel_aggregated_mos_assumption(imageset,
+                            assumption: str,
+                            annotator: int,
+                            scores: dict,
+                            eps,
+                            *,
+                            score_bounds: dict = None,
+                            solver_name: str = None,
+                            timeout: int = None,
+                            verbosity: int = 1,
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+    """
+    Checking the consistency of scores with calculated for some images of
+    the DRIVE dataset with the mean-of-scores aggregation.
+
+    Args:
+        imageset (str|list): 'train'/'test' for all images in the train or test set, or a list of
+                            identifiers of images (e.g. ['21', '22'])
+        assumption (str): the assumption on the region of evaluation to test ('fov'/'all')
+        annotator (int): the annotation to be used (1/2) (typically annotator 1 is used in papers)
+        scores (dict): the scores to check
+        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
-        verbosity (int): the verbosity level of the pulp linear programming solver
-                            0: silent, non-zero: verbose.
+        verbosity (int): the verbosity of the linear programming solver,
+                            0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -45,73 +76,52 @@ def _drive_aggregated_test_scores(data: list,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the results of the analysis, the attribute ``inconsistency``
-                shows if inconsistency has been found
-    """
-    experiment = {'evaluations': [{'dataset': dataset,
-                                    'folding': {'n_folds': 1, 'n_repeats': 1},
-                                    'aggregation': 'som'} for dataset in data],
-                    'aggregation': aggregation}
-    if aggregation == 'mos':
-        return check_n_datasets_mos_kfold_som_scores(scores=scores,
-                                                        eps=eps,
-                                                        evaluations=experiment['evaluations'],
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity,
-                                                        numerical_tolerance=numerical_tolerance)
-    return check_n_datasets_som_kfold_som_scores(scores=scores,
-                                                eps=eps,
-                                                evaluations=experiment['evaluations'])
-
-def filter_drive(data: list, subset: list = None) -> list:
-    """
-    Filter a dataset
-
-    Args:
-        data (list(dict)): a list of datasets
-        subset (list|None): the list of identifiers
-
-    Returns:
-        list(dict): the filtered dataset
+        dict: the dictionary of the results of the analysis, the
+        ``inconsistency`` entry indicates if inconsistencies have
+        been found. The aggregated_results entry is empty if
+        the execution of the linear programming based check was
+        unnecessary. The result has four more keys. Under ``lp_status``
+        one finds the status of the lp solver, under ``lp_configuration_scores_match``
+        one finds a flag indicating if the scores from the lp configuration
+        match the scores provided, ``lp_configuration_bounds_match`` indicates
+        if the specified bounds match the actual figures and finally
+        ``lp_configuration`` contains the actual configuration of the
+        linear programming solver.
 
     Raises:
-        ValueError: if the filtering results an empty set
+        ValueError: if the problem is not specified properly
     """
-    if subset is None:
-        return data
-    result = [dataset for dataset in data if dataset['identifier'] in subset]
-    if len(result) == 0:
-        raise ValueError('There is no images remaining. Please check if the image_set '\
-                        '("train"/"test") and the image identifiers are specified properly')
-    return result
+    data = get_experiment('retina.drive')
 
-def drive_aggregated(scores: dict,
-                        eps,
-                        image_set: str,
-                        subset: list = None,
-                        *,
-                        solver_name: str = None,
-                        timeout: int = None,
-                        verbosity: int = 1,
-                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+    testsets = _filter_drive(data, imageset, annotator, assumption)
+
+    return check_n_testsets_mos_no_kfold_scores(testsets=testsets,
+                                                scores=scores,
+                                                eps=eps,
+                                                testset_score_bounds=score_bounds,
+                                                solver_name=solver_name,
+                                                timeout=timeout,
+                                                verbosity=verbosity,
+                                                numerical_tolerance=numerical_tolerance)
+
+
+def check_drive_vessel_aggregated_som_assumption(imageset,
+                            assumption: str,
+                            annotator: int,
+                            scores: dict,
+                            eps,
+                            numerical_tolerance=NUMERICAL_TOLERANCE):
     """
-    Testing the consistency of DRIVE scores with multiple
-    aggregation techniques and with the field of view (FoV)
-    and without the field of view (no FoV). The aggregated
-    check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
+    Tests the consistency of scores calculated on the DRIVE dataset using
+    the score-of-means aggregation.
 
     Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        image_set (str): the image image_set to test ('train'/'test')
-        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
-                            note that the identifiers need to be in accordance
-                            with the image_set
-        solver_name (None|str): the solver to use
-        timeout (None|int): the timeout for the linear programming solver in seconds
-        verbosity (int): the verbosity of the pulp linear programming solver,
-                            0: silent, non-zero: verbose
+        imageset (str|list): 'train'/'test' for all images in the train or test set, or a list of
+                            identifiers of images (e.g. ['21', '22'])
+        assumption (str): the assumption on the region of evaluation to test ('fov'/'all')
+        annotator (int): the annotation to be used (1/2) (typically annotator 1 is used in papers)
+        scores (dict): the scores to check
+        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -119,125 +129,92 @@ def drive_aggregated(scores: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the result of the analysis
+        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
+        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
+        ``details`` provides further details from the analysis of the scores one after the other.
+        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
+        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
+        by using the solutions for the score pairs.
 
     Raises:
-        ValueError: if the filtering results an empty set
-
-    Examples:
-        >>> drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
-                            eps=1e-4,
-                            image_set='test')
-        # {'mos_fov_pixels_inconsistency': True,
-            'mos_all_pixels_inconsistency': True,
-            'som_fov_pixels_inconsistency': True,
-            'som_all_pixels_inconsistency': True}
+        ValueError: if the problem is not specified properly
     """
-    logger.info('testing MoS FoV pixels')
-    results_fov_mos = drive_aggregated_fov_pixels(scores=scores,
-                                                eps=eps,
-                                                aggregation='mos',
-                                                image_set=image_set,
-                                                subset=subset,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
-    logger.info('testing MoS all pixels')
-    results_no_fov_mos = drive_aggregated_all_pixels(scores=scores,
-                                                    eps=eps,
-                                                    aggregation='mos',
-                                                    image_set=image_set,
-                                                    subset=subset,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
-                                                    numerical_tolerance=numerical_tolerance)
-    logger.info('testing SoM FoV pixels')
-    results_fov_som = drive_aggregated_fov_pixels(scores=scores,
-                                                eps=eps,
-                                                aggregation='som',
-                                                image_set=image_set,
-                                                subset=subset,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
-    logger.info('testing SoM all pixels')
-    results_no_fov_som = drive_aggregated_all_pixels(scores=scores,
-                                                    eps=eps,
-                                                    aggregation='som',
-                                                    image_set=image_set,
-                                                    subset=subset,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
-                                                    numerical_tolerance=numerical_tolerance)
+    data = get_experiment('retina.drive')
 
-    return {'mos_fov_pixels_inconsistency': results_fov_mos['inconsistency'],
-            'mos_all_pixels_inconsistency': results_no_fov_mos['inconsistency'],
-            'som_fov_pixels_inconsistency': results_fov_som['inconsistency'],
-            'som_all_pixels_inconsistency': results_no_fov_som['inconsistency']}
+    testsets = _filter_drive(data, imageset, annotator, assumption)
 
-def drive_image(scores: dict,
-                eps,
-                image_set: str,
-                identifier: str) -> dict:
+    return check_n_testsets_som_no_kfold_scores(testsets=testsets,
+                                                scores=scores,
+                                                eps=eps,
+                                                numerical_tolerance=numerical_tolerance,
+                                                prefilter_by_pairs=True)
+
+
+def check_drive_vessel_image_assumption(image_identifier: str,
+                            assumption: str,
+                            annotator: str,
+                            scores: dict,
+                            eps,
+                            *,
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
-    Testing the consistency of DRIVE a drive image scores with multiple
-    with the field of view (FoV) and without the field of view (no FoV).
+    Testing the scores calculated for one image of the DRIVE dataset
 
     Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        image_set (str): the image set to test ('train'/'test')
-        identifier (str): the identifier of the image (like '01' or '22')
+        image_identifier (str): the identifier of the image (like "21")
+        assumption (str): the assumption on the region of evaluation to test ('fov'/'all')
+        annotator (int): the annotation to use (1, 2) (typically annotator 1 is used in papers)
+        scores (dict(str,float)): the scores to be tested
+        eps (float): the numerical uncertainty
+        numerical_tolerance (float): the additional numerical tolerance
 
     Returns:
-        dict: the result of the analysis
-
-    Raises:
-        ValueError: if the specified image cannot be found
-
-    Examples:
-        >>> drive_image(scores={'acc': 0.9478, 'npv': 0.8532,
-                                'f1p': 0.9801, 'ppv': 0.8543},
-                        eps=1e-4,
-                        image_set='test',
-                        identifier='01')
-        # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
+        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
+        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
+        ``details`` provides further details from the analysis of the scores one after the other.
+        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible
+        with all scores. Under the key ``prefiltering_details`` one finds the results of the
+        prefiltering by using the solutions for the score pairs.
     """
-    results_fov = drive_image_fov_pixels(scores, eps, image_set, identifier)
-    results_no_fov = drive_image_all_pixels(scores, eps, image_set, identifier)
-    return {'fov_pixels_inconsistency': results_fov['inconsistency'],
-            'all_pixels_inconsistency': results_no_fov['inconsistency']}
+    images = get_experiment('retina.drive')
+    testset = [image for image in images[(annotator, assumption)]['train']['images']
+                if image['identifier'] == image_identifier]
+    testset = testset + [image for image in images[(annotator, assumption)]['test']['images']
+                if image['identifier'] == image_identifier]
+    testset = testset[0]
 
-def drive_aggregated_fov_pixels(scores: dict,
+    return check_1_testset_no_kfold_scores(testset=testset,
+                                            scores=scores,
+                                            eps=eps,
+                                            numerical_tolerance=numerical_tolerance,
+                                            prefilter_by_pairs=True)
+
+
+def check_drive_vessel_aggregated(imageset,
+                                annotator: int,
+                                scores: dict,
                                 eps,
-                                aggregation: str,
-                                image_set: str,
-                                subset: list = None,
                                 *,
+                                score_bounds: dict = None,
                                 solver_name: str = None,
                                 timeout: int = None,
                                 verbosity: int = 1,
                                 numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Testing the consistency of DRIVE scores with the field of view (FoV) pixels only.
-    The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
+    Testing the scores calculated for the DRIVE dataset with all assumptions
 
     Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the aggregation technique ('mos'/'som')
-        image_set (str): the image set to test ('train'/'test')
-        subset (list|None): the list of identifiers to involve, e.g. ['01', '02']
-                            note that the identifiers need to be in accordance
-                            with the image_set
+        imageset (str|list): 'train'/'test' for all images in the train or test set, or a list of
+                            identifiers of images (e.g. ['21', '22'])
+        annotator (int): the annotation to use (1, 2) (typically annotator 1 is used in papers)
+        scores (dict(str,float)): the scores to be tested
+        eps (float): the numerical uncertainty
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
-        verbosity (int): the verbosity of the pulp linear programming solver,
-                            0: silent, non-zero: verbose
+        verbosity (int): the verbosity of the linear programming solver,
+                            0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -245,61 +222,68 @@ def drive_aggregated_fov_pixels(scores: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the result of the analysis, the 'inconsistency' flag
-        shows if inconsistency has been found, under the remaining
-        keys the details of the analysis can be found
-
-    Raises:
-        ValueError: if the filtering results an empty set
+        dict: a summary of the results. Under the ``inconsistency`` key one finds all
+        findings, under the keys ``details*`` the details of the analysis can
+        be found.
 
     Examples:
-        >>> result = drive_aggregated_fov_pixels(scores={'acc': 0.9478,
-                                                            'sens': 0.8532,
-                                                            'spec': 0.9801},
-                                            eps=1e-4,
-                                            image_set='test')
-        >>> result['inconsistency']
-        # True
+        >>> from mlscorecheck.bundles.retina import check_drive_vessel_aggregated
+        >>> scores = {'acc': 0.9494, 'sens': 0.7450, 'spec': 0.9793}
+        >>> k = 4
+        >>> results = check_drive_vessel_aggregated(scores=scores,
+                                                    eps=10**(-k),
+                                                    imageset='test',
+                                                    annotator=1,
+                                                    verbosity=0)
+        >>> results['inconsistency']
+        # {'inconsistency_fov_mos': False,
+        #  'inconsistency_fov_som': False,
+        #  'inconsistency_all_mos': True,
+        #  'inconsistency_all_som': True}
     """
-    assert image_set in ('train', 'test')
-    assert aggregation in ('mos', 'som')
+    results = {}
 
-    data = load_drive()[f'{image_set}_fov']['images']
-    data = filter_drive(data, subset)
+    for assumption in ['fov', 'all']:
+        results[f'details_{assumption}_mos'] = check_drive_vessel_aggregated_mos_assumption(
+                                                            imageset=imageset,
+                                                            annotator=annotator,
+                                                            assumption=assumption,
+                                                            scores=scores,
+                                                            eps=eps,
+                                                            score_bounds=score_bounds,
+                                                            solver_name=solver_name,
+                                                            timeout=timeout,
+                                                            verbosity=verbosity,
+                                                            numerical_tolerance=numerical_tolerance)
+        results[f'details_{assumption}_som'] = check_drive_vessel_aggregated_som_assumption(
+                                                            imageset=imageset,
+                                                            annotator=annotator,
+                                                            assumption=assumption,
+                                                            scores=scores,
+                                                            eps=eps,
+                                                            numerical_tolerance=numerical_tolerance)
 
-    return _drive_aggregated_test_scores(data,
-                                            scores,
-                                            eps,
-                                            aggregation,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    results['inconsistency'] = {f'inconsistency_{tmp}': results[f'details_{tmp}']['inconsistency']
+                                    for tmp in ['fov_mos', 'fov_som', 'all_mos', 'all_som']}
 
-def drive_aggregated_all_pixels(scores: dict,
-                                eps,
-                                aggregation: str,
-                                image_set: str,
-                                subset: list = None,
-                                *,
-                                solver_name: str = None,
-                                timeout: int = None,
-                                verbosity: int = 1,
-                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+    return results
+
+
+def check_drive_vessel_image(image_identifier: str,
+                            annotator: str,
+                            scores: dict,
+                            eps,
+                            *,
+                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
-    Testing the consistency of DRIVE scores with all pixels.
-    The aggregated check can test the 'acc', 'sens', 'spec' and 'bacc' scores.
+    Testing the scores calculated for one image of the DRIVE dataset with
+    both assumptions on the region of evaluation ('fov'/'all')
 
     Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        aggregation (str): the aggregation technique ('mos'/'som')
-        image_set (str): the image set to test ('train'/'test')
-        subset (list|None): the list of identifiers to involve
-        solver_name (None|str): the solver to use
-        timeout (None|int): the timeout for the linear programming solver in seconds
-        verbosity (int): the verbosity of the pulp linear programming solver,
-                            0: silent, non-zero: verbose
+        image_identifier (str): the identifier of the image (like "21")
+        annotator (int): the annotation to use (1, 2) (typically annotator 1 is used in papers)
+        scores (dict(str,float)): the scores to be tested
+        eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -307,119 +291,35 @@ def drive_aggregated_all_pixels(scores: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the result of the analysis, the ``inconsistency`` flag
-        shows if inconsistency has been found, under the remaining
-        keys the details of the analysis can be found
-
-    Raises:
-        ValueError: if the filtering results an empty set
+        dict: a summary of the results. Under the ``inconsistency`` key one finds all
+        findings, under the keys ``details*`` the details of the analysis can
+        be found.
 
     Examples:
-        >>> result = drive_aggregated_all_pixels(scores={'acc': 0.9478,
-                                                            'sens': 0.8532,
-                                                            'spec': 0.9801},
-                                            eps=1e-4,
-                                            image_set='test')
-        >>> result['inconsistency']
-        # True
+        >>> from mlscorecheck.bundles.retina import check_drive_vessel_image
+        >>> scores = {'acc': 0.9633, 'sens': 0.7406, 'spec': 0.9849}
+        >>> identifier = '01'
+        >>> k = 4
+        >>> results = check_drive_vessel_image(scores=scores,
+                                                eps=10**(-k),
+                                                image_identifier=identifier,
+                                                annotator=1)
+        >>> results['inconsistency']
+        # {'inconsistency_fov': True, 'inconsistency_all': False}
     """
-    assert image_set in ('train', 'test')
-    assert aggregation in ('mos', 'som')
+    results = {}
 
-    data = load_drive()[f'{image_set}_no_fov']['images']
-    data = filter_drive(data, subset)
+    for assumption in ['fov', 'all']:
+        results[f'details_{assumption}'] = check_drive_vessel_image_assumption(
+            image_identifier=image_identifier,
+            assumption=assumption,
+            annotator=annotator,
+            scores=scores,
+            eps=eps,
+            numerical_tolerance=numerical_tolerance
+        )
 
-    return _drive_aggregated_test_scores(data,
-                                            scores,
-                                            eps,
-                                            aggregation,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    results['inconsistency'] = {'inconsistency_fov': results['details_fov']['inconsistency'],
+                                'inconsistency_all': results['details_all']['inconsistency']}
 
-def drive_image_fov_pixels(scores: dict,
-                            eps,
-                            image_set: list,
-                            identifier: str) -> dict:
-    """
-    Testing the consistency of DRIVE a drive image scores with the field of
-    view (FoV) pixels only.
-
-    Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        image_set (str): the image set to test ('train'/'test')
-        identifier (str): the identifier of the image (like '01' or '22')
-
-    Returns:
-        dict: the result of the analysis, the ``inconsistency`` flag
-        shows if inconsistency has been found, the rest of the
-        keys contain the the details of the analysis, for the
-        interpretation see the documentation of the
-        check_1_dataset_no_kfold_scores function.
-
-    Raises:
-        ValueError: if the specified image cannot be found
-
-    Examples:
-        >>> result = drive_image_fov_pixels(scores={'acc': 0.9478, 'npv': 0.8532,
-                                            'f1p': 0.9801, 'ppv': 0.8543},
-                                    eps=1e-4,
-                                    image_set='test',
-                                    identifier='01')
-        >>> result['inconsistency']
-        # True
-    """
-    assert image_set in ('train', 'test')
-
-    data = load_drive()[f'{image_set}_fov']['images']
-    image = filter_drive(data, [identifier])[0]
-
-    return check_1_testset_no_kfold_scores(scores=scores,
-                                            eps=eps,
-                                            testset=image,
-                                            prefilter_by_pairs=True)
-
-def drive_image_all_pixels(scores: dict,
-                            eps,
-                            image_set: list,
-                            identifier: str) -> dict:
-    """
-    Testing the consistency of DRIVE a drive image scores
-    without all pixels.
-
-    Args:
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty
-        image_set (str): the image set to test ('train'/'test')
-        identifier (str): the identifier of the image (like '01' or '22')
-
-    Returns:
-        dict: the result of the analysis, the 'inconsistency' flag
-        shows if inconsistency has been found, the rest of the
-        keys contain the the details of the analysis, for the
-        interpretation see the documentation of the
-        check_1_dataset_no_kfold_scores function.
-
-    Raises:
-        ValueError: if the specified image cannot be found
-
-    Examples:
-        >>> result = drive_image_all_pixels(scores={'acc': 0.9478, 'npv': 0.8532,
-                                            'f1p': 0.9801, 'ppv': 0.8543},
-                                    eps=1e-4,
-                                    image_set='test',
-                                    identifier='01')
-        >>> result['inconsistency']
-        # True
-    """
-    assert image_set in ('train', 'test')
-
-    data = load_drive()[f'{image_set}_no_fov']['images']
-    image = filter_drive(data, [identifier])[0]
-
-    return check_1_testset_no_kfold_scores(scores=scores,
-                                            eps=eps,
-                                            testset=image,
-                                            prefilter_by_pairs=True)
+    return results

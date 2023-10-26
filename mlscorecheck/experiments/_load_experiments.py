@@ -18,7 +18,9 @@ __all__ = ['get_experiment',
 
 from ..core import load_json
 
+
 experiments = {}
+
 
 def get_experiment(name):
     if name in experiments:
@@ -49,6 +51,7 @@ def get_experiment(name):
 
     return experiments[name]
 
+
 def load_chase_db1() -> dict:
     """
     Loading the chase db1 specifications
@@ -60,6 +63,7 @@ def load_chase_db1() -> dict:
     return {'manual1': load_json(prefix, 'manual1.json'),
             'manual2': load_json(prefix, 'manual2.json')}
 
+
 def load_diaretdb0() -> dict:
     """
     Loading the diaretdb0 specifications
@@ -70,6 +74,7 @@ def load_diaretdb0() -> dict:
     prefix = os.path.join('experiments', 'retina', 'diaretdb0')
     return load_json(prefix, 'diaretdb0.json')
 
+
 def load_diaretdb1() -> dict:
     """
     Loading the diaretdb1 specifications
@@ -78,8 +83,8 @@ def load_diaretdb1() -> dict:
         dict: the experiment specifications
     """
     prefix = os.path.join('experiments', 'retina', 'diaretdb1')
-    return {'train': load_json(prefix, 'diaretdb1_train.json'),
-            'test': load_json(prefix, 'diaretdb1_test.json')}
+    return load_json(prefix, 'diaretdb1.json')
+
 
 def load_drishti_gs() -> dict:
     """
@@ -92,6 +97,7 @@ def load_drishti_gs() -> dict:
     return {'train': load_json(prefix, 'drishti_gs_train.json'),
             'test': load_json(prefix, 'drishti_gs_test.json')}
 
+
 def load_hrf() -> dict:
     """
     Loading the hrf specifications
@@ -102,6 +108,7 @@ def load_hrf() -> dict:
     prefix = os.path.join('experiments', 'retina', 'hrf')
     return {'fov': load_json(prefix, 'with_fov.json'),
             'all': load_json(prefix, 'without_fov.json')}
+
 
 def load_stare() -> dict:
     """
@@ -114,6 +121,7 @@ def load_stare() -> dict:
     return {'ah': load_json(prefix, 'ah.json'),
             'vk': load_json(prefix, 'vk.json')}
 
+
 def load_drive() -> dict:
     """
     Loading the drive experiments
@@ -122,12 +130,15 @@ def load_drive() -> dict:
         dict: the drive experiments
     """
     prefix = os.path.join('experiments', 'retina', 'drive')
-    return {
-        'test_fov': load_json(prefix, 'drive_test_fov.json'),
-        'test_no_fov': load_json(prefix, 'drive_test_no_fov.json'),
-        'train_fov': load_json(prefix, 'drive_train_fov.json'),
-        'train_no_fov': load_json(prefix, 'drive_train_no_fov.json')
-    }
+    results = {}
+
+    for annotator in [1, 2]:
+        for assumption in ['fov', 'all']:
+            tmp = {'train': load_json(prefix, f'drive_{annotator}_train_{assumption}.json'),
+                    'test': load_json(prefix, f'drive_{annotator}_test_{assumption}.json')}
+            results[(annotator, assumption)] = tmp
+    return results
+
 
 def load_ehg() -> dict:
     """
@@ -139,6 +150,7 @@ def load_ehg() -> dict:
     prefix = os.path.join('experiments', 'ehg')
     return load_json(prefix, 'ehg.json')
 
+
 def load_isic2016() -> dict:
     """
     Loading the ISIC 2016 skin lesion testset
@@ -148,6 +160,7 @@ def load_isic2016() -> dict:
     """
     prefix = os.path.join('experiments', 'skinlesion', 'isic2016')
     return load_json(prefix, 'isic2016.json')
+
 
 def load_isic2017() -> dict:
     """
