@@ -23,6 +23,15 @@ experiments = {}
 
 
 def get_experiment(name):
+    """
+    Returns the experiment dataset based on the identifier
+
+    Args:
+        name (str): the experiment identifier, like 'retina.drive'
+
+    Returns:
+        dict: the experiment dataset
+    """
     if name in experiments:
         return experiments[name]
 

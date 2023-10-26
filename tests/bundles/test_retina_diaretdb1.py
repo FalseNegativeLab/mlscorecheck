@@ -125,8 +125,9 @@ def test_check_success_segmentation_image(random_seed: int,
                                                 pixel_level=True,
                                                 assumption=assumption)
 
-    for test_idx in range(len(testsets)):
-        if testsets[test_idx]['p'] > 0:
+    test_idx = 0
+    for test_idx, test_item in enumerate(testsets):
+        if test_item['p'] > 0:
             break
 
     scores = generate_scores_for_testsets([testsets[test_idx]],
@@ -172,8 +173,9 @@ def test_check_failure_segmentation_image(random_seed: int,
                                                 pixel_level=True,
                                                 assumption=assumption)
 
-    for test_idx in range(len(testsets)):
-        if testsets[test_idx]['p'] > 0:
+    test_idx = 0
+    for test_idx, test_item in enumerate(testsets):
+        if test_item['p'] > 0:
             break
 
     scores = generate_scores_for_testsets([testsets[test_idx]],
@@ -198,7 +200,8 @@ def test_check_failure_segmentation_image(random_seed: int,
 @pytest.mark.parametrize('class_name', class_names)
 @pytest.mark.parametrize('assumption', ['fov', 'all'])
 @pytest.mark.parametrize('aggregation', ['mos', 'som'])
-def test_check_success_segmentation_aggregated(random_seed: int,
+def test_check_success_segmentation_aggregated(*,
+                                            random_seed: int,
                                             confidence: float,
                                             subset,
                                             class_name,
@@ -244,7 +247,8 @@ def test_check_success_segmentation_aggregated(random_seed: int,
 @pytest.mark.parametrize('class_name', class_names)
 @pytest.mark.parametrize('assumption', ['fov', 'all'])
 @pytest.mark.parametrize('aggregation', ['som', 'mos'])
-def test_check_failure_segmentation_aggregated(random_seed: int,
+def test_check_failure_segmentation_aggregated(*,
+                                            random_seed: int,
                                             confidence: float,
                                             subset,
                                             class_name,

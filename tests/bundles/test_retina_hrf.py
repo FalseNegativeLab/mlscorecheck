@@ -4,8 +4,6 @@ This file tests the test bundle for the HRF dataset
 
 import pytest
 
-import numpy as np
-
 from mlscorecheck.bundles.retina import (check_hrf_vessel_image,
                                             check_hrf_vessel_aggregated)
 

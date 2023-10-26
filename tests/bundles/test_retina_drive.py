@@ -4,8 +4,6 @@ This file tests the test bundle for the DRIVE dataset
 
 import pytest
 
-import numpy as np
-
 from mlscorecheck.bundles.retina import (check_drive_vessel_image,
                                             check_drive_vessel_aggregated)
 

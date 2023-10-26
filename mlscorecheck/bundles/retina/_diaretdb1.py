@@ -15,6 +15,47 @@ __all__ = ['_prepare_configuration_diaretdb1',
             'check_diaretdb1_segmentation_aggregated_assumption',
             'check_diaretdb1_segmentation_aggregated']
 
+def _prepare_testsets_diaretdb1(subset_indices,
+                                    data,
+                                    key,
+                                    assumption,
+                                    threshold):
+    """
+    Helper function for generating the diaretdb1 evaluation configuration
+
+    Args:
+        subset_indices (list): the list of image indices to consider
+        data (dict): the entire dataset
+        key (str): the key on the use of the class combinations
+        assumption (str): the assumption on using all pixels or the FoV ('fov'/'all')
+        threshold (float): the threshold on the confidence
+
+    Returns:
+        list, dict: the image level testsets and the overall testset
+    """
+    testsets = []
+    testset = {'p': 0, 'n': 0}
+
+    for img_idx in subset_indices:
+        values = data[img_idx][key][assumption]['values']
+        counts = data[img_idx][key][assumption]['counts']
+
+        total_p = 0
+        total_n = 0
+        for count, value in zip(counts, values):
+            if value >= threshold:
+                total_p += count
+            else:
+                total_n += count
+
+
+        testsets.append({'identifier': img_idx, 'p': total_p, 'n': total_n})
+
+        testset['p'] += (total_p > 0)
+        testset['n'] += (total_p == 0)
+
+    return testsets, testset
+
 def _prepare_configuration_diaretdb1(*,
                                         subset,
                                         class_name,
@@ -50,34 +91,17 @@ def _prepare_configuration_diaretdb1(*,
     subset_indices = data[subset] if isinstance(subset, str) else subset
     data = data['distributions']
 
-    testsets = []
-    testset = {'p': 0, 'n': 0}
-
     mapping = {'hardexudates': 'he',
                 'softexudates': 'se',
                 'hemorrhages': 'hr',
                 'redsmalldots': 'rsd'}
     key = '-'.join(sorted([mapping[class_] for class_ in class_name]))
 
-    threshold = confidence * 255
-
-    for img_idx in subset_indices:
-        values = data[img_idx][key][assumption]['values']
-        counts = data[img_idx][key][assumption]['counts']
-
-        total_p = 0
-        total_n = 0
-        for count, value in zip(counts, values):
-            if value >= threshold:
-                total_p += count
-            else:
-                total_n += count
-
-        if pixel_level:
-            testsets.append({'identifier': img_idx, 'p': total_p, 'n': total_n})
-        else:
-            testset['p'] += (total_p > 0)
-            testset['n'] += (total_p == 0)
+    testsets, testset = _prepare_testsets_diaretdb1(subset_indices,
+                                                    data,
+                                                    key,
+                                                    assumption,
+                                                    confidence*255)
 
     if only_valid:
         testsets = [tset for tset in testsets if tset['p'] > 0 and tset['n'] > 0]
@@ -183,7 +207,8 @@ def check_diaretdb1_segmentation_image_assumption(*,
                                 pixel_level=True,
                                 assumption=assumption,
                                 confidence=confidence)
-    testset = [tset for tset in testset_test + testset_train if tset['identifier'] == image_identifier][0]
+    testset = [tset for tset in testset_test + testset_train
+                    if tset['identifier'] == image_identifier][0]
 
     return check_1_testset_no_kfold_scores(testset=testset,
                                             scores=scores,

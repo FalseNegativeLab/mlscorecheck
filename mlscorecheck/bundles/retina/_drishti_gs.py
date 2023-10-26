@@ -60,6 +60,7 @@ def check_drishti_gs_segmentation_image(image_identifier: str,
                                             target: str,
                                             scores: dict,
                                             eps: float,
+                                            *,
                                             numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
     Testing the segmentation results on one image.
@@ -119,7 +120,8 @@ def check_drishti_gs_segmentation_aggregated_mos(subset,
     Testing the scores shared for a set of images with the MoS aggregation.
 
     Args:
-        subset (str|list): the subset ('test'/'train') or the list of identifiers, e.g. ['053', '086']
+        subset (str|list): the subset ('test'/'train') or the list of identifiers,
+                            e.g. ['053', '086']
         confidence (float): the confidence level (in [0,1]), used for thresholding
                             the soft segmentation ground truth image at threshold*255
         target (str): the target anatomical part ('OD'/'OC')
@@ -165,12 +167,14 @@ def check_drishti_gs_segmentation_aggregated_som(subset: str,
                                             target: str,
                                             scores: dict,
                                             eps: float,
+                                            *,
                                             numerical_tolerance: float = NUMERICAL_TOLERANCE):
     """
     Testing the scores shared for a set of images with the SoM aggregation.
 
     Args:
-        subset (str|list): the subset ('test'/'train') or the list of identifiers, e.g. ['053', '086']
+        subset (str|list): the subset ('test'/'train') or the list of identifiers,
+                            e.g. ['053', '086']
         confidence (float): the confidence level (in [0,1]), used for thresholding
                             the soft segmentation ground truth image at threshold*255
         target (str): the target anatomical part ('OD'/'OC')
@@ -213,7 +217,8 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
     Testing the scores shared for a set of images with both the MoS and SoM aggregations.
 
     Args:
-        subset (str|list): the subset ('test'/'train') or the list of identifiers, e.g. ['053', '086']
+        subset (str|list): the subset ('test'/'train') or the list of identifiers,
+                            e.g. ['053', '086']
         confidence (float): the confidence level (in [0,1]), used for thresholding
                             the soft segmentation ground truth image at threshold*255
         target (str): the target anatomical part ('OD'/'OC')

@@ -185,7 +185,7 @@ def check_chasedb1_vessel_aggregated(imageset,
     """
     results = {}
 
-    results[f'details_mos'] = check_chasedb1_vessel_aggregated_mos(
+    results['details_mos'] = check_chasedb1_vessel_aggregated_mos(
                                                         imageset=imageset,
                                                         annotator=annotator,
                                                         scores=scores,
@@ -195,7 +195,7 @@ def check_chasedb1_vessel_aggregated(imageset,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
                                                         numerical_tolerance=numerical_tolerance)
-    results[f'details_som'] = check_chasedb1_vessel_aggregated_som(
+    results['details_som'] = check_chasedb1_vessel_aggregated_som(
                                                         imageset=imageset,
                                                         annotator=annotator,
                                                         scores=scores,

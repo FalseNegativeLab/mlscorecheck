@@ -110,6 +110,7 @@ def check_drive_vessel_aggregated_som_assumption(imageset,
                             annotator: int,
                             scores: dict,
                             eps,
+                            *,
                             numerical_tolerance=NUMERICAL_TOLERANCE):
     """
     Tests the consistency of scores calculated on the DRIVE dataset using

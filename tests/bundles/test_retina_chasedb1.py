@@ -4,8 +4,6 @@ This file tests the test bundle for the CHASEDB1 dataset
 
 import pytest
 
-import numpy as np
-
 from mlscorecheck.bundles.retina import (check_chasedb1_vessel_image,
                                             check_chasedb1_vessel_aggregated)
 

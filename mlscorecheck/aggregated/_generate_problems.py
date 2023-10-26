@@ -330,5 +330,4 @@ def generate_scores_for_testsets(testsets,
                                 rounding_decimals=rounding_decimals,
                                 subset=subset)
 
-    return {key: value for key, value in scores.items()} |\
-            {'beta_positive': 2, 'beta_negative': 2}
+    return scores | {'beta_positive': 2, 'beta_negative': 2}

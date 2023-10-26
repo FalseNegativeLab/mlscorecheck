@@ -4,8 +4,6 @@ This file tests the test bundle for the STARE dataset
 
 import pytest
 
-import numpy as np
-
 from mlscorecheck.bundles.retina import (check_stare_vessel_image,
                                             check_stare_vessel_aggregated)
 

@@ -6,7 +6,6 @@ import pytest
 
 from mlscorecheck.bundles.skinlesion import check_isic2017, _prepare_testset_isic2017
 from mlscorecheck.aggregated import generate_scores_for_testsets
-from mlscorecheck.experiments import get_experiment
 
 subsets = [(['M'], ['SK', 'N']),
             (['SK'], ['M', 'N']),
