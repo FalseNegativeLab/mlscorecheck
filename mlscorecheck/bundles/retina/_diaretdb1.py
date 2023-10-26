@@ -2,12 +2,11 @@
 This module implements tests for the DIARETDB1 dataset
 """
 
-from mlscorecheck.experiments import get_experiment
-from mlscorecheck.check import check_1_testset_no_kfold_scores
-from mlscorecheck.check import check_n_testsets_mos_no_kfold_scores
-from mlscorecheck.check import check_n_testsets_som_no_kfold_scores
-from mlscorecheck.core import NUMERICAL_TOLERANCE
-from mlscorecheck.core import logger
+from ...experiments import get_experiment
+from ...check import check_1_testset_no_kfold_scores
+from ...check import check_n_testsets_mos_no_kfold_scores
+from ...check import check_n_testsets_som_no_kfold_scores
+from ...core import NUMERICAL_TOLERANCE, logger
 
 __all__ = ['_prepare_configuration_diaretdb1',
             'check_diaretdb1_class',
