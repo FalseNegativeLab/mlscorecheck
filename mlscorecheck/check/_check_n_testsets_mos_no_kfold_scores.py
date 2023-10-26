@@ -78,9 +78,10 @@ def check_n_testsets_mos_no_kfold_scores(testsets: list,
     datasets = [Dataset(**dataset) for dataset in testsets]
 
     evaluations = [{'dataset': dataset.to_dict(),
-                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n}]},
+                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n,
+                                            'identifier': f'{dataset.identifier}_{idx}'}]},
                     'aggregation': 'mos'}
-                    for dataset in datasets]
+                    for idx, dataset in enumerate(datasets)]
 
     experiment = Experiment(evaluations=evaluations,
                             dataset_score_bounds=testset_score_bounds,

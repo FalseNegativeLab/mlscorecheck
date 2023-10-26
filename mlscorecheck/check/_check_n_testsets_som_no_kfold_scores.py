@@ -71,9 +71,10 @@ def check_n_testsets_som_no_kfold_scores(testsets: list,
     datasets = [Dataset(**dataset) for dataset in testsets]
 
     evaluations = [{'dataset': dataset.to_dict(),
-                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n}]},
+                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n,
+                                            'identifier': f'{dataset.identifier}_{idx}'}}]},
                     'aggregation': 'mos'}
-                    for dataset in datasets]
+                    for idx, dataset in enumerate(datasets)]
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
