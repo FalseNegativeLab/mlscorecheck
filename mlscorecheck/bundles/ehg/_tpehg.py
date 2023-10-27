@@ -13,6 +13,7 @@ def check_tpehg(scores: dict,
                 n_folds: int,
                 n_repeats: int,
                 *,
+                score_bounds: dict = None,
                 solver_name: str = None,
                 timeout: int = None,
                 verbosity: int = 1,
@@ -25,6 +26,8 @@ def check_tpehg(scores: dict,
         eps (float|dict(str,float)): the numerical uncertainties
         n_folds (int): the number of folds
         n_repeats (int): the number of repetitions
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the folds
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
@@ -57,6 +60,7 @@ def check_tpehg(scores: dict,
                                                     eps=eps,
                                                     dataset=evaluation['dataset'],
                                                     folding=evaluation['folding'],
+                                                    fold_score_bounds=score_bounds,
                                                     solver_name=solver_name,
                                                     timeout=timeout,
                                                     verbosity=verbosity,

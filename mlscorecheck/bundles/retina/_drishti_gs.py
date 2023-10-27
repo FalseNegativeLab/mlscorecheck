@@ -112,6 +112,7 @@ def check_drishti_gs_segmentation_aggregated_mos(subset,
                                             scores: dict,
                                             eps: float,
                                             *,
+                                            score_bounds: dict = None,
                                             solver_name: str = None,
                                             timeout: int = None,
                                             verbosity: int = 1,
@@ -127,6 +128,8 @@ def check_drishti_gs_segmentation_aggregated_mos(subset,
         target (str): the target anatomical part ('OD'/'OC')
         scores (dict(str,float)): the scores to be tested
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
@@ -157,6 +160,7 @@ def check_drishti_gs_segmentation_aggregated_mos(subset,
     return check_n_testsets_mos_no_kfold_scores(testsets=testsets,
                                                 scores=scores,
                                                 eps=eps,
+                                                testset_score_bounds=score_bounds,
                                                 solver_name=solver_name,
                                                 timeout=timeout,
                                                 verbosity=verbosity,
@@ -209,6 +213,7 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
                                             scores: dict,
                                             eps: float,
                                             *,
+                                            score_bounds: dict = None,
                                             solver_name: str = None,
                                             timeout: int = None,
                                             verbosity: int = 1,
@@ -224,6 +229,8 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
         target (str): the target anatomical part ('OD'/'OC')
         scores (dict(str,float)): the scores to be tested
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
@@ -257,6 +264,7 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
                                                     target=target,
                                                     scores=scores,
                                                     eps=eps,
+                                                    score_bounds=score_bounds,
                                                     solver_name=solver_name,
                                                     timeout=timeout,
                                                     verbosity=verbosity,

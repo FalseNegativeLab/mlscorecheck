@@ -286,6 +286,7 @@ def check_diaretdb1_segmentation_aggregated_assumption(*,
                                     only_valid: bool,
                                     scores: dict,
                                     eps,
+                                    score_bounds: dict = None,
                                     solver_name: str = None,
                                     timeout: int = None,
                                     verbosity: int = 1,
@@ -308,6 +309,12 @@ def check_diaretdb1_segmentation_aggregated_assumption(*,
                             one of the images has 0 positives, the MoS test cannot be executed
         scores (dict(str,float)): the scores to be tested
         eps (float): the numerical uncertainty
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the linear programming solver,
+                            0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -339,6 +346,7 @@ def check_diaretdb1_segmentation_aggregated_assumption(*,
                                                         testsets=testsets,
                                                         scores=scores,
                                                         eps=eps,
+                                                        testset_score_bounds=score_bounds,
                                                         solver_name=solver_name,
                                                         timeout=timeout,
                                                         verbosity=verbosity,
@@ -357,6 +365,7 @@ def check_diaretdb1_segmentation_aggregated(*,
                                     only_valid: bool,
                                     scores: dict,
                                     eps,
+                                    score_bounds: dict = None,
                                     solver_name: str = None,
                                     timeout: int = None,
                                     verbosity: int = 1,
@@ -378,6 +387,12 @@ def check_diaretdb1_segmentation_aggregated(*,
                             one of the images has 0 positives, the MoS test cannot be executed
         scores (dict(str,float)): the scores to be tested
         eps (float): the numerical uncertainty
+        score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
+                                                            of the images
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the linear programming solver,
+                            0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -415,6 +430,7 @@ def check_diaretdb1_segmentation_aggregated(*,
                                     only_valid=only_valid,
                                     scores=scores,
                                     eps=eps,
+                                    score_bounds=score_bounds,
                                     solver_name=solver_name,
                                     timeout=timeout,
                                     verbosity=verbosity,
@@ -428,6 +444,7 @@ def check_diaretdb1_segmentation_aggregated(*,
                                     only_valid=only_valid,
                                     scores=scores,
                                     eps=eps,
+                                    score_bounds=score_bounds,
                                     solver_name=solver_name,
                                     timeout=timeout,
                                     verbosity=verbosity,
