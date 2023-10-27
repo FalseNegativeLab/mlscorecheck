@@ -65,7 +65,7 @@ If you use the package, please consider citing the following paper:
 .. code-block:: BibTex
 
   @article{mlscorecheck,
-    author={Gy\"orgy Kov\'acs and Attila Fazekas},
+    author={Attila Fazekas and Gy\"orgy Kov\'acs},
     title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
     year={2023}
   }
