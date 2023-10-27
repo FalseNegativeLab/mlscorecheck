@@ -10,7 +10,7 @@ from ...check import (check_1_testset_no_kfold_scores,
                         check_n_testsets_som_no_kfold_scores)
 
 __all__ = ['check_hrf_vessel_aggregated_mos_assumption',
-            'check_hrf_vessel_aggregated_mos_assumption',
+            'check_hrf_vessel_aggregated_som_assumption',
             'check_hrf_vessel_aggregated',
             'check_hrf_vessel_image_assumption',
             'check_hrf_vessel_image',

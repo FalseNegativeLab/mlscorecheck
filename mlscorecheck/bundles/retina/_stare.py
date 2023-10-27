@@ -174,7 +174,6 @@ def check_stare_vessel_aggregated(imageset,
     Examples:
         >>> from mlscorecheck.bundles.retina import check_stare_vessel_aggregated
         >>> scores = {'acc': 0.4964, 'sens': 0.5793, 'spec': 0.4871, 'bacc': 0.5332}
-        >>> k = 4
         >>> results = check_stare_vessel_aggregated(imageset='all',
                                                     annotator='ah',
                                                     scores=scores,

@@ -18,7 +18,7 @@ def check_tpehg(scores: dict,
                 verbosity: int = 1,
                 numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Checks the cross-validated EHG scores
+    Checks the cross-validated TPEHG scores
 
     Args:
         scores (dict(str,float)): the dictionary of scores
@@ -37,6 +37,18 @@ def check_tpehg(scores: dict,
 
     Returns:
         dict: the result of the consistency testing
+
+    Examples:
+        >>> from mlscorecheck.bundles.ehg import check_tpehg
+        >>> # the 5-fold cross-validation scores reported in the paper
+        >>> scores = {'acc': 0.9447, 'sens': 0.9139, 'spec': 0.9733}
+        >>> eps = 0.0001
+        >>> results = check_tpehg(scores=scores,
+                                    eps=eps,
+                                    n_folds=5,
+                                    n_repeats=1)
+        >>> results['inconsistency']
+        # True
     """
     evaluation = {'dataset': get_experiment('ehg.tpehg'),
                     'folding': {'n_folds': n_folds, 'n_repeats': n_repeats}}

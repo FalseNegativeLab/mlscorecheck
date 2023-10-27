@@ -220,7 +220,6 @@ def check_diaretdb0_class(subset: str,
     Examples:
         >>> from mlscorecheck.bundles.retina import check_diaretdb0_class
         >>> scores = {'acc': 0.4271, 'sens': 0.406, 'spec': 0.4765}
-        >>> k = 4
         >>> results = check_diaretdb0_class(subset='test',
                                             batch='all',
                                             class_name='hardexudates',

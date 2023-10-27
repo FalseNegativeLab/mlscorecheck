@@ -30,6 +30,7 @@ Welcome to mlscorecheck's documentation!
     02a_bundle_intro
     02b_retina
     02c_ehg
+    02e_skinlesion
     02d_contribution
     05_references
 
