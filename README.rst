@@ -637,58 +637,20 @@ Test bundles
 
 Certain fields have unique, systematic and recurring problems in terms of evaluation methodologies. The aim of this part of the package is to provide bundles of consistency tests for the most typical scenarios of a field.
 
-Experts in various fields are kindly invited to contribute further test bundles to the package.
+The list of currently supported problems, datasets and tests are summarized below, for more details see the documentation: https://mlscorecheck.readthedocs.io/en/latest/
 
+The supported scenarios:
 
-Retinal vessel segmentation
----------------------------
-
-The segmentation of the vasculature in retinal images [RV]_ gained enormous interest in the recent decades. Typically, the authors have the option to include or exclude certain parts of the images (the pixels outside the Field-of-View), making the reported scores incomparable. (For more details see [RV]_.) To facilitate the meaningful comparison, evaluation and interpretation of reported scores, we provide two functions to check the internal consistency of scores reported for the DRIVE retinal vessel segmentation dataset.
-
-The first function enables the testing of performance scores reported for specific test images. Two tests are executed, one assuming the use of the FoV mask (excluding the pixels outside the FoV) and the other assuming the neglect of the FoV mask (including the pixels outside the FoV). As the following example illustrates, one simply provides the scores and specifies the image (whether it is from the 'test' or 'train' subset and the image identifier) and the consistency results with the two assumptions are returned.
-
-.. code-block:: Python
-
-    from mlscorecheck.bundles import (drive_image, drive_aggregated)
-
-    drive_image(scores={'acc': 0.9478, 'npv': 0.8532, 'f1p': 0.9801, 'ppv': 0.8543},
-                eps=1e-4,
-                image_set='test',
-                identifier='01')
-    # {'fov_inconsistency': True, 'no_fov_inconsistency': True}
-
-The interpretation of these results is that the reported scores are inconsistent with any of the reasonable evaluation methodologies.
-
-A similar functionality is provided for the aggregated scores calculated on the DRIVE images, in this case the two assumptions of using the pixels outside the FoV is extended with two assumptions on the way of aggregation.
-
-.. code-block:: Python
-
-    drive_aggregated(scores={'acc': 0.9478, 'sens': 0.8532, 'spec': 0.9801},
-                    eps=1e-4,
-                    image_set='test')
-    # {'mos_fov_inconsistency': True,
-    #   'mos_no_fov_inconsistency': True,
-    #   'som_fov_inconsistency': True,
-    #   'som_no_fov_inconsistency': True}
-
-The results here show that the reported scores could not be the result of any aggregation of any evaluation methodologies.
-
-Preterm delivery prediction from electrohysterogram (EHG) signals
------------------------------------------------------------------
-
-Electrohysterogram classification for the prediction of preterm delivery in pregnancy became a popular area for the applications of minority oversampling, however, it turned out that there were overly optimistic classification results reported due to systematic data leakage in the data preparation process [EHG]_. In [EHG]_, the implementations were replicated and it was shown that there is a decent gap in terms of performance when the data is prepared properly. However, data leakage changes the statistics of the dataset being cross-validated. Hence, the problematic scores could be identified with the tests implemented in the ``mlscorecheck`` package. In order to facilitate the use of the tools for this purpose, some functionalities have been prepared with the dataset already pre-populated.
-
-For illustration, given a set of scores reported in a real paper, the test below shows that it is not consistent with the dataset:
-
-.. code-block:: Python
-
-    from mlscorecheck.bundles import check_ehg
-
-    scores = {'acc': 0.9552, 'sens': 0.9351, 'spec': 0.9713}
-
-    results = check_ehg(scores=scores, eps=10**(-4), n_folds=10, n_repeats=1)
-    results['inconsistency']
-    # True
+* retinal vessel segmentation results on the DRIVE [DRIVE]_ dataset;
+* retinal vessel segmentation results on the STARE [STARE]_ dataset;
+* retinal vessel segmentation results on the HRF [HRF]_ dataset;
+* retinal vessel segmentation results on the CHASE_DB1 [CHASE_DB1]_ dataset;
+* retina image labeling using the DIARETDB0 [DIARETDB0]_ dataset;
+* retina image labeling and the segmentation of lesions using the DIARETDB1 [DIARETDB1]_ dataset;
+* retinal optic disk and optic cup segmentation using the DHRISTI_GS [DRISHTI_GS]_ dataset;
+* classification of skin lesion images using the ISIC2016 [ISIC2016]_ dataset;
+* classification of skin lesion images using the ISIC2017 [ISIC2017]_ dataset;
+* classification of term-preterm delivery in pregnance using EHG signals and the TPEHG [TPEHG]_ dataset.
 
 Contribution
 ============
@@ -701,3 +663,23 @@ References
 .. [RV] Kovács, G. and Fazekas, A.: "A new baseline for retinal vessel segmentation: Numerical identification and correction of methodological inconsistencies affecting 100+ papers", Medical Image Analysis, 2022(1), pp. 102300
 
 .. [EHG] Vandewiele, G. and Dehaene, I. and Kovács, G. and Sterckx L. and Janssens, O. and Ongenae, F. and Backere, F. D. and Turck, F. D. and Roelens, K. and Decruyenaere J. and Hoecke, S. V., and Demeester, T.: "Overly optimistic prediction results on imbalanced data: a case study of flaws and benefits when applying over-sampling", Artificial Intelligence in Medicine, 2021(1), pp. 101987
+
+.. [DRIVE] Staal, J. and Abramoff, M. D. and Niemeijer, M. and Viergever, M. A. and B. van Ginneken: "Ridge-based vessel segmentation in color images of the retina," in IEEE Transactions on Medical Imaging, vol. 23, no. 4, pp. 501-509, April 2004.
+
+.. [STARE] Hoover, A. D. and Kouznetsova, V. and Goldbaum, M.: "Locating blood vessels in retinal images by piecewise threshold probing of a matched filter response," in IEEE Transactions on Medical Imaging, vol. 19, no. 3, pp. 203-210, March 2000, doi: 10.1109/42.845178.
+
+.. [HRF] Budai A, Bock R, Maier A, Hornegger J, Michelson G.: Robust vessel segmentation in fundus images. Int J Biomed Imaging. 2013;2013:154860. doi: 10.1155/2013/154860. Epub 2013 Dec 12. PMID: 24416040; PMCID: PMC3876700.
+
+.. [CHASE_DB1] Fraz, M. M. et al., "An Ensemble Classification-Based Approach Applied to Retinal Blood Vessel Segmentation," in IEEE Transactions on Biomedical Engineering, vol. 59, no. 9, pp. 2538-2548, Sept. 2012, doi: 10.1109/TBME.2012.2205687.
+
+.. [DIARETDB0] Kauppi, T. and Kalesnykiene, V. and Kämäräinen, J. and Lensu, L. and Sorri, I. and Uusitalo, H. and Kälviäinen, H. and & Pietilä, J. (2007): "DIARETDB 0: Evaluation Database and Methodology for Diabetic Retinopathy Algorithms".
+
+.. [DIARETDB1] Kauppi, Tomi and Kalesnykiene, Valentina and Kamarainen, Joni-Kristian and Lensu, Lasse and Sorri, Iiris and Raninen, A. and Voutilainen, R. and Uusitalo, Hannu and Kälviäinen, Heikki and Pietilä, Juhani. (2007).: "DIARETDB1 diabetic retinopathy database and evaluation protocol". Proc. Medical Image Understanding and Analysis (MIUA). 2007. 10.5244/C.21.15.
+
+.. [DRISHTI_GS] Sivaswamy, J. and Krishnadas, S. R. and Datt Joshi, G. and Jain, M. and Syed Tabish, A. U.: "Drishti-GS: Retinal image dataset for optic nerve head(ONH) segmentation," 2014 IEEE 11th International Symposium on Biomedical Imaging (ISBI), Beijing, China, 2014, pp. 53-56, doi: 10.1109/ISBI.2014.6867807.
+
+.. [ISIC2016] Gutman, D. and Codella, N. C. F. and Celebi, E. and Helba, B. and Marchetti, M. and Mishra, N. and Halpern, A., 2016: "Skin lesion analysis toward melanoma detection: A challenge at the international symposium on biomedical imaging (ISBI) 2016, hosted by the international skin imaging collaboration (ISIC)". doi: 1605.01397
+
+.. [ISIC2017] Codella, N. C. and Gutman, D. and Celebi, M.E. and Helba, B. and Marchetti, M.A. and Dusza, S.W. and Kalloo, A. and Liopyris, K. and Mishra, N. and Kittler, H., et al.: "Skin lesion analysis toward melanoma detection: A challenge at the 2017 international symposium on biomedical imaging (ISBI), hosted by the international skin imaging collaboration (ISIC) Biomedical Imaging (ISBI 2018)", 2018 IEEE 15th International Symposium on, IEEE (2018), pp. 168-172
+
+.. [TPEHG] Fele-Zorz G and Kavsek G and Novak-Antolic Z and Jager F.: "A comparison of various linear and non-linear signal processing techniques to separate uterine EMG records of term and pre-term delivery groups". Med Biol Eng Comput. 2008 Sep;46(9):911-22. doi: 10.1007/s11517-008-0350-y. Epub 2008 Apr 24. PMID: 18437439.

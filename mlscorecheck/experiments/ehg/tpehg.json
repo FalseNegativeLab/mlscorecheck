@@ -1,5 +1,9 @@
 {
-    "identifier": "ehg",
-    "p": 38,
-    "n": 262
+    "distribution":
+        {
+            "identifier": "ehg",
+            "p": 38,
+            "n": 262
+        },
+    "citation": "@article{tpehg, doi = {10.1007/s11517-008-0350-y}, url = {https://doi.org/10.1007/s11517-008-0350-y}, year = {2008}, month = apr, publisher = {Springer Science and Business Media {LLC}}, volume = {46}, number = {9}, pages = {911--922}, author = {G. Fele-{\\v{Z}}or{\\v{z}} and G. Kav{\\v{s}}ek and {\\v{Z}}. Novak-Antoli{\\v{c}} and F. Jager}, title = {A comparison of various linear and non-linear signal processing techniques to separate uterine {EMG} records of term and pre-term delivery groups}, journal = {Medical and Biological Engineering and Computing}}"
 }

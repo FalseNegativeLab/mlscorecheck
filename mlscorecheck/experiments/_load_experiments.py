@@ -103,8 +103,8 @@ def load_drishti_gs() -> dict:
         dict: the experiment specifications
     """
     prefix = os.path.join('experiments', 'retina', 'drishti_gs')
-    return {'train': load_json(prefix, 'drishti_gs_train.json'),
-            'test': load_json(prefix, 'drishti_gs_test.json')}
+    return {'train': load_json(prefix, 'drishti_gs_train.json')['distributions'],
+            'test': load_json(prefix, 'drishti_gs_test.json')['distributions']}
 
 
 def load_hrf() -> dict:
@@ -157,7 +157,7 @@ def load_tpehg() -> dict:
         dict: the drive experiments
     """
     prefix = os.path.join('experiments', 'ehg')
-    return load_json(prefix, 'tpehg.json')
+    return load_json(prefix, 'tpehg.json')['distribution']
 
 
 def load_isic2016() -> dict:
@@ -168,7 +168,7 @@ def load_isic2016() -> dict:
         dict: the testset
     """
     prefix = os.path.join('experiments', 'skinlesion', 'isic2016')
-    return load_json(prefix, 'isic2016.json')
+    return load_json(prefix, 'isic2016.json')['distribution']
 
 
 def load_isic2017() -> dict:
@@ -180,4 +180,4 @@ def load_isic2017() -> dict:
         dict: the testset
     """
     prefix = os.path.join('experiments', 'skinlesion', 'isic2017')
-    return load_json(prefix, 'isic2017.json')
+    return load_json(prefix, 'isic2017.json')['distribution']

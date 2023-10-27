@@ -1,2 +1,4 @@
-{"p": 75,
-"n": 304}
+{
+    "distribution": {"p": 75, "n": 304},
+    "citation": "@misc{gutman2016skin, title={Skin Lesion Analysis toward Melanoma Detection: A Challenge at the International Symposium on Biomedical Imaging (ISBI) 2016, hosted by the International Skin Imaging Collaboration (ISIC)}, author={David Gutman and Noel C. F. Codella and Emre Celebi and Brian Helba and Michael Marchetti and Nabin Mishra and Allan Halpern}, year={2016}, eprint={1605.01397}, archivePrefix={arXiv}, primaryClass={cs.CV}}"
+}
