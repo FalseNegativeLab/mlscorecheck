@@ -9,6 +9,13 @@ from ..core import (init_random_state, dict_minmax, dict_mean, round_scores)
 from ..experiments import dataset_statistics
 from ..scores import calculate_scores, calculate_scores_for_lp
 
+from ..individual import (sample_multiclass_dataset,
+                            generate_multiclass_dataset)
+from ._folding_utils import (multiclass_stratified_folds,
+                            _create_folds_multiclass)
+from ..scores import calculate_multiclass_scores
+
+
 from ._dataset import Dataset
 from ._folding import Folding
 from ._evaluation import Evaluation
@@ -20,7 +27,8 @@ __all__ = ['generate_dataset',
             'generate_experiment',
             'get_fold_score_bounds',
             'get_dataset_score_bounds',
-            'generate_scores_for_testsets']
+            'generate_scores_for_testsets',
+            'generate_dataset_folding_multiclass']
 
 def generate_dataset(max_p: int = 500,
                         max_n: int = 500,
@@ -331,3 +339,56 @@ def generate_scores_for_testsets(testsets,
                                 subset=subset)
 
     return scores | {'beta_positive': 2, 'beta_negative': 2}
+
+def generate_dataset_folding_multiclass(random_state=None,
+                                        max_n_classes=5,
+                                        min_n_classes=2,
+                                        max_class_size=200,
+                                        min_class_size=10,
+                                        max_n_folds=5,
+                                        max_n_repeats=3,
+                                        average=None,
+                                        aggregation=None,
+                                        rounding_decimals=None):
+    """
+    Generates a multiclass dataset and folding with scores
+    """
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    dataset = generate_multiclass_dataset(random_state=random_state,
+                                            max_n_classes=5,
+                                            min_n_classes=2,
+                                            max_class_size=200,
+                                            min_class_size=10)
+
+    if random_state.randint(2) == 0:
+        folding = {'n_folds': random_state.randint(2, max_n_folds),
+                    'n_repeats': random_state.randint(1, max_n_repeats),
+                    'strategy': 'stratified_sklearn'}
+    elif random_state.randint(2) == 0:
+        folding = {'folds': multiclass_stratified_folds(dataset=dataset,
+                                                        n_folds=random_state.randint(2, max_n_repeats))}
+    else:
+        folding = {'n_folds': 1}
+
+    folds = _create_folds_multiclass(dataset, folding)
+
+    samples = [sample_multiclass_dataset(dataset=fold, random_state=random_state) for fold in folds]
+
+    print(samples)
+
+    if aggregation == 'mos':
+        scores = [calculate_multiclass_scores(sample,
+                                                average=average,
+                                                additional_symbols={'beta_positive': 2,
+                                                                    'beta_negative': 2}) for sample in samples]
+        scores = round_scores(dict_mean(scores), rounding_decimals=rounding_decimals)
+        return dataset, folding, scores
+    elif aggregation == 'som':
+        scores = calculate_multiclass_scores(np.sum(np.array(samples), axis=0),
+                                                average=average,
+                                                additional_symbols={'beta_positive': 2,
+                                                                    'beta_negative': 2})
+        return dataset, folding, scores | {'beta_positive': 2, 'beta_negative': 2}
+

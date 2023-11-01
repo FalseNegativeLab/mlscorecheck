@@ -91,8 +91,6 @@ def multiclass_score_macro(confusion_matrix,
                         score_specifications[name].get('nans'))
                 for idx, count in enumerate(counts)]
 
-    print(scores)
-
     return np.mean(scores)
 
 def multiclass_score_micro(confusion_matrix,

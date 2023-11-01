@@ -25,7 +25,9 @@ __all__ = ['stratified_configurations_sklearn',
             'repeated_kfolds_generator',
             'experiment_kfolds_generator',
             'multiclass_stratified_folds',
-            'transform_multiclass_fold_to_binary']
+            'transform_multiclass_fold_to_binary',
+            '_create_folds_multiclass',
+            '_create_binary_folds_multiclass']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -471,3 +473,33 @@ def transform_multiclass_fold_to_binary(fold: dict) -> list:
     """
     n_total = sum(fold.values())
     return [{'p': value, 'n': n_total - value} for value in fold.values()]
+
+def _create_folds_multiclass(dataset, folding):
+    if folding.get('folds') is not None and (folding.get('n_repeats') is not None \
+                                                or folding.get('strategy') is not None
+                                                or folding.get('n_folds') is not None):
+        raise ValueError('either specify the folds or the folding strategy')
+
+    if 'folds' in folding:
+        return folding['folds']
+    elif folding.get('strategy') == 'stratified_sklearn':
+        folds = multiclass_stratified_folds(dataset, folding.get('n_folds', 1))
+    else:
+        folds = [dataset]
+
+    n_repeats = folding.get('n_repeats', 1)
+
+    folds = folds * n_repeats
+    folds = [copy.deepcopy(fold) for fold in folds]
+
+    return folds
+
+def _create_binary_folds_multiclass(dataset, folding):
+    if folding.get('folds') is not None and (folding.get('n_repeats') is not None \
+                                                or folding.get('strategy') is not None
+                                                or folding.get('n_folds') is not None):
+        raise ValueError('either specify the folds or the folding strategy')
+
+    folds = _create_folds_multiclass(dataset, folding)
+    folds = [transform_multiclass_fold_to_binary(fold) for fold in folds]
+    return [fold for fold_list in folds for fold in fold_list]
