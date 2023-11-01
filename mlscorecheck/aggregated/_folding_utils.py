@@ -5,6 +5,10 @@ This module implements some functionalities related to folding
 import copy
 import itertools
 
+import numpy as np
+
+from sklearn.model_selection import StratifiedKFold
+
 from ..core import logger
 from ..experiments import dataset_statistics
 from ._utils import random_identifier
@@ -19,7 +23,9 @@ __all__ = ['stratified_configurations_sklearn',
             'determine_min_max_p',
             'kfolds_generator',
             'repeated_kfolds_generator',
-            'experiment_kfolds_generator']
+            'experiment_kfolds_generator',
+            'multiclass_stratified_folds',
+            'transform_multiclass_fold_to_binary']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -434,3 +440,34 @@ def experiment_kfolds_generator(experiment: dict,
         yield {'evaluations': list(evaluations),
                 'dataset_score_bounds': experiment.get('dataset_score_bounds'),
                 'aggregation': experiment['aggregation']}
+
+def multiclass_stratified_folds(dataset: dict, n_folds: int) -> list:
+    """
+    Generating the folds for an sklearn stratified multiclass setup
+
+    Args:
+        dataset (dict): the specification of the dataset
+        n_folds (int): the number of folds
+
+    Returns:
+        list(dict): the list of fold specifications
+    """
+    folds = []
+    y = np.hstack([np.repeat(key, value) for key, value in dataset.items()])
+    for _, test in StratifiedKFold(n_splits=n_folds).split(y.reshape(-1, 1), y, y):
+        folds.append({idx: count for idx, count in enumerate(np.bincount(y[test]))})
+
+    return folds
+
+def transform_multiclass_fold_to_binary(fold: dict) -> list:
+    """
+    Transforms a multiclass fold specification to a list of binary folds
+
+    Args:
+        fold (dict): a multiclass fold specification
+
+    Returns:
+        list(dict): the list of binary folds
+    """
+    n_total = sum(fold.values())
+    return [{'p': value, 'n': n_total - value} for value in fold.values()]

@@ -10,7 +10,7 @@ the linear programming problem
 import pulp as pl
 
 from ..core import (init_random_state, round_scores)
-from ..individual import calculate_scores_for_lp
+from ..scores import calculate_scores_for_lp
 
 from ._utils import random_identifier, aggregated_scores
 

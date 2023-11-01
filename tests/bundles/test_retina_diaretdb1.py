@@ -4,7 +4,7 @@ This module tests the test functionalities implemented for the DIARETDB1 dataset
 
 import pytest
 
-from mlscorecheck.bundles.retina import (_prepare_configuration_diaretdb1,
+from mlscorecheck.check.bundles.retina import (_prepare_configuration_diaretdb1,
                                             check_diaretdb1_class,
                                             check_diaretdb1_segmentation_image,
                                             check_diaretdb1_segmentation_aggregated,

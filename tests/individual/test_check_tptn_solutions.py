@@ -8,9 +8,9 @@ import pytest
 from mlscorecheck.individual import (check_scores_tptn_pairs,
                                         _check_scores_tptn_pairs,
                                         generate_1_problem,
-                                        calculate_scores,
                                         sqrt)
-from mlscorecheck.scores import (score_functions_standardized_without_complements)
+from mlscorecheck.scores import (score_functions_standardized_without_complements,
+                                    calculate_scores)
 
 score_functions = score_functions_standardized_without_complements
 

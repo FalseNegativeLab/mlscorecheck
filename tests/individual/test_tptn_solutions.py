@@ -8,7 +8,8 @@ import numpy as np
 
 from mlscorecheck.core import safe_call
 from mlscorecheck.individual import (tptn_solutions, is_applicable_tptn,
-                                        generate_1_problem, calculate_scores)
+                                        generate_1_problem)
+from mlscorecheck.scores import calculate_scores
 
 @pytest.mark.parametrize('figure', ['tp', 'tn'])
 @pytest.mark.parametrize("score", list(tptn_solutions.keys()))

@@ -6,7 +6,7 @@ import pulp as pl
 
 from ..core import (init_random_state, dict_mean, round_scores,
                     NUMERICAL_TOLERANCE)
-from ..individual import calculate_scores_for_lp
+from ..scores import calculate_scores_for_lp
 
 from ._evaluation import Evaluation
 

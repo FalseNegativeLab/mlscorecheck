@@ -2,7 +2,7 @@
 Testing the EHG testing
 """
 
-from mlscorecheck.bundles.ehg import check_tpehg
+from mlscorecheck.check.bundles.ehg import check_tpehg
 
 def test_check_tpehg():
     """

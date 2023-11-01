@@ -4,11 +4,14 @@ This module implements a random problem generator
 
 import numpy as np
 
-from ._calculate_scores import calculate_scores
+from ..scores import calculate_scores
 
 __all__ = ['generate_problems',
             'generate_1_problem',
-            'generate_problem_and_scores']
+            'generate_problem_and_scores',
+            'generate_multiclass_dataset',
+            'sample_multiclass_dataset',
+            'create_confusion_matrix']
 
 def generate_problem_and_scores(*,
                                 max_p: int = 1000,
@@ -131,3 +134,49 @@ def generate_problems(*,
         problems.append(problem)
 
     return (evaluations[0], problems[0]) if n_problems == 1 else (evaluations, problems)
+
+def generate_multiclass_dataset(random_state=None,
+                                max_n_classes=5,
+                                min_n_classes=2,
+                                max_class_size=200,
+                                min_class_size=10):
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    n_classes = random_state.randint(min_n_classes, max_n_classes+1)
+    classes = {class_idx: random_state.randint(min_class_size, max_class_size+1)
+                for class_idx in range(n_classes)}
+
+    return classes
+
+def create_confusion_matrix(y_true, y_pred):
+    """
+    Creates a confusion matrix
+
+    Args:
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
+
+    Returns:
+        np.ndarray: the confusion matrix
+    """
+    n_classes = max(y_true.max(), y_pred.max()) + 1
+    confusion_matrix = np.zeros(shape=(n_classes, n_classes), dtype=int)
+
+    for true, pred in zip(y_true, y_pred):
+        confusion_matrix[true, pred] += 1
+
+    return confusion_matrix
+
+def sample_multiclass_dataset(dataset, random_state=None):
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    sample = np.zeros(shape=(len(dataset), len(dataset)), dtype=int)
+
+    for class_idx, count in dataset.items():
+        sample[class_idx, :] = random_state.multinomial(count,
+                                                        np.ones(len(dataset))/len(dataset),
+                                                        size=1)[0]
+
+    return sample

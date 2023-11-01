@@ -2,12 +2,16 @@
 This module tests the problem generator
 """
 
+import pytest
+
 import numpy as np
 
 from mlscorecheck.individual import (generate_problems,
-                                calculate_scores,
-                                generate_problem_and_scores)
+                                generate_problem_and_scores,
+                                generate_multiclass_dataset,
+                                sample_multiclass_dataset)
 from mlscorecheck.core import round_scores
+from mlscorecheck.scores import calculate_scores
 
 def test_generate_problem_and_scores():
     """
@@ -63,3 +67,33 @@ def test_generate_problems():
 
     evaluation, _ = generate_problems(zeros=['fn'])
     assert evaluation['tp'] == evaluation['p']
+
+def test_generate_multiclass_dataset():
+    """
+    Testing the generation of a multiclass dataset
+    """
+
+    dataset = generate_multiclass_dataset(random_state=5,
+                                            max_n_classes=5)
+
+    assert len(dataset) <= 5
+    assert all(item > 0 for item in dataset.values())
+
+@pytest.mark.parametrize('random_seed', list(range(10)))
+def test_sample_multiclass_dataset(random_seed):
+    """
+    Testing the sampling of a multiclass dataset
+
+    Args:
+        random_seed (int): the random seed to be used
+    """
+
+    dataset = generate_multiclass_dataset(random_state=random_seed)
+
+    sample = sample_multiclass_dataset(dataset=dataset,
+                                        random_state=random_seed)
+
+    assert len(dataset) == len(sample)
+    sums = np.sum(sample, axis=1)
+
+    assert np.all(sums == np.array(list(dataset.values())))

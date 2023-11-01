@@ -9,16 +9,16 @@ Consistency testing (``check``)
 
 The test functions implemented in the ``mlscorecheck.check`` module.
 
-.. autofunction:: mlscorecheck.check.check_1_testset_no_kfold_scores
-.. autofunction:: mlscorecheck.check.check_1_dataset_som_scores
-.. autofunction:: mlscorecheck.check.check_1_dataset_known_folds_mos_scores
-.. autofunction:: mlscorecheck.check.check_1_dataset_unknown_folds_mos_scores
-.. autofunction:: mlscorecheck.check.check_n_testsets_mos_no_kfold_scores
-.. autofunction:: mlscorecheck.check.check_n_testsets_som_no_kfold_scores
-.. autofunction:: mlscorecheck.check.check_n_datasets_som_kfold_som_scores
-.. autofunction:: mlscorecheck.check.check_n_datasets_mos_kfold_som_scores
-.. autofunction:: mlscorecheck.check.check_n_datasets_mos_known_folds_mos_scores
-.. autofunction:: mlscorecheck.check.check_n_datasets_mos_unknown_folds_mos_scores
+.. autofunction:: mlscorecheck.check.binary.check_1_testset_no_kfold
+.. autofunction:: mlscorecheck.check.binary.check_1_dataset_som
+.. autofunction:: mlscorecheck.check.binary.check_1_dataset_known_folds_mos
+.. autofunction:: mlscorecheck.check.binary.check_1_dataset_unknown_folds_mos
+.. autofunction:: mlscorecheck.check.binary.check_n_testsets_mos_no_kfold
+.. autofunction:: mlscorecheck.check.binary.check_n_testsets_som_no_kfold
+.. autofunction:: mlscorecheck.check.binary.check_n_datasets_som_kfold_som
+.. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_kfold_som
+.. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_known_folds_mos
+.. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_unknown_folds_mos
 
 
 Test bundles (``bundles``)
@@ -34,61 +34,61 @@ The test functions dedicated to retina image processing problems.
 DRIVE
 ~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_drive_vessel_image
-.. autofunction:: mlscorecheck.bundles.retina.check_drive_vessel_image_assumption
-.. autofunction:: mlscorecheck.bundles.retina.check_drive_vessel_aggregated
-.. autofunction:: mlscorecheck.bundles.retina.check_drive_vessel_aggregated_mos_assumption
-.. autofunction:: mlscorecheck.bundles.retina.check_drive_vessel_aggregated_som_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drive_vessel_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drive_vessel_image_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drive_vessel_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drive_vessel_aggregated_mos_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drive_vessel_aggregated_som_assumption
 
 STARE
 ~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_stare_vessel_image
-.. autofunction:: mlscorecheck.bundles.retina.check_stare_vessel_aggregated
-.. autofunction:: mlscorecheck.bundles.retina.check_stare_vessel_aggregated_mos
-.. autofunction:: mlscorecheck.bundles.retina.check_stare_vessel_aggregated_som
+.. autofunction:: mlscorecheck.check.bundles.retina.check_stare_vessel_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_stare_vessel_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_stare_vessel_aggregated_mos
+.. autofunction:: mlscorecheck.check.bundles.retina.check_stare_vessel_aggregated_som
 
 HRF
 ~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_hrf_vessel_image
-.. autofunction:: mlscorecheck.bundles.retina.check_hrf_vessel_image_assumption
-.. autofunction:: mlscorecheck.bundles.retina.check_hrf_vessel_aggregated
-.. autofunction:: mlscorecheck.bundles.retina.check_hrf_vessel_aggregated_mos_assumption
-.. autofunction:: mlscorecheck.bundles.retina.check_hrf_vessel_aggregated_som_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_hrf_vessel_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_hrf_vessel_image_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_hrf_vessel_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_hrf_vessel_aggregated_mos_assumption
+.. autofunction:: mlscorecheck.check.bundles.retina.check_hrf_vessel_aggregated_som_assumption
 
 CHASE_DB1
 ~~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_chasedb1_vessel_image
-.. autofunction:: mlscorecheck.bundles.retina.check_chasedb1_vessel_aggregated
-.. autofunction:: mlscorecheck.bundles.retina.check_chasedb1_vessel_aggregated_mos
-.. autofunction:: mlscorecheck.bundles.retina.check_chasedb1_vessel_aggregated_som
+.. autofunction:: mlscorecheck.check.bundles.retina.check_chasedb1_vessel_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_chasedb1_vessel_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_chasedb1_vessel_aggregated_mos
+.. autofunction:: mlscorecheck.check.bundles.retina.check_chasedb1_vessel_aggregated_som
 
 DIARETDB0
 ~~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_diaretdb0_class
+.. autofunction:: mlscorecheck.check.bundles.retina.check_diaretdb0_class
 
 DIARETDB1
 ~~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_diaretdb1_class
-.. autofunction:: mlscorecheck.bundles.retina.check_diaretdb1_segmentation_image
-.. autofunction:: mlscorecheck.bundles.retina.check_diaretdb1_segmentation_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_diaretdb1_class
+.. autofunction:: mlscorecheck.check.bundles.retina.check_diaretdb1_segmentation_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_diaretdb1_segmentation_aggregated
 
 DRISHTI_GS
 ~~~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.retina.check_drishti_gs_segmentation_image
-.. autofunction:: mlscorecheck.bundles.retina.check_drishti_gs_segmentation_aggregated
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drishti_gs_segmentation_image
+.. autofunction:: mlscorecheck.check.bundles.retina.check_drishti_gs_segmentation_aggregated
 
 Preterm delivery prediction by EHG signals
 ------------------------------------------
 
 The test bundle dedicated to the testing of electrohsyterogram data.
 
-.. autofunction:: mlscorecheck.bundles.ehg.check_tpehg
+.. autofunction:: mlscorecheck.check.bundles.ehg.check_tpehg
 
 Skin lesion classification
 --------------------------
@@ -98,12 +98,12 @@ The test bundle dedicated to the testing of skin lesion classification.
 ISIC2016
 ~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.skinlesion.check_isic2016
+.. autofunction:: mlscorecheck.check.bundles.skinlesion.check_isic2016
 
 ISIC2017
 ~~~~~~~~
 
-.. autofunction:: mlscorecheck.bundles.skinlesion.check_isic2017
+.. autofunction:: mlscorecheck.check.bundles.skinlesion.check_isic2017
 
 Experiments (``experiments``)
 =============================

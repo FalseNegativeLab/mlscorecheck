@@ -367,6 +367,7 @@ def prevalence_threshold_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
+    print(tp, tn, p, n)
     return -p*(n*sqrt(tp*(n - tn)/(n*p)) - n + tn)/(-n*tp + p*(n - tn))
 
 def diagnostic_odds_ratio_standardized(*, tp, tn, p, n):

@@ -4,7 +4,7 @@ This module tests the tests developed for the DRISHTI_GS dataset
 
 import pytest
 
-from mlscorecheck.bundles.retina import (_prepare_testsets_drishti_gs,
+from mlscorecheck.check.bundles.retina import (_prepare_testsets_drishti_gs,
                                             check_drishti_gs_segmentation_image,
                                             check_drishti_gs_segmentation_aggregated)
 

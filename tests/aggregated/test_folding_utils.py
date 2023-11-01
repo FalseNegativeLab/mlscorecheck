@@ -9,13 +9,16 @@ import pytest
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 
+from mlscorecheck.individual import generate_multiclass_dataset
 from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         determine_fold_configurations,
                                         _create_folds,
                                         repeated_kfolds_generator,
                                         fold_partitioning_generator,
                                         _check_specification_and_determine_p_n,
-                                        determine_min_max_p)
+                                        determine_min_max_p,
+                                        multiclass_stratified_folds,
+                                        transform_multiclass_fold_to_binary)
 
 def test_generate_datasets_with_all_kfolds():
     """
@@ -299,3 +302,33 @@ def test_determine_min_max_p(p, n, k, p_non_zero, n_non_zero): # pylint: disable
 
     assert min_p == min_p_full
     assert max_p == max_p_full
+
+def test_multiclass_stratified_folds():
+    """
+    Testing the generation of multiclass stratified folds
+    """
+
+    dataset = generate_multiclass_dataset(random_state=5)
+
+    folds = multiclass_stratified_folds(dataset, n_folds=3)
+
+    assert len(folds) == 3
+
+    counts = [0] * len(dataset)
+
+    for fold in folds:
+        for class_, count in fold.items():
+            counts[class_] += count
+
+    assert counts == list(dataset.values())
+
+def test_transform_multiclass_fold_to_binary():
+    """
+    Testing the transformation of a multiclass fold to binary folds
+    """
+
+    dataset = generate_multiclass_dataset(random_state=5)
+
+    bfolds = transform_multiclass_fold_to_binary(dataset)
+
+    assert len(bfolds) == len(dataset)

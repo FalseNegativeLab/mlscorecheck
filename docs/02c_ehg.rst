@@ -9,7 +9,7 @@ For illustration, given a set of scores reported in a real paper, the test below
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.ehg import check_tpehg
+    >>> from mlscorecheck.check.bundles.ehg import check_tpehg
     >>> # the 5-fold cross-validation scores reported in the paper
     >>> scores = {'acc': 0.9447, 'sens': 0.9139, 'spec': 0.9733}
     >>> eps = 0.0001

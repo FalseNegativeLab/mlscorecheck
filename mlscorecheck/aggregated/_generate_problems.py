@@ -7,7 +7,7 @@ import numpy as np
 
 from ..core import (init_random_state, dict_minmax, dict_mean, round_scores)
 from ..experiments import dataset_statistics
-from ..individual import calculate_scores, calculate_scores_for_lp
+from ..scores import calculate_scores, calculate_scores_for_lp
 
 from ._dataset import Dataset
 from ._folding import Folding
