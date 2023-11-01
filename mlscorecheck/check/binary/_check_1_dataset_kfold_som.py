@@ -19,11 +19,8 @@ def check_1_dataset_som(dataset: dict,
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to one single dataset and aggregating the figures
-    over the folds in the score of means fashion. All pairs of
-    the supported individual scores are checked against all other as in
-    the 1_dataset_no_kfold case, however, additionally, if score_bounds
-    are specified in the folds, the aggregated check is also executed
-    on the supported acc, bacc, sens and spec scores.
+    over the folds in the score of means fashion. The test follows the
+    methodology of the the 1_dataset_no_kfold case.
 
     Args:
         dataset (dict): the dataset specification

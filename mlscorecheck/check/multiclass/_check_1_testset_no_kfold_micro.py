@@ -17,14 +17,8 @@ def check_1_testset_no_kfold_micro(testset: dict,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores calculated by taking the micro average
-    on one single multiclass dataset. Note that this
-    test can only check the consistency of the 'acc', 'sens', 'spec'
-    and 'bacc' scores. Note that without bounds, if there is a large
-    number of classes, it is likely that there will be a configuration
-    matching the scores provided. In order to increase the strength of
-    the test, one can add class_scores_bounds if
-    for example, besides the average score, the minimum and the maximum
-    scores over the classes are also provided.
+    on one single multiclass dataset. The test follows the methodology of the
+    1_dataset_som case.
 
     Args:
         testset (dict): the specification of the testset
@@ -37,31 +31,31 @@ def check_1_testset_no_kfold_micro(testset: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the dictionary of the results of the analysis, the
-        ``inconsistency`` entry indicates if inconsistencies have
-        been found. The aggregated_results entry is empty if
-        the execution of the linear programming based check was
-        unnecessary. The result has four more keys. Under ``lp_status``
-        one finds the status of the lp solver, under ``lp_configuration_scores_match``
-        one finds a flag indicating if the scores from the lp configuration
-        match the scores provided, ``lp_configuration_bounds_match`` indicates
-        if the specified bounds match the actual figures and finally
-        ``lp_configuration`` contains the actual configuration of the
-        linear programming solver.
+        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
+        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
+        ``details`` provides further details from the analysis of the scores one after the other.
+        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
+        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
+        by using the solutions for the score pairs.
 
     Raises:
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_macro
+        >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
         >>> testset = {0: 10, 1: 100, 2: 80}
-        >>> scores = {'acc': 0.6, 'sens': 0.3417, 'spec': 0.6928, 'f1p': 0.3308}
-        >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+        >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
+            'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
+        >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
         >>> results['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8464
-        >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+        >>> scores['acc'] = 0.8184
+        >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
         >>> results['inconsistency']
         # True
     """
