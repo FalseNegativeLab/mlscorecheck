@@ -1,5 +1,6 @@
 """
-This module implements the multiclass tests in a k-fold MoS scenario.
+This module implements the multiclass tests in a k-fold MoS scenario with macro averaging
+of scores.
 """
 
 import copy
@@ -10,13 +11,12 @@ from ...aggregated import transform_multiclass_fold_to_binary, _create_folds_mul
 from ..binary import (check_n_datasets_mos_kfold_som,
                         check_n_datasets_mos_known_folds_mos)
 
-__all__ = ['check_1_dataset_known_folds_mos']
+__all__ = ['check_1_dataset_known_folds_mos_macro']
 
-def check_1_dataset_known_folds_mos(dataset: dict,
+def check_1_dataset_known_folds_mos_macro(dataset: dict,
                                     folding: dict,
                                     scores: dict,
                                     eps,
-                                    average: str,
                                     *,
                                     class_score_bounds: dict = None,
                                     dataset_score_bounds: dict = None,
@@ -25,7 +25,7 @@ def check_1_dataset_known_folds_mos(dataset: dict,
                                     verbosity: int = 1,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Checking the consistency of scores calculated by taking the micro average
+    Checking the consistency of scores calculated by taking the macro average
     on one single multiclass dataset. The test follows the methodology of the
     1_dataset_som case.
 
@@ -51,21 +51,23 @@ def check_1_dataset_known_folds_mos(dataset: dict,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
-        >>> testset = {0: 10, 1: 100, 2: 80}
-        >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
-            'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
-        >>> results = check_1_testset_no_kfold_micro(testset=testset,
-                                            scores=scores,
-                                            eps=1e-4)
+        >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_micro
+        >>> dataset = {0: 66, 1: 178, 2: 151}
+        >>> folding = {'folds': [{0: 33, 1: 89, 2: 76}, {0: 33, 1: 89, 2: 75}]}
+        >>> scores = {'acc': 0.5646, 'sens': 0.3469, 'spec': 0.6734, 'f1p': 0.3469}
+        >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                            folding=folding,
+                                                            scores=scores,
+                                                            eps=1e-4)
         >>> results['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8184
-        >>> results = check_1_testset_no_kfold_micro(testset=testset,
-                                            scores=scores,
-                                            eps=1e-4)
-        >>> results['inconsistency']
+        >>> scores['acc'] = 0.8367
+        >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+        >>> result['inconsistency']
         # True
     """
     folds = _create_folds_multiclass(dataset, folding)
@@ -81,17 +83,11 @@ def check_1_dataset_known_folds_mos(dataset: dict,
                             'folding': folding,
                             'fold_score_bounds': class_score_bounds})
 
-    if average == 'micro':
-        return check_n_datasets_mos_kfold_som(evaluations=evaluations,
-                                                scores=scores,
-                                                eps=eps,
-                                                numerical_tolerance=numerical_tolerance)
-    elif average == 'macro':
-        return check_n_datasets_mos_known_folds_mos(evaluations=evaluations,
-                                                scores=scores,
-                                                eps=eps,
-                                                dataset_score_bounds=dataset_score_bounds,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
+    return check_n_datasets_mos_known_folds_mos(evaluations=evaluations,
+                                            scores=scores,
+                                            eps=eps,
+                                            dataset_score_bounds=dataset_score_bounds,
+                                            solver_name=solver_name,
+                                            timeout=timeout,
+                                            verbosity=verbosity,
+                                            numerical_tolerance=numerical_tolerance)

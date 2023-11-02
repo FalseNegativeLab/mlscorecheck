@@ -349,7 +349,8 @@ def generate_dataset_folding_multiclass(random_state=None,
                                         max_n_repeats=3,
                                         average=None,
                                         aggregation=None,
-                                        rounding_decimals=None):
+                                        rounding_decimals=None,
+                                        subset=None):
     """
     Generates a multiclass dataset and folding with scores
     """
@@ -382,13 +383,16 @@ def generate_dataset_folding_multiclass(random_state=None,
         scores = [calculate_multiclass_scores(sample,
                                                 average=average,
                                                 additional_symbols={'beta_positive': 2,
-                                                                    'beta_negative': 2}) for sample in samples]
+                                                                    'beta_negative': 2},
+                                                subset=subset) for sample in samples]
         scores = round_scores(dict_mean(scores), rounding_decimals=rounding_decimals)
         return dataset, folding, scores
     elif aggregation == 'som':
         scores = calculate_multiclass_scores(np.sum(np.array(samples), axis=0),
                                                 average=average,
                                                 additional_symbols={'beta_positive': 2,
-                                                                    'beta_negative': 2})
+                                                                    'beta_negative': 2},
+                                                rounding_decimals=rounding_decimals,
+                                                subset=subset)
         return dataset, folding, scores | {'beta_positive': 2, 'beta_negative': 2}
 

@@ -1,5 +1,6 @@
 """
-This module implements the micro-averaged multiclass tests in a k-fold scenario.
+This module implements the macro-averaged multiclass tests in a k-fold scenario
+with SoM aggregation.
 """
 
 import copy
@@ -10,13 +11,12 @@ from ...aggregated import transform_multiclass_fold_to_binary, _create_folds_mul
 from ._check_1_testset_no_kfold_micro import check_1_testset_no_kfold_micro
 from ._check_1_testset_no_kfold_macro import check_1_testset_no_kfold_macro
 
-__all__ = ['check_1_dataset_known_folds_som']
+__all__ = ['check_1_dataset_known_folds_som_macro']
 
-def check_1_dataset_known_folds_som(dataset: dict,
+def check_1_dataset_known_folds_som_macro(dataset: dict,
                                     folding: dict,
                                     scores: dict,
                                     eps,
-                                    average: str,
                                     *,
                                     class_score_bounds: dict = None,
                                     solver_name: str = None,
@@ -51,28 +51,39 @@ def check_1_dataset_known_folds_som(dataset: dict,
 
     Raises:
         ValueError: If the provided scores are not consistent with the dataset.
+
+    Examples:
+        >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_macro
+        >>> dataset = {0: 34, 1: 135, 2: 170, 3: 192}
+        >>> folding = {'n_folds': 2, 'n_repeats': 1, 'strategy': 'stratified_sklearn'}
+        >>> scores = {'acc': 0.6271, 'sens': 0.2422, 'spec': 0.7525, 'f1p': 0.2333}
+        >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+        >>> result['inconsistency']
+        # False
+
+        >>> scores['acc'] = 0.8762
+        >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+        >>> result['inconsistency']
+        # True
     """
     folds = _create_folds_multiclass(dataset, folding)
-
-    print(folds)
 
     testset = copy.deepcopy(folds[0])
     for fold in folds[1:]:
         for key in fold:
             testset[key] += fold[key]
-    print(testset)
 
-    if average == 'micro':
-        return check_1_testset_no_kfold_micro(testset=testset,
-                                                scores=scores,
-                                                eps=eps,
-                                                numerical_tolerance=numerical_tolerance)
-    elif average == 'macro':
-        return check_1_testset_no_kfold_macro(testset=testset,
-                                                scores=scores,
-                                                eps=eps,
-                                                class_score_bounds=class_score_bounds,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
+    return check_1_testset_no_kfold_macro(testset=testset,
+                                            scores=scores,
+                                            eps=eps,
+                                            class_score_bounds=class_score_bounds,
+                                            solver_name=solver_name,
+                                            timeout=timeout,
+                                            verbosity=verbosity,
+                                            numerical_tolerance=numerical_tolerance)
