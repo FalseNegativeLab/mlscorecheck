@@ -26,8 +26,7 @@ __all__ = ['stratified_configurations_sklearn',
             'experiment_kfolds_generator',
             'multiclass_stratified_folds',
             'transform_multiclass_fold_to_binary',
-            '_create_folds_multiclass',
-            '_create_binary_folds_multiclass']
+            '_create_folds_multiclass']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -493,13 +492,3 @@ def _create_folds_multiclass(dataset, folding):
     folds = [copy.deepcopy(fold) for fold in folds]
 
     return folds
-
-def _create_binary_folds_multiclass(dataset, folding):
-    if folding.get('folds') is not None and (folding.get('n_repeats') is not None \
-                                                or folding.get('strategy') is not None
-                                                or folding.get('n_folds') is not None):
-        raise ValueError('either specify the folds or the folding strategy')
-
-    folds = _create_folds_multiclass(dataset, folding)
-    folds = [transform_multiclass_fold_to_binary(fold) for fold in folds]
-    return [fold for fold_list in folds for fold in fold_list]

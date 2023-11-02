@@ -9,6 +9,9 @@ Consistency testing (``check``)
 
 The test functions implemented in the ``mlscorecheck.check`` module.
 
+Binary classification
+---------------------
+
 .. autofunction:: mlscorecheck.check.binary.check_1_testset_no_kfold
 .. autofunction:: mlscorecheck.check.binary.check_1_dataset_som
 .. autofunction:: mlscorecheck.check.binary.check_1_dataset_known_folds_mos
@@ -19,6 +22,16 @@ The test functions implemented in the ``mlscorecheck.check`` module.
 .. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_kfold_som
 .. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_known_folds_mos
 .. autofunction:: mlscorecheck.check.binary.check_n_datasets_mos_unknown_folds_mos
+
+Multiclass classification
+-------------------------
+
+.. autofunction:: mlscorecheck.check.multiclass.check_1_testset_no_kfold_macro
+.. autofunction:: mlscorecheck.check.multiclass.check_1_testset_no_kfold_micro
+.. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_mos_macro
+.. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_mos_micro
+.. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_som_macro
+.. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_som_micro
 
 
 Test bundles (``bundles``)

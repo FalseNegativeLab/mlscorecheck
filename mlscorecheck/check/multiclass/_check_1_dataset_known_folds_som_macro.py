@@ -6,7 +6,7 @@ with SoM aggregation.
 import copy
 
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import transform_multiclass_fold_to_binary, _create_folds_multiclass, _create_binary_folds_multiclass
+from ...aggregated import transform_multiclass_fold_to_binary, _create_folds_multiclass
 
 from ._check_1_testset_no_kfold_micro import check_1_testset_no_kfold_micro
 from ._check_1_testset_no_kfold_macro import check_1_testset_no_kfold_macro
