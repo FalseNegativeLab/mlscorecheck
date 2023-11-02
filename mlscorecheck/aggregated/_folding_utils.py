@@ -26,7 +26,7 @@ __all__ = ['stratified_configurations_sklearn',
             'experiment_kfolds_generator',
             'multiclass_stratified_folds',
             'transform_multiclass_fold_to_binary',
-            '_create_folds_multiclass']
+            'create_folds_multiclass']
 
 def stratified_configurations_sklearn(p: int,
                                         n: int,
@@ -454,9 +454,9 @@ def multiclass_stratified_folds(dataset: dict, n_folds: int) -> list:
         list(dict): the list of fold specifications
     """
     folds = []
-    y = np.hstack([np.repeat(key, value) for key, value in dataset.items()])
-    for _, test in StratifiedKFold(n_splits=n_folds).split(y.reshape(-1, 1), y, y):
-        folds.append({idx: count for idx, count in enumerate(np.bincount(y[test]))})
+    labels = np.hstack([np.repeat(key, value) for key, value in dataset.items()])
+    for _, test in StratifiedKFold(n_splits=n_folds).split(labels.reshape(-1, 1), labels, labels):
+        folds.append(dict(enumerate(np.bincount(labels[test]))))
 
     return folds
 
@@ -473,7 +473,17 @@ def transform_multiclass_fold_to_binary(fold: dict) -> list:
     n_total = sum(fold.values())
     return [{'p': value, 'n': n_total - value} for value in fold.values()]
 
-def _create_folds_multiclass(dataset, folding):
+def create_folds_multiclass(dataset: dict, folding: dict) -> list:
+    """
+    Create the folds for the multiclass setup
+
+    Args:
+        dataset (dict): the dataset specification
+        folding (dict): the folding specification
+
+    Returns:
+        list(dict): the list of fold specifications
+    """
     if folding.get('folds') is not None and (folding.get('n_repeats') is not None \
                                                 or folding.get('strategy') is not None
                                                 or folding.get('n_folds') is not None):
@@ -481,7 +491,7 @@ def _create_folds_multiclass(dataset, folding):
 
     if 'folds' in folding:
         return folding['folds']
-    elif folding.get('strategy') == 'stratified_sklearn':
+    if folding.get('strategy') == 'stratified_sklearn':
         folds = multiclass_stratified_folds(dataset, folding.get('n_folds', 1))
     else:
         folds = [dataset]

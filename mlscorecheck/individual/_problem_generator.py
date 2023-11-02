@@ -136,10 +136,23 @@ def generate_problems(*,
     return (evaluations[0], problems[0]) if n_problems == 1 else (evaluations, problems)
 
 def generate_multiclass_dataset(random_state=None,
-                                max_n_classes=5,
-                                min_n_classes=2,
-                                max_class_size=200,
-                                min_class_size=10):
+                                max_n_classes: int=5,
+                                min_n_classes: int=2,
+                                max_class_size: int=200,
+                                min_class_size: int=10) -> dict:
+    """
+    Generates a multiclass dataset
+
+    Args:
+        random_state (None|int|np.random.RandomState): the random seed to use
+        max_n_classes (int): the maximum number of classes
+        min_n_classes (int): the minimum number of classes
+        max_class_size (int): the maximum class size
+        min_class_size (int): the minimum class size
+
+    Returns:
+        dict: a multiclass dataset
+    """
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 
@@ -149,7 +162,7 @@ def generate_multiclass_dataset(random_state=None,
 
     return classes
 
-def create_confusion_matrix(y_true, y_pred):
+def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
     """
     Creates a confusion matrix
 
@@ -168,7 +181,17 @@ def create_confusion_matrix(y_true, y_pred):
 
     return confusion_matrix
 
-def sample_multiclass_dataset(dataset, random_state=None):
+def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
+    """
+    Samples a multiclass dataset
+
+    Args:
+        dataset (dict): the dataset to sample
+        random_state (None|int|np.random.RandomState): the random seed to use
+
+    Returns:
+        np.array: the confusion matrix
+    """
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 

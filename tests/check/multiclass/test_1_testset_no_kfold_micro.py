@@ -6,9 +6,8 @@ import pytest
 
 from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
 from mlscorecheck.individual import (generate_multiclass_dataset,
-                                        sample_multiclass_dataset,
-                                        create_confusion_matrix)
-from mlscorecheck.scores import (multiclass_score_map, calculate_multiclass_scores)
+                                        sample_multiclass_dataset)
+from mlscorecheck.scores import calculate_multiclass_scores
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
 def test_consistent_configuration(random_seed):

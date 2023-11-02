@@ -10,8 +10,7 @@ from sklearn.metrics import precision_recall_fscore_support
 
 from mlscorecheck.core import safe_call
 from mlscorecheck.scores import (multiclass_score_map,
-                                    multiclass_score,
-                                    score_functions_standardized_without_complements)
+                                    multiclass_score)
 from mlscorecheck.individual import (generate_multiclass_dataset,
                                         sample_multiclass_dataset,
                                         create_confusion_matrix)
@@ -72,7 +71,7 @@ def test_compare_to_sklearn(average, random_seed):
 
     sample = create_confusion_matrix(y_true, y_pred)
 
-    ppv, sens, f1, _ = precision_recall_fscore_support(y_true, y_pred, average=average)
+    ppv, sens, f1p, _ = precision_recall_fscore_support(y_true, y_pred, average=average)
 
     sens_score = multiclass_score_map['sens'](confusion_matrix=sample, average=average)
     ppv_score = multiclass_score_map['ppv'](confusion_matrix=sample, average=average)
@@ -80,7 +79,7 @@ def test_compare_to_sklearn(average, random_seed):
 
     assert abs(sens - sens_score) < 1e-8
     assert abs(ppv - ppv_score) < 1e-8
-    assert abs(f1 - f1_score) < 1e-8
+    assert abs(f1p - f1_score) < 1e-8
 
 def test_exception():
     """

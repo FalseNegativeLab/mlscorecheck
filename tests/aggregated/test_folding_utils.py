@@ -19,7 +19,7 @@ from mlscorecheck.aggregated import (stratified_configurations_sklearn,
                                         determine_min_max_p,
                                         multiclass_stratified_folds,
                                         transform_multiclass_fold_to_binary,
-                                        _create_folds_multiclass)
+                                        create_folds_multiclass)
 
 def test_generate_datasets_with_all_kfolds():
     """
@@ -340,6 +340,6 @@ def test_multiclass_create_folds_exception():
     """
 
     with pytest.raises(ValueError):
-        _create_folds_multiclass(dataset={'p': 5, 'n': 7},
+        create_folds_multiclass(dataset={'p': 5, 'n': 7},
                                     folding={'folds': 'dummy',
                                             'n_repeats': 5})

@@ -6,4 +6,8 @@ __all__ = ['check_regression']
 
 def check_regression(scores,
                         eps):
-    pass
+    """
+    The consistency test for regression scores
+    """
+    _ = scores
+    _ = eps

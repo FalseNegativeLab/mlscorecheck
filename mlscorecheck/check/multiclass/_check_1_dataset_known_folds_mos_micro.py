@@ -3,13 +3,11 @@ This module implements the multiclass tests in a k-fold MoS scenario with micro
 averaging of scores.
 """
 
-import copy
-
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import transform_multiclass_fold_to_binary, _create_folds_multiclass
+from ...aggregated import (transform_multiclass_fold_to_binary,
+                            create_folds_multiclass)
 
-from ..binary import (check_n_datasets_mos_kfold_som,
-                        check_n_datasets_mos_known_folds_mos)
+from ..binary import check_n_datasets_mos_kfold_som
 
 __all__ = ['check_1_dataset_known_folds_mos_micro']
 
@@ -18,6 +16,10 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
                                     scores: dict,
                                     eps,
                                     *,
+                                    fold_score_bounds: dict = None,
+                                    solver_name: str = None,
+                                    timeout: int = None,
+                                    verbosity: int = 1,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     This function checks the consistency of scores calculated by taking the micro average
@@ -30,6 +32,13 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
         folding (dict): The specification of the folding strategy.
         scores (dict(str,float)): The scores to check.
         eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
+        fold_score_bounds (None|dict, optional): Bounds on the scores in the folds.
+                                                    Defaults to None.
+        solver_name (None|str, optional): The solver to use. Defaults to None.
+        timeout (None|int, optional): The timeout for the linear programming solver in seconds.
+                                        Defaults to None.
+        verbosity (int, optional): The verbosity level of the pulp linear programming solver.
+                                    0: silent, non-zero: verbose. Defaults to 1.
         numerical_tolerance (float, optional): Beyond the numerical uncertainty of
                                                 the scores, some further tolerance is applied.
                                                 This is orders of magnitude smaller than the
@@ -77,7 +86,7 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
         >>> result['inconsistency']
         # True
     """
-    folds = _create_folds_multiclass(dataset, folding)
+    folds = create_folds_multiclass(dataset, folding)
     binary_folds = [transform_multiclass_fold_to_binary(fold) for fold in folds]
 
     evaluations = []
@@ -92,4 +101,8 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
     return check_n_datasets_mos_kfold_som(evaluations=evaluations,
                                             scores=scores,
                                             eps=eps,
+                                            dataset_score_bounds=fold_score_bounds,
+                                            solver_name=solver_name,
+                                            timeout=timeout,
+                                            verbosity=verbosity,
                                             numerical_tolerance=numerical_tolerance)

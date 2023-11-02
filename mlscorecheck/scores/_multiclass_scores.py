@@ -82,11 +82,13 @@ def multiclass_score_macro(confusion_matrix,
     counts = np.sum(confusion_matrix, axis=1)
     n_total = np.sum(counts)
 
-    scores = [safe_call(score_function, {'p': counts[idx],
-                                    'n': n_total - counts[idx],
+    scores = [safe_call(score_function, {'p': count,
+                                    'n': n_total - count,
                                     'tp': confusion_matrix[idx, idx],
-                                    'tn': np.sum(confusion_matrix[0:idx, 0:idx]) + np.sum(confusion_matrix[idx+1:, idx+1:]) +
-                                            np.sum(confusion_matrix[:idx, idx+1:]) + np.sum(confusion_matrix[idx+1:, :idx])}
+                                    'tn': np.sum(confusion_matrix[0:idx, 0:idx]) \
+                                        + np.sum(confusion_matrix[idx+1:, idx+1:]) \
+                                        + np.sum(confusion_matrix[:idx, idx+1:]) \
+                                        + np.sum(confusion_matrix[idx+1:, :idx])}
                         | additional_params,
                         score_specifications[name].get('nans'))
                 for idx, count in enumerate(counts)]
@@ -121,11 +123,13 @@ def multiclass_score_micro(confusion_matrix,
                 'n': 0}
 
     for idx, count in enumerate(counts):
-        params['p'] += counts[idx]
-        params['n'] += n_total - counts[idx]
+        params['p'] += count
+        params['n'] += n_total - count
         params['tp'] += confusion_matrix[idx, idx]
-        params['tn'] += np.sum(confusion_matrix[0:idx, 0:idx]) + np.sum(confusion_matrix[idx+1:, idx+1:]) + \
-                                            np.sum(confusion_matrix[:idx, idx+1:]) + np.sum(confusion_matrix[idx+1:, :idx])
+        params['tn'] += np.sum(confusion_matrix[0:idx, 0:idx]) \
+                        + np.sum(confusion_matrix[idx+1:, idx+1:]) \
+                        + np.sum(confusion_matrix[:idx, idx+1:]) \
+                        + np.sum(confusion_matrix[idx+1:, :idx])
 
     return safe_call(score_function,
                         params | additional_params,
@@ -153,11 +157,13 @@ def multiclass_score_weighted(confusion_matrix,
     counts = np.sum(confusion_matrix, axis=1)
     n_total = np.sum(counts)
 
-    scores = [safe_call(score_function, {'p': counts[idx],
-                                    'n': n_total - counts[idx],
+    scores = [safe_call(score_function, {'p': count,
+                                    'n': n_total - count,
                                     'tp': confusion_matrix[idx, idx],
-                                    'tn': np.sum(confusion_matrix[0:idx, 0:idx]) + np.sum(confusion_matrix[idx+1:, idx+1:]) +
-                                            np.sum(confusion_matrix[:idx, idx+1:]) + np.sum(confusion_matrix[idx+1:, :idx])}
+                                    'tn': np.sum(confusion_matrix[0:idx, 0:idx]) \
+                                        + np.sum(confusion_matrix[idx+1:, idx+1:]) \
+                                        + np.sum(confusion_matrix[:idx, idx+1:]) \
+                                        + np.sum(confusion_matrix[idx+1:, :idx])}
                         | additional_params,
                         score_specifications[name].get('nans'))\
                 * count / n_total
