@@ -433,7 +433,7 @@ class IntervalUnion:
                     if (int0.lower_bound == int1.lower_bound) \
                         and (int0.upper_bound == int1.upper_bound) \
                         and idx > jdx:
-                            continue
+                        continue
                     if (int0.lower_bound <= int1.lower_bound) \
                             and (int0.upper_bound >= int1.upper_bound):
                         # the interval widh index jdx is contained in the interval with index idx
