@@ -120,7 +120,7 @@ def generate_regression_problem_and_scores(
     n_samples = random_state.randint(2, max_n_samples)
 
     y_true = np.random.random_sample(n_samples)
-    y_pred = (np.random.random_sample(n_samples) - 0.5) / 20
+    y_pred = y_true + (np.random.random_sample(n_samples) - 0.5) / 10
 
     scores = calculate_regression_scores(y_true, y_pred, subset)
 
@@ -216,6 +216,26 @@ def check_1_testset_no_kfold(var: float,
 
             - ``'inconsistency'`` (bool): whether an inconsistency has been identified
             - ``'details'`` (list(dict)): the details of the analysis, with the following entries
+
+    Examples:
+        >>> from mlscorecheck.check.regression import check_1_testset_no_kfold
+        >>> var = 0.08316192579267838
+        >>> n_samples = 100
+        >>> scores =  {'mae': 0.0254, 'r2': 0.9897}
+        >>> result = check_1_testset_no_kfold(var=var,
+                                                n_samples=n_samples,
+                                                scores=scores,
+                                                eps=1e-4)
+        >>> result['inconsistency']
+        # False
+
+        >>> scores['mae'] = 0.03
+        >>> result = check_1_testset_no_kfold(var=var,
+                                            n_samples=n_samples,
+                                            scores=scores,
+                                            eps=1e-4)
+        >>> result['inconsistency']
+        # True
     """
     intervals = expand_regression_scores(var,
                                             n_samples,
