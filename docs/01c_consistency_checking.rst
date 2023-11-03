@@ -409,5 +409,232 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
 Multiclass classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In multiclass classification scenarios only single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies.
+
+1 testset, no k-fold, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we suppose there is a multiclass classification testset and the class level scores on the testset are aggregated by micro-averaging. The test is based on exhaustive enumeration, so all 20 performance scores are supported. In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
+
+    >>> testset = {0: 10, 1: 100, 2: 80}
+    >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
+                    'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
+    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
+    >>> results['inconsistency']
+    # False
+
+As the test confirms, the setup is consistent. However, if one of the scores is adjusted a little, for example, accuracy is changed to 0.5258, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.5258
+    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
+    >>> results['inconsistency']
+    # True
+
+1 testset, no k-fold, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This scenario is similar to the previous one, except the scores are aggregated by macro-averaging. The test is based on linear programming, so only accuracy, sensitivity, specificity and balanced accuracy are supported. In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_macro
+
+    >>> testset = {0: 10, 1: 100, 2: 80}
+    >>> scores = {'acc': 0.6, 'sens': 0.3417, 'spec': 0.6928, 'f1p': 0.3308}
+    >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+    >>> results['inconsistency']
+    # False
+
+As the test confirms, the configuration shows no inconsistency. However, if one of the scores is adjusted a little, for example, accuracy is changed to 0.601, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.601
+    >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+    >>> results['inconsistency']
+    # True
+
+1 dataset, known k-folds, score of means aggregation, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by micro-averaging, and the fold level results are aggregated in the score of means fashion. The test is based on exhaustive enumeration, therefore, all 20 performance scores are supported.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
+
+    >>> dataset = {0: 86, 1: 96, 2: 59, 3: 105}
+    >>> folding = {'folds': [{0: 43, 1: 48, 2: 30, 3: 52}, {0: 43, 1: 48, 2: 29, 3: 53}]}
+    >>> scores =  {'acc': 0.6272, 'sens': 0.2543, 'spec': 0.7514, 'f1p': 0.2543}
+
+    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the test confirms, the scenario is feasible. However, if one of the scores is adjusted a little, for example, sensitivity is changed to 0.2553, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['sens'] = 0.2553
+    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, score of means aggregation, macro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by macro-averaging, and the fold level results are aggregated in the score of means fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_macro
+
+    >>> dataset = {0: 129, 1: 81, 2: 135}
+    >>> folding = {'n_folds': 2, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> scores = {'acc': 0.5662, 'sens': 0.3577, 'spec': 0.6767, 'f1p': 0.3481}
+
+    >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, no inconsistency has been identified. However, if accuracy is changed to 0.6662, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.6662
+    >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, mean of scores aggregation, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by micro-averaging, and the fold level results are aggregated in the mean of scores fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, an artificially generated, consistent scenario is tested:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_micro
+
+    >>> dataset = {0: 66, 1: 178, 2: 151}
+    >>> folding = {'folds': [{0: 33, 1: 89, 2: 76}, {0: 33, 1: 89, 2: 75}]}
+    >>> scores = {'acc': 0.5646, 'sens': 0.3469, 'spec': 0.6734, 'f1p': 0.3469}
+
+    >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, inconsistencies have not been identified. However, if one of the scores, say, accuracy is adjusted to 0.5746, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.5746
+    >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, mean of scores aggregation, macro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the last multiclass scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by macro-averaging, and the fold level results are aggregated in the mean of scores fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, an artificially generated, consistent scenario is tested:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_macro
+
+    >>> dataset = {0: 149, 1: 118, 2: 83, 3: 154}
+    >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> scores = {'acc': 0.626, 'sens': 0.2483, 'spec': 0.7509, 'f1p': 0.2469}
+
+    >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, there are no inconsistencies in the configuration. However, if accuracy is changed to 0.656, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.656
+    >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
 Regression
 ~~~~~~~~~~
+
+From the point of view of consistency testing, regression is the hardest problem as the predictions can produce any performance scores. The tests implemented in the package allow testing the relation of the *mean squared error* (``mse``), *root mean squared error* (``rmse``), *mean average error* (``mae``) and *r^2 scores* (``r2``).
+
+1 testset, no k-fold
+^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a regression testset, and the performance scores are calculated on the testset.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.regression import check_1_testset_no_kfold
+
+    >>> var = 0.0831619 # the variance of the target values in the testset
+    >>> n_samples = 100
+    >>> scores =  {'mae': 0.0254, 'r2': 0.9897}
+
+    >>> result = check_1_testset_no_kfold(var=var,
+                                        n_samples=n_samples,
+                                        scores=scores,
+                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, there is no inconsistency detected. However, if the mae score is adjusted slightly to 0.03, the configuration becomes inconsistent:
+
+.. code-block:: Python
+
+    >>> scores['mae'] = 0.03
+    >>> result = check_1_testset_no_kfold(var=var,
+                                        n_samples=n_samples,
+                                        scores=scores,
+                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
