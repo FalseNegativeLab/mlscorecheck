@@ -8,6 +8,8 @@ import numpy as np
 
 from sklearn.model_selection import StratifiedKFold
 
+from ._utils import random_identifier
+
 __all__ = ['stratified_configurations_sklearn',
             'determine_fold_configurations',
             '_create_folds',
@@ -160,7 +162,13 @@ def transform_multiclass_fold_to_binary(fold: dict) -> list:
         list(dict): the list of binary folds
     """
     n_total = sum(fold.values())
-    return [{'p': value, 'n': n_total - value} for value in fold.values()]
+    folds = [{'p': value, 'n': n_total - value} for value in fold.values()]
+    identifier = fold.get('identifier', random_identifier(4))
+
+    for idx, fold in enumerate(folds):
+        fold['identifier'] = f'{identifier}_{idx}'
+
+    return folds
 
 def create_folds_multiclass(dataset: dict, folding: dict) -> list:
     """

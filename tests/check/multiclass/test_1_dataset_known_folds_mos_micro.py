@@ -16,10 +16,12 @@ def test_consistent(random_seed: int):
         random_seed (int): the random seed to be used
     """
 
-    dataset, folding, scores = generate_dataset_folding_multiclass(random_state=random_seed,
-                                                                    average='micro',
-                                                                    aggregation='mos',
-                                                                    rounding_decimals=4)
+    dataset, folding, scores = generate_dataset_folding_multiclass(
+                                                random_state=random_seed,
+                                                average='micro',
+                                                aggregation='mos',
+                                                rounding_decimals=4,
+                                                subset=['acc', 'sens', 'spec', 'f1p', 'bacc'])
 
     result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
                                                     folding=folding,
@@ -37,10 +39,12 @@ def test_inconsistent(random_seed: int):
         random_seed (int): the random seed to be used
     """
 
-    dataset, folding, scores = generate_dataset_folding_multiclass(random_state=random_seed,
-                                                                    average='micro',
-                                                                    aggregation='mos',
-                                                                    rounding_decimals=4)
+    dataset, folding, scores = generate_dataset_folding_multiclass(
+                                                    random_state=random_seed,
+                                                    average='micro',
+                                                    aggregation='mos',
+                                                    rounding_decimals=4,
+                                                    subset=['acc', 'sens', 'spec', 'f1p', 'bacc'])
 
     scores['acc'] = (1.0 + scores['spec']) / 2.0
 
