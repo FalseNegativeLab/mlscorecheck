@@ -13,7 +13,7 @@ Binary classification
 ---------------------
 
 .. autofunction:: mlscorecheck.check.binary.check_1_testset_no_kfold
-.. autofunction:: mlscorecheck.check.binary.check_1_dataset_som
+.. autofunction:: mlscorecheck.check.binary.check_1_dataset_kfold_som
 .. autofunction:: mlscorecheck.check.binary.check_1_dataset_known_folds_mos
 .. autofunction:: mlscorecheck.check.binary.check_1_dataset_unknown_folds_mos
 .. autofunction:: mlscorecheck.check.binary.check_n_testsets_mos_no_kfold

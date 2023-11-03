@@ -20,21 +20,25 @@ def check_1_testset_no_kfold_macro(testset: dict,
                                     verbosity: int = 1,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Checking the consistency of scores calculated by taking the macro average
-    on one single multiclass dataset. Note that this
-    test can only check the consistency of the 'acc', 'sens', 'spec'
-    and 'bacc' scores. Note that without bounds, if there is a large
-    number of classes, it is likely that there will be a configuration
-    matching the scores provided. In order to increase the strength of
-    the test, one can add class_scores_bounds if
-    for example, besides the average score, the minimum and the maximum
-    scores over the classes are also provided.
+    The function tests the consistency of scores calculated by taking the macro average of
+    class level scores on one single multiclass dataset.
+
+    The test operates by constructing a linear programming problem representing the experiment
+    and checking its feasibility.
+
+    Note that this test can only check the consistency of the 'acc', 'sens', 'spec'
+    and 'bacc' scores. Note that without bounds, if there is a large number of classes, it is
+    likely that there will be a configuration matching the scores provided. In order to
+    increase the strength of the test, one can add ``class_scores_bounds`` when, for example,
+    besides the average score, the minimum and the maximum scores over the classes
+    are also provided.
 
     Args:
         testset (dict): the specification of the testset
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        class_score_bounds (None|dict): bounds on the scores in the classes
+        class_score_bounds (None|dict(str,tuple(float,float))): bounds on the scores in the
+                                                                classes
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
@@ -46,17 +50,22 @@ def check_1_testset_no_kfold_macro(testset: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the dictionary of the results of the analysis, the
-        ``inconsistency`` entry indicates if inconsistencies have
-        been found. The aggregated_results entry is empty if
-        the execution of the linear programming based check was
-        unnecessary. The result has four more keys. Under ``lp_status``
-        one finds the status of the lp solver, under ``lp_configuration_scores_match``
-        one finds a flag indicating if the scores from the lp configuration
-        match the scores provided, ``lp_configuration_bounds_match`` indicates
-        if the specified bounds match the actual figures and finally
-        ``lp_configuration`` contains the actual configuration of the
-        linear programming solver.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'lp_status'``:
+                The status of the lp solver.
+            - ``'lp_configuration_scores_match'``:
+                A flag indicating if the scores from the lp configuration match the scores
+                provided.
+            - ``'lp_configuration_bounds_match'``:
+                Indicates if the specified bounds match the actual figures.
+            - ``'lp_configuration'``:
+                Contains the actual configuration of the linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly

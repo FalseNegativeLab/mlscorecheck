@@ -254,8 +254,8 @@ def _check_scores_tptn_pairs(p: int,
             'n_valid_tptn_pairs': total_count,
             'iterate_by': iterate_by,
             'solve_for': solve_for,
-            'evidence': ((list(valid_pairs.keys())[0],
-                        valid_pairs[list(valid_pairs.keys())[0]].to_tuple())
+            'evidence': ({iterate_by: list(valid_pairs.keys())[0],
+                            solve_for: valid_pairs[list(valid_pairs.keys())[0]].representing_int()}
                             if len(valid_pairs) > 0 else None)}
 
 def check_all_negative_base(sols: list) -> bool:

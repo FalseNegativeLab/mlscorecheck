@@ -1,7 +1,7 @@
 """
 This module implements the top level check function for
 scores calculated by the mean-of-scores aggregation
-in a kfold scenario on one single dataset.
+in a k-fold scenario on one single dataset.
 """
 
 from ...core import NUMERICAL_TOLERANCE
@@ -20,45 +20,49 @@ def check_1_dataset_known_folds_mos(dataset: dict,
                                     verbosity: int = 1,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Checking the consistency of scores calculated by applying k-fold
-    cross validation to one single dataset and aggregating the figures
-    over the folds in the mean of scores fashion. Note that this
-    test can only check the consistency of the 'acc', 'sens', 'spec'
-    and 'bacc' scores. Note that without bounds, if there is a large
-    number of folds, it is likely that there will be a configuration
-    matching the scores provided. In order to increase the strength of
-    the test, one can add score_bounds to the individual folds if
-    for example, besides the average score, the minimum and the maximum
-    scores over the folds are also provided.
+    This function checks the consistency of scores calculated by applying k-fold cross validation
+    to a single dataset and aggregating the figures over the folds in the mean of scores fashion.
+
+    The test operates by constructing a linear program describing the experiment and checkings its
+    feasibility.
+
+    The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
+    scores. For a stronger test, one can add ``fold_score_bounds`` when, for example, the minimum
+    and the maximum scores over the folds are also provided.
 
     Args:
-        dataset (dict): the specification of the dataset
-        folding (dict): the specification of the folding
-        scores (dict(str,float)): the scores to check
-        eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        fold_score_bounds (dict): bounds on the scores in the folds
-        solver_name (None|str): the solver to use
-        timeout (None|int): the timeout for the linear programming solver in seconds
-        verbosity (int): the verbosity level of the pulp linear programming solver
-                            0: silent, non-zero: verbose.
-        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+        dataset (dict): The dataset specification.
+        folding (dict): The folding specification.
+        scores (dict(str,float)): The scores to check.
+        eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
+        fold_score_bounds (None|dict(str,tuple(float,float))): Bounds on the scores in the folds.
+        solver_name (None|str): The solver to use.
+        timeout (None|int): The timeout for the linear programming solver in seconds.
+        verbosity (int): The verbosity level of the pulp linear programming solver.
+                         0: silent, non-zero: verbose.
+        numerical_tolerance (float): In practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
                                     scores. It does ensure that the specificity of the test
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the dictionary of the results of the analysis, the
-        ``inconsistency`` entry indicates if inconsistencies have
-        been found. The aggregated_results entry is empty if
-        the execution of the linear programming based check was
-        unnecessary. The result has four more keys. Under ``lp_status``
-        one finds the status of the lp solver, under ``lp_configuration_scores_match``
-        one finds a flag indicating if the scores from the lp configuration
-        match the scores provided, ``lp_configuration_bounds_match`` indicates
-        if the specified bounds match the actual figures and finally
-        ``lp_configuration`` contains the actual configuration of the
-        linear programming solver.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'lp_status'``:
+                The status of the lp solver.
+            - ``'lp_configuration_scores_match'``:
+                A flag indicating if the scores from the lp configuration match the scores
+                provided.
+            - ``'lp_configuration_bounds_match'``:
+                Indicates if the specified bounds match the actual figures.
+            - ``'lp_configuration'``:
+                Contains the actual configuration of the linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly

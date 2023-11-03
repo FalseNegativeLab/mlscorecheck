@@ -23,17 +23,22 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     This function checks the consistency of scores calculated by taking the micro average
-    on a single multiclass dataset with known folds. The test follows the methodology of the
-    1_dataset_som case, but is specifically designed for multiclass classification problems
-    where the folds of the dataset are known beforehand.
+    on a single multiclass dataset with known folds.
+
+    The test operates by constructing a linear program describing the experiment and checkings its
+    feasibility.
+
+    The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
+    scores. For a stronger test, one can add ``fold_score_bounds`` when, for example, the minimum
+    and the maximum scores over the folds are available.
 
     Args:
         dataset (dict): The specification of the dataset.
         folding (dict): The specification of the folding strategy.
         scores (dict(str,float)): The scores to check.
         eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
-        fold_score_bounds (None|dict, optional): Bounds on the scores in the folds.
-                                                    Defaults to None.
+        fold_score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
+                                                                scores in the folds
         solver_name (None|str, optional): The solver to use. Defaults to None.
         timeout (None|int, optional): The timeout for the linear programming solver in seconds.
                                         Defaults to None.
@@ -48,20 +53,22 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
                                                 NUMERICAL_TOLERANCE.
 
     Returns:
-        dict: A summary of the results. The dictionary includes the following keys:
-            - ``inconsistency``: A boolean flag indicating whether the set of feasible
-                true positive (tp) and true negative (tn) pairs is empty. If True, it
-                indicates that the provided scores are not consistent with the dataset.
-            - ``details``: A list providing further details from the analysis of the
-                scores one after the other. Each entry in the list corresponds to the
-                analysis result for one score.
-            - ``n_valid_tptn_pairs``: The number of tp and tn pairs that are compatible
-                with all scores. This gives an indication of how many different classification
-                outcomes could have led to the provided scores.
-            - ``prefiltering_details``: The results of the prefiltering by using the
-                solutions for the score pairs. This provides additional information about the
-                process of checking the scores.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
 
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'lp_status'``:
+                The status of the lp solver.
+            - ``'lp_configuration_scores_match'``:
+                A flag indicating if the scores from the lp configuration match the scores
+                provided.
+            - ``'lp_configuration_bounds_match'``:
+                Indicates if the specified bounds match the actual figures.
+            - ``'lp_configuration'``:
+                Contains the actual configuration of the linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly

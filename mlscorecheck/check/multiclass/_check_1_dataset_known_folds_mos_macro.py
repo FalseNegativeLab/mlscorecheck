@@ -1,6 +1,6 @@
 """
 This module implements the multiclass tests in a k-fold MoS scenario with macro averaging
-of scores.
+of scores of classes.
 """
 
 from ...core import NUMERICAL_TOLERANCE
@@ -24,17 +24,23 @@ def check_1_dataset_known_folds_mos_macro(dataset: dict,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores calculated by taking the macro average
-    on one single multiclass dataset. The test follows the methodology of the
-    1_dataset_som case.
+    of class-level scores on one single multiclass dataset with k-fold cross-validation.
+
+    The test operates by constructing a linear program describing the experiment and checkings its
+    feasibility.
+
+    The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
+    scores. For a stronger test, one can add ``class_score_bounds`` or ``fold_score_bounds``
+    when, for example, the minimum and the maximum scores over the classes or folds are available.
 
     Args:
         testset (dict): the specification of the testset
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
-        class_score_bounds (None|dict, optional): Bounds on the scores in the classes. Defaults
-                                                    to None.
-        fold_score_bounds (None|dict, optional): Bounds on the folds in the classes. Defaults to
-                                                    None.
+        class_score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
+                                                                scores for the classes
+        fold_score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
+                                                                scores in the folds
         solver_name (None|str, optional): The solver to use. Defaults to None.
         timeout (None|int, optional): The timeout for the linear programming solver in seconds.
                                                     Defaults to None.
@@ -47,12 +53,22 @@ def check_1_dataset_known_folds_mos_macro(dataset: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible
-        with all scores. Under the key ``prefiltering_details`` one finds the results of the
-        prefiltering by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'lp_status'``:
+                The status of the lp solver.
+            - ``'lp_configuration_scores_match'``:
+                A flag indicating if the scores from the lp configuration match the scores
+                provided.
+            - ``'lp_configuration_bounds_match'``:
+                Indicates if the specified bounds match the actual figures.
+            - ``'lp_configuration'``:
+                Contains the actual configuration of the linear programming solver.
 
     Raises:
         ValueError: if the problem is not specified properly

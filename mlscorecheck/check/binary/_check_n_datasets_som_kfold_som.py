@@ -16,14 +16,13 @@ def check_n_datasets_som_kfold_som(evaluations: list,
                                             scores: dict,
                                             eps,
                                             *,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+                                            numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                                            prefilter_by_pairs: bool = True):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
-    over the folds and datasets in the score of means fashion. If
-    score bounds are specified and some of the 'acc', 'sens', 'spec' and
-    'bacc' scores are supplied, the linear programming based check is
-    executed to see if the bound conditions can be satisfied.
+    over the folds and datasets in the score of means fashion. The test is
+    performed by exhaustively testing all possible confusion matrices.
 
     Args:
         evaluations (list(dict)): the specification of the evaluations
@@ -39,14 +38,28 @@ def check_n_datasets_som_kfold_som(evaluations: list,
                                     orders of magnitude smaller than the uncertainty of the
                                     scores. It does ensure that the specificity of the test
                                     is 1, it might slightly decrease the sensitivity.
+        prefilter_by_pairs (bool): whether to do a prefiltering based on the score-pair tp-tn
+                                    solutions (faster)
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+                dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the dataset.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Raises:
         ValueError: if the problem is not specified properly
@@ -97,7 +110,8 @@ def check_n_datasets_som_kfold_som(evaluations: list,
 
     # executing the individual tests
     return check_scores_tptn_pairs(scores=scores,
-                                            eps=eps,
-                                            p=experiment.figures['p'],
-                                            n=experiment.figures['n'],
-                                            numerical_tolerance=numerical_tolerance)
+                                    eps=eps,
+                                    p=experiment.figures['p'],
+                                    n=experiment.figures['n'],
+                                    numerical_tolerance=numerical_tolerance,
+                                    prefilter_by_pairs=prefilter_by_pairs)

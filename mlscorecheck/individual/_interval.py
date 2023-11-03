@@ -366,6 +366,19 @@ class Interval:
 
         return res
 
+    def representing_int(self):
+        """
+        Returns a representative integer
+
+        Returns:
+            int: a representative element of the interval
+        """
+        shrunk = self.shrink_to_integers()
+        if not shrunk.is_empty():
+            return shrunk.lower_bound
+        return None
+
+
 class IntervalUnion:
     """
     The interval union abstraction
@@ -728,3 +741,17 @@ class IntervalUnion:
             IntervalUnion: the return of the power operation
         """
         return IntervalUnion([interval**other for interval in self.intervals])
+
+    def representing_int(self):
+        """
+        Returns a representative integer
+
+        Returns:
+            int: a representative element of the interval
+        """
+        for interval in self.intervals:
+            integer = interval.representing_int()
+            if integer is not None:
+                return integer
+
+        return None

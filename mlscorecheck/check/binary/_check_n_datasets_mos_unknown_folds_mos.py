@@ -1,7 +1,8 @@
 """
 This module implements the top level check function for
 scores calculated by the mean of scores aggregation
-in a kfold scenarios and mean of scores aggregation on multiple datasets.
+in a kfold scenarios and mean of scores aggregation on multiple datasets,
+but without knowing the fold configurations.
 """
 
 import copy
@@ -46,20 +47,32 @@ def check_n_datasets_mos_unknown_folds_mos(evaluations: list,
                                         verbosity: int = 1,
                                         numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Checking the consistency of scores calculated by applying k-fold
-    cross validation to multiple datasets and aggregating the figures
-    over the folds in the mean of scores fashion and over the datasets
-    in the mean of scores fashion.
+    Checking the consistency of scores calculated in k-fold cross validation on multiple
+    datasets, in mean-of-scores fashion, without knowing the fold configurations.
+    The function generates all possible fold configurations and tests the
+    consistency of each. The scores are inconsistent if all the k-fold configurations
+    lead to inconsistencies identified.
 
-    Note that depending on the number of the minority instances and on the
-    folding structure, this test might lead to enormous execution times.
-    Use the function ``estimate_n_experiments`` to get a rough upper bound estimate
-    on the number of experiments with different fold combinations.
+    The test operates by constructing a linear program describing the experiment and checkings its
+    feasibility.
+
+    The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
+    scores. For a stronger test, one can add dataset_score_bounds when, for example, the minimum and
+    the maximum scores over the datasets are also provided.
+
+    Note that depending on the size of the dataset (especially the number of minority instances)
+    and the folding configuration, this test might lead to an untractable number of problems to
+    be solved. Use the function ``estimate_n_experiments`` to get an upper bound estimate
+    on the number of fold combinations.
+
+    The evaluation of possible fold configurations stops when a feasible configuration is found.
 
     Args:
         evaluations (list(dict)): the list of evaluation specifications
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        dataset_score_bounds (None|dict(str,dict(float,float))): bounds on the scores in the
+                                                                    datasets
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the pulp linear programming solver,
@@ -71,10 +84,17 @@ def check_n_datasets_mos_unknown_folds_mos(evaluations: list,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the dictionary of the results of the analysis, the
-        ``inconsistency`` entry indicates if inconsistencies have
-        been found. The ``details`` entry contains all possible folding
-        combinations and the corresponding detailed results.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list of dictionaries containing the details of the consistency tests. Each
+                entry contains the specification of the folds being tested and the
+                outcome of the ``check_n_datasets_known_folds_mos`` function.
 
     Raises:
         ValueError: if the problem is not specified properly

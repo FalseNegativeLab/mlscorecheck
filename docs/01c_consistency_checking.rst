@@ -121,7 +121,7 @@ For example, testing a consistent scenario:
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check.binary import check_1_dataset_som
+    >>> from mlscorecheck.check.binary import check_1_dataset_kfold_som
 
     >>> dataset = {'dataset_name': 'common_datasets.monk-2'}
     >>> folding = {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}
@@ -129,7 +129,7 @@ For example, testing a consistent scenario:
     >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
                     'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
-    >>> result = check_1_dataset_som(dataset=dataset,
+    >>> result = check_1_dataset_kfold_som(dataset=dataset,
                                             folding=folding,
                                             scores=scores,
                                             eps=1e-3)
@@ -143,7 +143,7 @@ If one of the scores is adjusted, for example, negative predictive value is chan
     >>> {'spec': 0.668, 'npv': 0.754, 'ppv': 0.667,
             'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
-    >>> result = check_1_dataset_som(dataset=dataset,
+    >>> result = check_1_dataset_kfold_som(dataset=dataset,
                                             folding=folding,
                                             scores=scores,
                                             eps=1e-3)

@@ -1,7 +1,7 @@
 """
 This module implements the top level check function for
 scores calculated by the score-of-means aggregation
-over multiple testsets.
+over multiple testsets (with no kfold).
 """
 
 from ...core import NUMERICAL_TOLERANCE
@@ -15,13 +15,12 @@ def check_n_testsets_som_no_kfold(testsets: list,
                                         eps,
                                         *,
                                         numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                                        prefilter_by_pairs=True):
+                                        prefilter_by_pairs: bool = True):
     """
     Checking the consistency of scores calculated by aggregating the figures
-    over testsets in the score of means fashion. If
-    score bounds are specified and some of the 'acc', 'sens', 'spec' and
-    'bacc' scores are supplied, the linear programming based check is
-    executed to see if the bound conditions can be satisfied.
+    over testsets in the score of means fashion, without k-folding.
+
+    The test is performed by exhaustively testing all possible confusion matrices.
 
     Args:
         datasets (list(dict)): the specification of the evaluations
@@ -41,12 +40,24 @@ def check_n_testsets_som_no_kfold(testsets: list,
                                     solutions when possible to speed up the process
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Raises:
         ValueError: if the problem is not specified properly

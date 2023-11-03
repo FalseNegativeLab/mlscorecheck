@@ -1,6 +1,6 @@
 """
 This module implements the macro-averaged multiclass tests in a k-fold scenario
-with SoM aggregation.
+with SoM aggregation over the folds.
 """
 
 import copy
@@ -23,15 +23,23 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
                                     verbosity: int = 1,
                                     numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    This function checks the consistency of scores calculated by taking the micro or macro average
-    on a single multiclass dataset and averaging across the folds in the SoM manner.
+    This function checks the consistency of scores calculated by taking the macro average
+    on a single multiclass dataset and averaging the scores across the folds in the SoM manner.
+
+    The test operates by constructing a linear program describing the experiment and checkings its
+    feasibility.
+
+    The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
+    scores. For a stronger test, one can add ``class_score_bounds`` when, for example, the minimum
+    and the maximum scores over the classes are available.
 
     Args:
-        testset (dict): The specification of the testset.
+        dataset (dict): The specification of the dataset.
+        folding (dict): The specification of the folding.
         scores (dict(str,float)): The scores to check.
         eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
-        class_score_bounds (None|dict, optional): Bounds on the scores in the classes. Defaults
-                                                    to None.
+        class_score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
+                                                                scores for the classes
         solver_name (None|str, optional): The solver to use. Defaults to None.
         timeout (None|int, optional): The timeout for the linear programming solver in seconds.
                                         Defaults to None.
@@ -52,10 +60,7 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
             - ``'inconsistency'``:
                 A boolean flag indicating whether the set of feasible true
                 positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the dataset.
-            - ``'aggregated_results'``:
-                This entry is empty if the execution of the linear programming based check
-                was unnecessary.
+                it indicates that the provided scores are not consistent with the experiment.
             - ``'lp_status'``:
                 The status of the lp solver.
             - ``'lp_configuration_scores_match'``:
@@ -65,7 +70,6 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
                 Indicates if the specified bounds match the actual figures.
             - ``'lp_configuration'``:
                 Contains the actual configuration of the linear programming solver.
-
 
     Raises:
         ValueError: If the provided scores are not consistent with the dataset.

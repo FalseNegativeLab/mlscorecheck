@@ -17,20 +17,27 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
                                     scores: dict,
                                     eps,
                                     *,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+                                    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+                                    prefilter_by_pairs: bool = True) -> dict:
     """
-    This function checks the consistency of scores calculated by taking the micro or macro average
-    on a single multiclass dataset and averaging across the folds in the SoM manner.
+    This function checks the consistency of scores calculated by taking the micro average of
+    class level scores on a single multiclass dataset and averaging across the folds in the
+    SoM manner.
+
+    The test is performed by exhaustively testing all possible confusion matrices.
 
     Args:
         dataset (dict): The specification of the dataset.
         folding (dict): The specification of the folding strategy.
         scores (dict(str,float)): The scores to check.
         eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
-        numerical_tolerance (float, optional): Beyond the numerical uncertainty of the scores,
-                                               some further tolerance is applied. This is orders of
-                                               magnitude smaller than the uncertainty of the scores.
-                                               Defaults to NUMERICAL_TOLERANCE.
+        numerical_tolerance (float): in practice, beyond the numerical uncertainty of
+                                    the scores, some further tolerance is applied. This is
+                                    orders of magnitude smaller than the uncertainty of the
+                                    scores. It does ensure that the specificity of the test
+                                    is 1, it might slightly decrease the sensitivity.
+        prefilter_by_pairs (bool): whether to prefilter the solution space by pair
+                                    solutions when possible to speed up the process
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -39,20 +46,18 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
             - ``'inconsistency'``:
                 A boolean flag indicating whether the set of feasible true
                 positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the dataset.
+                it indicates that the provided scores are not consistent with the experiment.
             - ``'details'``:
                 A list providing further details from the analysis of the scores one
-                after the other. Each entry in the list corresponds to the analysis
-                result for one score.
+                after the other.
             - ``'n_valid_tptn_pairs'``:
                 The number of tp and tn pairs that are compatible with all
-                scores. This gives an indication of how many different
-                classification outcomes could have led to the provided scores.
+                scores.
             - ``'prefiltering_details'``:
                 The results of the prefiltering by using the solutions for
-                the score pairs. This provides additional information about
-                the process of checking the scores.
-
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Raises:
         ValueError: If the provided scores are not consistent with the dataset.

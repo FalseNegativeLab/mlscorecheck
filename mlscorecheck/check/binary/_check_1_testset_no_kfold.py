@@ -1,6 +1,6 @@
 """
 This module implements the top level check function for
-scores calculated from raw figures
+scores calculated from one single confusion matrix.
 """
 
 import warnings
@@ -19,7 +19,8 @@ def check_1_testset_no_kfold(testset: dict,
                             prefilter_by_pairs: bool = True) -> dict:
     """
     Use this check if the scores are calculated on one single test set
-    with no kfolding or aggregation over multiple datasets.
+    with no kfolding. The test is performed by exhaustively testing all
+    possible confusion matrices.
 
     Args:
         testset (dict): the specification of a testset with p, n or its name
@@ -39,12 +40,24 @@ def check_1_testset_no_kfold(testset: dict,
                                     solutions (faster)
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the dataset.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Raises:
         ValueError: if the problem is not specified properly

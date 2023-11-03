@@ -4,7 +4,7 @@ Testing the checking of scores on 1 dataset using kfold with SoM aggregation
 
 import pytest
 
-from mlscorecheck.check.binary import check_1_dataset_som
+from mlscorecheck.check.binary import check_1_dataset_kfold_som
 from mlscorecheck.aggregated import (generate_evaluation)
 
 @pytest.mark.parametrize('random_seed', list(range(10)))
@@ -22,7 +22,7 @@ def test_consistency(random_seed: int, rounding_decimals: int):
                                             return_scores=True,
                                             rounding_decimals=rounding_decimals)
 
-    result = check_1_dataset_som(dataset=evaluation['dataset'],
+    result = check_1_dataset_kfold_som(dataset=evaluation['dataset'],
                                         folding=evaluation['folding'],
                                         scores=scores,
                                         eps=10**(-rounding_decimals))
@@ -45,7 +45,7 @@ def test_failure(random_seed: int, rounding_decimals: int):
                                             return_scores=True)
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_1_dataset_som(dataset=evaluation['dataset'],
+    result = check_1_dataset_kfold_som(dataset=evaluation['dataset'],
                                         folding=evaluation['folding'],
                                         scores=scores,
                                         eps=10**(-rounding_decimals))
@@ -59,7 +59,7 @@ def test_adding_strategy():
     evaluation = {'dataset': {'p': 5, 'n': 6}, 'folding': {'n_folds': 2, 'n_repeats': 1}}
     scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
 
-    result = check_1_dataset_som(dataset=evaluation['dataset'],
+    result = check_1_dataset_kfold_som(dataset=evaluation['dataset'],
                                         folding=evaluation['folding'],
                                         scores=scores,
                                         eps=10**(-4))
