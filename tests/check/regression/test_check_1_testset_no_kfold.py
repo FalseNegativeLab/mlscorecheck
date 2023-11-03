@@ -6,10 +6,10 @@ import pytest
 
 import numpy as np
 
+from mlscorecheck.core import safe_eval
 from mlscorecheck.check.regression import (generate_regression_problem_and_scores,
                                             check_1_testset_no_kfold,
-                                            score_formulas,
-                                            calculate_regression_scores)
+                                            score_formulas)
 
 @pytest.mark.parametrize('random_seed', list(range(20)))
 @pytest.mark.parametrize('subset', [None, ['mae', 'rmse'],
@@ -23,9 +23,7 @@ def test_consistency(random_seed, subset):
         subset (list): the score subset to use
     """
 
-    random_state = np.random.RandomState(random_seed)
-
-    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_state,
+    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_seed,
                                                                     rounding_decimals=4,
                                                                     subset=subset)
 
@@ -44,9 +42,7 @@ def test_inconsistency(random_seed, subset):
         subset (list): the score subset to use
     """
 
-    random_state = np.random.RandomState(random_seed)
-
-    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_state,
+    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_seed,
                                                                     rounding_decimals=4,
                                                                     subset=subset)
 
@@ -66,12 +62,10 @@ def test_score_formulas(random_seed):
         random_seed (int): the random seed to use
     """
 
-    random_state = np.random.RandomState(random_seed)
-
-    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_state)
+    var, n_samples, scores = generate_regression_problem_and_scores(random_state=random_seed)
 
     for key, solutions in score_formulas.items():
         for sol_key, solution in solutions.items():
-            score_tmp = eval(solution, scores | {'var': var, 'n_samples': n_samples})
+            score_tmp = safe_eval(solution, scores | {'var': var, 'n_samples': n_samples})
             print(key, sol_key, score_tmp, scores[key])
             assert abs(score_tmp - scores[key]) < 1e-8

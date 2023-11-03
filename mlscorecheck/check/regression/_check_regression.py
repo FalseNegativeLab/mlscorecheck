@@ -5,7 +5,7 @@ This module implements the testing of regression scores
 import numpy as np
 
 from ...individual import Interval
-from ...core import NUMERICAL_TOLERANCE, round_scores
+from ...core import NUMERICAL_TOLERANCE, round_scores, safe_eval
 
 __all__ = ['check_1_testset_no_kfold',
             'expand_regression_scores',
@@ -163,7 +163,7 @@ def expand_regression_scores(var: float,
         if key not in scores:
             for sol, formula in value.items():
                 if sol in scores:
-                    to_add[key] = eval(formula, scores | {'var': var, 'n_samples': n_samples})
+                    to_add[key] = safe_eval(formula, scores | {'var': var, 'n_samples': n_samples})
                     break
 
     return scores | to_add
