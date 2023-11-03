@@ -22,7 +22,8 @@ def check_tpehg(scores: dict,
     Checks the cross-validated TPEHG scores
 
     Args:
-        scores (dict(str,float)): the dictionary of scores
+        scores (dict(str,float)): the dictionary of scores (supports only 'acc', 'sens', 'spec',
+                                    'bacc')
         eps (float|dict(str,float)): the numerical uncertainties
         n_folds (int): the number of folds
         n_repeats (int): the number of repetitions
@@ -39,7 +40,17 @@ def check_tpehg(scores: dict,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the result of the consistency testing
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list of dictionaries containing the details of the consistency tests. Each
+                entry contains the specification of the folds being tested and the
+                outcome of the ``check_1_dataset_known_folds_mos`` function.
 
     Examples:
         >>> from mlscorecheck.check.bundles.ehg import check_tpehg

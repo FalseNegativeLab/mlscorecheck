@@ -125,7 +125,12 @@ def check_diaretdb1_class(*,
         subset (str): the subset to be used ('train'/'test'), typically 'test'
         class_name (str|list): the name or list of names of classes used as "positive"
         confidence (float): the confidence threshold, typically 0.75
-        scores (dict(str,float)): the scores to be tested
+        scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -134,12 +139,24 @@ def check_diaretdb1_class(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_class
@@ -181,7 +198,12 @@ def check_diaretdb1_segmentation_image_assumption(*,
         class_name (str|list): the name or list of names of classes used as "positive"
         assumption (str): the assumption on the region of evaluation ('fov'/'all')
         confidence (float): the confidence threshold, typically 0.75
-        scores (dict(str,float)): the scores to be tested
+        scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -190,12 +212,24 @@ def check_diaretdb1_segmentation_image_assumption(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
     """
     testset_test = _prepare_configuration_diaretdb1(subset='test',
                                 class_name=class_name,
@@ -232,7 +266,12 @@ def check_diaretdb1_segmentation_image(*,
         image_identifier (str): the identifier of the image to be tested (e.g. '001')
         class_name (str|list): the name or list of names of classes used as "positive"
         confidence (float): the confidence threshold, typically 0.75
-        scores (dict(str,float)): the scores to be tested
+        scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -241,9 +280,12 @@ def check_diaretdb1_segmentation_image(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. Under the ``inconsistency`` key one finds all
-        findings, under the keys ``details*`` the details of the analysis can
-        be found.
+        dict: The summary of the results, with the following entries:
+
+            - ``'inconsistency'``:
+                All findings.
+            - ``details*``:
+                The details of the analysis for the two assumptions.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_segmentation_image
@@ -322,9 +364,12 @@ def check_diaretdb1_segmentation_aggregated_assumption(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. Under the ``inconsistency`` key one finds all
-        findings, under the keys ``details*`` the details of the analysis can
-        be found.
+        dict: The summary of the results, with the following entries:
+
+            - ``'inconsistency'``:
+                All findings.
+            - ``details*``:
+                The details of the analysis for the two assumptions.
     """
 
     testsets = _prepare_configuration_diaretdb1(subset=subset,
@@ -373,7 +418,8 @@ def check_diaretdb1_segmentation_aggregated(*,
     """
     Tests the scores describing the segmentation of multiple images of DIARETDB1 in an aggregated
     way. This test function supports binary the testing of binary subproblems (for example, the
-    pixels of the 'hardexudates' class being segmented in an image).
+    pixels of the 'hardexudates' class being segmented in an image). The test evaluates
+    both assumption on the region of evaluation.
 
     Args:
         subset (str|list): the subset of images to be used ('train'/'test') or the list of
@@ -400,9 +446,12 @@ def check_diaretdb1_segmentation_aggregated(*,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. Under the ``inconsistency`` key one finds all
-        findings, under the keys ``details*`` the details of the analysis can
-        be found.
+        dict: The summary of the results, with the following entries:
+
+            - ``'inconsistency'``:
+                All findings.
+            - ``details*``:
+                The details of the analysis for the two assumptions.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_segmentation_aggregated

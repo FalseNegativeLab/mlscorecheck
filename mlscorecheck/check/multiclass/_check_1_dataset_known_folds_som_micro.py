@@ -94,4 +94,5 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
     return check_1_testset_no_kfold_micro(testset=testset,
                                             scores=scores,
                                             eps=eps,
-                                            numerical_tolerance=numerical_tolerance)
+                                            numerical_tolerance=numerical_tolerance,
+                                            prefilter_by_pairs=prefilter_by_pairs)

@@ -43,13 +43,14 @@ def check_chasedb1_vessel_aggregated_mos(imageset,
                             numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Checking the consistency of scores with calculated for some images of
-    the CHASEDB1 dataset with the mean-of-scores aggregation.
+    the CHASEDB1 dataset with the mean of scores aggregation.
 
     Args:
         imageset (str|list): 'all' if all images are used, or a list of identifiers of
                             images (e.g. ['11R', '07L'])
         annotator (str): the annotation to be used ('manual1'/'manual2')
-        scores (dict): the scores to check
+        scores (dict): the scores to check (supports only 'acc', 'sens',
+                        'spec', 'bacc')
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
                                                             of the images
@@ -64,20 +65,22 @@ def check_chasedb1_vessel_aggregated_mos(imageset,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: the dictionary of the results of the analysis, the
-        ``inconsistency`` entry indicates if inconsistencies have
-        been found. The aggregated_results entry is empty if
-        the execution of the linear programming based check was
-        unnecessary. The result has four more keys. Under ``lp_status``
-        one finds the status of the lp solver, under ``lp_configuration_scores_match``
-        one finds a flag indicating if the scores from the lp configuration
-        match the scores provided, ``lp_configuration_bounds_match`` indicates
-        if the specified bounds match the actual figures and finally
-        ``lp_configuration`` contains the actual configuration of the
-        linear programming solver.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
 
-    Raises:
-        ValueError: if the problem is not specified properly
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'lp_status'``:
+                The status of the lp solver.
+            - ``'lp_configuration_scores_match'``:
+                A flag indicating if the scores from the lp configuration match the scores
+                provided.
+            - ``'lp_configuration_bounds_match'``:
+                Indicates if the specified bounds match the actual figures.
+            - ``'lp_configuration'``:
+                Contains the actual configuration of the linear programming solver.
     """
     data = get_experiment('retina.chase_db1')
 
@@ -106,7 +109,12 @@ def check_chasedb1_vessel_aggregated_som(imageset,
         imageset (str|list): 'all' if all images are used, or a list of identifiers of
                             images (e.g. ['11R', '07L'])
         annotator (str): the annotation to be used ('manual1'/'manual2')
-        scores (dict): the scores to check
+        scores (dict): the scores to check ('acc', 'sens', 'spec',
+                        'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                        'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                        'bm', 'pt', 'dor', 'ji', 'kappa'), when using
+                        f-beta positive or f-beta negative, also set
+                        'beta_positive' and 'beta_negative'.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -115,15 +123,24 @@ def check_chasedb1_vessel_aggregated_som(imageset,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. When the ``inconsistency`` flag is True, it indicates
-        that the set of feasible ``tp``, ``tn`` pairs is empty. The list under the key
-        ``details`` provides further details from the analysis of the scores one after the other.
-        Under the key ``n_valid_tptn_pairs`` one finds the number of tp and tn pairs compatible with
-        all scores. Under the key ``prefiltering_details`` one finds the results of the prefiltering
-        by using the solutions for the score pairs.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
 
-    Raises:
-        ValueError: if the problem is not specified properly
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
     """
     data = get_experiment('retina.chase_db1')
 
@@ -146,7 +163,8 @@ def check_chasedb1_vessel_aggregated(imageset,
                                 verbosity: int = 1,
                                 numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
-    Testing the scores calculated for the CHASEDB1 dataset
+    Testing the scores calculated for the CHASEDB1 dataset with both assumptions
+    on the mode of aggregation.
 
     Args:
         imageset (str|list): 'all' if all images are used, or a list of identifiers of
@@ -167,9 +185,12 @@ def check_chasedb1_vessel_aggregated(imageset,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. Under the ``inconsistency`` key one finds all
-        findings, under the keys ``details*`` the details of the analysis can
-        be found.
+        dict: The summary of the results, with the following entries:
+
+            - ``'inconsistency'``:
+                All findings.
+            - ``details*``:
+                The details of the analysis for the two assumptions.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_chasedb1_vessel_aggregated
@@ -219,7 +240,12 @@ def check_chasedb1_vessel_image(image_identifier: str,
     Args:
         image_identifier (str): the identifier of the image (like "11R")
         annotator (str): the annotation to use ('manual1'/'manual2')
-        scores (dict(str,float)): the scores to be tested
+        scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
+                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
+                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
+                                    f-beta positive or f-beta negative, also set
+                                    'beta_positive' and 'beta_negative'.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -228,9 +254,24 @@ def check_chasedb1_vessel_image(image_identifier: str,
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: a summary of the results. Under the ``inconsistency`` key one finds all
-        findings, under the keys ``details*`` the details of the analysis can
-        be found.
+        dict: A dictionary containing the results of the consistency check. The dictionary
+        includes the following keys:
+
+            - ``'inconsistency'``:
+                A boolean flag indicating whether the set of feasible true
+                positive (tp) and true negative (tn) pairs is empty. If True,
+                it indicates that the provided scores are not consistent with the experiment.
+            - ``'details'``:
+                A list providing further details from the analysis of the scores one
+                after the other.
+            - ``'n_valid_tptn_pairs'``:
+                The number of tp and tn pairs that are compatible with all
+                scores.
+            - ``'prefiltering_details'``:
+                The results of the prefiltering by using the solutions for
+                the score pairs.
+            - ``'evidence'``:
+                The evidence for satisfying the consistency constraints.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_chasedb1_vessel_image

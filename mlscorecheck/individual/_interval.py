@@ -749,6 +749,9 @@ class IntervalUnion:
         Returns:
             int: a representative element of the interval
         """
+        if len(self.intervals) == 0:
+            return None
+
         for interval in self.intervals:
             integer = interval.representing_int()
             if integer is not None:

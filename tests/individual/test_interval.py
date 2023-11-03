@@ -651,3 +651,15 @@ def test_odd_power():
     assert Interval(0, 2)**3 == Interval(0, 8)
     assert Interval(-1, 2)**3 == Interval(-1, 8)
     assert Interval(-2, -1)**3 == Interval(-8, -1)
+
+def test_representing_integer():
+    """
+    Testing the extraction of a representing integer
+    """
+
+    assert Interval(0, 1).representing_int() == 0
+    assert Interval(1, 0).representing_int() is None
+
+    assert IntervalUnion([Interval(0, 1)]).representing_int() == 0
+    assert IntervalUnion([Interval(1, 0)]).representing_int() is None
+    assert IntervalUnion([]).representing_int() is None
