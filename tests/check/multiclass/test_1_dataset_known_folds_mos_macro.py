@@ -21,7 +21,8 @@ def test_consistent(random_seed: int):
                                                 average='macro',
                                                 aggregation='mos',
                                                 rounding_decimals=4,
-                                                subset=['acc', 'sens', 'spec', 'f1p', 'bacc'])
+                                                #subset=['acc', 'sens', 'spec', 'f1p', 'bacc']
+                                                )
 
     result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
                                                     folding=folding,
@@ -44,7 +45,8 @@ def test_inconsistent(random_seed: int):
                                                 average='macro',
                                                 aggregation='mos',
                                                 rounding_decimals=4,
-                                                subset=['acc', 'sens', 'spec', 'f1p', 'bacc'])
+                                                #subset=['acc', 'sens', 'spec', 'f1p', 'bacc']
+                                                )
 
     scores['acc'] = (1.0 + scores['spec']) / 2.0
 

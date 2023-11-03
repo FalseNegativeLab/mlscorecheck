@@ -6,9 +6,13 @@ Numerous experimental setups are supported by the package. In this section we go
 We emphasize again, that the tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 
 A note on the *Score of Means* and *Mean of Scores* aggregations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
+
+
+Binary classification
+~~~~~~~~~~~~~~~~~~~~~
 
 The two types of tests
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -401,3 +405,9 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
                                                             eps=1e-3)
     >>> result['inconsistency']
     # True
+
+Multiclass classification
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Regression
+~~~~~~~~~~

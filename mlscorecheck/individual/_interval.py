@@ -391,6 +391,7 @@ class IntervalUnion:
             intervals (Interval|tuple|list(Interval)): a specification of one interval
                                                         or a list of intervals
         """
+
         if isinstance(intervals, Interval):
             self.intervals = [intervals]
         elif isinstance(intervals, tuple):
@@ -428,7 +429,11 @@ class IntervalUnion:
         to_drop = []
         for idx, int0 in enumerate(intervals):
             for jdx, int1 in enumerate(intervals):
-                if idx < jdx:
+                if idx != jdx:
+                    if (int0.lower_bound == int1.lower_bound) \
+                        and (int0.upper_bound == int1.upper_bound) \
+                        and idx > jdx:
+                            continue
                     if (int0.lower_bound <= int1.lower_bound) \
                             and (int0.upper_bound >= int1.upper_bound):
                         # the interval widh index jdx is contained in the interval with index idx

@@ -343,7 +343,7 @@ def generate_scores_for_testsets(testsets,
 def generate_dataset_folding_multiclass(*,
                                         random_state=None,
                                         max_n_classes=5,
-                                        min_n_classes=2,
+                                        min_n_classes=3,
                                         max_class_size=200,
                                         min_class_size=10,
                                         max_n_folds=5,
@@ -383,16 +383,15 @@ def generate_dataset_folding_multiclass(*,
                                             max_class_size=max_class_size,
                                             min_class_size=min_class_size)
 
-    n_folds = min([min(list(dataset.values())), random_state.randint(2, max_n_folds)])
+    folding = {'n_folds': min([min(list(dataset.values())), random_state.randint(2, max_n_folds)])}
 
     if random_state.randint(2) == 0:
-        folding = {'n_folds': n_folds,
-                    'n_repeats': random_state.randint(1, max_n_repeats),
-                    'strategy': 'stratified_sklearn'}
+        folding = folding | {'n_repeats': random_state.randint(1, max_n_repeats),
+                                'strategy': 'stratified_sklearn'}
     elif random_state.randint(2) == 0:
         folding = \
             {'folds': multiclass_stratified_folds(dataset=dataset,
-                                                n_folds=n_folds)}
+                                                n_folds=folding['n_folds'])}
     else:
         folding = {'n_folds': 1}
 

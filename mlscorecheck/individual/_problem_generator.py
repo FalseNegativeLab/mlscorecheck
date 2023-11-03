@@ -137,7 +137,7 @@ def generate_problems(*,
 
 def generate_multiclass_dataset(random_state=None,
                                 max_n_classes: int=5,
-                                min_n_classes: int=2,
+                                min_n_classes: int=3,
                                 max_class_size: int=200,
                                 min_class_size: int=10) -> dict:
     """
@@ -198,8 +198,16 @@ def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
     sample = np.zeros(shape=(len(dataset), len(dataset)), dtype=int)
 
     for class_idx, count in dataset.items():
-        sample[class_idx, :] = random_state.multinomial(count,
-                                                        np.ones(len(dataset))/len(dataset),
-                                                        size=1)[0]
+        sample_row = random_state.multinomial(count,
+                                                np.ones(len(dataset))/len(dataset),
+                                                size=1)[0]
+
+        #while np.any(sample_row == 0):
+        #    zidx = np.where(sample_row == 0)[0][0]
+        #    nzidx = np.where(sample_row > 1)[0][0]
+        #    sample_row[zidx] += 1
+        #    sample_row[nzidx] -= 1
+
+        sample[class_idx, :] = sample_row
 
     return sample

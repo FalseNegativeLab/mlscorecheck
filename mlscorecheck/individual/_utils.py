@@ -161,6 +161,7 @@ def unify_results(value_list):
     Returns:
         obj (list|IntervalUnion): the unified result
     """
+
     if len(value_list) == 0:
         return None
     if all(value is None for value in value_list):
@@ -177,4 +178,6 @@ def unify_results(value_list):
         elif interval is not None:
             intervals.append(Interval(interval, interval))
 
-    return IntervalUnion(intervals)
+    intu = IntervalUnion(intervals)
+
+    return intu

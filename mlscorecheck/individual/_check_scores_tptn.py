@@ -45,6 +45,7 @@ def iterate_tptn(*,
     results = {}
 
     for value in valid_pairs:
+
         if not is_applicable_tptn(score, score_value, 'tp' if iterate_by == 'tn' else 'tn'):
             results[value] = valid_pairs[value]
             continue

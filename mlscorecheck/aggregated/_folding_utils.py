@@ -165,8 +165,8 @@ def transform_multiclass_fold_to_binary(fold: dict) -> list:
     folds = [{'p': value, 'n': n_total - value} for value in fold.values()]
     identifier = fold.get('identifier', random_identifier(4))
 
-    for idx, fold in enumerate(folds):
-        fold['identifier'] = f'{identifier}_{idx}'
+    for idx, fold_ in enumerate(folds):
+        fold_['identifier'] = f'{identifier}_{idx}'
 
     return folds
 

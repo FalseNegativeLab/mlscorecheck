@@ -84,8 +84,6 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
     """
     folds = create_folds_multiclass(dataset, folding)
 
-    print(folds)
-
     testset = copy.deepcopy(folds[0])
     for fold in folds[1:]:
         for key in fold:
