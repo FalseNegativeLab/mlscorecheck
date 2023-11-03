@@ -4,8 +4,6 @@ Testing the consistency tests for regression scores in the 1 testset no kfold ca
 
 import pytest
 
-import numpy as np
-
 from mlscorecheck.core import safe_eval
 from mlscorecheck.check.regression import (generate_regression_problem_and_scores,
                                             check_1_testset_no_kfold,
