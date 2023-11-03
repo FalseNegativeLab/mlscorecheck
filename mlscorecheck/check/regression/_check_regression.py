@@ -15,20 +15,61 @@ __all__ = ['check_1_testset_no_kfold',
             'r_squared',
             'calculate_regression_scores',
             'generate_regression_problem_and_scores',
-            'check_relations']
+            'check_relations',
+            'score_formulas']
 
 rules = [{'score0': 'mae', 'score1': 'rmse', 'relation': 'le'}]
 
-def mean_average_error(y_true: np.array, y_pred: np.array):
+def mean_average_error(y_true: np.array, y_pred: np.array) -> float:
+    """
+    The mean average error (MAE) regression performance score
+
+    Args:
+        y_true (np.array): the true labels
+        y_pred (np.array): the predicted labels
+
+    Returns:
+        float: the MAE score
+    """
     return np.mean(np.abs(y_true - y_pred))
 
-def mean_squared_error(y_true: np.array, y_pred: np.array):
+def mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
+    """
+    The mean squared error (MSE) regression performance score
+
+    Args:
+        y_true (np.array): the true labels
+        y_pred (np.array): the predicted labels
+
+    Returns:
+        float: the MSE score
+    """
     return np.mean((y_true - y_pred)**2)
 
-def root_mean_squared_error(y_true: np.array, y_pred: np.array):
-    return np.sqrt(np.mean((y_true - y_pred)**2))
+def root_mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
+    """
+    The root mean squared error (RMSE) regression performance score
 
-def r_squared(y_true: np.array, y_pred: np.array):
+    Args:
+        y_true (np.array): the true labels
+        y_pred (np.array): the predicted labels
+
+    Returns:
+        float: the RMSE score
+    """
+    return np.sqrt(mean_squared_error(y_true, y_pred))
+
+def r_squared(y_true: np.array, y_pred: np.array) -> float:
+    """
+    The R squared (r2) regression performance score
+
+    Args:
+        y_true (np.array): the true labels
+        y_pred (np.array): the predicted labels
+
+    Returns:
+        float: the R2 score
+    """
     return 1.0 - np.sum((y_true - y_pred)**2) / (np.var(y_true) * y_true.shape[0])
 
 regression_scores = {'mae': mean_average_error,
@@ -36,7 +77,18 @@ regression_scores = {'mae': mean_average_error,
                         'rmse': root_mean_squared_error,
                         'r2': r_squared}
 
-def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None):
+def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None) -> dict:
+    """
+    Calculate the performance scores for a regression problem
+
+    Args:
+        y_true (np.array): the true labels
+        y_pred (np.array): the predicted labels
+        subset (None|list(str)): the scores to calculate
+
+    Returns:
+        dict: the calculated scores
+    """
     scores = {}
 
     for key, function in regression_scores.items():
@@ -45,10 +97,23 @@ def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None)
 
     return scores
 
-def generate_regression_problem_and_scores(random_state=None,
-                                            max_n_samples=1000,
-                                            subset=None,
-                                            rounding_decimals=None):
+def generate_regression_problem_and_scores(
+                                        random_state=None,
+                                        max_n_samples=1000,
+                                        subset=None,
+                                        rounding_decimals=None) -> (float, int, dict):
+    """
+    Generate a regression problem and corresponding scores
+
+    Args:
+        random_state (None|int|np.random.RandomState): the random state/seed to use
+        max_n_samples (int): the maximum number of samples to be used
+        subset (None|list(str)): the list of scores to be used
+        rounding_decimals (None|int): the number of decimals to round to
+
+    Returns:
+        float, int, dict: the variance, the number of samples and the scores
+    """
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 
@@ -62,6 +127,14 @@ def generate_regression_problem_and_scores(random_state=None,
     scores = round_scores(scores, rounding_decimals)
 
     return np.var(y_true), n_samples, scores
+
+score_formulas = {'mse': {'rmse': 'rmse**2',
+                              'r2': '((1 - r2) * (var))'},
+                        'rmse': {'mse': 'mse ** 0.5',
+                                 'r2': '((1 - r2) * (var)) ** 0.5'},
+                        'r2': {'mse': '(1 - mse / var)',
+                                'rmse': '(1 - rmse**2 / var)'},
+                        }
 
 def expand_regression_scores(var: float,
                                 n_samples: int,
@@ -85,25 +158,15 @@ def expand_regression_scores(var: float,
     scores = {key: Interval(value - eps - numerical_tolerance,
                             value + eps + numerical_tolerance) for key, value in scores.items()}
 
-    if 'rmse' in scores and 'mse' not in scores:
-        scores['mse'] = scores['rmse'] ** 2
+    to_add = {}
+    for key, value in score_formulas.items():
+        if key not in scores:
+            for sol, formula in value.items():
+                if sol in scores:
+                    to_add[key] = eval(formula, scores | {'var': var, 'n_samples': n_samples})
+                    break
 
-    if 'mse' in scores and 'rmse' not in scores:
-        scores['rmse'] = scores['mse'] ** 0.5
-
-    if 'r2' in scores and 'mse' not in scores:
-        scores['mse'] = (1 - scores['r2']) * var / n_samples
-
-    if 'r2' in scores and 'rmse' not in scores:
-        scores['mse'] = ((1 - scores['r2']) * var / n_samples) ** 0.5
-
-    if 'mse' in scores and 'r2' not in scores:
-        scores['r2'] = 1 - scores['mse'] * n_samples / var
-
-    if 'rmse' in scores and 'r2' not in scores:
-        scores['r2'] = 1 - scores['rmse'] ** 2 * n_samples / var
-
-    return scores
+    return scores | to_add
 
 def check_relations(scores: dict) -> dict:
     """
