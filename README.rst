@@ -541,26 +541,26 @@ In this scenario, we suppose there is a multiclass classification testset and th
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
+    from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
 
-    >>> testset = {0: 10, 1: 100, 2: 80}
-    >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
+    testset = {0: 10, 1: 100, 2: 80}
+    scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
                     'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
-    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+    results = check_1_testset_no_kfold_micro(testset=testset,
                                             scores=scores,
                                             eps=1e-4)
-    >>> results['inconsistency']
+    results['inconsistency']
     # False
 
 As the test confirms, the setup is consistent. However, if one of the scores is adjusted a little, for example, accuracy is changed to 0.5258, the configuration becomes infeasible:
 
 .. code-block:: Python
 
-    >>> scores['acc'] = 0.5258
-    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+    scores['acc'] = 0.5258
+    results = check_1_testset_no_kfold_micro(testset=testset,
                                             scores=scores,
                                             eps=1e-4)
-    >>> results['inconsistency']
+    results['inconsistency']
     # True
 
 Similar functionality is provided for macro-averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
@@ -574,29 +574,29 @@ In the first example, we test an artificially generated, consistent scenario:
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
+    from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
 
-    >>> dataset = {0: 86, 1: 96, 2: 59, 3: 105}
-    >>> folding = {'folds': [{0: 43, 1: 48, 2: 30, 3: 52}, {0: 43, 1: 48, 2: 29, 3: 53}]}
-    >>> scores =  {'acc': 0.6272, 'sens': 0.2543, 'spec': 0.7514, 'f1p': 0.2543}
+    dataset = {0: 86, 1: 96, 2: 59, 3: 105}
+    folding = {'folds': [{0: 43, 1: 48, 2: 30, 3: 52}, {0: 43, 1: 48, 2: 29, 3: 53}]}
+    scores =  {'acc': 0.6272, 'sens': 0.2543, 'spec': 0.7514, 'f1p': 0.2543}
 
-    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+    result = check_1_dataset_known_folds_som_micro(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-4)
-    >>> result['inconsistency']
+    result['inconsistency']
     # False
 
 As the test confirms, the scenario is feasible. However, if one of the scores is adjusted a little, for example, sensitivity is changed to 0.2553, the configuration becomes infeasible:
 
 .. code-block:: Python
 
-    >>> scores['sens'] = 0.2553
-    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+    scores['sens'] = 0.2553
+    result = check_1_dataset_known_folds_som_micro(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-4)
-    >>> result['inconsistency']
+    result['inconsistency']
     # True
 
 Similar functionality is provided for mean of scores aggregation and macro averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
@@ -615,29 +615,29 @@ In the first example, we test an artificially generated, consistent scenario:
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check.regression import check_1_testset_no_kfold
+    from mlscorecheck.check.regression import check_1_testset_no_kfold
 
-    >>> var = 0.0831619 # the variance of the target values in the testset
-    >>> n_samples = 100
-    >>> scores =  {'mae': 0.0254, 'r2': 0.9897}
+    var = 0.0831619 # the variance of the target values in the testset
+    n_samples = 100
+    scores =  {'mae': 0.0254, 'r2': 0.9897}
 
-    >>> result = check_1_testset_no_kfold(var=var,
+    result = check_1_testset_no_kfold(var=var,
                                         n_samples=n_samples,
                                         scores=scores,
                                         eps=1e-4)
-    >>> result['inconsistency']
+    result['inconsistency']
     # False
 
 As the results show, there is no inconsistency detected. However, if the mae score is adjusted slightly to 0.03, the configuration becomes inconsistent:
 
 .. code-block:: Python
 
-    >>> scores['mae'] = 0.03
-    >>> result = check_1_testset_no_kfold(var=var,
+    scores['mae'] = 0.03
+    result = check_1_testset_no_kfold(var=var,
                                         n_samples=n_samples,
                                         scores=scores,
                                         eps=1e-4)
-    >>> result['inconsistency']
+    result['inconsistency']
     # True
 
 Not knowing the mode of aggregation
