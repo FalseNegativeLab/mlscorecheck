@@ -33,6 +33,10 @@ Multiclass classification
 .. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_som_macro
 .. autofunction:: mlscorecheck.check.multiclass.check_1_dataset_known_folds_som_micro
 
+Regression
+----------
+
+.. autofunction:: mlscorecheck.check.regression.check_1_testset_no_kfold
 
 Test bundles (``bundles``)
 ==========================
