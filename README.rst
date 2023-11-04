@@ -385,8 +385,8 @@ If one of the scores is adjusted, for example, negative predictive value is chan
     result['inconsistency']
     # True
 
-n testsets without k-folding, SoM over the testsets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+n testsets without k-folding, SoM/Mos over the testsets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this scenario there are n different testsets, the classifier is evaluated on each testsets, and the scores are aggregated by the SoM aggregation. This scenario is similar to the "1 dataset k-fold SoM" case, except the scores are aggregated over testsets rather than folds. The output of the test is structured similarly as in the "1 dataset k-fold SoM" case. In the following example, a consistent case is tested.
 
@@ -415,115 +415,8 @@ If one of the scores is slightly adjusted, for example, ``npv`` changed to 0.626
     results["inconsistency"]
     # True
 
-n testsets without k-folding, MoS over the testsets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Similar tests are provided for the MoS aggregation as well, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
-This scenario is analogous to the "n testsets without k-folding, SoM" scenario, except the aggregation over the testsets is carried out with the MoS approach. The output is structured similarly to the output of the "1 dataset k-fold MoS" scenario. In the first example, a feasible scenario is tested.
-
-.. code-block:: Python
-
-    from mlscorecheck.check.binary import check_n_testsets_mos_no_kfold
-
-    testsets = [{'p': 349, 'n': 50},
-                {'p': 478, 'n': 323},
-                {'p': 324, 'n': 83},
-                {'p': 123, 'n': 145}]
-
-    scores = {'acc': 0.6441, 'sens': 0.6706, 'spec': 0.3796, 'bacc': 0.5251}
-    results = check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                    scores=scores,
-                                                    eps=0.0001)
-    results["inconsistency"]
-    # False
-
-If one of the scores is slightly adjusted, for example, ``sens`` is updated to 0.6756, the configuration becomes infeasible.
-
-.. code-block:: Python
-
-    scores['sens'] = 0.6756
-
-    results = check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                    scores=scores,
-                                                    eps=0.0001)
-    results["inconsistency"]
-    # True
-
-n datasets with k-folds, SoM over datasets and SoM over folds
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Again, the scenario is similar to the "1 dataset k-fold SoM" scenario, except there is another level of aggregation over datasets, and one single confusion matrix is determined for the entire experiment and the scores are calculated from that. In this scenario a list of evaluations need to be specified. The output of the test is structured similarly as in the "1 dataset k-fold SoM" case, there is a top level ``inconsistency`` flag indicating if inconsistency has been detected. In the following example, a consistent case is prepared with two datasets.
-
-.. code-block:: Python
-
-    from mlscorecheck.check.binary import check_n_datasets_som_kfold_som
-
-    evaluation0 = {'dataset': {'p': 389, 'n': 630},
-                    'folding': {'n_folds': 5, 'n_repeats': 2,
-                                'strategy': 'stratified_sklearn'}}
-    evaluation1 = {'dataset': {'dataset_name': 'common_datasets.saheart'},
-                    'folding': {'n_folds': 5, 'n_repeats': 2,
-                                'strategy': 'stratified_sklearn'}}
-    evaluations = [evaluation0, evaluation1]
-
-    scores = {'acc': 0.631, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-
-    result = check_n_datasets_som_kfold_som(scores=scores,
-                                                    evaluations=evaluations,
-                                                    eps=1e-3)
-    result['inconsistency']
-    # False
-
-However, if one of the scores is adjusted a little, like accuracy is changed to 0.731, the configuration becomes inconsistent:
-
-.. code-block:: Python
-
-    scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
-
-    result = check_n_datasets_som_kfold_som(scores=scores,
-                                                    evaluations=evaluations,
-                                                    eps=1e-3)
-    result['inconsistency']
-    # True
-
-n datasets with k-folds, MoS over datasets and SoM over folds
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This scenario is about performance scores calculated for each dataset individually by the SoM aggregation in any k-folding strategy, and then the scores are aggregated across the datasets in the MoS manner. Because of the overall averaging, one cannot do inference about the non-linear scores, only the four linear scores are supported (``acc``, ``sens``, ``spec``, ``bacc``), and the scores are checked by linear programming. Similarly as before, the specification of a list of evaluations is needed. In the following example a consistent scenario is tested, with score bounds also specified on the datasets:
-
-.. code-block:: Python
-
-    from mlscorecheck.check.binary import check_n_datasets_mos_kfold_som
-
-    evaluation0 = {'dataset': {'p': 39, 'n': 822},
-                    'folding': {'n_folds': 5, 'n_repeats': 3,
-                                'strategy': 'stratified_sklearn'}}
-    evaluation1 = {'dataset': {'dataset_name': 'common_datasets.winequality-white-3_vs_7'},
-                    'folding': {'n_folds': 5, 'n_repeats': 3,
-                                'strategy': 'stratified_sklearn'}}
-    evaluations = [evaluation0, evaluation1]
-
-    scores = {'acc': 0.312, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
-
-    result = check_n_datasets_mos_kfold_som(evaluations=evaluations,
-                                                    dataset_score_bounds={'acc': (0.0, 0.5)},
-                                                    eps=1e-4,
-                                                    scores=scores)
-    result['inconsistency']
-    # False
-
-However, if one of the scores is adjusted a little (accuracy changed to 0.412 and the score bounds also changed), the configuration becomes infeasible:
-
-.. code-block:: Python
-
-    scores = {'acc': 0.412, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
-    result = check_n_datasets_mos_kfold_som(evaluations=evaluations,
-                                                    dataset_score_bounds={'acc': (0.5, 1.0)},
-                                                    eps=1e-4,
-                                                    scores=scores)
-    result['inconsistency']
-    # True
-
-The output is structured similarly to the '1 dataset k-folds MoS' case, one can query the status of the solver by the key ``lp_status`` and the actual configuration of the variables by the ``lp_configuration`` key. If there are hints on the minimum and maximum scores across the datasets, one can add those bounds through the ``dataset_score_bounds`` parameter to strengthen the test.
 
 n datasets with k-folds, MoS over datasets and MoS over folds
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -562,13 +455,11 @@ Again, the details of the analysis are accessible under the ``lp_status`` and ``
 
 If there are hints on the minimum and maximum scores across the datasets, one can add those bounds through the ``dataset_score_bounds`` parameter to strengthen the test.
 
-Not knowing the mode of aggregation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Similar tests are provided for the SoM aggregation as well, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
-The biggest challenge with aggregated scores is that the ways of aggregation at the dataset and experiment level are rarely disclosed explicitly. Even in this case the tools presented in the previous section can be used since there are hardly any further ways of meaningful averaging than (MoS on folds, MoS on datasets), (SoM on folds, MoS on datasets), (SoM on folds, SoM on datasets), hence, if a certain set of scores is inconsistent with each of these possibilities, one can safely say that the results do not satisfy the reasonable expectations.
 
 Not knowing the k-folding scheme
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases, it is not stated explicitly if stratification was applied or not, only the use of k-fold is phrased in papers. Not knowing the folding structure, the MoS aggregated tests cannot be used. However, if the cardinality of the minority class is not too big (a couple of dozens), then all potential k-fold configurations can be generated, and the MoS tests can be applied to each. If the scores are inconsistent with each, it means that no k-fold could result the scores. There are two functions supporting these exhaustive tests, one for the dataset level, and one for the experiment level.
 
@@ -671,7 +562,7 @@ As the test confirms, the setup is consistent. However, if one of the scores is 
     >>> results['inconsistency']
     # True
 
-Similar functionality is provided for macro-averaging.
+Similar functionality is provided for macro-averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 1 dataset, known k-folds, SoM/MoS aggregation, micro/macro-averaging
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -707,7 +598,7 @@ As the test confirms, the scenario is feasible. However, if one of the scores is
     >>> result['inconsistency']
     # True
 
-Similar functionality is provided for mean of scores aggregation and macro averaging.
+Similar functionality is provided for mean of scores aggregation and macro averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 Regression
 ^^^^^^^^^^
@@ -748,6 +639,10 @@ As the results show, there is no inconsistency detected. However, if the mae sco
     >>> result['inconsistency']
     # True
 
+Not knowing the mode of aggregation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The biggest challenge with aggregated scores is that the ways of aggregation at the dataset and experiment level are rarely disclosed explicitly. Even in this case the tools presented in the previous section can be used since there are hardly any further ways of meaningful averaging than (MoS on folds, MoS on datasets), (SoM on folds, MoS on datasets), (SoM on folds, SoM on datasets), hence, if a certain set of scores is inconsistent with each of these possibilities, one can safely say that the results do not satisfy the reasonable expectations.
 
 Test bundles
 ============
