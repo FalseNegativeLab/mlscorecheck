@@ -53,6 +53,7 @@ def test_inconsistent(random_seed: int):
     result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
                                                     folding=folding,
                                                     scores=scores,
-                                                    eps=1e-4)
+                                                    eps=1e-4,
+                                                    timeout=2)
 
     assert result['inconsistency']
