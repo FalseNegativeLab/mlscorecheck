@@ -127,8 +127,8 @@ For further information, see
 * ReadTheDocs full documentation: https://mlscorecheck.readthedocs.io/en/latest/
 * The preprint: https://arxiv.org/abs/2310.12527
 
-Use cases
-=========
+Binary classification
+=====================
 
 In general, there are three inputs to the consistency testing functions:
 
@@ -241,15 +241,8 @@ A note on the *Score of Means* and *Mean of Scores* aggregations
 
 When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
 
-Binary classification
----------------------
-
-In the context of a single testset or a Score of Means (SoM) aggregation, which results in one confusion matrix, one can systematically iterate through all potential confusion matrices to assess whether any of them can generate the reported scores within the specified numerical uncertainty. To expedite this process, the test leverages interval arithmetic. The test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` parameters.
-
-With a MoS type of aggregation, only the averages of scores over folds or datasets are available. In this case, it is feasible to reconstruct fold-level or dataset-level confusion matrices for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear integer programming. These tests formulate a linear integer program based on the reported scores and the experimental setup, and check if the program is feasible to produce the reported values within the estimated numerical uncertainties.
-
 1 testset with no k-fold
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 A scenario like this is having one single test set to which classification is applied and the scores are computed from the resulting confusion matrix. For example, given a test image, which is segmented and the scores of the segmentation (as a binary classification of pixels) are calculated and reported.
 
@@ -286,7 +279,7 @@ If one of the scores is altered, like accuracy is changed to 0.92, the configura
 As the ``inconsistency`` flag shows, here inconsistencies were identified, there are no such ``tp`` and ``tn`` combinations which would end up with the reported scores. Either the assumption on the properties of the dataset, or the scores are incorrect.
 
 1 dataset with k-fold, mean of scores (MoS)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the true positive and true negative parameters of all folds and checks its feasibility.
 
@@ -344,7 +337,7 @@ with a true positive and true negative configuration with the specified lower an
 Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four linear scores.
 
 1 dataset with k-fold, score of means (SoM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 When the scores are calculated in the Score-of-Means (SoM) manner in a k-fold scenario, it means that the total confusion matrix of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold scheme multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
 
@@ -382,7 +375,7 @@ If one of the scores is adjusted, for example, negative predictive value is chan
     # True
 
 n testsets without k-fold, SoM/MoS aggregation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------
 
 In this scenario there are n different testsets, the classifier is evaluated on each testsets, and the scores are aggregated by the SoM aggregation. This scenario is similar to the "1 dataset k-fold SoM" case, except the scores are aggregated over testsets rather than folds. The output of the test is structured similarly as in the "1 dataset k-fold SoM" case. In the following example, a consistent case is tested.
 
@@ -415,7 +408,7 @@ Similar tests are provided for the MoS aggregation as well, for further details 
 
 
 n datasets with k-fold, MoS over datasets and MoS over folds
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------
 
 In this scenario, scores are calculated in the MoS manner for each dataset, and then aggregated again across the datasets. Again, because of the averaging, only the four linear scores (``acc``, ``sens``, ``spec``, ``bacc``) are supported. In the following example a consistent scenario is checked with three datasets and without score bounds specified at any level:
 
@@ -454,7 +447,7 @@ If there are hints on the minimum and maximum scores across the datasets, one ca
 Similar tests are provided for the SoM aggregation and the mixing of MoS and SoM aggregation, as well, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 Not knowing the k-folding scheme
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------
 
 In many cases, it is not stated explicitly if stratification was applied or not, only the use of k-fold is phrased in papers. Not knowing the folding structure, the MoS aggregated tests cannot be used. However, if the cardinality of the minority class is not too big (a couple of dozens), then all potential k-fold configurations can be generated, and the MoS tests can be applied to each. If the scores are inconsistent with each, it means that no k-fold could result the scores. There are two functions supporting these exhaustive tests, one for the dataset level, and one for the experiment level.
 
@@ -524,22 +517,22 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
     # True
 
 Not knowing the mode of aggregation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 The biggest challenge with aggregated scores is that the ways of aggregation at the dataset and experiment level are rarely disclosed explicitly. Even in this case the tools presented in the previous section can be used since there are hardly any further ways of meaningful averaging than (MoS on folds, MoS on datasets), (SoM on folds, MoS on datasets), (SoM on folds, SoM on datasets), hence, if a certain set of scores is inconsistent with each of these possibilities, one can safely say that the results do not satisfy the reasonable expectations.
 
 Multiclass classification
--------------------------
+=========================
 
 In multiclass classification scenarios only single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies.
 
 A note on micro and macro-averaging
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 In a multiclass scenario, the commonly used approach is for measuring the performance of a classification technique is to calculate the micro or macro-averaged scores. In the micro-averaging approach, the confusion matrices of the individual classes are aggregated, and the scores are calculated from the aggregated confusion matrix. In the macro-averaging approach, the scores are calculated for each class, and the average of the scores is reported. The micro-averaging approach is more robust to class imbalance, however, it is not possible to estimate the standard deviation of the scores. The macro-averaging approach is more sensitive to class imbalance, but it is possible to estimate the standard deviation of the scores.
 
 1 testset, no k-fold, micro/macro-averaging
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 In this scenario, we suppose there is a multiclass classification testset and the class level scores on the testset are aggregated by micro-averaging. The test is based on exhaustive enumeration, so all 20 performance scores are supported. In the first example, we test an artificially generated, consistent scenario:
 
@@ -570,7 +563,7 @@ As the test confirms, the setup is consistent. However, if one of the scores is 
 Similar functionality is provided for macro-averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 1 dataset, known k-folds, SoM/MoS aggregation, micro/macro-averaging
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------------------
 
 In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by micro-averaging, and the fold level results are aggregated in the score of means fashion. The test is based on exhaustive enumeration, therefore, all 20 performance scores are supported.
 
@@ -606,12 +599,12 @@ As the test confirms, the scenario is feasible. However, if one of the scores is
 Similar functionality is provided for mean of scores aggregation and macro averaging, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 Regression
-----------
+==========
 
 From the point of view of consistency testing, regression is the hardest problem as the predictions can produce any performance scores. The tests implemented in the package allow testing the relation of the *mean squared error* (``mse``), *root mean squared error* (``rmse``), *mean average error* (``mae``) and *r^2 scores* (``r2``).
 
 1 testset, no k-fold
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 In this scenario, we assume there is a regression testset, and the performance scores are calculated on the testset.
 
