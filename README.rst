@@ -27,11 +27,18 @@
 .. |Gitter| image:: https://badges.gitter.im/mlscorecheck.svg
 .. _Gitter: https://app.gitter.im/#/room/!AmkvUevcfkobbwcNWS:gitter.im
 
+
 mlscorecheck: testing the consistency of binary classification performance scores
 *********************************************************************************
 
+.. contents::
+    :depth: 3
+
+Getting started
+===============
+
 The purpose
-===========
+-----------
 
 Performance scores for binary classification are reported on a dataset and look suspicious (exceptionally high scores possibly due to typo, uncommon evaluation methodology, data leakage in preparation, incorrect use of statistics, etc.). With the tools implemented in the package ``mlscorecheck``, one can test if the reported performance scores are consistent with each other and the assumptions on the experimental setup up to the numerical uncertainty due to rounding/truncation/ceiling.
 
@@ -50,7 +57,7 @@ Testing is as simple as the following example shows: the tested scores are incon
 The consistency tests are numerical and **not** statistical: if inconsistencies are identified, it means that either the assumptions on the experimental setup or the reported scores are incorrect.
 
 Latest news
-===========
+-----------
 
 * the 1.0.1 version of the package is released;
 * the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
@@ -59,7 +66,7 @@ Latest news
 * multiclass and regression tests added.
 
 Citation
-========
+--------
 
 If you use the package, please consider citing the following paper:
 
@@ -71,18 +78,8 @@ If you use the package, please consider citing the following paper:
     year={2023}
   }
 
-Contents
-========
-
-The contents of the repository:
-
-* ``mlscorecheck`` folder: the implementation of the consistency tests;
-* ``notebooks/illustration`` folder: the notebooks containing all working sample codes used throughout this README and the ReadTheDocs documentation;
-* ``notebooks/utils`` folder: utilities related to generate the algebraic solutions of the score functions, as well as the summary tables used for illustration;
-* ``tests`` folder: the unit and functional tests covering each line of code of the package.
-
 Installation
-============
+------------
 
 The package has only basic requirements when used for consistency testing.
 
@@ -664,7 +661,7 @@ Contribution
 We kindly encourage any experts to provide further, field specific dataset and experiment specifications and test bundles to facilitate the reporting of clean and reproducible results in any field related to binary classification!
 
 References
-**********
+==========
 
 .. [RV] Kovács, G. and Fazekas, A.: "A new baseline for retinal vessel segmentation: Numerical identification and correction of methodological inconsistencies affecting 100+ papers", Medical Image Analysis, 2022(1), pp. 102300
 
