@@ -440,7 +440,7 @@ As the test confirms, the setup is consistent. However, if one of the scores is 
     >>> results['inconsistency']
     # True
 
-1 testset, no k-fold, micro-averaging
+1 testset, no k-fold, macro-averaging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This scenario is similar to the previous one, except the scores are aggregated by macro-averaging. The test is based on linear programming, so only accuracy, sensitivity, specificity and balanced accuracy are supported. In the first example, we test an artificially generated, consistent scenario:
