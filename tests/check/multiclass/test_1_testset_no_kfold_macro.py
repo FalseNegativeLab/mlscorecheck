@@ -60,6 +60,7 @@ def test_inconsistent_configuration(random_seed):
 
     result = check_1_testset_no_kfold_macro(testset=dataset,
                                             scores=scores,
-                                            eps=1e-4)
+                                            eps=1e-4,
+                                            timeout=2)
 
     assert result['inconsistency']
