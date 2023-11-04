@@ -52,10 +52,11 @@ The consistency tests are numerical and **not** statistical: if inconsistencies 
 Latest news
 ===========
 
-* the 1.0.0 version of the package is released
+* the 1.0.1 version of the package is released;
 * the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 * the full documentation is available at: https://mlscorecheck.readthedocs.io/en/latest/
-* 10 test bundles including retina image processing datasets, preterm delivery prediction from electrohysterograms and skin lesion classification has been added.
+* 10 test bundles including retina image processing datasets, preterm delivery prediction from electrohysterograms and skin lesion classification has been added;
+* multiclass and regression tests added.
 
 Citation
 ========
