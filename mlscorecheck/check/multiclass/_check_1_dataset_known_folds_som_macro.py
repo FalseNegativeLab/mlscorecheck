@@ -76,9 +76,9 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
 
     Examples:
         >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_macro
-        >>> dataset = {0: 34, 1: 135, 2: 170, 3: 192}
-        >>> folding = {'n_folds': 2, 'n_repeats': 1, 'strategy': 'stratified_sklearn'}
-        >>> scores = {'acc': 0.6271, 'sens': 0.2422, 'spec': 0.7525, 'f1p': 0.2333}
+        >>> dataset = {0: 129, 1: 81, 2: 135}
+        >>> folding = {'n_folds': 2, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+        >>> scores = {'acc': 0.5662, 'sens': 0.3577, 'spec': 0.6767, 'f1p': 0.3481}
         >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,
@@ -86,7 +86,7 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
         >>> result['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8762
+        >>> scores['acc'] = 0.6762
         >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,

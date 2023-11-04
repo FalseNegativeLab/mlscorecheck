@@ -73,7 +73,7 @@ def check_1_testset_no_kfold_micro(testset: dict,
         >>> results['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8184
+        >>> scores['acc'] = 0.5258
         >>> results = check_1_testset_no_kfold_micro(testset=testset,
                                             scores=scores,
                                             eps=1e-4)

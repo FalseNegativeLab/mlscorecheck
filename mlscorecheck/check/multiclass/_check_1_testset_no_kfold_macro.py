@@ -78,7 +78,7 @@ def check_1_testset_no_kfold_macro(testset: dict,
         >>> results['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8464
+        >>> scores['acc'] = 0.6020
         >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
         >>> results['inconsistency']
         # True

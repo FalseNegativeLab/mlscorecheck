@@ -74,7 +74,7 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
         >>> result['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8756
+        >>> scores['sens'] = 0.2553
         >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,

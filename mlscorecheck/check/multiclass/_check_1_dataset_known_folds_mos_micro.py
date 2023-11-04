@@ -74,19 +74,19 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
         ValueError: if the problem is not specified properly
 
     Examples:
-        >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_macro
-        >>> dataset = {0: 149, 1: 118, 2: 83, 3: 154}
-        >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
-        >>> scores = {'acc': 0.626, 'sens': 0.2483, 'spec': 0.7509, 'f1p': 0.2469}
-        >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+        >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_micro
+        >>> dataset = {0: 66, 1: 178, 2: 151}
+        >>> folding = {'folds': [{0: 33, 1: 89, 2: 76}, {0: 33, 1: 89, 2: 75}]}
+        >>> scores = {'acc': 0.5646, 'sens': 0.3469, 'spec': 0.6734, 'f1p': 0.3469}
+        >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,
                                                 eps=1e-4)
         >>> result['inconsistency']
         # False
 
-        >>> scores['acc'] = 0.8745
-        >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+        >>> scores['acc'] = 0.5746
+        >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
                                                 folding=folding,
                                                 scores=scores,
                                                 eps=1e-4)
