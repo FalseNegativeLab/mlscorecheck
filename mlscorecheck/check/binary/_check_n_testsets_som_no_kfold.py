@@ -8,14 +8,17 @@ from ...core import NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs
 from ...aggregated import Experiment, Dataset
 
-__all__ = ['check_n_testsets_som_no_kfold']
+__all__ = ["check_n_testsets_som_no_kfold"]
 
-def check_n_testsets_som_no_kfold(testsets: list,
-                                        scores: dict,
-                                        eps,
-                                        *,
-                                        numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                                        prefilter_by_pairs: bool = True):
+
+def check_n_testsets_som_no_kfold(
+    testsets: list,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True,
+):
     """
     Checking the consistency of scores calculated by aggregating the figures
     over testsets in the score of means fashion, without k-folding.
@@ -82,21 +85,33 @@ def check_n_testsets_som_no_kfold(testsets: list,
 
     datasets = [Dataset(**dataset) for dataset in testsets]
 
-    evaluations = [{'dataset': dataset.to_dict(),
-                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n,
-                                            'identifier': f'{dataset.identifier}_{idx}'}]},
-                    'aggregation': 'mos'}
-                    for idx, dataset in enumerate(datasets)]
+    evaluations = [
+        {
+            "dataset": dataset.to_dict(),
+            "folding": {
+                "folds": [
+                    {
+                        "p": dataset.p,
+                        "n": dataset.n,
+                        "identifier": f"{dataset.identifier}_{idx}",
+                    }
+                ]
+            },
+            "aggregation": "mos",
+        }
+        for idx, dataset in enumerate(datasets)
+    ]
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(evaluations=evaluations,
-                            aggregation='som')
+    experiment = Experiment(evaluations=evaluations, aggregation="som")
 
     # executing the individual tests
-    return check_scores_tptn_pairs(scores=scores,
-                                            eps=eps,
-                                            p=experiment.figures['p'],
-                                            n=experiment.figures['n'],
-                                            numerical_tolerance=numerical_tolerance,
-                                            prefilter_by_pairs=prefilter_by_pairs)
+    return check_scores_tptn_pairs(
+        scores=scores,
+        eps=eps,
+        p=experiment.figures["p"],
+        n=experiment.figures["n"],
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=prefilter_by_pairs,
+    )

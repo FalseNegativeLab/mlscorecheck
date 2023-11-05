@@ -9,17 +9,15 @@ import copy
 
 import numpy as np
 
-from ._check_n_datasets_mos_known_folds_mos \
-            import check_n_datasets_mos_known_folds_mos
+from ._check_n_datasets_mos_known_folds_mos import check_n_datasets_mos_known_folds_mos
 from ._check_1_dataset_unknown_folds_mos import estimate_n_evaluations
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import (experiment_kfolds_generator)
+from ...aggregated import experiment_kfolds_generator
 
-__all__ = ['check_n_datasets_mos_unknown_folds_mos',
-            'estimate_n_experiments']
+__all__ = ["check_n_datasets_mos_unknown_folds_mos", "estimate_n_experiments"]
 
-def estimate_n_experiments(evaluations: list,
-                            available_scores: list = None) -> int:
+
+def estimate_n_experiments(evaluations: list, available_scores: list = None) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
@@ -31,21 +29,28 @@ def estimate_n_experiments(evaluations: list,
     """
     available_scores = [] if available_scores is None else available_scores
 
-    counts = [estimate_n_evaluations(dataset=evaluation['dataset'],
-                                        folding=evaluation['folding'],
-                                        available_scores=available_scores)
-                for evaluation in evaluations]
+    counts = [
+        estimate_n_evaluations(
+            dataset=evaluation["dataset"],
+            folding=evaluation["folding"],
+            available_scores=available_scores,
+        )
+        for evaluation in evaluations
+    ]
     return np.prod(counts)
 
-def check_n_datasets_mos_unknown_folds_mos(evaluations: list,
-                                        scores: dict,
-                                        eps,
-                                        dataset_score_bounds: dict = None,
-                                        *,
-                                        solver_name: str = None,
-                                        timeout: int = None,
-                                        verbosity: int = 1,
-                                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_n_datasets_mos_unknown_folds_mos(
+    evaluations: list,
+    scores: dict,
+    eps,
+    dataset_score_bounds: dict = None,
+    *,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Checking the consistency of scores calculated in k-fold cross validation on multiple
     datasets, in mean-of-scores fashion, without knowing the fold configurations.
@@ -125,39 +130,44 @@ def check_n_datasets_mos_unknown_folds_mos(evaluations: list,
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mos') != 'mos' for evaluation in evaluations):
-        raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
-    if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
-        raise ValueError('do not specify fold score bounds through this interface')
+    if any(evaluation.get("aggregation", "mos") != "mos" for evaluation in evaluations):
+        raise ValueError(
+            'the aggregation specified in each dataset must be "mor" or nothing.'
+        )
+    if any(
+        evaluation.get("fold_score_bounds") is not None for evaluation in evaluations
+    ):
+        raise ValueError("do not specify fold score bounds through this interface")
 
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'mos'
+        evaluation["aggregation"] = "mos"
 
-    experiment = {'evaluations': evaluations,
-                    'dataset_score_bounds': dataset_score_bounds,
-                    'aggregation': 'mos'}
+    experiment = {
+        "evaluations": evaluations,
+        "dataset_score_bounds": dataset_score_bounds,
+        "aggregation": "mos",
+    }
 
-    results = {'details': [],
-                'inconsistency': True}
+    results = {"details": [], "inconsistency": True}
 
-    for experiment in experiment_kfolds_generator(experiment,
-                                                    list(scores.keys())):
+    for experiment in experiment_kfolds_generator(experiment, list(scores.keys())):
         result = check_n_datasets_mos_known_folds_mos(
-                                    evaluations=experiment['evaluations'],
-                                    dataset_score_bounds=experiment.get('dataset_score_bounds'),
-                                    scores=scores,
-                                    eps=eps,
-                                    timeout=timeout,
-                                    solver_name=solver_name,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+            evaluations=experiment["evaluations"],
+            dataset_score_bounds=experiment.get("dataset_score_bounds"),
+            scores=scores,
+            eps=eps,
+            timeout=timeout,
+            solver_name=solver_name,
+            verbosity=verbosity,
+            numerical_tolerance=numerical_tolerance,
+        )
 
-        results['details'].append(result)
-        results['inconsistency'] = results['inconsistency'] and result['inconsistency']
+        results["details"].append(result)
+        results["inconsistency"] = results["inconsistency"] and result["inconsistency"]
 
-        if not result['inconsistency']:
+        if not result["inconsistency"]:
             break
 
     return results

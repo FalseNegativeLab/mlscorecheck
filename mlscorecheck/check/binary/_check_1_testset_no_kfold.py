@@ -9,14 +9,17 @@ from ...core import logger, NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs
 from ...experiments import dataset_statistics
 
-__all__ = ['check_1_testset_no_kfold']
+__all__ = ["check_1_testset_no_kfold"]
 
-def check_1_testset_no_kfold(testset: dict,
-                            scores: dict,
-                            eps,
-                            *,
-                            numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                            prefilter_by_pairs: bool = True) -> dict:
+
+def check_1_testset_no_kfold(
+    testset: dict,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True
+) -> dict:
     """
     Use this check if the scores are calculated on one single test set
     with no kfolding. The test is performed by exhaustively testing all
@@ -81,31 +84,46 @@ def check_1_testset_no_kfold(testset: dict,
         # True
 
     """
-    logger.info('Use this function if the scores originate from the '\
-                'tp and tn statistics calculated on one test set with '\
-                'no aggregation of any kind.')
+    logger.info(
+        "Use this function if the scores originate from the "
+        "tp and tn statistics calculated on one test set with "
+        "no aggregation of any kind."
+    )
 
-    if ('p' not in testset or 'n' not in testset) and ('name' not in testset):
+    if ("p" not in testset or "n" not in testset) and ("name" not in testset):
         raise ValueError('either "p" and "n" or "name" should be specified')
 
-    if ('n_repeats' in testset) or ('n_folds' in testset) \
-        or ('folds' in testset) or ('aggregation' in testset):
-        warnings.warn('Additional fields beyond ("p", "n") or "name" present ' \
-                        'in the specification, you might want to use another check '\
-                        'function specialized to datasets')
+    if (
+        ("n_repeats" in testset)
+        or ("n_folds" in testset)
+        or ("folds" in testset)
+        or ("aggregation" in testset)
+    ):
+        warnings.warn(
+            'Additional fields beyond ("p", "n") or "name" present '
+            "in the specification, you might want to use another check "
+            "function specialized to datasets"
+        )
 
-    p = testset.get('p')
-    n = testset.get('n')
-    if 'name' in testset:
-        p = dataset_statistics[testset['name']]['p']
-        n = dataset_statistics[testset['name']]['n']
+    p = testset.get("p")
+    n = testset.get("n")
+    if "name" in testset:
+        p = dataset_statistics[testset["name"]]["p"]
+        n = dataset_statistics[testset["name"]]["n"]
 
-    logger.info('calling the score check with scores %s, uncertainty %s, p %d and n %d',
-                str(scores), str(eps), p, n)
+    logger.info(
+        "calling the score check with scores %s, uncertainty %s, p %d and n %d",
+        str(scores),
+        str(eps),
+        p,
+        n,
+    )
 
-    return check_scores_tptn_pairs(scores=scores,
-                                    eps=eps,
-                                    p=p,
-                                    n=n,
-                                    numerical_tolerance=numerical_tolerance,
-                                    prefilter_by_pairs=prefilter_by_pairs)
+    return check_scores_tptn_pairs(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=prefilter_by_pairs,
+    )

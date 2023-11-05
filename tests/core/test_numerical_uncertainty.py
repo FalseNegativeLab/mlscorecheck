@@ -4,8 +4,8 @@ Testing the handling of uncertainty and tolerance
 
 import pytest
 
-from mlscorecheck.core import (check_uncertainty_and_tolerance,
-                                update_uncertainty)
+from mlscorecheck.core import check_uncertainty_and_tolerance, update_uncertainty
+
 
 def test_uncertainty_and_tolerance():
     """
@@ -13,10 +13,11 @@ def test_uncertainty_and_tolerance():
     """
 
     with pytest.raises(ValueError):
-        check_uncertainty_and_tolerance({'acc': 1e-7, 'sens': 1e-4}, 2*1e-8)
+        check_uncertainty_and_tolerance({"acc": 1e-7, "sens": 1e-4}, 2 * 1e-8)
 
     with pytest.raises(ValueError):
-        check_uncertainty_and_tolerance(1e-7, 2*1e-8)
+        check_uncertainty_and_tolerance(1e-7, 2 * 1e-8)
+
 
 def test_update_uncertainty():
     """
@@ -24,4 +25,4 @@ def test_update_uncertainty():
     """
 
     assert abs(update_uncertainty(1e-2, 1e-3) - (1e-2 + 1e-3)) <= 1e-5
-    assert abs(update_uncertainty({'acc': 1e-2}, 1e-3)['acc'] - (1e-2 + 1e-3)) <= 1e-5
+    assert abs(update_uncertainty({"acc": 1e-2}, 1e-3)["acc"] - (1e-2 + 1e-3)) <= 1e-5

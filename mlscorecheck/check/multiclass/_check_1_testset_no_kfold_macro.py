@@ -8,17 +8,20 @@ from ...aggregated import transform_multiclass_fold_to_binary
 
 from ..binary import check_1_dataset_known_folds_mos
 
-__all__ = ['check_1_testset_no_kfold_macro']
+__all__ = ["check_1_testset_no_kfold_macro"]
 
-def check_1_testset_no_kfold_macro(testset: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    class_score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_testset_no_kfold_macro(
+    testset: dict,
+    scores: dict,
+    eps,
+    *,
+    class_score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     The function tests the consistency of scores calculated by taking the macro average of
     class level scores on one single multiclass dataset.
@@ -84,15 +87,19 @@ def check_1_testset_no_kfold_macro(testset: dict,
         # True
     """
     folds = transform_multiclass_fold_to_binary(testset)
-    dataset = {'p': sum(fold['p'] for fold in folds),
-                'n': sum(fold['n'] for fold in folds)}
+    dataset = {
+        "p": sum(fold["p"] for fold in folds),
+        "n": sum(fold["n"] for fold in folds),
+    }
 
-    return check_1_dataset_known_folds_mos(scores=scores,
-                                            eps=eps,
-                                            dataset=dataset,
-                                            folding={'folds': folds},
-                                            fold_score_bounds=class_score_bounds,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_1_dataset_known_folds_mos(
+        scores=scores,
+        eps=eps,
+        dataset=dataset,
+        folding={"folds": folds},
+        fold_score_bounds=class_score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

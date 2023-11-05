@@ -4,12 +4,14 @@ This module implements the complex interval arithmetics
 
 from ._interval import Interval, IntervalUnion
 
-__all__ = ['ComplexInterval']
+__all__ = ["ComplexInterval"]
+
 
 class ComplexInterval:
     """
     The class represents a complex interval
     """
+
     def __init__(self, real, imag):
         """
         Constructor of the complex interval
@@ -88,8 +90,10 @@ class ComplexInterval:
         if not isinstance(other, ComplexInterval):
             return ComplexInterval(self.real * other, self.imag * other)
 
-        return ComplexInterval(self.real * other.real - self.imag * other.imag,
-                                self.real * other.imag + self.imag * other.real)
+        return ComplexInterval(
+            self.real * other.real - self.imag * other.imag,
+            self.real * other.imag + self.imag * other.real,
+        )
 
     def __rmul__(self, other):
         """
@@ -118,8 +122,10 @@ class ComplexInterval:
 
         norm = other.real**2 + other.imag**2
 
-        return ComplexInterval((self.real * other.real + self.imag * other.imag)/norm,
-                                (self.imag * other.real - self.real * other.imag)/norm)
+        return ComplexInterval(
+            (self.real * other.real + self.imag * other.imag) / norm,
+            (self.imag * other.real - self.real * other.imag) / norm,
+        )
 
     def __rtruediv__(self, other):
         """

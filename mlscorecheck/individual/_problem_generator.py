@@ -6,21 +6,26 @@ import numpy as np
 
 from ..scores import calculate_scores
 
-__all__ = ['generate_problems',
-            'generate_1_problem',
-            'generate_problem_and_scores',
-            'generate_multiclass_dataset',
-            'sample_multiclass_dataset',
-            'create_confusion_matrix']
+__all__ = [
+    "generate_problems",
+    "generate_1_problem",
+    "generate_problem_and_scores",
+    "generate_multiclass_dataset",
+    "sample_multiclass_dataset",
+    "create_confusion_matrix",
+]
 
-def generate_problem_and_scores(*,
-                                max_p: int = 1000,
-                                max_n: int = 1000,
-                                zeros: list = None,
-                                add_complements: bool = None,
-                                score_subset: list = None,
-                                rounding_decimals: int = None,
-                                random_state=None) -> (dict, dict):
+
+def generate_problem_and_scores(
+    *,
+    max_p: int = 1000,
+    max_n: int = 1000,
+    zeros: list = None,
+    add_complements: bool = None,
+    score_subset: list = None,
+    rounding_decimals: int = None,
+    random_state=None
+) -> (dict, dict):
     """
     Generates a random problem and random but feasible scores
 
@@ -36,24 +41,29 @@ def generate_problem_and_scores(*,
     Returns:
         dict, dict: the problem and the scores
     """
-    evaluation, problem = generate_1_problem(max_p=max_p,
-                                                max_n=max_n,
-                                                zeros=zeros,
-                                                add_complements=add_complements,
-                                                random_state=random_state)
-    evaluation['beta_negative'] = 2
-    evaluation['beta_positive'] = 2
+    evaluation, problem = generate_1_problem(
+        max_p=max_p,
+        max_n=max_n,
+        zeros=zeros,
+        add_complements=add_complements,
+        random_state=random_state,
+    )
+    evaluation["beta_negative"] = 2
+    evaluation["beta_positive"] = 2
     scores = calculate_scores(evaluation, rounding_decimals=rounding_decimals)
     if score_subset is not None:
         scores = {key: value for key, value in scores.items() if key in score_subset}
     return problem, scores
 
-def generate_1_problem(*,
-                        max_p: int = 1000,
-                        max_n: int = 1000,
-                        zeros: list = None,
-                        add_complements: bool = False,
-                        random_state=None) -> dict:
+
+def generate_1_problem(
+    *,
+    max_p: int = 1000,
+    max_n: int = 1000,
+    zeros: list = None,
+    add_complements: bool = False,
+    random_state=None
+) -> dict:
     """
     Generates a random problem
 
@@ -73,38 +83,41 @@ def generate_1_problem(*,
     if zeros is None:
         zeros = []
 
-    p = int(random_state.randint(2, max_p+1))
-    n = int(random_state.randint(2, max_n+1))
+    p = int(random_state.randint(2, max_p + 1))
+    n = int(random_state.randint(2, max_n + 1))
 
-    if 'tp' in zeros:
+    if "tp" in zeros:
         tp = 0
-    elif 'fn' in zeros:
+    elif "fn" in zeros:
         tp = p
     else:
         tp = int(random_state.randint(1, p))
 
-    if 'tn' in zeros:
+    if "tn" in zeros:
         tn = 0
-    elif 'fp' in zeros:
+    elif "fp" in zeros:
         tn = n
     else:
         tn = int(random_state.randint(1, n))
 
-    result = {'p': p, 'n': n, 'tp': tp, 'tn': tn}
+    result = {"p": p, "n": n, "tp": tp, "tn": tn}
 
     if add_complements:
-        result['fn'] = p - tp
-        result['fp'] = n - tn
+        result["fn"] = p - tp
+        result["fp"] = n - tn
 
-    return result, {'p': result['p'], 'n': result['n']}
+    return result, {"p": result["p"], "n": result["n"]}
 
-def generate_problems(*,
-                        n_problems: int = 1,
-                        max_p: int = 1000,
-                        max_n: int = 1000,
-                        zeros: list = None,
-                        add_complements: bool = False,
-                        random_state=None) -> (dict, dict):
+
+def generate_problems(
+    *,
+    n_problems: int = 1,
+    max_p: int = 1000,
+    max_n: int = 1000,
+    zeros: list = None,
+    add_complements: bool = False,
+    random_state=None
+) -> (dict, dict):
     """
     Generates a random problem
 
@@ -125,21 +138,26 @@ def generate_problems(*,
 
     evaluations, problems = [], []
     for _ in range(n_problems):
-        evaluation, problem = generate_1_problem(max_p=max_p,
-                                    max_n=max_n,
-                                    zeros=zeros,
-                                    add_complements=add_complements,
-                                    random_state=random_state)
+        evaluation, problem = generate_1_problem(
+            max_p=max_p,
+            max_n=max_n,
+            zeros=zeros,
+            add_complements=add_complements,
+            random_state=random_state,
+        )
         evaluations.append(evaluation)
         problems.append(problem)
 
     return (evaluations[0], problems[0]) if n_problems == 1 else (evaluations, problems)
 
-def generate_multiclass_dataset(random_state=None,
-                                max_n_classes: int=5,
-                                min_n_classes: int=3,
-                                max_class_size: int=200,
-                                min_class_size: int=10) -> dict:
+
+def generate_multiclass_dataset(
+    random_state=None,
+    max_n_classes: int = 5,
+    min_n_classes: int = 3,
+    max_class_size: int = 200,
+    min_class_size: int = 10,
+) -> dict:
     """
     Generates a multiclass dataset
 
@@ -156,11 +174,14 @@ def generate_multiclass_dataset(random_state=None,
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 
-    n_classes = random_state.randint(min_n_classes, max_n_classes+1)
-    classes = {class_idx: random_state.randint(min_class_size, max_class_size+1)
-                for class_idx in range(n_classes)}
+    n_classes = random_state.randint(min_n_classes, max_n_classes + 1)
+    classes = {
+        class_idx: random_state.randint(min_class_size, max_class_size + 1)
+        for class_idx in range(n_classes)
+    }
 
     return classes
+
 
 def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
     """
@@ -181,6 +202,7 @@ def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
 
     return confusion_matrix
 
+
 def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
     """
     Samples a multiclass dataset
@@ -198,11 +220,11 @@ def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
     sample = np.zeros(shape=(len(dataset), len(dataset)), dtype=int)
 
     for class_idx, count in dataset.items():
-        sample_row = random_state.multinomial(count,
-                                                np.ones(len(dataset))/len(dataset),
-                                                size=1)[0]
+        sample_row = random_state.multinomial(
+            count, np.ones(len(dataset)) / len(dataset), size=1
+        )[0]
 
-        #while np.any(sample_row == 0):
+        # while np.any(sample_row == 0):
         #    zidx = np.where(sample_row == 0)[0][0]
         #    nzidx = np.where(sample_row > 1)[0][0]
         #    sample_row[zidx] += 1

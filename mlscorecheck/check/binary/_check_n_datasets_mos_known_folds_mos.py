@@ -9,17 +9,20 @@ import copy
 from ...aggregated import check_aggregated_scores, Experiment
 from ...core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_n_datasets_mos_known_folds_mos']
+__all__ = ["check_n_datasets_mos_known_folds_mos"]
 
-def check_n_datasets_mos_known_folds_mos(evaluations: list,
-                                        scores: dict,
-                                        eps,
-                                        dataset_score_bounds: dict = None,
-                                        *,
-                                        solver_name: str = None,
-                                        timeout: int = None,
-                                        verbosity: int = 1,
-                                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_n_datasets_mos_known_folds_mos(
+    evaluations: list,
+    scores: dict,
+    eps,
+    dataset_score_bounds: dict = None,
+    *,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     This function checks the consistency of scores calculated by applying k-fold cross validation
     to N datasets and aggregating the figures over the folds and datasets in the mean of scores
@@ -95,24 +98,32 @@ def check_n_datasets_mos_known_folds_mos(evaluations: list,
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'mos') != 'mos' for evaluation in evaluations):
-        raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
-    if any(evaluation.get('fold_score_bounds') is not None for evaluation in evaluations):
-        raise ValueError('do not specify fold_score_bounds through this interface')
+    if any(evaluation.get("aggregation", "mos") != "mos" for evaluation in evaluations):
+        raise ValueError(
+            'the aggregation specified in each dataset must be "mor" or nothing.'
+        )
+    if any(
+        evaluation.get("fold_score_bounds") is not None for evaluation in evaluations
+    ):
+        raise ValueError("do not specify fold_score_bounds through this interface")
 
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'mos'
+        evaluation["aggregation"] = "mos"
 
-    experiment = Experiment(evaluations=evaluations,
-                            dataset_score_bounds=dataset_score_bounds,
-                            aggregation='mos')
+    experiment = Experiment(
+        evaluations=evaluations,
+        dataset_score_bounds=dataset_score_bounds,
+        aggregation="mos",
+    )
 
-    return check_aggregated_scores(experiment=experiment.to_dict(),
-                                    scores=scores,
-                                    eps=eps,
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+    return check_aggregated_scores(
+        experiment=experiment.to_dict(),
+        scores=scores,
+        eps=eps,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

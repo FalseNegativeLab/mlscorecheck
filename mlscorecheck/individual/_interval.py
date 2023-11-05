@@ -4,9 +4,8 @@ This module implements the interval arithmetics
 
 import numpy as np
 
-__all__ = ['Interval',
-            'IntervalUnion',
-            'sqrt']
+__all__ = ["Interval", "IntervalUnion", "sqrt"]
+
 
 def sqrt(obj):
     """
@@ -19,14 +18,16 @@ def sqrt(obj):
         Interval|IntervalUnion|numeric: the square root of the parameter
     """
 
-    result = obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else obj**0.5
+    result = obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else obj ** 0.5
 
     return result
+
 
 class Interval:
     """
     The interval abstraction
     """
+
     def __init__(self, lower_bound, upper_bound):
         """
         Constructor of the interval
@@ -80,9 +81,15 @@ class Interval:
         if isinstance(other, IntervalUnion):
             return IntervalUnion([self]).intersection(other)
 
-        if self.lower_bound >= other.lower_bound and self.upper_bound <= other.upper_bound:
+        if (
+            self.lower_bound >= other.lower_bound
+            and self.upper_bound <= other.upper_bound
+        ):
             return Interval(self.lower_bound, self.upper_bound)
-        if self.lower_bound <= other.lower_bound and self.upper_bound >= other.upper_bound:
+        if (
+            self.lower_bound <= other.lower_bound
+            and self.upper_bound >= other.upper_bound
+        ):
             return Interval(other.lower_bound, other.upper_bound)
 
         tmp_lower = self
@@ -153,11 +160,15 @@ class Interval:
             return other + self
 
         if not isinstance(other, Interval):
-            return Interval(lower_bound=self.lower_bound + other,
-                            upper_bound=self.upper_bound + other)
+            return Interval(
+                lower_bound=self.lower_bound + other,
+                upper_bound=self.upper_bound + other,
+            )
 
-        return Interval(lower_bound=self.lower_bound + other.lower_bound,
-                        upper_bound=self.upper_bound + other.upper_bound)
+        return Interval(
+            lower_bound=self.lower_bound + other.lower_bound,
+            upper_bound=self.upper_bound + other.upper_bound,
+        )
 
     def __radd__(self, other):
         """
@@ -185,11 +196,15 @@ class Interval:
             return (-1) * other + self
 
         if not isinstance(other, Interval):
-            return Interval(lower_bound=self.lower_bound - other,
-                            upper_bound=self.upper_bound - other)
+            return Interval(
+                lower_bound=self.lower_bound - other,
+                upper_bound=self.upper_bound - other,
+            )
 
-        return Interval(lower_bound=self.lower_bound - other.upper_bound,
-                        upper_bound=self.upper_bound - other.lower_bound)
+        return Interval(
+            lower_bound=self.lower_bound - other.upper_bound,
+            upper_bound=self.upper_bound - other.lower_bound,
+        )
 
     def __rsub__(self, other):
         """
@@ -217,16 +232,19 @@ class Interval:
             return other * self
 
         if not isinstance(other, Interval):
-            return Interval(lower_bound=min(self.lower_bound * other, self.upper_bound*other),
-                            upper_bound=max(self.upper_bound * other, self.lower_bound*other))
+            return Interval(
+                lower_bound=min(self.lower_bound * other, self.upper_bound * other),
+                upper_bound=max(self.upper_bound * other, self.lower_bound * other),
+            )
 
         term0 = self.lower_bound * other.lower_bound
         term1 = self.lower_bound * other.upper_bound
         term2 = self.upper_bound * other.lower_bound
         term3 = self.upper_bound * other.upper_bound
 
-        return Interval(min(term0, term1, term2, term3),
-                        max(term0, term1, term2, term3))
+        return Interval(
+            min(term0, term1, term2, term3), max(term0, term1, term2, term3)
+        )
 
     def __rmul__(self, other):
         """
@@ -251,7 +269,7 @@ class Interval:
             Interval: the ratio
         """
         if isinstance(other, IntervalUnion):
-            return (1.0/other) * self
+            return (1.0 / other) * self
 
         if not isinstance(other, Interval):
             if other >= 0:
@@ -261,21 +279,19 @@ class Interval:
                 lower_bound = self.upper_bound / other
                 upper_bound = self.lower_bound / other
 
-            return Interval(lower_bound=lower_bound,
-                            upper_bound=upper_bound)
+            return Interval(lower_bound=lower_bound, upper_bound=upper_bound)
 
         if (other.upper_bound == 0) and (other.lower_bound != 0):
-            return self * Interval(-np.inf, 1.0/other.lower_bound)
+            return self * Interval(-np.inf, 1.0 / other.lower_bound)
 
         if (other.lower_bound == 0) and (other.upper_bound != 0):
-            return self * Interval(1.0/other.upper_bound, np.inf)
+            return self * Interval(1.0 / other.upper_bound, np.inf)
 
         if (other.lower_bound > 0) or (other.upper_bound < 0):
-            return self * Interval(1.0/other.upper_bound,
-                                    1.0/other.lower_bound)
+            return self * Interval(1.0 / other.upper_bound, 1.0 / other.lower_bound)
 
-        res_0 = Interval(-np.inf, 1.0/other.lower_bound)
-        res_1 = Interval(1.0/other.upper_bound, np.inf)
+        res_0 = Interval(-np.inf, 1.0 / other.lower_bound)
+        res_1 = Interval(1.0 / other.upper_bound, np.inf)
 
         return IntervalUnion([self * res_0, self * res_1])
 
@@ -315,7 +331,10 @@ class Interval:
         """
         if not isinstance(other, Interval):
             return False
-        return self.lower_bound == other.lower_bound and self.upper_bound == other.upper_bound
+        return (
+            self.lower_bound == other.lower_bound
+            and self.upper_bound == other.upper_bound
+        )
 
     def __ne__(self, other) -> bool:
         """
@@ -336,7 +355,7 @@ class Interval:
         Returns:
             Interval: the negated interval
         """
-        return (-1)*self
+        return (-1) * self
 
     def __pow__(self, other):
         """
@@ -356,9 +375,13 @@ class Interval:
             if self.lower_bound > 0 or self.upper_bound < 0:
                 lower_bound = self.lower_bound**other
                 upper_bound = self.upper_bound**other
-                res = Interval(min(lower_bound, upper_bound), max(lower_bound, upper_bound))
+                res = Interval(
+                    min(lower_bound, upper_bound), max(lower_bound, upper_bound)
+                )
             else:
-                res = Interval(0, max(self.lower_bound**other, self.upper_bound**other))
+                res = Interval(
+                    0, max(self.lower_bound**other, self.upper_bound**other)
+                )
         elif int(other) % 2 == 1:
             lower_bound = self.lower_bound**other
             upper_bound = self.upper_bound**other
@@ -383,6 +406,7 @@ class IntervalUnion:
     """
     The interval union abstraction
     """
+
     def __init__(self, intervals):
         """
         Constructor of the object
@@ -400,7 +424,9 @@ class IntervalUnion:
             if isinstance(intervals[0], Interval):
                 self.intervals = intervals
             else:
-                self.intervals = [Interval(interval[0], interval[1]) for interval in intervals]
+                self.intervals = [
+                    Interval(interval[0], interval[1]) for interval in intervals
+                ]
         else:
             self.intervals = intervals
 
@@ -430,16 +456,21 @@ class IntervalUnion:
         for idx, int0 in enumerate(intervals):
             for jdx, int1 in enumerate(intervals):
                 if idx != jdx:
-                    if (int0.lower_bound == int1.lower_bound) \
-                        and (int0.upper_bound == int1.upper_bound) \
-                        and idx > jdx:
+                    if (
+                        (int0.lower_bound == int1.lower_bound)
+                        and (int0.upper_bound == int1.upper_bound)
+                        and idx > jdx
+                    ):
                         continue
-                    if (int0.lower_bound <= int1.lower_bound) \
-                            and (int0.upper_bound >= int1.upper_bound):
+                    if (int0.lower_bound <= int1.lower_bound) and (
+                        int0.upper_bound >= int1.upper_bound
+                    ):
                         # the interval widh index jdx is contained in the interval with index idx
                         to_drop.append(jdx)
 
-        intervals = [interval for idx, interval in enumerate(intervals) if not idx in to_drop]
+        intervals = [
+            interval for idx, interval in enumerate(intervals) if not idx in to_drop
+        ]
 
         # chaining the intervals
         sorted_intervals = sorted(intervals, key=lambda x: x.lower_bound)
@@ -449,7 +480,9 @@ class IntervalUnion:
 
         for idx in range(1, len(sorted_intervals)):
             if interval.upper_bound >= sorted_intervals[idx].lower_bound:
-                interval = Interval(interval.lower_bound, sorted_intervals[idx].upper_bound)
+                interval = Interval(
+                    interval.lower_bound, sorted_intervals[idx].upper_bound
+                )
             else:
                 final_intervals.append(interval)
                 interval = sorted_intervals[idx]
@@ -481,9 +514,12 @@ class IntervalUnion:
             is empty
         """
         if isinstance(other, Interval):
-            new_intervals = [other.intersection(interval) for interval in self.intervals]
-            new_intervals = [interval for interval in new_intervals
-                                        if interval != Interval(1, 0)]
+            new_intervals = [
+                other.intersection(interval) for interval in self.intervals
+            ]
+            new_intervals = [
+                interval for interval in new_intervals if interval != Interval(1, 0)
+            ]
             return IntervalUnion(new_intervals)
 
         intersections = []
@@ -491,8 +527,9 @@ class IntervalUnion:
             for int1 in other.intervals:
                 intersections.append(int0.intersection(int1))
 
-        return IntervalUnion([interval for interval in intersections
-                                        if interval != Interval(1, 0)])
+        return IntervalUnion(
+            [interval for interval in intersections if interval != Interval(1, 0)]
+        )
 
     def integer(self) -> bool:
         """
@@ -511,7 +548,9 @@ class IntervalUnion:
         Returns:
             IntervalUnion: the shrinked interval union
         """
-        return IntervalUnion([interval.shrink_to_integers() for interval in self.intervals])
+        return IntervalUnion(
+            [interval.shrink_to_integers() for interval in self.intervals]
+        )
 
     def integer_counts(self) -> int:
         """
@@ -686,7 +725,7 @@ class IntervalUnion:
         Returns:
             IntervalUnion: the negated interval union
         """
-        return (-1)*self
+        return (-1) * self
 
     def __repr__(self) -> str:
         """
@@ -695,8 +734,12 @@ class IntervalUnion:
         Returns:
             str: the representation
         """
-        return ' | '.join([f'({interval.lower_bound}, {interval.upper_bound})'
-                                                for interval in self.intervals])
+        return " | ".join(
+            [
+                f"({interval.lower_bound}, {interval.upper_bound})"
+                for interval in self.intervals
+            ]
+        )
 
     def __eq__(self, other) -> bool:
         """

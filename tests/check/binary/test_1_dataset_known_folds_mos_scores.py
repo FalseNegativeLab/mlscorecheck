@@ -6,10 +6,11 @@ aggregation
 import pytest
 
 from mlscorecheck.check.binary import check_1_dataset_known_folds_mos
-from mlscorecheck.aggregated import (generate_evaluation)
+from mlscorecheck.aggregated import generate_evaluation
 
-@pytest.mark.parametrize('random_seed', list(range(10)))
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
+
+@pytest.mark.parametrize("random_seed", list(range(10)))
+@pytest.mark.parametrize("rounding_decimals", [3, 4])
 def test_consistency(random_seed: int, rounding_decimals: int):
     """
     Testing with a consistent setup
@@ -18,20 +19,25 @@ def test_consistency(random_seed: int, rounding_decimals: int):
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
     """
-    evaluation, scores = generate_evaluation(aggregation='mos',
-                                            random_state=random_seed,
-                                            return_scores=True,
-                                            rounding_decimals=rounding_decimals)
+    evaluation, scores = generate_evaluation(
+        aggregation="mos",
+        random_state=random_seed,
+        return_scores=True,
+        rounding_decimals=rounding_decimals,
+    )
 
-    result = check_1_dataset_known_folds_mos(dataset=evaluation['dataset'],
-                                                folding=evaluation['folding'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals))
+    result = check_1_dataset_known_folds_mos(
+        dataset=evaluation["dataset"],
+        folding=evaluation["folding"],
+        scores=scores,
+        eps=10 ** (-rounding_decimals),
+    )
 
-    assert not result['inconsistency']
+    assert not result["inconsistency"]
 
-@pytest.mark.parametrize('random_seed', list(range(10)))
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
+
+@pytest.mark.parametrize("random_seed", list(range(10)))
+@pytest.mark.parametrize("rounding_decimals", [3, 4])
 def test_failure(random_seed: int, rounding_decimals: int):
     """
     Testing with an inconsistent setup
@@ -40,21 +46,26 @@ def test_failure(random_seed: int, rounding_decimals: int):
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
     """
-    evaluation, scores = generate_evaluation(aggregation='mos',
-                                            random_state=random_seed,
-                                            rounding_decimals=rounding_decimals,
-                                            return_scores=True)
-    scores = {'acc': 0.9, 'sens': 0.3, 'spec': 0.5, 'f1': 0.1}
+    evaluation, scores = generate_evaluation(
+        aggregation="mos",
+        random_state=random_seed,
+        rounding_decimals=rounding_decimals,
+        return_scores=True,
+    )
+    scores = {"acc": 0.9, "sens": 0.3, "spec": 0.5, "f1": 0.1}
 
-    result = check_1_dataset_known_folds_mos(dataset=evaluation['dataset'],
-                                                folding=evaluation['folding'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals))
+    result = check_1_dataset_known_folds_mos(
+        dataset=evaluation["dataset"],
+        folding=evaluation["folding"],
+        scores=scores,
+        eps=10 ** (-rounding_decimals),
+    )
 
-    assert result['inconsistency']
+    assert result["inconsistency"]
 
-@pytest.mark.parametrize('random_seed', list(range(10)))
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
+
+@pytest.mark.parametrize("random_seed", list(range(10)))
+@pytest.mark.parametrize("rounding_decimals", [3, 4])
 def test_consistency_bounds(random_seed: int, rounding_decimals: int):
     """
     Testing with a consistent setup and bounds
@@ -63,23 +74,28 @@ def test_consistency_bounds(random_seed: int, rounding_decimals: int):
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
     """
-    evaluation, scores = generate_evaluation(aggregation='mos',
-                                            random_state=random_seed,
-                                            return_scores=True,
-                                            feasible_fold_score_bounds=True,
-                                            rounding_decimals=rounding_decimals)
+    evaluation, scores = generate_evaluation(
+        aggregation="mos",
+        random_state=random_seed,
+        return_scores=True,
+        feasible_fold_score_bounds=True,
+        rounding_decimals=rounding_decimals,
+    )
 
-    result = check_1_dataset_known_folds_mos(dataset=evaluation['dataset'],
-                                                folding=evaluation['folding'],
-                                                fold_score_bounds=evaluation['fold_score_bounds'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals),
-                                                timeout=1)
+    result = check_1_dataset_known_folds_mos(
+        dataset=evaluation["dataset"],
+        folding=evaluation["folding"],
+        fold_score_bounds=evaluation["fold_score_bounds"],
+        scores=scores,
+        eps=10 ** (-rounding_decimals),
+        timeout=1,
+    )
 
-    assert not result['inconsistency']
+    assert not result["inconsistency"]
 
-@pytest.mark.parametrize('random_seed', list(range(10)))
-@pytest.mark.parametrize('rounding_decimals', [3, 4])
+
+@pytest.mark.parametrize("random_seed", list(range(10)))
+@pytest.mark.parametrize("rounding_decimals", [3, 4])
 def test_failure_bounds(random_seed: int, rounding_decimals: int):
     """
     Testing with a inconsistent setup and bounds
@@ -88,18 +104,22 @@ def test_failure_bounds(random_seed: int, rounding_decimals: int):
         random_seed (int): the random seed to use
         rounding_decimals (int): the number of decimals to round to
     """
-    evaluation, scores = generate_evaluation(aggregation='mos',
-                                            random_state=random_seed,
-                                            return_scores=True,
-                                            feasible_fold_score_bounds=False,
-                                            rounding_decimals=rounding_decimals)
-    scores = {'acc': 0.9, 'bacc': 0.1, 'sens': 0.1, 'npv': 0.1, 'ppv': 0.1, 'f1': 0.9}
+    evaluation, scores = generate_evaluation(
+        aggregation="mos",
+        random_state=random_seed,
+        return_scores=True,
+        feasible_fold_score_bounds=False,
+        rounding_decimals=rounding_decimals,
+    )
+    scores = {"acc": 0.9, "bacc": 0.1, "sens": 0.1, "npv": 0.1, "ppv": 0.1, "f1": 0.9}
 
-    result = check_1_dataset_known_folds_mos(dataset=evaluation['dataset'],
-                                                folding=evaluation['folding'],
-                                                fold_score_bounds=evaluation['fold_score_bounds'],
-                                                scores=scores,
-                                                eps=10**(-rounding_decimals),
-                                                timeout=1)
+    result = check_1_dataset_known_folds_mos(
+        dataset=evaluation["dataset"],
+        folding=evaluation["folding"],
+        fold_score_bounds=evaluation["fold_score_bounds"],
+        scores=scores,
+        eps=10 ** (-rounding_decimals),
+        timeout=1,
+    )
 
-    assert result['inconsistency'] or result['lp_status'] == 'timeout'
+    assert result["inconsistency"] or result["lp_status"] == "timeout"

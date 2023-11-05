@@ -4,8 +4,8 @@ This module implements some operations related to dictionaries
 
 import numpy as np
 
-__all__ = ['dict_mean',
-            'dict_minmax']
+__all__ = ["dict_mean", "dict_minmax"]
+
 
 def dict_mean(dicts: list) -> dict:
     """
@@ -27,6 +27,7 @@ def dict_mean(dicts: list) -> dict:
         result[key] /= len(dicts)
 
     return result
+
 
 def dict_minmax(dicts: list) -> dict:
     """

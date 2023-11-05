@@ -4,24 +4,26 @@ of scores of classes.
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import (transform_multiclass_fold_to_binary,
-                            create_folds_multiclass)
+from ...aggregated import transform_multiclass_fold_to_binary, create_folds_multiclass
 
 from ..binary import check_n_datasets_mos_known_folds_mos
 
-__all__ = ['check_1_dataset_known_folds_mos_macro']
+__all__ = ["check_1_dataset_known_folds_mos_macro"]
 
-def check_1_dataset_known_folds_mos_macro(dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    class_score_bounds: dict = None,
-                                    fold_score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_dataset_known_folds_mos_macro(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    *,
+    class_score_bounds: dict = None,
+    fold_score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Checking the consistency of scores calculated by taking the macro average
     of class-level scores on one single multiclass dataset with k-fold cross-validation.
@@ -99,18 +101,26 @@ def check_1_dataset_known_folds_mos_macro(dataset: dict,
     evaluations = []
 
     for binary_folding in binary_folds:
-        folding = {'folds': binary_folding}
-        dataset = {'p': sum(tmp['p'] for tmp in binary_folding),
-                    'n': sum(tmp['n'] for tmp in binary_folding)}
-        evaluations.append({'dataset': dataset,
-                            'folding': folding,
-                            'fold_score_bounds': class_score_bounds})
+        folding = {"folds": binary_folding}
+        dataset = {
+            "p": sum(tmp["p"] for tmp in binary_folding),
+            "n": sum(tmp["n"] for tmp in binary_folding),
+        }
+        evaluations.append(
+            {
+                "dataset": dataset,
+                "folding": folding,
+                "fold_score_bounds": class_score_bounds,
+            }
+        )
 
-    return check_n_datasets_mos_known_folds_mos(evaluations=evaluations,
-                                            scores=scores,
-                                            eps=eps,
-                                            dataset_score_bounds=fold_score_bounds,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_n_datasets_mos_known_folds_mos(
+        evaluations=evaluations,
+        scores=scores,
+        eps=eps,
+        dataset_score_bounds=fold_score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

@@ -4,17 +4,15 @@ scenario with unknown fold configuration.
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import (Dataset,
-                            repeated_kfolds_generator,
-                            kfolds_generator)
+from ...aggregated import Dataset, repeated_kfolds_generator, kfolds_generator
 from ._check_1_dataset_known_folds_mos import check_1_dataset_known_folds_mos
 
-__all__ = ['check_1_dataset_unknown_folds_mos',
-            'estimate_n_evaluations']
+__all__ = ["check_1_dataset_unknown_folds_mos", "estimate_n_evaluations"]
 
-def estimate_n_evaluations(dataset: dict,
-                            folding: dict,
-                            available_scores: list = None) -> int:
+
+def estimate_n_evaluations(
+    dataset: dict, folding: dict, available_scores: list = None
+) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
@@ -27,27 +25,32 @@ def estimate_n_evaluations(dataset: dict,
         int: the estimated number of different fold configurations.
     """
     dataset = Dataset(**dataset)
-    n_repeats = folding.get('n_repeats', 1)
+    n_repeats = folding.get("n_repeats", 1)
 
     available_scores = [] if available_scores is None else available_scores
 
-    count = sum(1 for _ in kfolds_generator({'dataset': dataset.to_dict(),
-                                                'folding': folding},
-                                            available_scores))
+    count = sum(
+        1
+        for _ in kfolds_generator(
+            {"dataset": dataset.to_dict(), "folding": folding}, available_scores
+        )
+    )
 
     return count**n_repeats
 
+
 def check_1_dataset_unknown_folds_mos(
-                                    dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    fold_score_bounds: dict = None,
-                                    *,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    fold_score_bounds: dict = None,
+    *,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Checking the consistency of scores calculated in a k-fold cross validation on a single
     dataset, in a mean-of-scores fashion, without knowing the fold configuration.
@@ -123,33 +126,39 @@ def check_1_dataset_unknown_folds_mos(
         >>> result['inconsistency']
         # True
     """
-    evaluation = {'dataset': dataset,
-                    'folding': folding,
-                    'fold_score_bounds': fold_score_bounds,
-                    'aggregation': 'mos'}
+    evaluation = {
+        "dataset": dataset,
+        "folding": folding,
+        "fold_score_bounds": fold_score_bounds,
+        "aggregation": "mos",
+    }
 
-    results = {'details': []}
+    results = {"details": []}
 
     idx = 0
-    for evaluation_0 in repeated_kfolds_generator(evaluation,
-                                                    list(scores.keys())):
-        tmp = {'folds': evaluation_0['folding']['folds'],
-                'details': check_1_dataset_known_folds_mos(
-                                    scores=scores,
-                                    eps=eps,
-                                    dataset=evaluation_0['dataset'],
-                                    folding=evaluation_0['folding'],
-                                    fold_score_bounds=evaluation_0.get('fold_score_bounds'),
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance),
-                'configuration_id': idx}
-        results['details'].append(tmp)
-        if not tmp['details']['inconsistency']:
+    for evaluation_0 in repeated_kfolds_generator(evaluation, list(scores.keys())):
+        tmp = {
+            "folds": evaluation_0["folding"]["folds"],
+            "details": check_1_dataset_known_folds_mos(
+                scores=scores,
+                eps=eps,
+                dataset=evaluation_0["dataset"],
+                folding=evaluation_0["folding"],
+                fold_score_bounds=evaluation_0.get("fold_score_bounds"),
+                solver_name=solver_name,
+                timeout=timeout,
+                verbosity=verbosity,
+                numerical_tolerance=numerical_tolerance,
+            ),
+            "configuration_id": idx,
+        }
+        results["details"].append(tmp)
+        if not tmp["details"]["inconsistency"]:
             break
         idx += 1
 
-    results['inconsistency'] = all(tmp['details']['inconsistency'] for tmp in results['details'])
+    results["inconsistency"] = all(
+        tmp["details"]["inconsistency"] for tmp in results["details"]
+    )
 
     return results

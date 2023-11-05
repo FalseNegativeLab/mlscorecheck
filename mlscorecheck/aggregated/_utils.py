@@ -7,12 +7,10 @@ import random
 
 import numpy as np
 
-__all__ = ['random_identifier',
-            'check_bounds',
-            'compare_scores',
-            'aggregated_scores']
+__all__ = ["random_identifier", "check_bounds", "compare_scores", "aggregated_scores"]
 
-aggregated_scores = ['acc', 'sens', 'spec', 'bacc']
+aggregated_scores = ["acc", "sens", "spec", "bacc"]
+
 
 def random_identifier(length: int):
     """
@@ -25,11 +23,10 @@ def random_identifier(length: int):
         str: the identifier
     """
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for _ in range(length))
+    return "".join(random.choice(letters) for _ in range(length))
 
-def check_bounds(scores: dict,
-                    bounds: dict = None,
-                    tolerance: float = 1e-5) -> bool:
+
+def check_bounds(scores: dict, bounds: dict = None, tolerance: float = 1e-5) -> bool:
     """
     Checks the bounds for the scores
 
@@ -50,17 +47,16 @@ def check_bounds(scores: dict,
     for key in bounds:
         if key in scores:
             if bounds[key][0] is not None and not np.isnan(bounds[key][0]):
-                flag = flag and (bounds[key][0]-tolerance <= scores[key])
+                flag = flag and (bounds[key][0] - tolerance <= scores[key])
             if bounds[key][1] is not None and not np.isnan(bounds[key][1]):
-                flag = flag and (scores[key] <= bounds[key][1]+tolerance)
+                flag = flag and (scores[key] <= bounds[key][1] + tolerance)
 
     return flag
 
-def compare_scores(scores0: dict,
-                    scores1: dict,
-                    eps,
-                    subset: list = None,
-                    tolerance: float = 1e-5):
+
+def compare_scores(
+    scores0: dict, scores1: dict, eps, subset: list = None, tolerance: float = 1e-5
+):
     """
     Compares two sets of scores
 
@@ -78,5 +74,8 @@ def compare_scores(scores0: dict,
     if not isinstance(eps, dict):
         eps = {key: eps for key in scores0}
 
-    return all(abs(scores0[key] - scores1[key]) <= eps[key] + tolerance
-                for key in scores1 if key in scores0)
+    return all(
+        abs(scores0[key] - scores1[key]) <= eps[key] + tolerance
+        for key in scores1
+        if key in scores0
+    )

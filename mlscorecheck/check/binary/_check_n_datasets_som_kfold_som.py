@@ -10,14 +10,17 @@ from ...core import NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs
 from ...aggregated import Experiment
 
-__all__ = ['check_n_datasets_som_kfold_som']
+__all__ = ["check_n_datasets_som_kfold_som"]
 
-def check_n_datasets_som_kfold_som(evaluations: list,
-                                            scores: dict,
-                                            eps,
-                                            *,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                                            prefilter_by_pairs: bool = True):
+
+def check_n_datasets_som_kfold_som(
+    evaluations: list,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True
+):
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures
@@ -94,24 +97,26 @@ def check_n_datasets_som_kfold_som(evaluations: list,
         >>> result['inconsistency']
         # True
     """
-    if any(evaluation.get('aggregation', 'som') != 'som' for evaluation in evaluations):
-        raise ValueError('the aggregation specifications cannot be anything else '\
-                            'but "rom"')
+    if any(evaluation.get("aggregation", "som") != "som" for evaluation in evaluations):
+        raise ValueError(
+            "the aggregation specifications cannot be anything else but 'rom'"
+        )
 
     evaluations = copy.deepcopy(evaluations)
 
     for evaluation in evaluations:
-        evaluation['aggregation'] = 'som'
+        evaluation["aggregation"] = "som"
 
     # creating the experiment consisting of one single dataset, the
     # outer level aggregation can be arbitrary
-    experiment = Experiment(evaluations=evaluations,
-                            aggregation='som')
+    experiment = Experiment(evaluations=evaluations, aggregation="som")
 
     # executing the individual tests
-    return check_scores_tptn_pairs(scores=scores,
-                                    eps=eps,
-                                    p=experiment.figures['p'],
-                                    n=experiment.figures['n'],
-                                    numerical_tolerance=numerical_tolerance,
-                                    prefilter_by_pairs=prefilter_by_pairs)
+    return check_scores_tptn_pairs(
+        scores=scores,
+        eps=eps,
+        p=experiment.figures["p"],
+        n=experiment.figures["n"],
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=prefilter_by_pairs,
+    )

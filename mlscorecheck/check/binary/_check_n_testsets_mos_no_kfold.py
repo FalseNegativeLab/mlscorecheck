@@ -7,17 +7,20 @@ with no k-fold cross-validation.
 from ...aggregated import check_aggregated_scores, Experiment, Dataset
 from ...core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_n_testsets_mos_no_kfold']
+__all__ = ["check_n_testsets_mos_no_kfold"]
 
-def check_n_testsets_mos_no_kfold(testsets: list,
-                                        scores: dict,
-                                        eps,
-                                        testset_score_bounds: dict = None,
-                                        *,
-                                        solver_name: str = None,
-                                        timeout: int = None,
-                                        verbosity: int = 1,
-                                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_n_testsets_mos_no_kfold(
+    testsets: list,
+    scores: dict,
+    eps,
+    testset_score_bounds: dict = None,
+    *,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     This function checks the consistency of scores calculated on multiple testsets with no k-fold
     and aggregating the figures over the testsets in the mean of scores fashion.
@@ -89,20 +92,35 @@ def check_n_testsets_mos_no_kfold(testsets: list,
 
     datasets = [Dataset(**dataset) for dataset in testsets]
 
-    evaluations = [{'dataset': dataset.to_dict(),
-                    'folding': {'folds': [{'p': dataset.p, 'n': dataset.n,
-                                            'identifier': f'{dataset.identifier}_{idx}'}]},
-                    'aggregation': 'mos'}
-                    for idx, dataset in enumerate(datasets)]
+    evaluations = [
+        {
+            "dataset": dataset.to_dict(),
+            "folding": {
+                "folds": [
+                    {
+                        "p": dataset.p,
+                        "n": dataset.n,
+                        "identifier": f"{dataset.identifier}_{idx}",
+                    }
+                ]
+            },
+            "aggregation": "mos",
+        }
+        for idx, dataset in enumerate(datasets)
+    ]
 
-    experiment = Experiment(evaluations=evaluations,
-                            dataset_score_bounds=testset_score_bounds,
-                            aggregation='mos')
+    experiment = Experiment(
+        evaluations=evaluations,
+        dataset_score_bounds=testset_score_bounds,
+        aggregation="mos",
+    )
 
-    return check_aggregated_scores(experiment=experiment.to_dict(),
-                                    scores=scores,
-                                    eps=eps,
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+    return check_aggregated_scores(
+        experiment=experiment.to_dict(),
+        scores=scores,
+        eps=eps,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

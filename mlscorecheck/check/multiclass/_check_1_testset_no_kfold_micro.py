@@ -8,14 +8,17 @@ from ...aggregated import transform_multiclass_fold_to_binary
 
 from ..binary import check_1_dataset_kfold_som
 
-__all__ = ['check_1_testset_no_kfold_micro']
+__all__ = ["check_1_testset_no_kfold_micro"]
 
-def check_1_testset_no_kfold_micro(testset: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                                    prefilter_by_pairs: bool = True) -> dict:
+
+def check_1_testset_no_kfold_micro(
+    testset: dict,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True
+) -> dict:
     """
     Checking the consistency of scores calculated by taking the micro average of class level
     scores on one single multiclass dataset.
@@ -81,12 +84,16 @@ def check_1_testset_no_kfold_micro(testset: dict,
         # True
     """
     folds = transform_multiclass_fold_to_binary(testset)
-    dataset = {'p': sum(fold['p'] for fold in folds),
-                'n': sum(fold['n'] for fold in folds)}
+    dataset = {
+        "p": sum(fold["p"] for fold in folds),
+        "n": sum(fold["n"] for fold in folds),
+    }
 
-    return check_1_dataset_kfold_som(scores=scores,
-                                eps=eps,
-                                dataset=dataset,
-                                folding={'folds': folds},
-                                numerical_tolerance=numerical_tolerance,
-                                prefilter_by_pairs=prefilter_by_pairs)
+    return check_1_dataset_kfold_som(
+        scores=scores,
+        eps=eps,
+        dataset=dataset,
+        folding={"folds": folds},
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=prefilter_by_pairs,
+    )

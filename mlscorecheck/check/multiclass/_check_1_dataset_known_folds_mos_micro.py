@@ -4,23 +4,25 @@ averaging of scores.
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import (transform_multiclass_fold_to_binary,
-                            create_folds_multiclass)
+from ...aggregated import transform_multiclass_fold_to_binary, create_folds_multiclass
 
 from ..binary import check_n_datasets_mos_kfold_som
 
-__all__ = ['check_1_dataset_known_folds_mos_micro']
+__all__ = ["check_1_dataset_known_folds_mos_micro"]
 
-def check_1_dataset_known_folds_mos_micro(dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    fold_score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_dataset_known_folds_mos_micro(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    *,
+    fold_score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     This function checks the consistency of scores calculated by taking the micro average
     on a single multiclass dataset with known folds.
@@ -99,17 +101,20 @@ def check_1_dataset_known_folds_mos_micro(dataset: dict,
     evaluations = []
 
     for binary_folding in binary_folds:
-        folding = {'folds': binary_folding}
-        dataset = {'p': sum(tmp['p'] for tmp in binary_folding),
-                    'n': sum(tmp['n'] for tmp in binary_folding)}
-        evaluations.append({'dataset': dataset,
-                            'folding': folding})
+        folding = {"folds": binary_folding}
+        dataset = {
+            "p": sum(tmp["p"] for tmp in binary_folding),
+            "n": sum(tmp["n"] for tmp in binary_folding),
+        }
+        evaluations.append({"dataset": dataset, "folding": folding})
 
-    return check_n_datasets_mos_kfold_som(evaluations=evaluations,
-                                            scores=scores,
-                                            eps=eps,
-                                            dataset_score_bounds=fold_score_bounds,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_n_datasets_mos_kfold_som(
+        evaluations=evaluations,
+        scores=scores,
+        eps=eps,
+        dataset_score_bounds=fold_score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

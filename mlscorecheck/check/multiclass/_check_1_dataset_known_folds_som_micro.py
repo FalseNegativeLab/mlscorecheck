@@ -10,15 +10,18 @@ from ...aggregated import create_folds_multiclass
 
 from ._check_1_testset_no_kfold_micro import check_1_testset_no_kfold_micro
 
-__all__ = ['check_1_dataset_known_folds_som_micro']
+__all__ = ["check_1_dataset_known_folds_som_micro"]
 
-def check_1_dataset_known_folds_som_micro(dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE,
-                                    prefilter_by_pairs: bool = True) -> dict:
+
+def check_1_dataset_known_folds_som_micro(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True
+) -> dict:
     """
     This function checks the consistency of scores calculated by taking the micro average of
     class level scores on a single multiclass dataset and averaging across the folds in the
@@ -89,8 +92,10 @@ def check_1_dataset_known_folds_som_micro(dataset: dict,
         for key in fold:
             testset[key] += fold[key]
 
-    return check_1_testset_no_kfold_micro(testset=testset,
-                                            scores=scores,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance,
-                                            prefilter_by_pairs=prefilter_by_pairs)
+    return check_1_testset_no_kfold_micro(
+        testset=testset,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=prefilter_by_pairs,
+    )

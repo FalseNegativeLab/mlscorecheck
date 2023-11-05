@@ -7,18 +7,21 @@ import numpy as np
 from ...individual import Interval
 from ...core import NUMERICAL_TOLERANCE, round_scores, safe_eval
 
-__all__ = ['check_1_testset_no_kfold',
-            'expand_regression_scores',
-            'mean_average_error',
-            'mean_squared_error',
-            'root_mean_squared_error',
-            'r_squared',
-            'calculate_regression_scores',
-            'generate_regression_problem_and_scores',
-            'check_relations',
-            'score_formulas']
+__all__ = [
+    "check_1_testset_no_kfold",
+    "expand_regression_scores",
+    "mean_average_error",
+    "mean_squared_error",
+    "root_mean_squared_error",
+    "r_squared",
+    "calculate_regression_scores",
+    "generate_regression_problem_and_scores",
+    "check_relations",
+    "score_formulas",
+]
 
-rules = [{'score0': 'mae', 'score1': 'rmse', 'relation': 'le'}]
+rules = [{"score0": "mae", "score1": "rmse", "relation": "le"}]
+
 
 def mean_average_error(y_true: np.array, y_pred: np.array) -> float:
     """
@@ -33,6 +36,7 @@ def mean_average_error(y_true: np.array, y_pred: np.array) -> float:
     """
     return np.mean(np.abs(y_true - y_pred))
 
+
 def mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     """
     The mean squared error (MSE) regression performance score
@@ -44,7 +48,8 @@ def mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     Returns:
         float: the MSE score
     """
-    return np.mean((y_true - y_pred)**2)
+    return np.mean((y_true - y_pred) ** 2)
+
 
 def root_mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     """
@@ -59,6 +64,7 @@ def root_mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     """
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
+
 def r_squared(y_true: np.array, y_pred: np.array) -> float:
     """
     The R squared (r2) regression performance score
@@ -70,14 +76,20 @@ def r_squared(y_true: np.array, y_pred: np.array) -> float:
     Returns:
         float: the R2 score
     """
-    return 1.0 - np.sum((y_true - y_pred)**2) / (np.var(y_true) * y_true.shape[0])
+    return 1.0 - np.sum((y_true - y_pred) ** 2) / (np.var(y_true) * y_true.shape[0])
 
-regression_scores = {'mae': mean_average_error,
-                        'mse': mean_squared_error,
-                        'rmse': root_mean_squared_error,
-                        'r2': r_squared}
 
-def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None) -> dict:
+regression_scores = {
+    "mae": mean_average_error,
+    "mse": mean_squared_error,
+    "rmse": root_mean_squared_error,
+    "r2": r_squared,
+}
+
+
+def calculate_regression_scores(
+    y_true: np.array, y_pred: np.array, subset=None
+) -> dict:
     """
     Calculate the performance scores for a regression problem
 
@@ -97,11 +109,10 @@ def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None)
 
     return scores
 
+
 def generate_regression_problem_and_scores(
-                                        random_state=None,
-                                        max_n_samples=1000,
-                                        subset=None,
-                                        rounding_decimals=None) -> (float, int, dict):
+    random_state=None, max_n_samples=1000, subset=None, rounding_decimals=None
+) -> (float, int, dict):
     """
     Generate a regression problem and corresponding scores
 
@@ -128,19 +139,17 @@ def generate_regression_problem_and_scores(
 
     return np.var(y_true), n_samples, scores
 
-score_formulas = {'mse': {'rmse': 'rmse**2',
-                              'r2': '((1 - r2) * (var))'},
-                        'rmse': {'mse': 'mse ** 0.5',
-                                 'r2': '((1 - r2) * (var)) ** 0.5'},
-                        'r2': {'mse': '(1 - mse / var)',
-                                'rmse': '(1 - rmse**2 / var)'},
-                        }
 
-def expand_regression_scores(var: float,
-                                n_samples: int,
-                                scores: dict,
-                                eps,
-                                numerical_tolerance: float) -> dict:
+score_formulas = {
+    "mse": {"rmse": "rmse**2", "r2": "((1 - r2) * (var))"},
+    "rmse": {"mse": "mse ** 0.5", "r2": "((1 - r2) * (var)) ** 0.5"},
+    "r2": {"mse": "(1 - mse / var)", "rmse": "(1 - rmse**2 / var)"},
+}
+
+
+def expand_regression_scores(
+    var: float, n_samples: int, scores: dict, eps, numerical_tolerance: float
+) -> dict:
     """
     Generate scores from the ones available and expand the scores to intervals given the
     numerical uncertainty.
@@ -155,18 +164,25 @@ def expand_regression_scores(var: float,
     Returns:
         dict: the extended set of score intervals
     """
-    scores = {key: Interval(value - eps - numerical_tolerance,
-                            value + eps + numerical_tolerance) for key, value in scores.items()}
+    scores = {
+        key: Interval(
+            value - eps - numerical_tolerance, value + eps + numerical_tolerance
+        )
+        for key, value in scores.items()
+    }
 
     to_add = {}
     for key, value in score_formulas.items():
         if key not in scores:
             for sol, formula in value.items():
                 if sol in scores:
-                    to_add[key] = safe_eval(formula, scores | {'var': var, 'n_samples': n_samples})
+                    to_add[key] = safe_eval(
+                        formula, scores | {"var": var, "n_samples": n_samples}
+                    )
                     break
 
     return scores | to_add
+
 
 def check_relations(scores: dict) -> dict:
     """
@@ -181,25 +197,28 @@ def check_relations(scores: dict) -> dict:
             - ``'inconsistency'`` (bool): whether an inconsistency has been identified
             - ``'details'`` (list(dict)): the details of the analysis, with the following entries
     """
-    results = {'details': []}
+    results = {"details": []}
 
     for rule in rules:
-        if rule['score0'] in scores and rule['score1'] in scores:
-            score0 = scores[rule['score0']]
-            score1 = scores[rule['score1']]
-            if rule['relation'] == 'le':
+        if rule["score0"] in scores and rule["score1"] in scores:
+            score0 = scores[rule["score0"]]
+            score1 = scores[rule["score1"]]
+            if rule["relation"] == "le":
                 value = score0.lower_bound <= score1.upper_bound
-            results['details'].append(rule | {'value': value})
+            results["details"].append(rule | {"value": value})
 
-    results['inconsistency'] = any(not result['value'] for result in results['details'])
+    results["inconsistency"] = any(not result["value"] for result in results["details"])
 
     return results
 
-def check_1_testset_no_kfold(var: float,
-                                n_samples: int,
-                                scores: dict,
-                                eps,
-                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_testset_no_kfold(
+    var: float,
+    n_samples: int,
+    scores: dict,
+    eps,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     The consistency test for regression scores calculated on a single test set
     with no k-folding
@@ -237,10 +256,8 @@ def check_1_testset_no_kfold(var: float,
         >>> result['inconsistency']
         # True
     """
-    intervals = expand_regression_scores(var,
-                                            n_samples,
-                                            scores,
-                                            eps,
-                                            numerical_tolerance)
+    intervals = expand_regression_scores(
+        var, n_samples, scores, eps, numerical_tolerance
+    )
 
     return check_relations(intervals)

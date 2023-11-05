@@ -1,4 +1,3 @@
-
 """
 This module implements the joint interface to the algebraic systems
 to be used.
@@ -6,13 +5,14 @@ to be used.
 
 import abc
 
-__all__ = ['Algebra']
+__all__ = ["Algebra"]
 
 
 class Algebra(metaclass=abc.ABCMeta):
     """
     The base class of the algebra abstractions
     """
+
     @abc.abstractmethod
     def __init__(self):
         """

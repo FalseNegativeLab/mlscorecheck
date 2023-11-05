@@ -2,16 +2,18 @@
 This module implements the wrapper for the sympy algebra
 """
 
-__all__ = ['SympyAlgebra']
+__all__ = ["SympyAlgebra"]
 
 import importlib
 
 from ._algebra import Algebra
 
+
 class SympyAlgebra(Algebra):
     """
     The required algebra driven by sympy
     """
+
     def __init__(self):
         """
         Constructor of the algebra
@@ -32,10 +34,10 @@ class SympyAlgebra(Algebra):
         Returns:
             object: the symbol
         """
-        if 'upper_bound' in kwargs:
-            del kwargs['upper_bound']
-        if 'lower_bound' in kwargs:
-            del kwargs['lower_bound']
+        if "upper_bound" in kwargs:
+            del kwargs["upper_bound"]
+        if "lower_bound" in kwargs:
+            del kwargs["lower_bound"]
         return self.algebra.Symbol(name, **kwargs)
 
     def num_denom(self, expression):

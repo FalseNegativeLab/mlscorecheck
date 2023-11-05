@@ -10,18 +10,21 @@ from ...aggregated import create_folds_multiclass
 
 from ._check_1_testset_no_kfold_macro import check_1_testset_no_kfold_macro
 
-__all__ = ['check_1_dataset_known_folds_som_macro']
+__all__ = ["check_1_dataset_known_folds_som_macro"]
 
-def check_1_dataset_known_folds_som_macro(dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    class_score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_dataset_known_folds_som_macro(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    *,
+    class_score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     This function checks the consistency of scores calculated by taking the macro average
     on a single multiclass dataset and averaging the scores across the folds in the SoM manner.
@@ -101,11 +104,13 @@ def check_1_dataset_known_folds_som_macro(dataset: dict,
         for key in fold:
             testset[key] += fold[key]
 
-    return check_1_testset_no_kfold_macro(testset=testset,
-                                            scores=scores,
-                                            eps=eps,
-                                            class_score_bounds=class_score_bounds,
-                                            solver_name=solver_name,
-                                            timeout=timeout,
-                                            verbosity=verbosity,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_1_testset_no_kfold_macro(
+        testset=testset,
+        scores=scores,
+        eps=eps,
+        class_score_bounds=class_score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )

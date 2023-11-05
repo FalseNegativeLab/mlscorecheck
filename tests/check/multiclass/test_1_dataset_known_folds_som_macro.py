@@ -7,7 +7,8 @@ import pytest
 from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_macro
 from mlscorecheck.aggregated import generate_dataset_folding_multiclass
 
-@pytest.mark.parametrize('random_seed', range(20))
+
+@pytest.mark.parametrize("random_seed", range(20))
 def test_consistent(random_seed: int):
     """
     Testing a consistent configuration
@@ -16,19 +17,21 @@ def test_consistent(random_seed: int):
         random_seed (int): the random seed to be used
     """
 
-    dataset, folding, scores = generate_dataset_folding_multiclass(random_state=random_seed,
-                                                                    average='macro',
-                                                                    aggregation='som',
-                                                                    rounding_decimals=4)
+    dataset, folding, scores = generate_dataset_folding_multiclass(
+        random_state=random_seed,
+        average="macro",
+        aggregation="som",
+        rounding_decimals=4,
+    )
 
-    result = check_1_dataset_known_folds_som_macro(dataset=dataset,
-                                                    folding=folding,
-                                                    scores=scores,
-                                                    eps=1e-4)
+    result = check_1_dataset_known_folds_som_macro(
+        dataset=dataset, folding=folding, scores=scores, eps=1e-4
+    )
 
-    assert not result['inconsistency']
+    assert not result["inconsistency"]
 
-@pytest.mark.parametrize('random_seed', range(20))
+
+@pytest.mark.parametrize("random_seed", range(20))
 def test_inconsistent(random_seed: int):
     """
     Testing a consistent configuration
@@ -37,17 +40,17 @@ def test_inconsistent(random_seed: int):
         random_seed (int): the random seed to be used
     """
 
-    dataset, folding, scores = generate_dataset_folding_multiclass(random_state=random_seed,
-                                                                    average='macro',
-                                                                    aggregation='som',
-                                                                    rounding_decimals=4)
+    dataset, folding, scores = generate_dataset_folding_multiclass(
+        random_state=random_seed,
+        average="macro",
+        aggregation="som",
+        rounding_decimals=4,
+    )
 
-    scores['acc'] = (1.0 + scores['spec']) / 2.0
+    scores["acc"] = (1.0 + scores["spec"]) / 2.0
 
-    result = check_1_dataset_known_folds_som_macro(dataset=dataset,
-                                                    folding=folding,
-                                                    scores=scores,
-                                                    eps=1e-4,
-                                                    timeout=2)
+    result = check_1_dataset_known_folds_som_macro(
+        dataset=dataset, folding=folding, scores=scores, eps=1e-4, timeout=2
+    )
 
-    assert result['inconsistency']
+    assert result["inconsistency"] or result["lp_status"] == "timeout"

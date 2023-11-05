@@ -6,6 +6,7 @@ import numpy as np
 
 from mlscorecheck.core import init_random_state
 
+
 def test_init_random_state():
     """
     Testing the init random state functionality

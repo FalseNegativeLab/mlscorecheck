@@ -2,8 +2,8 @@
 This module implements functions for safe evaluations
 """
 
-__all__ = ['safe_eval',
-            'safe_call']
+__all__ = ["safe_eval", "safe_call"]
+
 
 def safe_eval(expression: str, subs: dict):
     """
@@ -18,7 +18,8 @@ def safe_eval(expression: str, subs: dict):
         obj: the value of the expression
     """
 
-    return eval(expression, subs) # pylint: disable=eval-used
+    return eval(expression, subs)  # pylint: disable=eval-used
+
 
 def check_applicability(params: dict, non_applicable: list = None) -> bool:
     """
@@ -48,6 +49,7 @@ def check_applicability(params: dict, non_applicable: list = None) -> bool:
             return False
     return True
 
+
 def safe_call(function, params: dict, non_applicable: list = None):
     """
     Safe call to a function
@@ -65,6 +67,6 @@ def safe_call(function, params: dict, non_applicable: list = None):
     if not check_applicability(params, non_applicable):
         return None
 
-    args = list(function.__code__.co_varnames[:function.__code__.co_kwonlyargcount])
+    args = list(function.__code__.co_varnames[: function.__code__.co_kwonlyargcount])
 
     return function(**{arg: params[arg] for arg in args if arg in params})

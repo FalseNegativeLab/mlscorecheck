@@ -7,18 +7,21 @@ in a k-fold scenario on one single dataset.
 from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import check_aggregated_scores, Experiment, Evaluation
 
-__all__ = ['check_1_dataset_known_folds_mos']
+__all__ = ["check_1_dataset_known_folds_mos"]
 
-def check_1_dataset_known_folds_mos(dataset: dict,
-                                    folding: dict,
-                                    scores: dict,
-                                    eps,
-                                    fold_score_bounds: dict = None,
-                                    *,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_1_dataset_known_folds_mos(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps,
+    fold_score_bounds: dict = None,
+    *,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     This function checks the consistency of scores calculated by applying k-fold cross validation
     to a single dataset and aggregating the figures over the folds in the mean of scores fashion.
@@ -102,18 +105,21 @@ def check_1_dataset_known_folds_mos(dataset: dict,
         # True
     """
 
-    evaluation = Evaluation(dataset=dataset,
-                            folding=folding,
-                            fold_score_bounds=fold_score_bounds,
-                            aggregation='mos')
+    evaluation = Evaluation(
+        dataset=dataset,
+        folding=folding,
+        fold_score_bounds=fold_score_bounds,
+        aggregation="mos",
+    )
 
-    experiment = Experiment(evaluations=[evaluation.to_dict()],
-                            aggregation='mos')
+    experiment = Experiment(evaluations=[evaluation.to_dict()], aggregation="mos")
 
-    return check_aggregated_scores(experiment=experiment.to_dict(),
-                                        scores=scores,
-                                        eps=eps,
-                                        solver_name=solver_name,
-                                        timeout=timeout,
-                                        verbosity=verbosity,
-                                        numerical_tolerance=numerical_tolerance)
+    return check_aggregated_scores(
+        experiment=experiment.to_dict(),
+        scores=scores,
+        eps=eps,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
