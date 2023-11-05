@@ -75,7 +75,6 @@ def check_aggregated_scores(*,
                                     else solver_name)
 
 
-    print('solver setting')
     solver = pl.getSolver(solver_name,
                             timeLimit=timeout,
                             msg=verbosity,
