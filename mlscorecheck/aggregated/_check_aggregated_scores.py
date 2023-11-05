@@ -77,7 +77,7 @@ def check_aggregated_scores(*,
     solver = pl.getSolver(solver_name,
                             timeLimit=timeout,
                             msg=verbosity,
-                            options=[f"RandomS 1", f"RandomC 1"])
+                            options=["RandomS 1", "RandomC 1"])
 
     result = solve(experiment, scores, eps, solver)
 
