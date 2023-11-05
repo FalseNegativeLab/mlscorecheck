@@ -20,6 +20,7 @@ def test_consistent(random_seed: int):
                                                 random_state=random_seed,
                                                 average='macro',
                                                 aggregation='mos',
+                                                max_class_size=100,
                                                 rounding_decimals=4,
                                                 #subset=['acc', 'sens', 'spec', 'f1p', 'bacc']
                                                 )
