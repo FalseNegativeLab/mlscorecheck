@@ -74,7 +74,10 @@ def check_aggregated_scores(*,
     solver_name = (PREFERRED_SOLVER if solver_name is None or solver_name not in solvers
                                     else solver_name)
 
-    solver = pl.getSolver(solver_name, timeLimit=timeout, msg=verbosity)
+    solver = pl.getSolver(solver_name,
+                            timeLimit=timeout,
+                            msg=verbosity,
+                            options=[f"RandomS 1", f"RandomC 1"])
 
     result = solve(experiment, scores, eps, solver)
 
