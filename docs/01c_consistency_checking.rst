@@ -10,16 +10,35 @@ A note on the *Score of Means* and *Mean of Scores* aggregations
 
 When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
 
-
 Binary classification
 ~~~~~~~~~~~~~~~~~~~~~
 
-The two types of tests
-^^^^^^^^^^^^^^^^^^^^^^
+Depending on the experimental setup, the consistency tests developed for binary classification problems support a variety of performance scores: when aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported; when cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
 
-In the context of a single testset or a Score of Means (SoM) aggregation, which results in one confusion matrix, one can systematically iterate through all potential confusion matrices to assess whether any of them can generate the reported scores within the specified numerical uncertainty. To expedite this process, the test leverages interval arithmetic. The test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` parameters.
+  * accuracy (``acc``),
+  * sensitivity (``sens``),
+  * specificity (``spec``),
+  * positive predictive value (``ppv``),
+  * negative predictive value (``npv``),
+  * balanced accuracy (``bacc``),
+  * f1(-positive) score (``f1``),
+  * f1-negative score (``f1n``),
+  * f-beta positive (``fbp``),
+  * f-beta negative (``fbn``),
+  * Fowlkes-Mallows index (``fm``),
+  * unified performance measure (``upm``),
+  * geometric mean (``gm``),
+  * markedness (``mk``),
+  * positive likelihood ratio (``lrp``),
+  * negative likelihood ratio (``lrn``),
+  * Matthews correlation coefficient (``mcc``),
+  * bookmaker informedness (``bm``),
+  * prevalence threshold (``pt``),
+  * diagnostic odds ratio (``dor``),
+  * Jaccard index (``ji``),
+  * Cohen's kappa (``kappa``)
 
-With a MoS type of aggregation, only the averages of scores over folds or datasets are available. In this case, it is feasible to reconstruct fold-level or dataset-level confusion matrices for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear integer programming. These tests formulate a linear integer program based on the reported scores and the experimental setup, and check if the program is feasible to produce the reported values within the estimated numerical uncertainties.
+The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 
 1 testset with no k-fold
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -409,7 +428,7 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
 Multiclass classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In multiclass classification scenarios only single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies.
+In multiclass classification scenarios single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies. The list of supported scores depends on the experimental setup, when applicable, all 20 scores listed for binary classification are supported, when the test operates in terms of linear programming, only accuracy, sensitivity, specificity and balanced accuracy are supported.
 
 1 testset, no k-fold, micro-averaging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

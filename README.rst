@@ -81,16 +81,17 @@ If you use the package, please consider citing the following paper:
 Installation
 ------------
 
-The package has only basic requirements when used for consistency testing.
+The package has only basic requirements when used for consistency testing:
 
 * ``numpy``
 * ``pulp``
+* ``scikit-learn``
 
 .. code-block:: bash
 
     pip install numpy pulp
 
-In order to execute the tests, one also needs ``scikit-learn``, in order to test the computer algebra components or reproduce the algebraic solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. To install ``sage`` in a ``conda`` environment, one needs to add the ``conda-forge`` channel first:
+In order to execute the unit tests for the computer algebra components or reproduce the algebraic solutions, either ``sympy`` or ``sage`` needs to be installed. The installation of ``sympy`` can be done in the usual way. To install ``sage`` in a ``conda`` environment, one needs to add the ``conda-forge`` channel first:
 
 .. code-block:: bash
 
@@ -204,6 +205,11 @@ A dataset and a folding constitute an *evaluation*, and many of the test functio
                     "folding": {"n_folds": 5, "n_repeats": 1,
                                 "strategy": "stratified_sklearn"}}
 
+A note on the *Score of Means* and *Mean of Scores* aggregations
+----------------------------------------------------------------
+
+When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
+
 Binary classification
 =====================
 
@@ -235,11 +241,6 @@ Depending on the experimental setup, the consistency tests developed for binary 
 The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 
 In the rest of the section, we illustrate some of the test functions, for further details and the full list of supported scenarios, see https://mlscorecheck.readthedocs.io/en/latest/.
-
-A note on the *Score of Means* and *Mean of Scores* aggregations
-----------------------------------------------------------------
-
-When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
 
 1 testset with no k-fold
 ------------------------
@@ -278,8 +279,8 @@ If one of the scores is altered, like accuracy is changed to 0.92, the configura
 
 As the ``inconsistency`` flag shows, here inconsistencies were identified, there are no such ``tp`` and ``tn`` combinations which would end up with the reported scores. Either the assumption on the properties of the dataset, or the scores are incorrect.
 
-1 dataset with k-fold, mean of scores/score of means
-----------------------------------------------------
+1 dataset with k-fold, mean of scores (MoS)/score of means (SoM) aggregation
+----------------------------------------------------------------------------
 
 This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the true positive and true negative parameters of all folds and checks its feasibility.
 
