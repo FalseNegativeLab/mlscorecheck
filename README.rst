@@ -278,8 +278,8 @@ If one of the scores is altered, like accuracy is changed to 0.92, the configura
 
 As the ``inconsistency`` flag shows, here inconsistencies were identified, there are no such ``tp`` and ``tn`` combinations which would end up with the reported scores. Either the assumption on the properties of the dataset, or the scores are incorrect.
 
-1 dataset with k-fold, mean of scores (MoS)
--------------------------------------------
+1 dataset with k-fold, mean of scores/score of means
+----------------------------------------------------
 
 This scenario is the most common in the literature. A classification technique is executed to each fold in a (repeated) k-fold scenario, the scores are calculated for each fold, and the average of the scores is reported with some numerical uncertainty due to rounding/ceiling/flooring. Because of the averaging, this test supports only the linear scores (``acc``, ``sens``, ``spec``, ``bacc``) which usually are among the most commonly reported scores. The test constructs a linear integer program describing the scenario with the true positive and true negative parameters of all folds and checks its feasibility.
 
@@ -336,43 +336,7 @@ with a true positive and true negative configuration with the specified lower an
 
 Note that in this example, although ``f1`` is provided, it is completely ignored as the aggregated tests work only for the four linear scores.
 
-1 dataset with k-fold, score of means (SoM)
--------------------------------------------
-
-When the scores are calculated in the Score-of-Means (SoM) manner in a k-fold scenario, it means that the total confusion matrix of all folds is calculated first, and then the score formulas are applied to it. The only difference compared to the "1 testset no kfold" scenario is that the number of repetitions of the k-fold scheme multiples the ``p`` and ``n`` statistics of the dataset, but the actual structure of the folds is irrelevant. The result of the analysis is structured similarly to the "1 testset no kfold" case.
-
-For example, testing a consistent scenario:
-
-.. code-block:: Python
-
-    from mlscorecheck.check.binary import check_1_dataset_kfold_som
-
-    dataset = {'dataset_name': 'common_datasets.monk-2'}
-    folding = {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}
-
-    scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
-                'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
-
-    result = check_1_dataset_kfold_som(dataset=dataset,
-                                        folding=folding,
-                                        scores=scores,
-                                        eps=1e-3)
-    result['inconsistency']
-    # False
-
-If one of the scores is adjusted, for example, negative predictive value is changed to 0.754, the configuration becomes inconsistent:
-
-.. code-block:: Python
-
-    scores = {'spec': 0.668, 'npv': 0.754, 'ppv': 0.667,
-            'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
-
-    result = check_1_dataset_kfold_som(dataset=dataset,
-                                        folding=folding,
-                                        scores=scores,
-                                        eps=1e-3)
-    result['inconsistency']
-    # True
+Similar tests are provided for the SoM aggregation as well, for further details see https://mlscorecheck.readthedocs.io/en/latest/.
 
 n testsets without k-fold, SoM/MoS aggregation
 ----------------------------------------------
