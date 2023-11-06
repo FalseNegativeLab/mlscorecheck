@@ -12,7 +12,7 @@ In the following example, we illustrate the consistency testing of performance s
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.skinlesion import check_isic2016
+    >>> from mlscorecheck.check.bundles.skinlesion import check_isic2016
     >>> scores = {'acc': 0.7916, 'sens': 0.2933, 'spec': 0.9145}
     >>> results = check_isic2016(scores=scores, eps=1e-4)
     >>> results['inconsistency']
@@ -29,7 +29,7 @@ The consistency tests support these types of evaluations. In the following examp
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.skinlesion import check_isic2017
+    >>> from mlscorecheck.check.bundles.skinlesion import check_isic2017
     >>> scores = {'acc': 0.6183, 'sens': 0.4957, 'ppv': 0.2544, 'f1p': 0.3362}
     >>> results = check_isic2017(target='M',
                         against=['SK', 'N'],

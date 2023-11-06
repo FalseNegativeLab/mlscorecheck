@@ -4,6 +4,7 @@ This module brings together all the logic related to aggregated figures
 
 from ._folding import *
 from ._fold import *
+from ._fold_enumeration import *
 from ._dataset import *
 from ._evaluation import *
 from ._experiment import *

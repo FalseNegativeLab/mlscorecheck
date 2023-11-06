@@ -4,9 +4,7 @@ This module implements a function to check if a symbolic toolkit is available
 
 import importlib
 
-__all__ = ['symbolic_toolkits',
-           'get_symbolic_toolkit',
-           'check_importability']
+__all__ = ["symbolic_toolkits", "get_symbolic_toolkit", "check_importability"]
 
 symbolic_toolkits = []
 
@@ -28,8 +26,8 @@ def check_importability(package: str):
         return None
 
 
-symbolic_toolkits.append(check_importability('sympy'))
-symbolic_toolkits.append(check_importability('sage'))
+symbolic_toolkits.append(check_importability("sympy"))
+symbolic_toolkits.append(check_importability("sage"))
 
 symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
 

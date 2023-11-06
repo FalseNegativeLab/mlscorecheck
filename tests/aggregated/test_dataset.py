@@ -13,10 +13,10 @@ bounds it is likely to become feasible.
 
 import pytest
 
-from mlscorecheck.aggregated import (Dataset,
-                                        generate_dataset)
+from mlscorecheck.aggregated import Dataset, generate_dataset
 
 random_seeds = list(range(20))
+
 
 def test_dataset_instantiation():
     """
@@ -30,9 +30,9 @@ def test_dataset_instantiation():
         Dataset()
 
     with pytest.raises(ValueError):
-        Dataset(p=5, n=10, dataset_name='common_datasets.ADA')
+        Dataset(p=5, n=10, dataset_name="common_datasets.ADA")
 
-    dataset = Dataset(dataset_name='common_datasets.ADA')
+    dataset = Dataset(dataset_name="common_datasets.ADA")
 
     assert dataset.p > 0 and dataset.n > 0
 
@@ -40,7 +40,8 @@ def test_dataset_instantiation():
 
     assert dataset2.p == dataset.p and dataset2.n == dataset.n
 
-@pytest.mark.parametrize('random_seed', random_seeds)
+
+@pytest.mark.parametrize("random_seed", random_seeds)
 def test_dataset_generation(random_seed: int):
     """
     Testing the dataset generation

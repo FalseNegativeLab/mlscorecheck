@@ -13,19 +13,16 @@ from importlib.resources import files
 from ._interval import Interval, IntervalUnion
 from ._expression import Expression
 
-__all__ = ['load_solutions',
-            'Solution',
-            'Solutions',
-            'solution_specifications']
+__all__ = ["load_solutions", "Solution", "Solutions", "solution_specifications"]
+
 
 class Solution:
     """
     Represents one single solution (expressions for tp and tn) and corresponding
     non-zero and non-negative conditions as expressions
     """
-    def __init__(self,
-                    solution: dict,
-                    conditions: list = None):
+
+    def __init__(self, solution: dict, conditions: list = None):
         """
         Constructor of the solution
 
@@ -40,12 +37,12 @@ class Solution:
         self.all_symbols = set()
 
         for item in self.solution.values():
-            self.all_symbols = self.all_symbols.union(item['symbols'])
+            self.all_symbols = self.all_symbols.union(item["symbols"])
 
         for cond in self.conditions:
-            self.all_symbols = self.all_symbols.union(cond['symbols'])
+            self.all_symbols = self.all_symbols.union(cond["symbols"])
 
-        self.conditions = sorted(self.conditions, key=lambda x: -x['depth'])
+        self.conditions = sorted(self.conditions, key=lambda x: -x["depth"])
 
     def to_dict(self):
         """
@@ -54,8 +51,7 @@ class Solution:
         Returns:
             dict: the dictionary representation
         """
-        return {'solution': self.solution,
-                'conditions': self.conditions}
+        return {"solution": self.solution, "conditions": self.conditions}
 
     def check_non_negative(self, value) -> bool:
         """
@@ -88,10 +84,9 @@ class Solution:
         Returns:
             bool: True if the condition fails, False otherwise
         """
-        return ((isinstance(value, (Interval, IntervalUnion))
-                and value.contains(0))
-                or (not isinstance(value, (Interval, IntervalUnion))
-                and abs(value) < 1e-8))
+        return (isinstance(value, (Interval, IntervalUnion)) and value.contains(0)) or (
+            not isinstance(value, (Interval, IntervalUnion)) and abs(value) < 1e-8
+        )
 
     def evaluate(self, subs):
         """
@@ -108,41 +103,41 @@ class Solution:
         message = None
         term = None
         for condition in self.conditions:
-            if condition['mode'] == 'non-negative':
+            if condition["mode"] == "non-negative":
                 value = Expression(**condition).evaluate(subs)
                 if self.check_non_negative(value):
-                    message = 'negative base'
-                    term = condition['expression']
+                    message = "negative base"
+                    term = condition["expression"]
                     break
-            elif condition['mode'] == 'non-zero':
+            elif condition["mode"] == "non-zero":
                 value = Expression(**condition).evaluate(subs)
                 if self.check_non_zero(value):
-                    message = 'zero division'
-                    term = condition['expression']
+                    message = "zero division"
+                    term = condition["expression"]
                     break
 
         if message is not None:
-            return {'tp': None,
-                    'tn': None,
-                    'message': message,
-                    'term': term}
+            return {"tp": None, "tn": None, "message": message, "term": term}
 
-        res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
-        if 'tp' in self.solution:
-            res['tp_formula'] = self.solution['tp']['expression']
+        res = {
+            key: Expression(**value).evaluate(subs)
+            for key, value in self.solution.items()
+        }
+        if "tp" in self.solution:
+            res["tp_formula"] = self.solution["tp"]["expression"]
 
-        if 'tn' in self.solution:
-            res['tn_formula'] = self.solution['tn']['expression']
+        if "tn" in self.solution:
+            res["tn_formula"] = self.solution["tn"]["expression"]
 
         return res
+
 
 class Solutions:
     """
     Represents all solutions to a particular problem
     """
-    def __init__(self,
-                    scores: list,
-                    solutions: list):
+
+    def __init__(self, scores: list, solutions: list):
         """
         The constructor of the object
 
@@ -161,8 +156,10 @@ class Solutions:
             dict: the dictionary representation
         """
 
-        return {'scores': self.scores,
-                'solutions': [sol.to_dict() for sol in self.solutions]}
+        return {
+            "scores": self.scores,
+            "solutions": [sol.to_dict() for sol in self.solutions],
+        }
 
     def evaluate(self, subs):
         """
@@ -182,6 +179,7 @@ class Solutions:
 
         return results
 
+
 def load_solutions():
     """
     Load the solutions
@@ -189,27 +187,32 @@ def load_solutions():
     Returns:
         dict: the dictionary of the solutions
     """
-    sio = files('mlscorecheck').joinpath(os.path.join('individual', 'solutions.json')).read_text() # pylint: disable=unspecified-encoding
+    sio = (
+        files("mlscorecheck")
+        .joinpath(os.path.join("individual", "solutions.json"))
+        .read_text()
+    )  # pylint: disable=unspecified-encoding
 
     solutions_dict = json.loads(sio)
 
     results = {}
 
-    for sol in solutions_dict['solutions']:
-        scores = list(sol['scores'])
-        if 'p4' not in scores:
+    for sol in solutions_dict["solutions"]:
+        scores = list(sol["scores"])
+        if "p4" not in scores:
             results[tuple(sorted(scores))] = Solutions(**sol)
 
     # removing the solutions containing complex values
-    del results[('fm', 'gm')]
-    del results[('fm', 'mk')]
-    #del results[('fm', 'p4')] # goes to complex
-    del results[('fm', 'upm')] # goes to complex
-    #del results[('dor', 'p4')] # goes to complex
-    del results[('dor', 'upm')] # goes to complex
-    del results[('gm', 'mk')] # goes to complex
-    del results[('gm', 'mcc')] # goes to complex when tn = 0 (maybe other times too)
+    del results[("fm", "gm")]
+    del results[("fm", "mk")]
+    # del results[('fm', 'p4')] # goes to complex
+    del results[("fm", "upm")]  # goes to complex
+    # del results[('dor', 'p4')] # goes to complex
+    del results[("dor", "upm")]  # goes to complex
+    del results[("gm", "mk")]  # goes to complex
+    del results[("gm", "mcc")]  # goes to complex when tn = 0 (maybe other times too)
 
     return results
+
 
 solution_specifications = load_solutions()

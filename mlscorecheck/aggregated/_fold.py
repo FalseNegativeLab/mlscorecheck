@@ -9,21 +9,20 @@ the linear programming problem
 
 import pulp as pl
 
-from ..core import (init_random_state, round_scores)
-from ..individual import calculate_scores_for_lp
+from ..core import init_random_state, round_scores
+from ..scores import calculate_scores_for_lp
 
 from ._utils import random_identifier, aggregated_scores
 
-__all__ = ['Fold']
+__all__ = ["Fold"]
+
 
 class Fold:
     """
     Abstract representation of a fold
     """
-    def __init__(self,
-                    p: int,
-                    n: int,
-                    identifier: str = None):
+
+    def __init__(self, p: int, n: int, identifier: str = None):
         """
         Constructor of a fold
 
@@ -40,8 +39,10 @@ class Fold:
         self.tn = None
         self.scores = None
 
-        self.variable_names = {'tp': f'tp_{self.identifier}'.replace('-', '_'),
-                                'tn': f'tn_{self.identifier}'.replace('-', '_')}
+        self.variable_names = {
+            "tp": f"tp_{self.identifier}".replace("-", "_"),
+            "tn": f"tn_{self.identifier}".replace("-", "_"),
+        }
 
     def to_dict(self) -> dict:
         """
@@ -50,11 +51,9 @@ class Fold:
         Returns:
             dict: the dictionary representation
         """
-        return {'p': self.p,
-                'n': self.n,
-                'identifier': self.identifier}
+        return {"p": self.p, "n": self.n, "identifier": self.identifier}
 
-    def sample_figures(self, random_state = None):
+    def sample_figures(self, random_state=None):
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -66,14 +65,14 @@ class Fold:
         """
         random_state = init_random_state(random_state)
 
-        self.tp = random_state.randint(self.p+1)
-        self.tn = random_state.randint(self.n+1)
+        self.tp = random_state.randint(self.p + 1)
+        self.tn = random_state.randint(self.n + 1)
 
         return self
 
-    def calculate_scores(self,
-                            rounding_decimals: int = None,
-                            score_subset: list = None) -> dict:
+    def calculate_scores(
+        self, rounding_decimals: int = None, score_subset: list = None
+    ) -> dict:
         """
         Calculate the scores for the fold
 
@@ -86,14 +85,16 @@ class Fold:
         """
         score_subset = score_subset if score_subset is not None else aggregated_scores
 
-        self.scores = calculate_scores_for_lp({'p': self.p,
-                                                'n': self.n,
-                                                'tp': self.tp,
-                                                'tn': self.tn},
-                                                score_subset=score_subset)
+        self.scores = calculate_scores_for_lp(
+            {"p": self.p, "n": self.n, "tp": self.tp, "tn": self.tn},
+            score_subset=score_subset,
+        )
 
-        return self.scores if rounding_decimals is None else round_scores(self.scores,
-                                                                            rounding_decimals)
+        return (
+            self.scores
+            if rounding_decimals is None
+            else round_scores(self.scores, rounding_decimals)
+        )
 
     def set_initial_values(self, scores):
         """
@@ -102,17 +103,17 @@ class Fold:
         Args:
             scores (dict): the dictionary of scores
         """
-        if 'acc' in scores:
-            tp_init = scores['acc'] * self.p
-            tn_init = scores['acc'] * self.n
-        if 'bacc' in scores:
-            tp_init = scores['bacc'] * self.p
-            tn_init = scores['bacc'] * self.n
+        if "acc" in scores:
+            tp_init = scores["acc"] * self.p
+            tn_init = scores["acc"] * self.n
+        if "bacc" in scores:
+            tp_init = scores["bacc"] * self.p
+            tn_init = scores["bacc"] * self.n
 
-        if 'sens' in scores:
-            tp_init = scores['sens'] * self.p
-        if 'spec' in scores:
-            tn_init = scores['spec'] * self.n
+        if "sens" in scores:
+            tp_init = scores["sens"] * self.p
+        if "spec" in scores:
+            tn_init = scores["spec"] * self.n
 
         self.tp.setInitialValue(int(tp_init))
         self.tn.setInitialValue(int(tn_init))
@@ -127,8 +128,8 @@ class Fold:
         Returns:
             pl.LpProblem: the updated problem
         """
-        self.tp = pl.LpVariable(self.variable_names['tp'], 0, self.p, pl.LpInteger)
-        self.tn = pl.LpVariable(self.variable_names['tn'], 0, self.n, pl.LpInteger)
+        self.tp = pl.LpVariable(self.variable_names["tp"], 0, self.p, pl.LpInteger)
+        self.tn = pl.LpVariable(self.variable_names["tn"], 0, self.n, pl.LpInteger)
 
         if scores is not None:
             self.set_initial_values(scores)
@@ -150,9 +151,9 @@ class Fold:
             obj: the self object populated with the ``tp`` and ``tn`` scores
         """
         for variable in lp_problem.variables():
-            if variable.name == self.variable_names['tp']:
+            if variable.name == self.variable_names["tp"]:
                 self.tp = variable.varValue
-            if variable.name == self.variable_names['tn']:
+            if variable.name == self.variable_names["tn"]:
                 self.tn = variable.varValue
 
         return self

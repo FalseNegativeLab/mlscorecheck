@@ -6,8 +6,8 @@
 .. raw:: html
     :file: ga4.html
 
-Welcome to mlscorecheck's documentation!
-==========================================
+mlscorecheck: testing the consistency of machine learning performance scores
+****************************************************************************
 
 .. toctree::
     :maxdepth: 2
@@ -20,7 +20,6 @@ Welcome to mlscorecheck's documentation!
     :caption: Consistency testing
 
     01a_requirements
-    01b_specifying_setup
     01c_consistency_checking
 
 .. toctree::

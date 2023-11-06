@@ -1,21 +1,32 @@
-Testing the consistency of performance scores
----------------------------------------------
+Binary classification
+=====================
 
-Numerous experimental setups are supported by the package. In this section we go through them one by one giving some examples of possible use cases.
+Depending on the experimental setup, the consistency tests developed for binary classification problems support a variety of performance scores: when aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported; when cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
 
-We emphasize again, that the tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
+  * accuracy (``acc``),
+  * sensitivity (``sens``),
+  * specificity (``spec``),
+  * positive predictive value (``ppv``),
+  * negative predictive value (``npv``),
+  * balanced accuracy (``bacc``),
+  * f1(-positive) score (``f1``),
+  * f1-negative score (``f1n``),
+  * f-beta positive (``fbp``),
+  * f-beta negative (``fbn``),
+  * Fowlkes-Mallows index (``fm``),
+  * unified performance measure (``upm``),
+  * geometric mean (``gm``),
+  * markedness (``mk``),
+  * positive likelihood ratio (``lrp``),
+  * negative likelihood ratio (``lrn``),
+  * Matthews correlation coefficient (``mcc``),
+  * bookmaker informedness (``bm``),
+  * prevalence threshold (``pt``),
+  * diagnostic odds ratio (``dor``),
+  * Jaccard index (``ji``),
+  * Cohen's kappa (``kappa``)
 
-A note on the *Score of Means* and *Mean of Scores* aggregations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
-
-The two types of tests
-^^^^^^^^^^^^^^^^^^^^^^
-
-In the context of a single testset or a Score of Means (SoM) aggregation, which results in one confusion matrix, one can systematically iterate through all potential confusion matrices to assess whether any of them can generate the reported scores within the specified numerical uncertainty. To expedite this process, the test leverages interval arithmetic. The test supports the performance scores ``acc``, ``sens``, ``spec``, ``ppv``, ``npv``, ``bacc``, ``f1``, ``f1n``, ``fbp``, ``fbn``, ``fm``, ``upm``, ``gm``, ``mk``, ``lrp``, ``lrn``, ``mcc``, ``bm``, ``pt``, ``dor``, ``ji``, ``kappa``. Note that when the f-beta positive or f-beta negative scores are used, one also needs to specify the ``beta_positive`` or ``beta_negative`` parameters.
-
-With a MoS type of aggregation, only the averages of scores over folds or datasets are available. In this case, it is feasible to reconstruct fold-level or dataset-level confusion matrices for the linear scores ``acc``, ``sens``, ``spec`` and ``bacc`` using linear integer programming. These tests formulate a linear integer program based on the reported scores and the experimental setup, and check if the program is feasible to produce the reported values within the estimated numerical uncertainties.
+The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 
 1 testset with no k-fold
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -26,13 +37,13 @@ In the example below, the scores are artificially generated to be consistent, an
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_1_testset_no_kfold_scores
+    >>> from mlscorecheck.check.binary import check_1_testset_no_kfold
 
     >>> testset = {'p': 530, 'n': 902}
 
     >>> scores = {'acc': 0.62, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}
 
-    >>> result = check_1_testset_no_kfold_scores(testset=testset,
+    >>> result = check_1_testset_no_kfold(testset=testset,
                                                 scores=scores,
                                                 eps=1e-2)
     >>> result['inconsistency']
@@ -46,7 +57,7 @@ If one of the scores is altered, like accuracy is changed to 0.92, the configura
 
     >>> scores = {'acc': 0.92, 'sens': 0.22, 'spec': 0.86, 'f1p': 0.3, 'fm': 0.32}
 
-    >>> result = check_1_testset_no_kfold_scores(testset=testset,
+    >>> result = check_1_testset_no_kfold(testset=testset,
                                                 scores=scores,
                                                 eps=1e-2)
     >>> result['inconsistency']
@@ -63,14 +74,14 @@ In the example below, a consistent set of figures is tested:
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_1_dataset_known_folds_mos_scores
+    >>> from mlscorecheck.check.binary import check_1_dataset_known_folds_mos
 
     >>> dataset = {'p': 126, 'n': 131}
     >>> folding = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
 
     >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
 
-    >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
+    >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
@@ -84,7 +95,7 @@ If one of the scores is adjusted, for example, sensitivity is changed to 0.568, 
 .. code-block:: Python
 
     >>> scores = {'acc': 0.573, 'sens': 0.568, 'bacc': 0.662}
-    >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
+    >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
@@ -101,7 +112,7 @@ with a true positive and true negative configuration with the specified lower an
 
     >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
 
-    >>> result = check_1_dataset_known_folds_mos_scores(dataset=dataset,
+    >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
                                                         folding=folding,
                                                         fold_score_bounds={'acc': (0.8, 1.0)},
                                                         scores=scores,
@@ -121,7 +132,7 @@ For example, testing a consistent scenario:
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_1_dataset_som_scores
+    >>> from mlscorecheck.check.binary import check_1_dataset_kfold_som
 
     >>> dataset = {'dataset_name': 'common_datasets.monk-2'}
     >>> folding = {'n_folds': 4, 'n_repeats': 3, 'strategy': 'stratified_sklearn'}
@@ -129,7 +140,7 @@ For example, testing a consistent scenario:
     >>> scores = {'spec': 0.668, 'npv': 0.744, 'ppv': 0.667,
                     'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
-    >>> result = check_1_dataset_som_scores(dataset=dataset,
+    >>> result = check_1_dataset_kfold_som(dataset=dataset,
                                             folding=folding,
                                             scores=scores,
                                             eps=1e-3)
@@ -143,7 +154,7 @@ If one of the scores is adjusted, for example, negative predictive value is chan
     >>> {'spec': 0.668, 'npv': 0.754, 'ppv': 0.667,
             'bacc': 0.706, 'f1p': 0.703, 'fm': 0.704}
 
-    >>> result = check_1_dataset_som_scores(dataset=dataset,
+    >>> result = check_1_dataset_kfold_som(dataset=dataset,
                                             folding=folding,
                                             scores=scores,
                                             eps=1e-3)
@@ -157,12 +168,12 @@ In this scenario there are n different testsets, the classifier is evaluated on 
 
 .. code-block:: Python
 
-    from mlscorecheck.check import check_n_testsets_som_no_kfold_scores
+    from mlscorecheck.check.binary import check_n_testsets_som_no_kfold
 
     testsets = [{'p': 405, 'n': 223}, {'p': 3, 'n': 422}, {'p': 109, 'n': 404}]
     scores = {'acc': 0.4719, 'npv': 0.6253, 'f1p': 0.3091}
 
-    results = check_n_testsets_som_no_kfold_scores(testsets=testsets,
+    results = check_n_testsets_som_no_kfold(testsets=testsets,
                                         scores=scores,
                                         eps=0.0001)
     results["inconsistency"]
@@ -174,7 +185,7 @@ If one of the scores is slightly adjusted, for example, ``npv`` changed to 0.626
 
     scores['npv'] = 0.6263
 
-    results = check_n_testsets_som_no_kfold_scores(testsets=testsets,
+    results = check_n_testsets_som_no_kfold(testsets=testsets,
                                         scores=scores,
                                         eps=0.0001)
     results["inconsistency"]
@@ -187,7 +198,7 @@ This scenario is analogous to the "n testsets without k-folding, SoM" scenario, 
 
 .. code-block:: Python
 
-    from mlscorecheck.check import check_n_testsets_mos_no_kfold_scores
+    from mlscorecheck.check.binary import check_n_testsets_mos_no_kfold
 
     testsets = [{'p': 349, 'n': 50},
                 {'p': 478, 'n': 323},
@@ -195,7 +206,7 @@ This scenario is analogous to the "n testsets without k-folding, SoM" scenario, 
                 {'p': 123, 'n': 145}]
 
     scores = {'acc': 0.6441, 'sens': 0.6706, 'spec': 0.3796, 'bacc': 0.5251}
-    results = check_n_testsets_mos_no_kfold_scores(testsets=testsets,
+    results = check_n_testsets_mos_no_kfold(testsets=testsets,
                                                     scores=scores,
                                                     eps=0.0001)
     results["inconsistency"]
@@ -207,7 +218,7 @@ If one of the scores is slightly adjusted, for example, ``sens`` is updated to 0
 
     scores['sens'] = 0.6756
 
-    results = check_n_testsets_mos_no_kfold_scores(testsets=testsets,
+    results = check_n_testsets_mos_no_kfold(testsets=testsets,
                                                     scores=scores,
                                                     eps=0.0001)
     results["inconsistency"]
@@ -220,7 +231,7 @@ Again, the scenario is similar to the "1 dataset k-fold SoM" scenario, except th
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_n_datasets_som_kfold_som_scores
+    >>> from mlscorecheck.check.binary import check_n_datasets_som_kfold_som
 
     >>> evaluation0 = {'dataset': {'p': 389, 'n': 630},
                         'folding': {'n_folds': 5, 'n_repeats': 2,
@@ -232,7 +243,7 @@ Again, the scenario is similar to the "1 dataset k-fold SoM" scenario, except th
 
     >>> scores = {'acc': 0.631, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
 
-    >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
+    >>> result = check_n_datasets_som_kfold_som(scores=scores,
                                                         evaluations=evaluations,
                                                         eps=1e-3)
     >>> result['inconsistency']
@@ -244,7 +255,7 @@ However, if one of the scores is adjusted a little, like accuracy is changed to 
 
     >>> scores = {'acc': 0.731, 'sens': 0.341, 'spec': 0.802, 'f1p': 0.406, 'fm': 0.414}
 
-    >>> result = check_n_datasets_som_kfold_som_scores(scores=scores,
+    >>> result = check_n_datasets_som_kfold_som(scores=scores,
                                                         evaluations=evaluations,
                                                         eps=1e-3)
     >>> result['inconsistency']
@@ -257,7 +268,7 @@ This scenario is about performance scores calculated for each dataset individual
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_n_datasets_mos_kfold_som_scores
+    >>> from mlscorecheck.check.binary import check_n_datasets_mos_kfold_som
 
     >>> evaluation0 = {'dataset': {'p': 39, 'n': 822},
                         'folding': {'n_folds': 5, 'n_repeats': 3,
@@ -269,7 +280,7 @@ This scenario is about performance scores calculated for each dataset individual
 
     >>> scores = {'acc': 0.312, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
 
-    >>> result = check_n_datasets_mos_kfold_som_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_kfold_som(evaluations=evaluations,
                                                         dataset_score_bounds={'acc': (0.0, 0.5)},
                                                         eps=1e-4,
                                                         scores=scores)
@@ -281,7 +292,7 @@ However, if one of the scores is adjusted a little (accuracy changed to 0.412 an
 .. code-block:: Python
 
     >>> scores = {'acc': 0.412, 'sens': 0.45, 'spec': 0.312, 'bacc': 0.381}
-    >>> result = check_n_datasets_mos_kfold_som_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_kfold_som(evaluations=evaluations,
                                                         dataset_score_bounds={'acc': (0.5, 1.0)},
                                                         eps=1e-4,
                                                         scores=scores)
@@ -297,7 +308,7 @@ In this scenario, scores are calculated in the MoS manner for each dataset, and 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_n_datasets_mos_known_folds_mos_scores
+    >>> from mlscorecheck.check.binary import check_n_datasets_mos_known_folds_mos
 
     >>> evaluation0 = {'dataset': {'p': 118, 'n': 95},
                     'folding': {'folds': [{'p': 22, 'n': 23}, {'p': 96, 'n': 72}]}}
@@ -307,7 +318,7 @@ In this scenario, scores are calculated in the MoS manner for each dataset, and 
 
     >>> scores = {'acc': 0.61, 'sens': 0.709, 'spec': 0.461, 'bacc': 0.585}
 
-    >>> result = check_n_datasets_mos_known_folds_mos_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_known_folds_mos(evaluations=evaluations,
                                                             scores=scores,
                                                             eps=1e-3)
     >>> result['inconsistency']
@@ -319,7 +330,7 @@ Again, the details of the analysis are accessible under the ``lp_status`` and ``
 
     >>> scores = {'acc': 0.71, 'sens': 0.709, 'spec': 0.461}
 
-    >>> result = check_n_datasets_mos_known_folds_mos_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_known_folds_mos(evaluations=evaluations,
                                                         scores=scores,
                                                         eps=1e-3)
     >>> result['inconsistency']
@@ -341,14 +352,14 @@ Given a dataset and knowing that k-fold cross-validation was applied with MoS ag
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_1_dataset_unknown_folds_mos_scores
+    >>> from mlscorecheck.check.binary import check_1_dataset_unknown_folds_mos
 
     >>> dataset = {'p': 126, 'n': 131}
     >>> folding = {'n_folds': 2, 'n_repeats': 1}
 
     >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
 
-    >>> result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
+    >>> result = check_1_dataset_unknown_folds_mos(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
@@ -361,7 +372,7 @@ If the balanced accuracy score is adjusted to 0.862, the configuration becomes i
 
     >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.862}
 
-    >>> result = check_1_dataset_unknown_folds_mos_scores(dataset=dataset,
+    >>> result = check_1_dataset_unknown_folds_mos(dataset=dataset,
                                                         folding=folding,
                                                         scores=scores,
                                                         eps=1e-3)
@@ -374,7 +385,7 @@ The following scenario is similar in the sense that MoS aggregation is applied t
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.check import check_n_datasets_mos_unknown_folds_mos_scores
+    >>> from mlscorecheck.check.binary import check_n_datasets_mos_unknown_folds_mos
 
     >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
                     'folding': {'n_folds': 4, 'n_repeats': 1}}
@@ -384,7 +395,7 @@ The following scenario is similar in the sense that MoS aggregation is applied t
 
     >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
 
-    >>> result = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_unknown_folds_mos(evaluations=evaluations,
                                                             scores=scores,
                                                             eps=1e-3)
     >>> result['inconsistency']
@@ -396,8 +407,241 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
 
     >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
 
-    >>> result = check_n_datasets_mos_unknown_folds_mos_scores(evaluations=evaluations,
+    >>> result = check_n_datasets_mos_unknown_folds_mos(evaluations=evaluations,
                                                             scores=scores,
                                                             eps=1e-3)
+    >>> result['inconsistency']
+    # True
+
+Multiclass classification
+=========================
+
+In multiclass classification scenarios single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies. The list of supported scores depends on the experimental setup, when applicable, all 20 scores listed for binary classification are supported, when the test operates in terms of linear programming, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+1 testset, no k-fold, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we suppose there is a multiclass classification testset and the class level scores on the testset are aggregated by micro-averaging. The test is based on exhaustive enumeration, so all 20 performance scores are supported. In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
+
+    >>> testset = {0: 10, 1: 100, 2: 80}
+    >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
+                    'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
+    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
+    >>> results['inconsistency']
+    # False
+
+As the test confirms, the setup is consistent. However, if one of the scores is adjusted a little, for example, accuracy is changed to 0.5258, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.5258
+    >>> results = check_1_testset_no_kfold_micro(testset=testset,
+                                            scores=scores,
+                                            eps=1e-4)
+    >>> results['inconsistency']
+    # True
+
+1 testset, no k-fold, macro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This scenario is similar to the previous one, except the scores are aggregated by macro-averaging. The test is based on linear programming, so only accuracy, sensitivity, specificity and balanced accuracy are supported. In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_macro
+
+    >>> testset = {0: 10, 1: 100, 2: 80}
+    >>> scores = {'acc': 0.6, 'sens': 0.3417, 'spec': 0.6928, 'f1p': 0.3308}
+    >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+    >>> results['inconsistency']
+    # False
+
+As the test confirms, the configuration shows no inconsistency. However, if one of the scores is adjusted a little, for example, accuracy is changed to 0.601, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.601
+    >>> results = check_1_testset_no_kfold_macro(scores=scores, testset=testset, eps=1e-4)
+    >>> results['inconsistency']
+    # True
+
+1 dataset, known k-folds, score of means aggregation, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by micro-averaging, and the fold level results are aggregated in the score of means fashion. The test is based on exhaustive enumeration, therefore, all 20 performance scores are supported.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
+
+    >>> dataset = {0: 86, 1: 96, 2: 59, 3: 105}
+    >>> folding = {'folds': [{0: 43, 1: 48, 2: 30, 3: 52}, {0: 43, 1: 48, 2: 29, 3: 53}]}
+    >>> scores =  {'acc': 0.6272, 'sens': 0.2543, 'spec': 0.7514, 'f1p': 0.2543}
+
+    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the test confirms, the scenario is feasible. However, if one of the scores is adjusted a little, for example, sensitivity is changed to 0.2553, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['sens'] = 0.2553
+    >>> result = check_1_dataset_known_folds_som_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, score of means aggregation, macro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by macro-averaging, and the fold level results are aggregated in the score of means fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_macro
+
+    >>> dataset = {0: 129, 1: 81, 2: 135}
+    >>> folding = {'n_folds': 2, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> scores = {'acc': 0.5662, 'sens': 0.3577, 'spec': 0.6767, 'f1p': 0.3481}
+
+    >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, no inconsistency has been identified. However, if accuracy is changed to 0.6662, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.6662
+    >>> result = check_1_dataset_known_folds_som_macro(dataset=dataset,
+                                                folding=folding,
+                                                scores=scores,
+                                                eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, mean of scores aggregation, micro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by micro-averaging, and the fold level results are aggregated in the mean of scores fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, an artificially generated, consistent scenario is tested:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_micro
+
+    >>> dataset = {0: 66, 1: 178, 2: 151}
+    >>> folding = {'folds': [{0: 33, 1: 89, 2: 76}, {0: 33, 1: 89, 2: 75}]}
+    >>> scores = {'acc': 0.5646, 'sens': 0.3469, 'spec': 0.6734, 'f1p': 0.3469}
+
+    >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, inconsistencies have not been identified. However, if one of the scores, say, accuracy is adjusted to 0.5746, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.5746
+    >>> result = check_1_dataset_known_folds_mos_micro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+1 dataset, known k-folds, mean of scores aggregation, macro-averaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the last multiclass scenario, we assume there is a multiclass classification dataset, which is evaluated in a k-fold cross-validation scenario, the class level scores are calculated by macro-averaging, and the fold level results are aggregated in the mean of scores fashion. The test is based on linear programming, thus, only accuracy, sensitivity, specificity and balanced accuracy are supported.
+
+In the first example, an artificially generated, consistent scenario is tested:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.multiclass import check_1_dataset_known_folds_mos_macro
+
+    >>> dataset = {0: 149, 1: 118, 2: 83, 3: 154}
+    >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
+    >>> scores = {'acc': 0.626, 'sens': 0.2483, 'spec': 0.7509, 'f1p': 0.2469}
+
+    >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, there are no inconsistencies in the configuration. However, if accuracy is changed to 0.656, the configuration becomes infeasible:
+
+.. code-block:: Python
+
+    >>> scores['acc'] = 0.656
+    >>> result = check_1_dataset_known_folds_mos_macro(dataset=dataset,
+                                                        folding=folding,
+                                                        scores=scores,
+                                                        eps=1e-4)
+    >>> result['inconsistency']
+    # True
+
+Regression
+==========
+
+From the point of view of consistency testing, regression is the hardest problem as the predictions can produce any performance scores. The tests implemented in the package allow testing the relation of the *mean squared error* (``mse``), *root mean squared error* (``rmse``), *mean average error* (``mae``) and *r^2 scores* (``r2``).
+
+1 testset, no k-fold
+^^^^^^^^^^^^^^^^^^^^
+
+In this scenario, we assume there is a regression testset, and the performance scores are calculated on the testset.
+
+In the first example, we test an artificially generated, consistent scenario:
+
+.. code-block:: Python
+
+    >>> from mlscorecheck.check.regression import check_1_testset_no_kfold
+
+    >>> var = 0.0831619 # the variance of the target values in the testset
+    >>> n_samples = 100
+    >>> scores =  {'mae': 0.0254, 'r2': 0.9897}
+
+    >>> result = check_1_testset_no_kfold(var=var,
+                                        n_samples=n_samples,
+                                        scores=scores,
+                                        eps=1e-4)
+    >>> result['inconsistency']
+    # False
+
+As the results show, there is no inconsistency detected. However, if the mae score is adjusted slightly to 0.03, the configuration becomes inconsistent:
+
+.. code-block:: Python
+
+    >>> scores['mae'] = 0.03
+    >>> result = check_1_testset_no_kfold(var=var,
+                                        n_samples=n_samples,
+                                        scores=scores,
+                                        eps=1e-4)
     >>> result['inconsistency']
     # True

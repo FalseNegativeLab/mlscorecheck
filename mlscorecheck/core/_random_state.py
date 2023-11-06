@@ -4,9 +4,10 @@ This module implements some functionalities related to random states
 
 import numpy as np
 
-__all__ = ['init_random_state']
+__all__ = ["init_random_state"]
 
-def init_random_state(random_state = None) -> np.random.RandomState:
+
+def init_random_state(random_state=None) -> np.random.RandomState:
     """
     Initializes a random state
 

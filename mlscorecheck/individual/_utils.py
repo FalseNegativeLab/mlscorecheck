@@ -7,20 +7,24 @@ import itertools
 import numpy as np
 
 from ._pair_solutions import solution_specifications
-from ..scores import (score_functions_without_complements,
-                            score_functions_standardized_without_complements,
-                            score_function_aliases,
-                            score_function_complements,
-                            score_specifications)
+from ..scores import (
+    score_functions_without_complements,
+    score_functions_standardized_without_complements,
+    score_function_aliases,
+    score_function_complements,
+    score_specifications,
+)
 from ._interval import Interval, IntervalUnion
 from ..core import NUMERICAL_TOLERANCE
 
-__all__ = ['create_intervals',
-            'create_problems_2',
-            'resolve_aliases_and_complements',
-            'is_less_than_zero',
-            'is_zero',
-            'unify_results']
+__all__ = [
+    "create_intervals",
+    "create_problems_2",
+    "resolve_aliases_and_complements",
+    "is_less_than_zero",
+    "is_zero",
+    "unify_results",
+]
 
 solutions = solution_specifications
 score_descriptors = score_specifications
@@ -29,6 +33,7 @@ aliases = score_function_aliases
 complementers = score_function_complements
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
+
 
 def resolve_aliases_and_complements(scores: dict) -> dict:
     """
@@ -56,9 +61,10 @@ def resolve_aliases_and_complements(scores: dict) -> dict:
 
     return complemented
 
-def create_intervals(scores: dict,
-                        eps,
-                        numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def create_intervals(
+    scores: dict, eps, numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Turns the scores into intervals using the uncertainty specifications,
     the interval for a score will be (score - eps, score + eps).
@@ -83,21 +89,27 @@ def create_intervals(scores: dict,
         eps = {key: eps for key in scores}
 
     # creating the intervals
-    intervals = {key: Interval(val - eps[key] - numerical_tolerance,
-                                val + eps[key] + numerical_tolerance)
-                    for key, val in scores.items()}
+    intervals = {
+        key: Interval(
+            val - eps[key] - numerical_tolerance, val + eps[key] + numerical_tolerance
+        )
+        for key, val in scores.items()
+    }
 
     # trimming the intervals into the domains of the scores
     # for example, to prevent acc - eps < 0 implying a negative subinterval for
     # accuracy
     for key in intervals:
         if key in score_descriptors:
-            lower_bound = score_descriptors[key].get('lower_bound', -np.inf)
-            upper_bound = score_descriptors[key].get('upper_bound', np.inf)
+            lower_bound = score_descriptors[key].get("lower_bound", -np.inf)
+            upper_bound = score_descriptors[key].get("upper_bound", np.inf)
 
-            intervals[key] = intervals[key].intersection(Interval(lower_bound, upper_bound))
+            intervals[key] = intervals[key].intersection(
+                Interval(lower_bound, upper_bound)
+            )
 
     return intervals
+
 
 def create_problems_2(scores: list) -> list:
     """
@@ -114,11 +126,12 @@ def create_problems_2(scores: list) -> list:
     bases = list(itertools.combinations(scores, 2))
     problems = []
     for base0, base1 in bases:
-        problems.extend((base0, base1, score)
-                        for score in scores
-                        if score not in {base0, base1})
+        problems.extend(
+            (base0, base1, score) for score in scores if score not in {base0, base1}
+        )
 
     return problems
+
 
 def is_less_than_zero(value) -> bool:
     """
@@ -136,6 +149,7 @@ def is_less_than_zero(value) -> bool:
         return value.upper_bound < 0
     return all(interval.upper_bound < 0 for interval in value.intervals)
 
+
 def is_zero(value, tolerance: float = 1e-8) -> bool:
     """
     Checks if the parameter is zero
@@ -151,6 +165,7 @@ def is_zero(value, tolerance: float = 1e-8) -> bool:
         return abs(value) < tolerance
     return value.contains(0.0)
 
+
 def unify_results(value_list):
     """
     Unifies the list of solutions
@@ -161,6 +176,7 @@ def unify_results(value_list):
     Returns:
         obj (list|IntervalUnion): the unified result
     """
+
     if len(value_list) == 0:
         return None
     if all(value is None for value in value_list):
@@ -177,4 +193,6 @@ def unify_results(value_list):
         elif interval is not None:
             intervals.append(Interval(interval, interval))
 
-    return IntervalUnion(intervals)
+    intu = IntervalUnion(intervals)
+
+    return intu

@@ -12,7 +12,7 @@ The first function enables the testing of performance scores reported for specif
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_drive_vessel_image
+    >>> from mlscorecheck.check.bundles.retina import check_drive_vessel_image
     >>> scores = {'acc': 0.9633, 'sens': 0.7406, 'spec': 0.9849}
     >>> identifier = '01'
     >>> k = 4
@@ -29,7 +29,7 @@ A similar functionality is provided for the aggregated scores calculated on the 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_drive_vessel_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_drive_vessel_aggregated
     >>> scores = {'acc': 0.9494, 'sens': 0.7450, 'spec': 0.9793}
     >>> k = 4
     >>> results = check_drive_vessel_aggregated(scores=scores,
@@ -56,7 +56,7 @@ In the first example, we test the consistency of scores provided for the image '
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_stare_vessel_image
+    >>> from mlscorecheck.check.bundles.retina import check_stare_vessel_image
     >>> img_identifier = 'im0235'
     >>> scores = {'acc': 0.4699, 'npv': 0.8993, 'f1p': 0.134}
     >>> results = check_stare_vessel_image(image_identifier=img_identifier,
@@ -70,7 +70,7 @@ In the next example, we illustrate the consistency testing of performance scores
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_stare_vessel_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_stare_vessel_aggregated
     >>> scores = {'acc': 0.4964, 'sens': 0.5793, 'spec': 0.4871, 'bacc': 0.5332}
     >>> results = check_stare_vessel_aggregated(imageset='all',
                                                 annotator='ah',
@@ -90,7 +90,7 @@ In the first example, we illustrate the consistency testing of scores reported f
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_hrf_vessel_image
+    >>> from mlscorecheck.check.bundles.retina import check_hrf_vessel_image
     >>> scores = {'acc': 0.5562, 'sens': 0.5049, 'spec': 0.5621}
     >>> identifier = '13_h'
     >>> k = 4
@@ -106,7 +106,7 @@ In the next example, we illustrate the consistency testing of scores aggregated 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_hrf_vessel_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_hrf_vessel_aggregated
         >>> scores = {'acc': 0.4841, 'sens': 0.5665, 'spec': 0.475}
         >>> k = 4
         >>> results = check_hrf_vessel_aggregated(scores=scores,
@@ -130,7 +130,7 @@ In the first example, we illustrate the consistency testing of scores reported f
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_chasedb1_vessel_image
+    >>> from mlscorecheck.check.bundles.retina import check_chasedb1_vessel_image
     >>> img_identifier = '11R'
     >>> scores = {'acc': 0.4457, 'sens': 0.0051, 'spec': 0.4706}
     >>> results = check_chasedb1_vessel_image(image_identifier=img_identifier,
@@ -146,7 +146,7 @@ The next example illustrates the consistency testing of scores aggregated over a
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_chasedb1_vessel_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_chasedb1_vessel_aggregated
     >>> scores = {'acc': 0.5063, 'sens': 0.4147, 'spec': 0.5126}
     >>> k = 4
     >>> results = check_chasedb1_vessel_aggregated(imageset='all',
@@ -176,7 +176,7 @@ In the following example we illustrate the evaluation of scores aggregated over 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_diaretdb0_class
+    >>> from mlscorecheck.check.bundles.retina import check_diaretdb0_class
     >>> scores = {'acc': 0.4271, 'sens': 0.406, 'spec': 0.4765}
     >>> results = check_diaretdb0_class(subset='test',
                                         batch='all',
@@ -199,7 +199,7 @@ In the first example, we illustrate the consistency testing of image labeling, t
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_diaretdb1_class
+    >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_class
     >>> scores = {'acc': 0.3115, 'sens': 1.0, 'spec': 0.0455, 'f1p': 0.4474}
     >>> results = check_diaretdb1_class(subset='test',
                             class_name=['hardexudates', 'softexudates'],
@@ -215,7 +215,7 @@ In the next example, we test if the reported scores could be yielded from the se
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_diaretdb1_segmentation_image
+    >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_segmentation_image
     >>> scores = {'acc': 0.5753, 'sens': 0.0503, 'spec': 0.6187, 'f1p': 0.0178}
     >>> results = check_diaretdb1_segmentation_image(image_identifier='005',
                             class_name=['hardexudates', 'softexudates'],
@@ -231,7 +231,7 @@ In the last example, we illustrate the consistency testing of scores aggregated 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_diaretdb1_segmentation_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_segmentation_aggregated
     >>> scores = {'acc': 0.7143, 'sens': 0.3775, 'spec': 0.7244}
     >>> results = check_diaretdb1_segmentation_aggregated(subset='test',
                             class_name='hardexudates',
@@ -258,7 +258,7 @@ In the first example, we illustrate the consistency testing of image level segme
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_drishti_gs_segmentation_image
+    >>> from mlscorecheck.check.bundles.retina import check_drishti_gs_segmentation_image
     >>> scores = {'acc': 0.5966, 'sens': 0.3, 'spec': 0.6067, 'f1p': 0.0468}
     >>> results = check_drishti_gs_segmentation_image(image_identifier='053',
                                 confidence=0.75,
@@ -274,7 +274,7 @@ In the next example, we illustrate the consistency testing of scores aggregated 
 
 .. code-block:: Python
 
-    >>> from mlscorecheck.bundles.retina import check_drishti_gs_segmentation_aggregated
+    >>> from mlscorecheck.check.bundles.retina import check_drishti_gs_segmentation_aggregated
     >>> scores = {'acc': 0.4767, 'sens': 0.4845, 'spec': 0.4765, 'f1p': 0.0512}
     >>> results = check_drishti_gs_segmentation_aggregated(subset='test',
                                 confidence=0.75,

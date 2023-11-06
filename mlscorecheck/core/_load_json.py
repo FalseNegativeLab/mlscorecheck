@@ -7,7 +7,8 @@ import json
 
 from importlib.resources import files
 
-__all__ = ['load_json']
+__all__ = ["load_json"]
+
 
 def load_json(directory: str, file: str) -> dict:
     """
@@ -20,6 +21,6 @@ def load_json(directory: str, file: str) -> dict:
     Returns:
         obj: the loaded object
     """
-    sio = files('mlscorecheck').joinpath(os.path.join(directory, file)).read_text()
+    sio = files("mlscorecheck").joinpath(os.path.join(directory, file)).read_text()
 
     return json.loads(sio)

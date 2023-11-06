@@ -4,11 +4,14 @@ This module contains the general numerical tolerance
 
 import numpy as np
 
-__all__ = ['NUMERICAL_TOLERANCE',
-            'check_uncertainty_and_tolerance',
-            'update_uncertainty']
+__all__ = [
+    "NUMERICAL_TOLERANCE",
+    "check_uncertainty_and_tolerance",
+    "update_uncertainty",
+]
 
 NUMERICAL_TOLERANCE = 1e-6
+
 
 def check_uncertainty_and_tolerance(eps: float, numerical_tolerance: float):
     """
@@ -23,9 +26,12 @@ def check_uncertainty_and_tolerance(eps: float, numerical_tolerance: float):
         greater than the numerical tolerance
     """
     eps_min = np.min(list(eps.values())) if isinstance(eps, dict) else eps
-    if eps_min <= 10*numerical_tolerance:
-        raise ValueError('The numerical tolerance is comparable to the numerical '\
-                        'uncertainty. Please lower the numerical tolerance.')
+    if eps_min <= 10 * numerical_tolerance:
+        raise ValueError(
+            "The numerical tolerance is comparable to the numerical "
+            "uncertainty. Please lower the numerical tolerance."
+        )
+
 
 def update_uncertainty(eps: float, numerical_tolerance: float):
     """

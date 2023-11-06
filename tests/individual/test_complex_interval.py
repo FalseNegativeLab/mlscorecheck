@@ -4,6 +4,7 @@ Testing the complex interval
 
 from mlscorecheck.individual import Interval, IntervalUnion, ComplexInterval
 
+
 def test_arithmetics():
     """
     Testing the arithmetics
@@ -33,12 +34,14 @@ def test_arithmetics():
     assert (5 - ci0).real == 5 - int0
     assert (ci0 - 5).real == int0 - 5
     assert (5 * ci0).real == 5 * int0
-    assert (5 / ci0).real == (ComplexInterval(Interval(5, 5), Interval(0, 0)) / ci0).real
+    assert (5 / ci0).real == (
+        ComplexInterval(Interval(5, 5), Interval(0, 0)) / ci0
+    ).real
     assert (ci0 / 5).real == ci0.real / 5
 
     assert ci0 != int0
     assert ci0 + ci1 == ci0 + ci1
-    assert not ci0 + ci1 != ci0 + ci1 # pylint: disable = unneeded-not
+    assert not ci0 + ci1 != ci0 + ci1  # pylint: disable = unneeded-not
 
     assert -ci0 == (-1) * ci0
 

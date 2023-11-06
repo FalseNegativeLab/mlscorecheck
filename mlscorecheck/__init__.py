@@ -8,5 +8,4 @@ from . import experiments
 from . import symbolic
 from . import individual
 from . import aggregated
-from . import bundles
 from ._version import *

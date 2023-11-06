@@ -8,13 +8,12 @@ import pulp as pl
 
 from mlscorecheck.aggregated import compare_scores, Experiment
 
-__all__ = ['evaluate_timeout']
+__all__ = ["evaluate_timeout"]
 
-def evaluate_timeout(result: pl.LpProblem,
-                        problem: Experiment,
-                        scores: dict,
-                        eps,
-                        score_subset: list):
+
+def evaluate_timeout(
+    result: pl.LpProblem, problem: Experiment, scores: dict, eps, score_subset: list
+):
     """
     Evaluate the stopped or succeeded tests
 
@@ -29,6 +28,6 @@ def evaluate_timeout(result: pl.LpProblem,
         populated = problem.populate(result)
 
         assert compare_scores(scores, populated.calculate_scores(), eps, score_subset)
-        assert populated.check_bounds()['bounds_flag'] is True
+        assert populated.check_bounds()["bounds_flag"] is True
     elif result.status == 0:
-        warnings.warn('test timed out')
+        warnings.warn("test timed out")
