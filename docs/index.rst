@@ -20,7 +20,6 @@ mlscorecheck: testing the consistency of machine learning performance scores
     :caption: Consistency testing
 
     01a_requirements
-    01b_specifying_setup
     01c_consistency_checking
 
 .. toctree::

@@ -1,17 +1,5 @@
-Testing the consistency of performance scores
----------------------------------------------
-
-Numerous experimental setups are supported by the package. In this section we go through them one by one giving some examples of possible use cases.
-
-We emphasize again, that the tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
-
-A note on the *Score of Means* and *Mean of Scores* aggregations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
-
 Binary classification
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 Depending on the experimental setup, the consistency tests developed for binary classification problems support a variety of performance scores: when aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported; when cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
 
@@ -426,7 +414,7 @@ The setup is consistent. However, if the balanced accuracy is changed to 0.9, th
     # True
 
 Multiclass classification
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 In multiclass classification scenarios single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies. The list of supported scores depends on the experimental setup, when applicable, all 20 scores listed for binary classification are supported, when the test operates in terms of linear programming, only accuracy, sensitivity, specificity and balanced accuracy are supported.
 
@@ -620,7 +608,7 @@ As the results show, there are no inconsistencies in the configuration. However,
     # True
 
 Regression
-~~~~~~~~~~
+==========
 
 From the point of view of consistency testing, regression is the hardest problem as the predictions can produce any performance scores. The tests implemented in the package allow testing the relation of the *mean squared error* (``mse``), *root mean squared error* (``rmse``), *mean average error* (``mae``) and *r^2 scores* (``r2``).
 

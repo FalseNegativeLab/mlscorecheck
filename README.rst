@@ -125,8 +125,11 @@ For further information, see
 * ReadTheDocs full documentation: https://mlscorecheck.readthedocs.io/en/latest/
 * The preprint: https://arxiv.org/abs/2310.12527
 
-The requirements of the consistency tests
-=========================================
+Preliminaries
+=============
+
+Requirements
+------------
 
 In general, there are three inputs to the consistency testing functions:
 
@@ -209,6 +212,17 @@ A note on the *Score of Means* and *Mean of Scores* aggregations
 ----------------------------------------------------------------
 
 When it comes to the aggregation of scores (either over multiple folds, multiple datasets or both), there are two approaches in the literature. In the *Mean of Scores* (MoS) scenario, the scores are calculated for each fold/dataset, and the mean of the scores is determined as the score characterizing the entire experiment. In the *Score of Means* (SoM) approach, first the overall confusion matrix is determined, and then the scores are calculated based on these total figures. The advantage of the MoS approach over SoM is that it is possible to estimate the standard deviation of the scores, however, its disadvantage is that the average of non-linear scores might be distorted and some score might become undefined on when the folds are extremely small (typically in the case of small and imbalanced data).
+
+The ``mlscorecheck`` package supports both approaches, however, by design, to increase awareness, different functions are provided for the different approaches, usually indicated by the '_mos' or '_som' suffixes in the function names.
+
+The types of tests
+------------------
+
+The consistency tests can be grouped to three classes, and it is the problem and the experimental setup determining which internal implementation is applicable:
+
+- Exhaustive enumeration: primarily applied for binary and multiclass classification, when the scores are calculated from one single confusion matrix. The calculations are speeded up by interval computing techniques. These tests support all 20 performance scores of binary classification.
+- Linear programming: when averaging is involved in the calculation of performance scores, due to the non-linearity of most scores, the operation cannot be simplified and the extremely large parameter space prevents exhaustive enumeration. In these scenarios, linear integer programming is exploited. These tests usually support only the accuracy, sensitivity, specificity and balanced accuracy scores.
+- Checking the relation of scores: mainly used for regression, when the  domain of the performance scores is continuous, preventing inference from the discrete values.
 
 Binary classification
 =====================
