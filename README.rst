@@ -28,8 +28,8 @@
 .. _Gitter: https://app.gitter.im/#/room/!AmkvUevcfkobbwcNWS:gitter.im
 
 
-mlscorecheck: testing the consistency of binary classification performance scores
-*********************************************************************************
+mlscorecheck: testing the consistency of machine learning performance scores
+****************************************************************************
 
 .. contents::
     :depth: 3
@@ -40,9 +40,9 @@ Getting started
 The purpose
 -----------
 
-Performance scores for binary classification are reported on a dataset and look suspicious (exceptionally high scores possibly due to typo, uncommon evaluation methodology, data leakage in preparation, incorrect use of statistics, etc.). With the tools implemented in the package ``mlscorecheck``, one can test if the reported performance scores are consistent with each other and the assumptions on the experimental setup up to the numerical uncertainty due to rounding/truncation/ceiling.
+Performance scores of a machine learning technique (binary/multiclass classification, regression) are reported on a dataset and look suspicious (exceptionally high scores possibly due to a typo, uncommon evaluation methodology, data leakage in preparation, incorrect use of statistics, etc.). With the tools implemented in the package ``mlscorecheck``, one can test if the reported performance scores are consistent with each other and the assumptions on the experimental setup up.
 
-Testing is as simple as the following example shows: the tested scores are inconsistent with a testset of 100 positive and 200 negative entries.
+Testing is as simple as the following example illustrated. Suppose the accuracy, sensitivity and specificity scores are reported for a binary classification testset consisting of p=100 and n=200 samples. All this information is supplied to the suitable test function and the result shows that that inconsistencies were identified: the scores could not be calculated from the confusion matrix of the testset:
 
 .. code-block:: Python
 
@@ -115,46 +115,22 @@ Alternatively, one can clone the latest version of the package from GitHub and i
 Introduction
 ============
 
-Binary classification is one of the most fundamental tasks in machine learning. The evaluation of the performance of binary classification techniques, whether for original theoretical advancements or applications in specific fields, relies heavily on performance scores (https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). Although reported performance scores are employed as primary indicators of research value, they often suffer from methodological problems, typos, and insufficient descriptions of experimental settings. These issues contribute to the replication crisis (https://en.wikipedia.org/wiki/Replication_crisis) and ultimately entire fields of research ([RV]_, [EHG]_). Even systematic reviews can suffer from using incomparable performance scores for ranking research papers [RV]_.
+The evaluation of the performance of machine learning techniques, whether for original theoretical advancements or applications in specific fields, relies heavily on performance scores (https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). Although reported performance scores are employed as primary indicators of research value, they often suffer from methodological problems, typos, and insufficient descriptions of experimental settings. These issues contribute to the replication crisis (https://en.wikipedia.org/wiki/Replication_crisis) and ultimately entire fields of research ([RV]_, [EHG]_). Even systematic reviews can suffer from using incomparable performance scores for ranking research papers [RV]_.
 
-The majority of performance scores are calculated from the binary confusion matrix, or multiple confusion matrices aggregated across folds and/or datasets. For many commonly used experimental setups one can develop numerical techniques to test if there exists any confusion matrix (or matrices), compatible with the experiment and leading to the reported performance scores. This package implements such consistency tests for some common scenarios. We highlight that the developed tests cannot guarantee that the scores are surely calculated by some standards or a presumed evaluation protocol. However, *if the tests fail and inconsistencies are detected, it means that the scores are not calculated by the presumed protocols with certainty*. In this sense, the specificity of the test is 1.0, the inconsistencies being detected are inevitable.
+In practice, the performance scores cannot take any values independently, the scores reported for the same experiment are constrained by the experimental setup and need to express some internal consistency. For many commonly used experimental setups it is possible to develop numerical techniques to test if the scores could be the outcome of the presumed experiment on the presumed dataset. This package implements such consistency tests for some common experimental setups. We highlight that the developed tests cannot guarantee that the scores are surely calculated by some standards or a presumed evaluation protocol. However, *if the tests fail and inconsistencies are detected, it means that the scores are not calculated by the presumed protocols with certainty*. In this sense, the specificity of the test is 1.0, the inconsistencies being detected are inevitable.
 
 For further information, see
 
 * ReadTheDocs full documentation: https://mlscorecheck.readthedocs.io/en/latest/
 * The preprint: https://arxiv.org/abs/2310.12527
 
-Binary classification
-=====================
+The requirements of the consistency tests
+=========================================
 
 In general, there are three inputs to the consistency testing functions:
 
 * **the specification of the experiment**;
-* **the collection of available (reported) performance scores**: when aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported; when cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
-
-  * accuracy (``acc``),
-  * sensitivity (``sens``),
-  * specificity (``spec``),
-  * positive predictive value (``ppv``),
-  * negative predictive value (``npv``),
-  * balanced accuracy (``bacc``),
-  * f1(-positive) score (``f1``),
-  * f1-negative score (``f1n``),
-  * f-beta positive (``fbp``),
-  * f-beta negative (``fbn``),
-  * Fowlkes-Mallows index (``fm``),
-  * unified performance measure (``upm``),
-  * geometric mean (``gm``),
-  * markedness (``mk``),
-  * positive likelihood ratio (``lrp``),
-  * negative likelihood ratio (``lrn``),
-  * Matthews correlation coefficient (``mcc``),
-  * bookmaker informedness (``bm``),
-  * prevalence threshold (``pt``),
-  * diagnostic odds ratio (``dor``),
-  * Jaccard index (``ji``),
-  * Cohen's kappa (``kappa``);
-
+* **the collection of available (reported) performance scores**;
 * **the estimated numerical uncertainty**: the performance scores are usually shared with some finite precision, being rounded/ceiled/floored to ``k`` decimal places. The numerical uncertainty estimates the maximum difference of the reported score and its true value. For example, having the accuracy score 0.9489 published (4 decimal places), one can suppose that it is rounded, therefore, the numerical uncertainty is 0.00005 (10^(-4)/2). To be more conservative, one can assume that the score was ceiled or floored. In this case, the numerical uncertainty becomes 0.0001 (10^(-4)).
 
 Specification of the experimental setup
@@ -228,10 +204,37 @@ A dataset and a folding constitute an *evaluation*, and many of the test functio
                     "folding": {"n_folds": 5, "n_repeats": 1,
                                 "strategy": "stratified_sklearn"}}
 
-The output of the tests
------------------------
+Binary classification
+=====================
+
+Depending on the experimental setup, the consistency tests developed for binary classification problems support a variety of performance scores: when aggregated performance scores (averages on folds or datasets) are reported, only accuracy (``acc``), sensitivity (``sens``), specificity (``spec``) and balanced accuracy (``bacc``) are supported; when cross-validation is not involved in the experimental setup, the list of supported scores reads as follows (with abbreviations in parentheses):
+
+  * accuracy (``acc``),
+  * sensitivity (``sens``),
+  * specificity (``spec``),
+  * positive predictive value (``ppv``),
+  * negative predictive value (``npv``),
+  * balanced accuracy (``bacc``),
+  * f1(-positive) score (``f1``),
+  * f1-negative score (``f1n``),
+  * f-beta positive (``fbp``),
+  * f-beta negative (``fbn``),
+  * Fowlkes-Mallows index (``fm``),
+  * unified performance measure (``upm``),
+  * geometric mean (``gm``),
+  * markedness (``mk``),
+  * positive likelihood ratio (``lrp``),
+  * negative likelihood ratio (``lrn``),
+  * Matthews correlation coefficient (``mcc``),
+  * bookmaker informedness (``bm``),
+  * prevalence threshold (``pt``),
+  * diagnostic odds ratio (``dor``),
+  * Jaccard index (``ji``),
+  * Cohen's kappa (``kappa``)
 
 The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
+
+In the rest of the section, we illustrate some of the test functions, for further details and the full list of supported scenarios, see https://mlscorecheck.readthedocs.io/en/latest/.
 
 A note on the *Score of Means* and *Mean of Scores* aggregations
 ----------------------------------------------------------------
@@ -521,7 +524,7 @@ The biggest challenge with aggregated scores is that the ways of aggregation at 
 Multiclass classification
 =========================
 
-In multiclass classification scenarios only single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies.
+In multiclass classification scenarios single testsets and k-fold cross-validation on a single dataset are supported with both the micro-averaging and macro-averaging aggregation strategies. The list of supported scores depends on the experimental setup, when applicable, all 20 scores listed for binary classification are supported, when the test operates in terms of linear programming, only accuracy, sensitivity, specificity and balanced accuracy are supported.
 
 A note on micro and macro-averaging
 -----------------------------------
