@@ -11,7 +11,6 @@ from mlscorecheck.individual import (
 )
 from mlscorecheck.scores import calculate_multiclass_scores
 
-
 @pytest.mark.parametrize("random_seed", list(range(10)))
 def test_consistent_configuration(random_seed):
     """
