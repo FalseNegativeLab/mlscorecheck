@@ -11,6 +11,7 @@ from mlscorecheck.individual import (
 )
 from mlscorecheck.scores import calculate_multiclass_scores
 
+from ._evaluate import evaluate_timeout
 
 @pytest.mark.parametrize("random_seed", list(range(10)))
 def test_consistent_configuration(random_seed):
@@ -64,4 +65,4 @@ def test_inconsistent_configuration(random_seed):
         testset=dataset, scores=scores, eps=1e-4, timeout=2
     )
 
-    assert result["inconsistency"] or result["lp_status"] == "timeout"
+    evaluate_timeout(result, inconsistent=True)

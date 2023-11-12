@@ -7,7 +7,6 @@ import pytest
 from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
 from mlscorecheck.aggregated import generate_dataset_folding_multiclass
 
-
 @pytest.mark.parametrize("random_seed", range(20))
 def test_consistent(random_seed: int):
     """
@@ -53,4 +52,5 @@ def test_inconsistent(random_seed: int):
         dataset=dataset, folding=folding, scores=scores, eps=1e-4
     )
 
-    assert result["inconsistency"] or result["lp_status"] == "timeout"
+    assert result["inconsistency"]
+
