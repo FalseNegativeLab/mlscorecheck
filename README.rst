@@ -62,6 +62,7 @@ Latest news
 * the 1.0.1 version of the package is released;
 * the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 * the full documentation is available at: https://mlscorecheck.readthedocs.io/en/latest/
+* tutorial on Medium.com: https://medium.com/p/e1baaba57610
 * 10 test bundles including retina image processing datasets, preterm delivery prediction from electrohysterograms and skin lesion classification has been added;
 * multiclass and regression tests added.
 
@@ -72,10 +73,13 @@ If you use the package, please consider citing the following paper:
 
 .. code-block:: BibTex
 
-  @article{mlscorecheck,
-    author={Attila Fazekas and Gy\"orgy Kov\'acs},
-    title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
-    year={2023}
+  @misc{fazekas2023testing,
+      title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems}, 
+      author={Attila Fazekas and György Kovács},
+      year={2023},
+      eprint={2310.12527},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
   }
 
 Installation
