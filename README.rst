@@ -114,7 +114,7 @@ Alternatively, one can clone the latest version of the package from GitHub and i
 
 .. code-block:: bash
 
-    git clone git@github.com:gykovacs/mlscorecheck.git
+    git clone git@github.com:FalseNegativeLab/mlscorecheck.git
     cd mlscorecheck
     pip install .
 
