@@ -89,7 +89,7 @@ For develompent purposes, one can clone the source code from the repository as
 
 .. code-block:: bash
 
-    > git clone git@github.com:gykovacs/mlscorecheck.git
+    > git clone git@github.com:FalseNegativeLab/mlscorecheck.git
 
 and install the source code into the actual virtual environment as
 
