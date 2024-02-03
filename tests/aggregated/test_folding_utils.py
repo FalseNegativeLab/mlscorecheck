@@ -21,6 +21,9 @@ from mlscorecheck.aggregated import (
     multiclass_stratified_folds,
     transform_multiclass_fold_to_binary,
     create_folds_multiclass,
+    multiclass_fold_partitioning_generator_22,
+    multiclass_fold_partitioning_generator_2n,
+    multiclass_fold_partitioning_generator_kn
 )
 
 
@@ -411,3 +414,33 @@ def test_multiclass_create_folds_exception():
         create_folds_multiclass(
             dataset={"p": 5, "n": 7}, folding={"folds": "dummy", "n_repeats": 5}
         )
+
+def test_multiclass_fold_partitioning_generator_22():
+    """
+    Smoke-test for the multiclass fold partitioning generator (22)
+    """
+
+    count = 0
+    for _  in multiclass_fold_partitioning_generator_22(10, 10, 10):
+        count += 1
+    assert count > 0
+
+def test_multiclass_fold_partitioning_generator_2n():
+    """
+    Smoke-test for the multiclass fold partitioning generator (2n)
+    """
+
+    count = 0
+    for _ in multiclass_fold_partitioning_generator_2n(10, 10, [10, 6, 4]):
+        count += 1
+    assert count > 0
+
+def test_multiclass_fold_partitioning_generator_kn():
+    """
+    Smoke-test for the multiclass fold partitioning generator (kn)
+    """
+
+    count = 0
+    for _ in multiclass_fold_partitioning_generator_kn([10, 7, 3], [10, 6, 4]):
+        count += 1
+    assert count > 0

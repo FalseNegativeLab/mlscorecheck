@@ -5,6 +5,8 @@ This module implements the functionalities for enumerating fold configurations
 import copy
 import itertools
 
+import numpy as np
+
 from ..core import logger
 from ..experiments import dataset_statistics
 from ._utils import random_identifier
@@ -18,6 +20,9 @@ __all__ = [
     "repeated_kfolds_generator",
     "experiment_kfolds_generator",
     "_check_specification_and_determine_p_n",
+    "multiclass_fold_partitioning_generator_22",
+    "multiclass_fold_partitioning_generator_2n",
+    "multiclass_fold_partitioning_generator_kn"
 ]
 
 
@@ -364,3 +369,71 @@ def experiment_kfolds_generator(experiment: dict, available_scores: list):
             "dataset_score_bounds": experiment.get("dataset_score_bounds"),
             "aggregation": experiment["aggregation"],
         }
+
+def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int) -> dict:
+    """
+    Generates the configurations for two folds of cardinalities n0 and n1 and two
+    classes of cardinalities c0 and n0 + n1 - c0
+
+    Args:
+        n0 (int): the cardinality of fold 0
+        n1 (int): the cardinality of fold 1
+        c0 (int): the cardinality of class 0
+
+    Yields:
+        dict(int, tuple(int,int)): a configuration
+    """
+    upper_bound = min(int(np.floor(c0 / ((n0 == n1) + 1))), n0)
+    lower_bound = max(c0 - n1, 0)
+
+    for c_00 in range(lower_bound, upper_bound + 1):
+        yield {
+            0: (c_00, n0 - c_00),
+            1: (c0 - c_00, n1 - c0 + c_00)
+        }
+
+def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list) -> dict:
+    """
+    Generates the configurations for two folds of cardinalities n0 and n1 and a list
+    of classes with sizes in cs
+
+    Args:
+        n0 (int): the cardinality of fold 0
+        n1 (int): the cardinality of fold 1
+        cs (list): the list of class cardinalities
+
+    Yields:
+        dict(int, tuple): a configuration
+    """
+    for part in multiclass_fold_partitioning_generator_22(n0, n1, cs[0]):
+        if len(cs) == 2:
+            yield part
+        else:
+            for part_deep in multiclass_fold_partitioning_generator_2n(part[0][1], part[1][1], cs[1:]):
+                yield {
+                    0: (part[0][0], *(part_deep[0])),
+                    1: (part[1][0], *(part_deep[1]))
+                }
+
+def multiclass_fold_partitioning_generator_kn(ns: list, cs: list) -> dict:
+    """
+    Generates the configurations for a list of folds of sizes ns and a list
+    of classes with sizes in cs
+
+    Args:
+        ns (list): the list of fold cardinalities
+        cs (list): the list of class cardinalities
+
+    Yields:
+        dict(int, tuple): a configuration
+    """
+    for part in multiclass_fold_partitioning_generator_2n(ns[0], sum(ns[1:]), cs):
+        if len(ns) == 2:
+            yield part
+        else:
+            for part_deep in multiclass_fold_partitioning_generator_kn(ns[1:], part[1]):
+
+                if ns[0] == ns[1] and part[0] > part_deep[0]:
+                    continue
+
+                yield {0: part[0]} | {idx + 1: ptmp for idx, ptmp in part_deep.items()}
