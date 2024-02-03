@@ -444,3 +444,8 @@ def test_multiclass_fold_partitioning_generator_kn():
     for _ in multiclass_fold_partitioning_generator_kn([10, 7, 3], [10, 6, 4]):
         count += 1
     assert count > 0
+
+    count = 0
+    for _ in multiclass_fold_partitioning_generator_kn([10, 10, 10], [10, 10, 10]):
+        count += 1
+    assert count > 0
