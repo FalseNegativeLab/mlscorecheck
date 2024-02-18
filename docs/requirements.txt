@@ -1,2 +1,6 @@
+numpy
+pandas
+pulp
+scikit-learn
 sphinx
 sphinx-rtd-theme
