@@ -24,7 +24,18 @@ Depending on the experimental setup, the consistency tests developed for binary 
   * prevalence threshold (``pt``),
   * diagnostic odds ratio (``dor``),
   * Jaccard index (``ji``),
-  * Cohen's kappa (``kappa``)
+  * Cohen's kappa (``kappa``).
+
+We note that synonyms and full names are also supported, for example:
+
+  * alternatives to ``sens`` are ``sensitivity``, ``true_positive_rate``, ``tpr`` and ``recall``,
+  * alternatives to ``spec`` are ``specificity``, ``true_negative_rate``, ``tnr`` and ``selectivity``,
+  * alternatives to ``ppv`` are ``positive_predictive_value`` and ``precision``.
+
+Similarly, complements are supported as:
+
+  * one can specify ``false_positive_rate`` or ``fpr`` as a complement of ``spec``,
+  * and similarly, ``false_negative_rate`` or ``fnr`` as a complement of ``sens``.
 
 The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 

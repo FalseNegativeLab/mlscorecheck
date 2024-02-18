@@ -207,7 +207,10 @@ def test_others():
     """
 
     experiment, scores = generate_experiment(
-        aggregation="som", evaluation_params={"aggregation": "mos"}, return_scores=True
+        aggregation="som",
+        evaluation_params={"aggregation": "mos"},
+        return_scores=True,
+        random_state=5
     )
     with pytest.raises(ValueError):
         check_aggregated_scores(experiment=experiment, scores=scores, eps=1e-4)

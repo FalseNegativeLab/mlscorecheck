@@ -6,3 +6,5 @@ ignored-modules = numpy
 
 # Minimum lines number of a similarity.
 min-similarity-lines=30
+
+disable = too-many-arguments

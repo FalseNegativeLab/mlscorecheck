@@ -112,9 +112,12 @@ def check_chasedb1_vessel_aggregated_som(imageset,
         scores (dict): the scores to check ('acc', 'sens', 'spec',
                         'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                         'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
-                        'bm', 'pt', 'dor', 'ji', 'kappa'), when using
-                        f-beta positive or f-beta negative, also set
-                        'beta_positive' and 'beta_negative'.
+                        'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
+                                positive or f-beta negative, also set 'beta_positive' and
+                                'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -243,9 +246,12 @@ def check_chasedb1_vessel_image(image_identifier: str,
         scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
-                                    'bm', 'pt', 'dor', 'ji', 'kappa'), when using
-                                    f-beta positive or f-beta negative, also set
-                                    'beta_positive' and 'beta_negative'.
+                                    'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
+                                positive or f-beta negative, also set 'beta_positive' and
+                                'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is

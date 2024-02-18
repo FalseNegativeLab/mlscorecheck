@@ -5,7 +5,7 @@ in a kfold scenario on one single dataset.
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...individual import check_scores_tptn_pairs
+from ...individual import check_scores_tptn_pairs, translate_metadata
 from ...aggregated import Experiment
 
 __all__ = ["check_1_dataset_kfold_som"]
@@ -32,7 +32,10 @@ def check_1_dataset_kfold_som(
                                 'f1', 'fm', 'f1n', 'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn',
                                 'mcc', 'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
                                 positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'.
+                                'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): The numerical uncertainty(ies) of the scores.
         numerical_tolerance (float, optional): In practice, beyond the numerical uncertainty of
                                             the scores, some further tolerance is applied. This
@@ -90,6 +93,8 @@ def check_1_dataset_kfold_som(
         # True
 
     """
+    folding = translate_metadata(folding)
+
     if folding.get("folds") is None and folding.get("strategy") is None:
         # any folding strategy results the same
         folding = {**folding} | {"strategy": "stratified_sklearn"}

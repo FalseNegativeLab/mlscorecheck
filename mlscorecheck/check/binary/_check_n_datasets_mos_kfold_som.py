@@ -7,6 +7,7 @@ in k-fold scenarios and mean of scores aggregation on multiple datasets.
 import copy
 
 from ...aggregated import check_aggregated_scores, Experiment
+from ...individual import translate_metadata
 from ...core import NUMERICAL_TOLERANCE
 
 __all__ = ["check_n_datasets_mos_kfold_som"]
@@ -33,7 +34,10 @@ def check_n_datasets_mos_kfold_som(
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add ``dataset_score_bounds`` when, for example, the minimum
-    and the maximum scores over the datasets are also provided.
+    and the maximum scores over the datasets are also provided. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         evaluations (list(dict)): the list of evaluation specifications
@@ -104,6 +108,8 @@ def check_n_datasets_mos_kfold_som(
         >>> result['inconsistency']
         # True
     """
+
+    evaluations = translate_metadata(evaluations)
 
     if any(evaluation.get("aggregation", "som") != "som" for evaluation in evaluations):
         raise ValueError(
