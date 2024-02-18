@@ -32,10 +32,11 @@ def check_n_testsets_som_no_kfold(
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'), when using
                                     f-beta positive or f-beta negative, also set
-                                    'beta_positive' and 'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    'beta_positive' and 'beta_negative'. Full names in camel case,
+                                    like 'positive_predictive_value', synonyms, like
+                                    'true_positive_rate' or 'tpr' instead of 'sens' and
+                                    complements, like 'false_positive_rate' for (1 - 'spec') can
+                                    also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is

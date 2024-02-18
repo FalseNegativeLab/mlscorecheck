@@ -34,10 +34,9 @@ def check_n_datasets_mos_known_folds_mos(
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add ``dataset_score_bounds`` when, for example, the
-    minimum and the maximum scores over the datasets are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    minimum and the maximum scores over the datasets are also provided. Full names in camel case,
+    like 'positive_predictive_value', synonyms, like 'true_positive_rate' or 'tpr' instead of
+    'sens' and complements, like 'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         evaluations (list): The list of evaluation specifications.

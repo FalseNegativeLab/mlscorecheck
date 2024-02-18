@@ -57,10 +57,10 @@ def check_hrf_vessel_aggregated_mos_assumption(imageset,
     Args:
         imageset (str|list): 'all' or the list of identifiers of images (e.g. ['13_h', '01_g'])
         assumption (str): the assumption on the region of evaluation to test ('fov'/'all')
-        scores (dict): the scores to check (supports only 'acc', 'sens', 'spec', 'bacc'). Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+        scores (dict): the scores to check (supports only 'acc', 'sens', 'spec', 'bacc'). Full
+                        names in camel case, like 'positive_predictive_value', synonyms, like
+                        'true_positive_rate' or 'tpr' instead of 'sens' and complements, like
+                        'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         score_bounds (dict(str,tuple(float,float))): the potential bounds on the scores
                                                             of the images

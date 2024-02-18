@@ -342,7 +342,9 @@ def test_others():
     """
 
     experiment = generate_experiment(
-        aggregation="som", feasible_dataset_score_bounds=True
+        aggregation="som",
+        feasible_dataset_score_bounds=True,
+        random_state=5
     )
     with pytest.raises(ValueError):
         Experiment(**experiment)

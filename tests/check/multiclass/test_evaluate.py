@@ -4,8 +4,6 @@ Testing the timeout evaluation
 
 import warnings
 
-import pytest
-
 from ._evaluate import evaluate_timeout
 
 def test_evaluate_timeout():

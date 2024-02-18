@@ -370,7 +370,7 @@ def experiment_kfolds_generator(experiment: dict, available_scores: list):
             "aggregation": experiment["aggregation"],
         }
 
-def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int) -> dict:
+def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int):
     """
     Generates the configurations for two folds of cardinalities n0 and n1 and two
     classes of cardinalities c0 and n0 + n1 - c0
@@ -392,7 +392,7 @@ def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int) -> dict
             1: (c0 - c_00, n1 - c0 + c_00)
         }
 
-def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list) -> dict:
+def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list):
     """
     Generates the configurations for two folds of cardinalities n0 and n1 and a list
     of classes with sizes in cs
@@ -409,13 +409,17 @@ def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list) -> dic
         if len(cs) == 2:
             yield part
         else:
-            for part_deep in multiclass_fold_partitioning_generator_2n(part[0][1], part[1][1], cs[1:]):
+            for part_deep in multiclass_fold_partitioning_generator_2n(
+                part[0][1],
+                part[1][1],
+                cs[1:]
+                ):
                 yield {
                     0: (part[0][0], *(part_deep[0])),
                     1: (part[1][0], *(part_deep[1]))
                 }
 
-def multiclass_fold_partitioning_generator_kn(ns: list, cs: list) -> dict:
+def multiclass_fold_partitioning_generator_kn(ns: list, cs: list):
     """
     Generates the configurations for a list of folds of sizes ns and a list
     of classes with sizes in cs

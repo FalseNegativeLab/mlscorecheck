@@ -336,6 +336,8 @@ def test_others():
     Testing other functionalities
     """
 
-    evaluation = generate_evaluation(aggregation="som", feasible_fold_score_bounds=True)
+    evaluation = generate_evaluation(aggregation="som",
+                                        feasible_fold_score_bounds=True,
+                                        random_state=5)
     with pytest.raises(ValueError):
         Evaluation(**evaluation)

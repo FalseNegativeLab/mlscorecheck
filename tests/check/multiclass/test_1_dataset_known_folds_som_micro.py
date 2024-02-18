@@ -53,4 +53,3 @@ def test_inconsistent(random_seed: int):
     )
 
     assert result["inconsistency"]
-
