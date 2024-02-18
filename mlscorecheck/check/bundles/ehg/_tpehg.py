@@ -23,7 +23,10 @@ def check_tpehg(scores: dict,
 
     Args:
         scores (dict(str,float)): the dictionary of scores (supports only 'acc', 'sens', 'spec',
-                                    'bacc')
+                                    'bacc'). Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainties
         n_folds (int): the number of folds
         n_repeats (int): the number of repetitions

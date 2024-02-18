@@ -76,7 +76,7 @@ If you use the package, please consider citing the following paper:
 .. code-block:: BibTex
 
   @misc{fazekas2023testing,
-      title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems}, 
+      title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
       author={Attila Fazekas and György Kovács},
       year={2023},
       eprint={2310.12527},
@@ -158,6 +158,8 @@ A simple binary classification testset consisting of ``p`` positive samples (usu
 .. code-block:: Python
 
     testset = {"p": 10, "n": 20}
+
+We note that alternative notations, like using ``n_positive``, ``n_minority`` or ``n_1`` instead of ``p`` and similarly, ``n_negative``, ``n_majority`` and ``n_0`` instead of ``n`` are supported.
 
 One can also specify a commonly used dataset by its name and the package will look up the ``p`` and ``n`` counts of the datasets from its internal registry (based on the representations in the ``common-datasets`` package):
 
@@ -261,7 +263,18 @@ Depending on the experimental setup, the consistency tests developed for binary 
   * prevalence threshold (``pt``),
   * diagnostic odds ratio (``dor``),
   * Jaccard index (``ji``),
-  * Cohen's kappa (``kappa``)
+  * Cohen's kappa (``kappa``).
+
+We note that synonyms and full names are also supported, for example:
+
+  * alternatives to ``sens`` are ``sensitivity``, ``true_positive_rate``, ``tpr`` and ``recall``,
+  * alternatives to ``spec`` are ``specificity``, ``true_negative_rate``, ``tnr`` and ``selectivity``,
+  * alternative to ``ppv`` are ``positive_predictive_value`` and ``precision``.
+
+Similarly, complements are supported as:
+
+  * one can specify ``false_positive_rate`` or ``fpr`` as a complement of ``spec``,
+  * and similarly, ``false_negative_rate`` or ``fnr`` as a complement of ``sens``.
 
 The tests are designed to detect inconsistencies. If the resulting ``inconsistency`` flag is ``False``, the scores can still be calculated in non-standard ways. However, **if the resulting ``inconsistency`` flag is ``True``, it conclusively indicates that inconsistencies are detected, and the reported scores could not be the outcome of the presumed experiment**.
 

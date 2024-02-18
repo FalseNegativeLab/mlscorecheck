@@ -24,6 +24,7 @@ __all__ = [
     "is_less_than_zero",
     "is_zero",
     "unify_results",
+    "translate_metadata"
 ]
 
 solutions = solution_specifications
@@ -34,6 +35,36 @@ complementers = score_function_complements
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
 
+def translate_metadata(original):
+    """
+    Translates the metadata, internally uses p instead of n_positive, n_minority or
+    n_1, and similarly, internally uses n instead of n_negative, n_majority, or n_0.
+
+    Args:
+        original (dict(str, int)|list): the original metadata specification
+
+    Returns:
+        dict(str, int)|list: the translated metadata specification
+    """
+
+    if isinstance(original, dict):
+        result = {}
+        for key, val in original.items():
+            if isinstance(val, dict):
+                result[key] = translate_metadata(val)
+            else:
+                if key in ('n_positive', 'n_minority', 'n_1'):
+                    result['p'] = val
+                elif key in ('n_negative', 'n_majority', 'n_0'):
+                    result['n'] = val
+                else:
+                    result[key] = val
+    elif isinstance(original, list):
+        result = [translate_metadata(item) for item in original]
+    else:
+        result = original
+
+    return result
 
 def resolve_aliases_and_complements(scores: dict) -> dict:
     """

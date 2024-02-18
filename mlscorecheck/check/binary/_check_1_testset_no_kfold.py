@@ -6,7 +6,7 @@ scores calculated from one single confusion matrix.
 import warnings
 
 from ...core import logger, NUMERICAL_TOLERANCE
-from ...individual import check_scores_tptn_pairs
+from ...individual import check_scores_tptn_pairs, translate_metadata
 from ...experiments import dataset_statistics
 
 __all__ = ["check_1_testset_no_kfold"]
@@ -32,7 +32,10 @@ def check_1_testset_no_kfold(
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'), when using
                                     f-beta positive or f-beta negative, also set
-                                    'beta_positive' and 'beta_negative'.
+                                    'beta_positive' and 'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty (potentially for each score)
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -89,6 +92,8 @@ def check_1_testset_no_kfold(
         "tp and tn statistics calculated on one test set with "
         "no aggregation of any kind."
     )
+
+    testset = translate_metadata(testset)
 
     if ("p" not in testset or "n" not in testset) and ("name" not in testset):
         raise ValueError('either "p" and "n" or "name" should be specified')

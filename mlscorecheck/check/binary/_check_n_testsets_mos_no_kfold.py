@@ -5,6 +5,7 @@ with no k-fold cross-validation.
 """
 
 from ...aggregated import check_aggregated_scores, Experiment, Dataset
+from ...individual import translate_metadata
 from ...core import NUMERICAL_TOLERANCE
 
 __all__ = ["check_n_testsets_mos_no_kfold"]
@@ -30,7 +31,10 @@ def check_n_testsets_mos_no_kfold(
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add ``testset_score_bounds`` when, for example, the minimum
-    and the maximum scores over the testsets are also provided.
+    and the maximum scores over the testsets are also provided. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         testsets (list(dict)): the list of testset specifications
@@ -89,6 +93,8 @@ def check_n_testsets_mos_no_kfold(
         >>> result['inconsistency']
         # True
     """
+
+    testsets = translate_metadata(testsets)
 
     datasets = [Dataset(**dataset) for dataset in testsets]
 

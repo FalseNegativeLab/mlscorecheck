@@ -26,6 +26,8 @@ A simple binary classification testset consisting of ``p`` positive samples (usu
 
     testset = {"p": 10, "n": 20}
 
+We note that alternative notations, like using ``n_positive``, ``n_minority`` or ``n_1`` instead of ``p`` and similarly, ``n_negative``, ``n_majority`` and ``n_0`` instead of ``n`` are supported.
+
 One can also specify a commonly used dataset by its name and the package will look up the ``p`` and ``n`` counts of the datasets from its internal registry (based on the representations in the ``common-datasets`` package):
 
 .. code-block:: Python

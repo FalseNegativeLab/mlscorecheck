@@ -13,6 +13,7 @@ from ._check_n_datasets_mos_known_folds_mos import check_n_datasets_mos_known_fo
 from ._check_1_dataset_unknown_folds_mos import estimate_n_evaluations
 from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import experiment_kfolds_generator
+from ...individual import translate_metadata
 
 __all__ = ["check_n_datasets_mos_unknown_folds_mos", "estimate_n_experiments"]
 
@@ -27,6 +28,9 @@ def estimate_n_experiments(evaluations: list, available_scores: list = None) -> 
     Returns:
         int: the estimated number of different fold configurations.
     """
+
+    evaluations = translate_metadata(evaluations)
+
     available_scores = [] if available_scores is None else available_scores
 
     counts = [
@@ -63,7 +67,10 @@ def check_n_datasets_mos_unknown_folds_mos(
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add dataset_score_bounds when, for example, the minimum and
-    the maximum scores over the datasets are also provided.
+    the maximum scores over the datasets are also provided. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
 
     Note that depending on the size of the dataset (especially the number of minority instances)
     and the folding configuration, this test might lead to an untractable number of problems to
@@ -130,6 +137,8 @@ def check_n_datasets_mos_unknown_folds_mos(
         >>> result['inconsistency']
         # True
     """
+    evaluations = translate_metadata(evaluations)
+
     if any(evaluation.get("aggregation", "mos") != "mos" for evaluation in evaluations):
         raise ValueError(
             'the aggregation specified in each dataset must be "mor" or nothing.'

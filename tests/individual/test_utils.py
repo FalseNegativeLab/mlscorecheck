@@ -12,6 +12,7 @@ from mlscorecheck.individual import (
     is_less_than_zero,
     unify_results,
     IntervalUnion,
+    translate_metadata
 )
 from mlscorecheck.scores import score_functions_with_solutions, score_specifications
 
@@ -21,6 +22,23 @@ solutions = load_solutions()
 
 random_seeds = [5]
 
+
+def test_translate_metadata():
+    """
+    Testing the metadata translation
+    """
+
+    result = translate_metadata({'n_negative': 10, 'n_minority': 5})
+
+    assert len(result) == 2
+    assert 'n' in result
+    assert 'p' in result
+
+    result = translate_metadata([1, 2, 3])
+
+    assert result == [1, 2, 3]
+
+    assert 1 == translate_metadata(1)
 
 def test_resolve_aliases_and_complements():
     """

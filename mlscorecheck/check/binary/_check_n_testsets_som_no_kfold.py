@@ -5,7 +5,7 @@ over multiple testsets (with no kfold).
 """
 
 from ...core import NUMERICAL_TOLERANCE
-from ...individual import check_scores_tptn_pairs
+from ...individual import check_scores_tptn_pairs, translate_metadata
 from ...aggregated import Experiment, Dataset
 
 __all__ = ["check_n_testsets_som_no_kfold"]
@@ -32,7 +32,10 @@ def check_n_testsets_som_no_kfold(
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'), when using
                                     f-beta positive or f-beta negative, also set
-                                    'beta_positive' and 'beta_negative'.
+                                    'beta_positive' and 'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -82,6 +85,8 @@ def check_n_testsets_som_no_kfold(
         >>> result['inconsistency']
         # True
     """
+
+    testsets = translate_metadata(testsets)
 
     datasets = [Dataset(**dataset) for dataset in testsets]
 

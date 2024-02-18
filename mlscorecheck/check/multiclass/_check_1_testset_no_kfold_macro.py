@@ -34,7 +34,10 @@ def check_1_testset_no_kfold_macro(
     likely that there will be a configuration matching the scores provided. In order to
     increase the strength of the test, one can add ``class_scores_bounds`` when, for example,
     besides the average score, the minimum and the maximum scores over the classes
-    are also provided.
+    are also provided. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         testset (dict): the specification of the testset

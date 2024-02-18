@@ -7,7 +7,7 @@ in a kfold scenario on multiple datasets.
 import copy
 
 from ...core import NUMERICAL_TOLERANCE
-from ...individual import check_scores_tptn_pairs
+from ...individual import check_scores_tptn_pairs, translate_metadata
 from ...aggregated import Experiment
 
 __all__ = ["check_n_datasets_som_kfold_som"]
@@ -34,7 +34,10 @@ def check_n_datasets_som_kfold_som(
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'), when using
                                     f-beta positive or f-beta negative, also set
-                                    'beta_positive' and 'beta_negative'.
+                                    'beta_positive' and 'beta_negative'. Full names in camel case, like
+                                'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                or 'tpr' instead of 'sens' and complements, like
+                                'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -97,6 +100,8 @@ def check_n_datasets_som_kfold_som(
         >>> result['inconsistency']
         # True
     """
+    evaluations = translate_metadata(evaluations)
+
     if any(evaluation.get("aggregation", "som") != "som" for evaluation in evaluations):
         raise ValueError(
             "the aggregation specifications cannot be anything else but 'rom'"
