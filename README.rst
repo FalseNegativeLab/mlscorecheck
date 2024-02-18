@@ -61,7 +61,7 @@ The consistency tests are numerical and **not** statistical: if inconsistencies 
 Latest news
 -----------
 
-* the 1.0.1 version of the package is released;
+* the 1.0.3 version of the package is released;
 * the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 * the full documentation is available at: https://mlscorecheck.readthedocs.io/en/latest/
 * tutorial on Medium.com: https://medium.com/p/e1baaba57610
