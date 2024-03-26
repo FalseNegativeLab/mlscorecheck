@@ -73,22 +73,6 @@ Citation
 
 If you use the package, please consider citing the following paper(s) about the package:
 
-.. code-block:: BibTex
-
-  @article{KOVACS2024127556,
-      title = {mlscorecheck: Testing the consistency of reported performance scores and experiments in machine learning},
-      journal = {Neurocomputing},
-      volume = {583},
-      pages = {127556},
-      year = {2024},
-      issn = {0925-2312},
-      doi = {https://doi.org/10.1016/j.neucom.2024.127556},
-      url = {https://www.sciencedirect.com/science/article/pii/S0925231224003278},
-      author = {György Kovács and Attila Fazekas},
-      keywords = {Binary classification, Multiclass classification, Regression, Consistency testing, Performance scores, Open source},
-      abstract = {Addressing the reproducibility crisis in artificial intelligence through the validation of reported experimental results is a challenging task. It necessitates either the reimplementation of techniques or a meticulous assessment of papers for deviations from the scientific method and best statistical practices. To facilitate the validation of reported results, we have developed numerical techniques capable of identifying inconsistencies between reported performance scores and various experimental setups in machine learning problems, including binary/multiclass classification and regression. These consistency tests are integrated into the open-source package mlscorecheck, which also provides specific test bundles designed to detect systematically recurring flaws in various fields, such as retina image processing and synthetic minority oversampling.}
-  }
-
 and about the methodology:
 
 .. code-block:: BibTex
