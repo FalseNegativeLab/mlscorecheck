@@ -269,7 +269,7 @@ We note that synonyms and full names are also supported, for example:
 
   * alternatives to ``sens`` are ``sensitivity``, ``true_positive_rate``, ``tpr`` and ``recall``,
   * alternatives to ``spec`` are ``specificity``, ``true_negative_rate``, ``tnr`` and ``selectivity``,
-  * alternatives to ``ppv`` are ``positive_predictive_value`` and ``precision``.
+  * alternative to ``ppv`` are ``positive_predictive_value`` and ``precision``.
 
 Similarly, complements are supported as:
 
