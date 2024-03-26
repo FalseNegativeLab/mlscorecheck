@@ -71,7 +71,24 @@ Latest news
 Citation
 --------
 
-If you use the package, please consider citing the following paper:
+If you use the package, please consider citing the following paper(s) about the package:
+
+.. code-block:: BibTex
+
+    @article{kovacs2024,
+    title = {mlscorecheck: Testing the consistency of reported performance scores and experiments in machine learning},
+    journal = {Neurocomputing},
+    volume = {583},
+    pages = {127556},
+    year = {2024},
+    issn = {0925-2312},
+    doi = {https://doi.org/10.1016/j.neucom.2024.127556},
+    url = {https://www.sciencedirect.com/science/article/pii/S0925231224003278},
+    author = {György Kovács and Attila Fazekas},
+    keywords = {Binary classification, Multiclass classification, Regression, Consistency testing, Performance scores, Open source}
+    }
+
+and the methodology:
 
 .. code-block:: BibTex
 
