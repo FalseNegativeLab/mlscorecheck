@@ -61,7 +61,7 @@ The consistency tests are numerical and **not** statistical: if inconsistencies 
 Latest news
 -----------
 
-* the 1.0.1 version of the package is released;
+* the 1.0.3 version of the package is released;
 * the paper describing the numerical techniques is available as a preprint at: https://arxiv.org/abs/2310.12527
 * the full documentation is available at: https://mlscorecheck.readthedocs.io/en/latest/
 * tutorial on Medium.com: https://medium.com/p/e1baaba57610
@@ -71,7 +71,24 @@ Latest news
 Citation
 --------
 
-If you use the package, please consider citing the following paper:
+If you use the package, please consider citing the following paper(s) about the package:
+
+.. code-block:: BibTex
+
+  @article{kovacs2024,
+      title = {mlscorecheck: Testing the consistency of reported performance scores and experiments in machine learning},
+      journal = {Neurocomputing},
+      volume = {583},
+      pages = {127556},
+      year = {2024},
+      issn = {0925-2312},
+      doi = {https://doi.org/10.1016/j.neucom.2024.127556},
+      url = {https://www.sciencedirect.com/science/article/pii/S0925231224003278},
+      author = {György Kovács and Attila Fazekas},
+      keywords = {Binary classification, Multiclass classification, Regression, Consistency testing, Performance scores, Open source}
+  }
+
+and the methodology:
 
 .. code-block:: BibTex
 
@@ -269,7 +286,7 @@ We note that synonyms and full names are also supported, for example:
 
   * alternatives to ``sens`` are ``sensitivity``, ``true_positive_rate``, ``tpr`` and ``recall``,
   * alternatives to ``spec`` are ``specificity``, ``true_negative_rate``, ``tnr`` and ``selectivity``,
-  * alternative to ``ppv`` are ``positive_predictive_value`` and ``precision``.
+  * alternatives to ``ppv`` are ``positive_predictive_value`` and ``precision``.
 
 Similarly, complements are supported as:
 
