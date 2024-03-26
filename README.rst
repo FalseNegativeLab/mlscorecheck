@@ -84,7 +84,6 @@ If you use the package, please consider citing the following paper:
       primaryClass={cs.LG}
   }
 
-
 Installation
 ------------
 
