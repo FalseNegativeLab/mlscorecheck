@@ -75,14 +75,14 @@ If you use the package, please consider citing the following paper(s) about the 
 
 .. code-block:: BibTex
 
-  @misc{fazekas2023testing,
-      title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
-      author={Attila Fazekas and György Kovács},
-      year={2023},
-      eprint={2310.12527},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-  }
+    @misc{fazekas2023testing,
+        title={Testing the Consistency of Performance Scores Reported for Binary Classification Problems},
+        author={Attila Fazekas and György Kovács},
+        year={2023},
+        eprint={2310.12527},
+        archivePrefix={arXiv},
+        primaryClass={cs.LG}
+    }
 
 Installation
 ------------
