@@ -73,8 +73,6 @@ Citation
 
 If you use the package, please consider citing the following paper(s) about the package:
 
-and about the methodology:
-
 .. code-block:: BibTex
 
   @misc{fazekas2023testing,
