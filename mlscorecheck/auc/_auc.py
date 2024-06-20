@@ -6,8 +6,8 @@ import numpy as np
 
 __all__ = [
     'prepare_intervals_for_auc_estimation',
-    'auc_from',
-    'acc_from'
+    'auc_from_sens_spec',
+    'acc_from_auc'
 ]
 
 def prepare_intervals_for_auc_estimation(scores: dict, eps: float, p: int, n: int) -> dict:
@@ -42,7 +42,15 @@ def prepare_intervals_for_auc_estimation(scores: dict, eps: float, p: int, n: in
 
     return results
 
-def auc_from(*, scores: dict, eps: float, p: int, n: int, lower: str = 'min', upper: str = 'max'):
+def auc_from_sens_spec(
+        *,
+        scores: dict,
+        eps: float,
+        p: int,
+        n: int,
+        lower: str = 'min',
+        upper: str = 'max'
+    ):
     """
     This module applies the estimation scheme A to estimate AUC from scores
 
@@ -51,7 +59,11 @@ def auc_from(*, scores: dict, eps: float, p: int, n: int, lower: str = 'min', up
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        method (str): ('A'/'B') - the type of estimation
+        lower (str): ('min'/'cmin') - the type of estimation for the lower bound
+        upper (str): ('max'/'max-acc') - the type of estimation for the upper bound
+    
+    Returns:
+        tuple(float, float): the interval for the AUC
     """
 
     if ('sens' in scores) + ('spec' in scores) + ('acc' in scores) < 2:
@@ -62,29 +74,17 @@ def auc_from(*, scores: dict, eps: float, p: int, n: int, lower: str = 'min', up
     if lower == 'min':
         lower0 = intervals['sens'][0] * intervals['spec'][0]
     elif lower == 'cmin':
-        tmp = [
-            abs(1 - intervals['sens'][0] + intervals['spec'][0]),
-            abs(1 - intervals['sens'][0] + intervals['spec'][1]),
-            abs(1 - intervals['sens'][1] + intervals['spec'][0]),
-            abs(1 - intervals['sens'][1] + intervals['spec'][1])
-            ]
-        min_idx = np.argmin(tmp)
-        if min_idx == 0:
-            sens_idx, spec_idx = 0, 0
-        elif min_idx == 1:
-            sens_idx, spec_idx = 0, 1
-        elif min_idx == 2:
-            sens_idx, spec_idx = 1, 0
-        elif min_idx == 3:
-            sens_idx, spec_idx = 1, 1
-        lower0 = 0.5 + (1 - (intervals['sens'][sens_idx] + intervals['spec'][spec_idx]))**2 / 2.0
+        if intervals['sens'][0] < 1 - intervals['spec'][0]:
+            raise ValueError('sens >= 1 - spec does not hold for "\
+                             "the corrected minimum curve')
+        lower0 = 0.5 + (1 - (intervals['sens'][0] + intervals['spec'][0]))**2 / 2.0
     else:
         raise ValueError('Unsupported lower bound')
 
     if upper == 'max':
         upper0 = 1 - (1 - intervals['sens'][1]) *(1 - intervals['spec'][1])
     elif upper == 'max-acc':
-        if not (intervals['acc'][0] >= max(p, n)/(p + n)):
+        if not intervals['acc'][0] >= max(p, n)/(p + n):
             raise ValueError('accuracy too small')
         upper0 = 1 - ((1 - intervals['acc'][1]) * (p + n))**2 / (2*n*p)
     else:
@@ -92,7 +92,7 @@ def auc_from(*, scores: dict, eps: float, p: int, n: int, lower: str = 'min', up
 
     return (lower0, upper0)
 
-def acc_from(*, scores: dict, eps: float, p: int, n: int):
+def acc_from_auc(*, scores: dict, eps: float, p: int, n: int):
     """
     This module applies the estimation scheme A to estimate AUC from scores
 
@@ -101,12 +101,14 @@ def acc_from(*, scores: dict, eps: float, p: int, n: int):
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        method (str): ('A'/'B') - the type of estimation
+    
+    Returns:
+        tuple(float, float): the interval for the maximum accuracy
     """
 
     auc = (max(scores['auc'] - eps, 0), min(scores['auc'] + eps, 1))
 
-    if not (auc[0] >= 1 - min(p, n)/(2*max(p, n))):
+    if not auc[0] >= 1 - min(p, n)/(2*max(p, n)):
         raise ValueError('AUC too small')
 
     lower = 1 - (2*np.sqrt(p*n - auc[0] * p * n)) / (p + n)
