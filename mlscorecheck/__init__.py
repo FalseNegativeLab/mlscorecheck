@@ -8,4 +8,5 @@ from . import experiments
 from . import symbolic
 from . import individual
 from . import aggregated
+from . import auc
 from ._version import *
