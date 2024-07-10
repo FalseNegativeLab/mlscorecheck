@@ -13,7 +13,7 @@ from mlscorecheck.auc import (
     generate_kfold_sens_spec_fix_problem,
     auc_from_sens_spec_kfold,
     generate_average,
-    translate
+    translate,
 )
 
 EPS = 0.04
@@ -21,21 +21,23 @@ ITERATIONS = 5000
 ITERATIONS_ACC = 10000
 RANDOM_SEED = 5
 
+
 def test_translate():
     """
     Testing the score translation
     """
 
-    assert 'sens' in translate({'tpr': 0.9})
-    assert 'spec' in translate({'tnr': 0.9})
-    assert 'spec' in translate({'fpr': 0.9})
+    assert "sens" in translate({"tpr": 0.9})
+    assert "spec" in translate({"tnr": 0.9})
+    assert "spec" in translate({"fpr": 0.9})
 
     with pytest.raises(ValueError):
-        translate({'tpr': 0.9, 'sens': 0.8})
+        translate({"tpr": 0.9, "sens": 0.8})
     with pytest.raises(ValueError):
-        translate({'tnr': 0.9, 'spec': 0.8})
+        translate({"tnr": 0.9, "spec": 0.8})
     with pytest.raises(ValueError):
-        translate({'fpr': 0.9, 'spec': 0.8})
+        translate({"fpr": 0.9, "spec": 0.8})
+
 
 def test_generate_average():
     """
@@ -44,6 +46,7 @@ def test_generate_average():
 
     with pytest.raises(ValueError):
         generate_average(0.8, 5, 0.9)
+
 
 @pytest.mark.parametrize("sens_spec", [(0.7, 0.8), (0.6, 0.8)])
 @pytest.mark.parametrize("k_p_n", [(5, 100, 100), (10, 100, 100)])
@@ -313,12 +316,12 @@ def test_auc_from():
 
     with pytest.raises(ValueError):
         auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="min", upper="max")
-    
+
     scores = {"acc": 0.6, "sens": 0.55, "spec": 0.7, "asdf": "dummy"}
 
     with pytest.raises(ValueError):
         auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="cmin", upper="amax")
-    
+
     scores = {"acc": 0.9, "sens": 0.92, "spec": 0.95, "asdf": "dummy"}
 
     auc0 = auc_from_sens_spec(
@@ -348,6 +351,7 @@ def test_auc_from():
     with pytest.raises(ValueError):
         auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="min", upper="dummy")
 
+
 def test_auc_from_kfold():
     """
     Testing the auc estimation functionalities with kfold
@@ -360,17 +364,28 @@ def test_auc_from_kfold():
     scores = {"acc": 0.6}
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec_kfold(scores=scores, eps=eps, p=p, n=n, k=5, lower="min", upper="max")
+        auc_from_sens_spec_kfold(
+            scores=scores, eps=eps, p=p, n=n, k=5, lower="min", upper="max"
+        )
 
     scores = {"acc": 0.6, "sens": 0.55, "spec": 0.7, "asdf": "dummy"}
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec_kfold(scores=scores, eps=eps, p=p, n=n, k=5, lower="cmin", upper="amax")
-    
-    scores = {"acc": (0.3*p + 0.5*n) / (p + n), "sens": 0.3, "spec": 0.5, "asdf": "dummy"}
+        auc_from_sens_spec_kfold(
+            scores=scores, eps=eps, p=p, n=n, k=5, lower="cmin", upper="amax"
+        )
+
+    scores = {
+        "acc": (0.3 * p + 0.5 * n) / (p + n),
+        "sens": 0.3,
+        "spec": 0.5,
+        "asdf": "dummy",
+    }
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec_kfold(scores=scores, eps=eps, p=p, n=n, k=5, lower="cmin", upper="amax")
+        auc_from_sens_spec_kfold(
+            scores=scores, eps=eps, p=p, n=n, k=5, lower="cmin", upper="amax"
+        )
 
     scores = {"acc": 0.9, "sens": 0.92, "spec": 0.95, "asdf": "dummy"}
 
@@ -395,7 +410,7 @@ def test_auc_from_kfold():
             upper="amax",
             k=5,
         )
-    
+
     with pytest.raises(ValueError):
         auc_from_sens_spec_kfold(
             scores=scores | {"sens": 0.1, "spec": 0.8},
@@ -404,9 +419,9 @@ def test_auc_from_kfold():
             upper="amax",
             k=5,
             p=None,
-            n=None
+            n=None,
         )
-    
+
     with pytest.raises(ValueError):
         auc_from_sens_spec_kfold(
             scores=scores | {"sens": 0.1, "spec": 0.8},
@@ -419,10 +434,14 @@ def test_auc_from_kfold():
         )
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec_kfold(scores=scores, eps=eps, p=p, n=n, lower="dummy", upper="max", k=5)
+        auc_from_sens_spec_kfold(
+            scores=scores, eps=eps, p=p, n=n, lower="dummy", upper="max", k=5
+        )
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec_kfold(scores=scores, eps=eps, p=p, n=n, lower="min", upper="dummy", k=5)
+        auc_from_sens_spec_kfold(
+            scores=scores, eps=eps, p=p, n=n, lower="min", upper="dummy", k=5
+        )
 
 
 def test_acc_from_auc():
