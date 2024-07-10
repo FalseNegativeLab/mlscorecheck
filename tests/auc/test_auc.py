@@ -9,8 +9,167 @@ import numpy as np
 from mlscorecheck.auc import (
     prepare_intervals_for_auc_estimation,
     auc_from_sens_spec,
-    acc_from_auc
+    acc_from_auc,
+    generate_kfold_auc_fix_problem,
+    generate_kfold_sens_spec_fix_problem,
+    auc_from_sens_spec_kfold,
+    generate_average
 )
+
+EPS = 0.05
+ITERATIONS = 5000
+
+@pytest.mark.parametrize('sens_spec', [(0.7, 0.8), (0.6, 0.8)])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_min(sens_spec, k):
+    # min
+    aucs = []
+    senss = []
+    specs = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        problem = generate_kfold_sens_spec_fix_problem(sens=sens_spec[0], 
+                                                       spec=sens_spec[1], 
+                                                       k=k)
+        aucs.append(np.mean(problem['spec'] * problem['sens']))
+        senss.append(problem['sens'])
+        specs.append(problem['spec'])
+
+    interval = auc_from_sens_spec_kfold(scores={'sens': sens_spec[0], 'spec': sens_spec[1]},
+                         eps=1e-4,
+                         p=p,
+                         n=n,
+                         k=k,
+                         lower='min')
+    assert np.abs(np.min(aucs) - interval[0]) < EPS
+
+@pytest.mark.parametrize('sens_spec', [(0.7, 0.8), (0.6, 0.8)])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_cmin(sens_spec, k):
+    aucs = []
+    senss = []
+    specs = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        problem = generate_kfold_sens_spec_fix_problem(sens=sens_spec[0], 
+                                                       spec=sens_spec[1], 
+                                                       k=k)
+        if np.any(problem['sens'] < 1 - problem['spec']):
+            continue
+        aucs.append(np.mean(0.5 + (1 - problem['spec'] - problem['sens'])**2/2.0))
+        senss.append(problem['sens'])
+        specs.append(problem['spec'])
+
+    interval = auc_from_sens_spec_kfold(scores={'sens': sens_spec[0], 'spec': sens_spec[1]},
+                         eps=1e-4,
+                         p=p,
+                         n=n,
+                         k=k,
+                         lower='cmin')
+    assert np.abs(np.min(aucs) - interval[0]) < EPS
+
+@pytest.mark.parametrize('sens_spec', [(0.7, 0.8), (0.6, 0.8)])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_max(sens_spec, k):
+    aucs = []
+    senss = []
+    specs = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        problem = generate_kfold_sens_spec_fix_problem(sens=sens_spec[0], 
+                                                       spec=sens_spec[1], 
+                                                       k=k)
+        aucs.append(1 - np.mean((1 - problem['spec']) * (1 - problem['sens'])))
+        senss.append(problem['sens'])
+        specs.append(problem['spec'])
+    np.max(aucs)
+
+    interval = auc_from_sens_spec_kfold(scores={'sens': sens_spec[0], 
+                                                'spec': sens_spec[1]},
+                         eps=1e-4,
+                         p=p,
+                         n=n,
+                         k=k,
+                         upper='max')
+    assert np.abs(np.max(aucs) - interval[1]) < EPS
+
+@pytest.mark.parametrize('sens_spec', [(0.7, 0.8), (0.6, 0.8)])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_amax(sens_spec, k):
+    aucs = []
+    senss = []
+    specs = []
+    accs0 = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        problem = generate_kfold_sens_spec_fix_problem(sens=sens_spec[0],
+                                                       spec=sens_spec[1], 
+                                                       k=k)
+        accs = (problem['sens'] + problem['spec']) / 2.0
+        aucs.append(1 - np.mean(((1 - accs) * (p + n))**2 / (2*p*n)))
+        senss.append(problem['sens'])
+        specs.append(problem['spec'])
+        accs0.append(accs)
+
+    interval = auc_from_sens_spec_kfold(scores={'sens': sens_spec[0], 
+                                                'spec': sens_spec[1]},
+                         eps=1e-4,
+                         p=p,
+                         n=n,
+                         k=k,
+                         upper='amax')
+    assert np.abs(np.max(aucs) - interval[1]) < EPS
+
+@pytest.mark.parametrize('auc', [0.7, 0.8])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_acc_min_max(auc, k):
+    accs = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        aucs = generate_average(auc, k)
+        tmp = []
+        for a in aucs:
+            if a < 0.51:
+                break
+            acc_int = acc_from_auc(scores={'auc': a}, eps=1e-4, p=p, n=n, upper='max')
+            tmp.append(np.random.random()*(acc_int[1] - acc_int[0]) + acc_int[0])
+        if len(tmp) < k:
+            continue
+        
+        accs.append(np.mean(tmp))
+
+    interval = acc_from_auc(scores={'auc': auc}, eps=1e-4, p=p, n=n, upper='max')
+    assert np.abs(np.max(accs) - interval[1]) < EPS
+    assert np.abs(np.min(accs) - interval[0]) < EPS
+
+@pytest.mark.parametrize('auc', [0.7, 0.8])
+@pytest.mark.parametrize('k', [5, 10])
+def test_kfold_acc_min_cmax(auc, k):
+    accs = []
+    p = 100
+    n = 100
+    for _ in range(ITERATIONS):
+        aucs = generate_average(auc, k)
+        tmp = []
+        for a in aucs:
+            if a < 0.51:
+                break
+            acc_int = acc_from_auc(scores={'auc': a}, eps=1e-4, p=p, n=n, upper='cmax')
+            tmp.append(np.random.random()*(acc_int[1] - acc_int[0]) + acc_int[0])
+        
+        if len(tmp) < k:
+            continue
+
+        accs.append(np.mean(tmp))
+
+    interval = acc_from_auc(scores={'auc': auc}, eps=1e-4, p=p, n=n, upper='cmax')
+    assert np.abs(np.max(accs) - interval[1]) < EPS
+    assert np.abs(np.min(accs) - interval[0]) < EPS
 
 def test_prepare_intervals_for_auc_estimation():
     """
@@ -99,7 +258,7 @@ def test_auc_from():
             p=p,
             n=n,
             lower='cmin',
-            upper='max-acc'
+            upper='amax'
         )
 
     scores = {
@@ -124,7 +283,7 @@ def test_auc_from():
             p=p,
             n=n,
             lower='cmin',
-            upper='max-acc'
+            upper='amax'
         )
 
     assert auc0[0] < auc1[0]
@@ -137,7 +296,7 @@ def test_auc_from():
             p=p,
             n=n,
             lower='cmin',
-            upper='max-acc'
+            upper='amax'
         )
 
     with pytest.raises(ValueError):
