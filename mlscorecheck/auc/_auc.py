@@ -301,7 +301,7 @@ def auc_from_sens_spec_kfold(
         n: int,
         lower: str = 'min',
         upper: str = 'max',
-        k: int | None = None
+        k: int = None
     ) -> tuple:
     """
     This module applies the estimation scheme A to estimate AUC from scores
