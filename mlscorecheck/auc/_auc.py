@@ -14,8 +14,37 @@ __all__ = [
     #'generate_kfold_sens_spec_acc_problem',
     'generate_average',
     'generate_kfold_sens_spec_fix_problem',
-    'R'
+    'R',
+    'translate'
 ]
+
+def translate(scores: dict) -> dict:
+    """
+    Translates the scores
+
+    Args:
+        scores (dict): the dict of scores
+    
+    Returns:
+        dict: the translated scores
+    """
+    scores = {**scores}
+    if 'tpr' in scores:
+        if not 'sens' in scores:
+            scores['sens'] = scores['tpr']
+        else:
+            raise ValueError('tpr and sens cannot be specified together')
+    if 'tnr' in scores:
+        if not 'spec' in scores:
+            scores['spec'] = scores['tnr']
+        else:
+            raise ValueError('tnr and spec cannot be specified together')
+    if 'fpr' in scores:
+        if not 'spec' in scores:
+            scores['spec'] = 1 - scores['fpr']
+        else:
+            raise ValueError('fpr and spec cannot be specified together')
+    return scores
 
 def generate_average(avg_value, n_items, lower_bound=None, random_state=None):
     random_state = (np.random.RandomState(random_state) 
@@ -255,6 +284,8 @@ def auc_from_sens_spec(
     if ('sens' in scores) + ('spec' in scores) + ('acc' in scores) < 2:
         raise ValueError('Not enough scores specified for the estimation')
 
+    scores = translate(scores)
+
     intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
 
     if lower == 'min':
@@ -327,7 +358,9 @@ def auc_from_sens_spec_kfold(
         raise ValueError('For k-fold estimation p and n are needed')
     if p % k != 0 or n % k != 0:
         raise ValueError('For k-fold, p and n must be divisible by k')
-    
+
+    scores = translate(scores)
+
     intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
 
     if lower == 'min':
@@ -379,6 +412,8 @@ def acc_from_auc(
     Returns:
         tuple(float, float): the interval for the maximum accuracy
     """
+
+    scores = translate(scores)
 
     auc = (max(scores['auc'] - eps, 0), min(scores['auc'] + eps, 1))
 

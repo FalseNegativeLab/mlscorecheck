@@ -13,12 +13,29 @@ from mlscorecheck.auc import (
     generate_kfold_sens_spec_fix_problem,
     auc_from_sens_spec_kfold,
     generate_average,
+    translate
 )
 
 EPS = 0.04
 ITERATIONS = 5000
 ITERATIONS_ACC = 10000
 RANDOM_SEED = 5
+
+def test_translate():
+    """
+    Testing the score translation
+    """
+
+    assert 'sens' in translate({'tpr': 0.9})
+    assert 'spec' in translate({'tnr': 0.9})
+    assert 'spec' in translate({'fpr': 0.9})
+
+    with pytest.raises(ValueError):
+        translate({'tpr': 0.9, 'sens': 0.8})
+    with pytest.raises(ValueError):
+        translate({'tnr': 0.9, 'spec': 0.8})
+    with pytest.raises(ValueError):
+        translate({'fpr': 0.9, 'spec': 0.8})
 
 def test_generate_average():
     """
