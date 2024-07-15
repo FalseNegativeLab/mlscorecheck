@@ -260,9 +260,36 @@ def prepare_intervals_for_auc_estimation(
 
     return results
 
+def auc_from_sens_spec_wrapper(
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    lower: str = "min", 
+    upper: str = "max"):
+    try:
+        return auc_from_sens_spec(
+            scores=scores,
+            eps=eps,
+            p=p,
+            n=n,
+            lower=lower,
+            upper=upper,
+            raise_errors=True
+        )
+    except:
+        return None
 
 def auc_from_sens_spec(
-    *, scores: dict, eps: float, p: int, n: int, lower: str = "min", upper: str = "max"
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    lower: str = "min", 
+    upper: str = "max",
+    raise_errors: bool = False
 ) -> tuple:
     """
     This module applies the estimation scheme A to estimate AUC from scores
@@ -278,6 +305,16 @@ def auc_from_sens_spec(
     Returns:
         tuple(float, float): the interval for the AUC
     """
+
+    if not raise_errors:
+        return auc_from_sens_spec_wrapper(
+            scores=scores,
+            eps=eps,
+            p=p,
+            n=n,
+            lower=lower,
+            upper=upper
+        )
 
     if ("sens" in scores) + ("spec" in scores) + ("acc" in scores) < 2:
         raise ValueError("Not enough scores specified for the estimation")
@@ -322,7 +359,6 @@ def R(x: float, k: int) -> list:
 
     return result
 
-
 def auc_from_sens_spec_kfold(
     *,
     scores: dict,
@@ -331,7 +367,8 @@ def auc_from_sens_spec_kfold(
     n: int,
     lower: str = "min",
     upper: str = "max",
-    k: int = None
+    k: int = None,
+    raise_error: bool = False
 ) -> tuple:
     """
     This module applies the estimation scheme A to estimate AUC from scores
@@ -364,9 +401,9 @@ def auc_from_sens_spec_kfold(
 
     if lower == "min":
         RL_avg_sens = R(intervals["sens"][0], k)
-        R1mU_avg_spec = R(intervals["spec"][1], k)
+        RL_avg_spec = R(intervals["spec"][0], k)
 
-        lower0 = np.mean([a * b for a, b in zip(RL_avg_sens, R1mU_avg_spec[::-1])])
+        lower0 = np.mean([a * b for a, b in zip(RL_avg_sens, RL_avg_spec[::-1])])
     elif lower == "cmin":
         if intervals["sens"][0] < 1 - intervals["spec"][0]:
             raise ValueError(
@@ -378,11 +415,11 @@ def auc_from_sens_spec_kfold(
         raise ValueError("Unsupported lower bound")
 
     if upper == "max":
-        R1mU_avg_sens = R(intervals["sens"][1], k)
-        RL_avg_spec = R(intervals["spec"][0], k)
+        RU_avg_sens = R(intervals["sens"][1], k)
+        RU_avg_spec = R(intervals["spec"][1], k)
 
         upper0 = 1 - np.mean(
-            [(1 - a) * (1 - b) for a, b in zip(R1mU_avg_sens, RL_avg_spec[::-1])]
+            [(1 - a) * (1 - b) for a, b in zip(RU_avg_sens, RU_avg_spec[::-1])]
         )
     elif upper == "amax":
         if not intervals["acc"][0] >= max(p, n) / (p + n):
@@ -394,9 +431,35 @@ def auc_from_sens_spec_kfold(
 
     return (float(lower0), float(upper0))
 
+def acc_from_auc_wrapper(
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    upper: str = "max"
+):
+    try:
+        return acc_from_auc(
+            scores=scores,
+            eps=eps,
+            p=p,
+            n=n,
+            upper=upper,
+            raise_errors=True
+        )
+    except:
+        return None
+    
 
 def acc_from_auc(
-    *, scores: dict, eps: float, p: int, n: int, upper: str = "max"
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    upper: str = "max",
+    raise_errors: bool = False
 ) -> tuple:
     """
     This module applies the estimation scheme A to estimate AUC from scores
@@ -412,6 +475,15 @@ def acc_from_auc(
         tuple(float, float): the interval for the maximum accuracy
     """
 
+    if not raise_errors:
+        return acc_from_auc_wrapper(
+            scores=scores,
+            eps=eps,
+            p=p,
+            n=n,
+            upper=upper
+        )
+
     scores = translate(scores)
 
     auc = (max(scores["auc"] - eps, 0), min(scores["auc"] + eps, 1))
@@ -421,7 +493,7 @@ def acc_from_auc(
 
     lower = 1 - (2 * np.sqrt(p * n - auc[0] * p * n)) / (p + n)
     if upper == "max":
-        upper = (auc[1] * max(p, n) + min(p, n)) / (p + n)
+        upper = (auc[1] * min(p, n) + max(p, n)) / (p + n)
     else:
         upper = (max(p, n) + min(p, n) * np.sqrt(2 * (auc[1] - 0.5))) / (p + n)
 
