@@ -316,10 +316,10 @@ def auc_from_sens_spec(
             upper=upper
         )
 
+    scores = translate(scores)
+
     if ("sens" in scores) + ("spec" in scores) + ("acc" in scores) < 2:
         raise ValueError("Not enough scores specified for the estimation")
-
-    scores = translate(scores)
 
     intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
 
@@ -387,6 +387,8 @@ def auc_from_sens_spec_kfold(
         tuple(float, float): the interval for the average AUC
     """
 
+    scores = translate(scores)
+
     if ("sens" in scores) + ("spec" in scores) + ("acc" in scores) < 2:
         raise ValueError("Not enough scores specified for the estimation")
 
@@ -394,8 +396,6 @@ def auc_from_sens_spec_kfold(
         raise ValueError("For k-fold estimation p and n are needed")
     if p % k != 0 or n % k != 0:
         raise ValueError("For k-fold, p and n must be divisible by k")
-
-    scores = translate(scores)
 
     intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
 
@@ -488,10 +488,84 @@ def acc_from_auc(
 
     auc = (max(scores["auc"] - eps, 0), min(scores["auc"] + eps, 1))
 
-    if not auc[0] >= 1 - min(p, n) / (2 * max(p, n)):
-        raise ValueError("AUC too small")
+    #if np.sqrt((1 - auc[0])*2*p*n) > min(p, n):
+    if auc[0] < 1 - min(p, n)/(2*max(p, n)):
+        lower = 1 - (np.sqrt(2 * p * n - 2 * auc[0] * p * n)) / (p + n)
+    else:
+        lower = max(p, n)/(p + n)
+        #raise ValueError("AUC too small")
+    
+    if upper == "max":
+        upper = (auc[1] * min(p, n) + max(p, n)) / (p + n)
+    else:
+        upper = (max(p, n) + min(p, n) * np.sqrt(2 * (auc[1] - 0.5))) / (p + n)
 
-    lower = 1 - (2 * np.sqrt(p * n - auc[0] * p * n)) / (p + n)
+    return (float(lower), float(upper))
+
+def acc_from_auc_kfold_wrapper(
+    *, 
+    scores: dict, 
+    eps: float, 
+    ps: int, 
+    ns: int, 
+    upper: str = "max"
+):
+    try:
+        return acc_from_auc_kfold(
+            scores=scores,
+            eps=eps,
+            ps=ps,
+            ns=ns,
+            upper=upper,
+            raise_errors=True
+        )
+    except:
+        return None
+    
+
+def acc_from_auc_kfold(
+    *, 
+    scores: dict, 
+    eps: float, 
+    ps: int, 
+    ns: int, 
+    upper: str = "max",
+    raise_errors: bool = False
+) -> tuple:
+    """
+    This module applies the estimation scheme A to estimate AUC from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        upper (str): 'max'/'cmax' - the type of upper bound
+
+    Returns:
+        tuple(float, float): the interval for the maximum accuracy
+    """
+
+    if not raise_errors:
+        return acc_from_auc_kfold_wrapper(
+            scores=scores,
+            eps=eps,
+            ps=ps,
+            ns=ns,
+            upper=upper
+        )
+
+    scores = translate(scores)
+
+    auc = (max(scores["auc"] - eps, 0), min(scores["auc"] + eps, 1))
+
+    #if np.sqrt((1 - auc[0])*2*p*n) > min(p, n):
+    if auc[0] < 1 - min(p, n)/(2*max(p, n)):
+        lower = 1 - (np.sqrt(2 * p * n - 2 * auc[0] * p * n)) / (p + n)
+    else:
+        lower = max(p, n)/(p + n)
+        #raise ValueError("AUC too small")
+    
     if upper == "max":
         upper = (auc[1] * min(p, n) + max(p, n)) / (p + n)
     else:

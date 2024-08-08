@@ -315,12 +315,28 @@ def test_auc_from():
     scores = {"acc": 0.6}
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="min", upper="max")
+        auc_from_sens_spec(
+            scores=scores, 
+            eps=eps, 
+            p=p, 
+            n=n, 
+            lower="min", 
+            upper="max", 
+            raise_errors=True
+        )
 
     scores = {"acc": 0.6, "sens": 0.55, "spec": 0.7, "asdf": "dummy"}
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="cmin", upper="amax")
+        auc_from_sens_spec(
+            scores=scores, 
+            eps=eps, 
+            p=p, 
+            n=n, 
+            lower="cmin", 
+            upper="amax", 
+            raise_errors=True
+        )
 
     scores = {"acc": 0.9, "sens": 0.92, "spec": 0.95, "asdf": "dummy"}
 
@@ -343,13 +359,30 @@ def test_auc_from():
             n=n,
             lower="cmin",
             upper="amax",
+            raise_errors=True
         )
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="dummy", upper="max")
+        auc_from_sens_spec(
+            scores=scores, 
+            eps=eps, 
+            p=p, 
+            n=n, 
+            lower="dummy", 
+            upper="max",
+            raise_errors=True
+        )
 
     with pytest.raises(ValueError):
-        auc_from_sens_spec(scores=scores, eps=eps, p=p, n=n, lower="min", upper="dummy")
+        auc_from_sens_spec(
+            scores=scores, 
+            eps=eps, 
+            p=p, 
+            n=n, 
+            lower="min", 
+            upper="dummy",
+            raise_errors=True
+        )
 
 
 def test_auc_from_kfold():
@@ -461,4 +494,4 @@ def test_acc_from_auc():
     scores = {"auc": 1 - min(p, n) / (2 * max(p, n)) - 0.1}
 
     with pytest.raises(ValueError):
-        acc_from_auc(scores=scores, eps=eps, p=p, n=n)
+        acc_from_auc(scores=scores, eps=eps, p=p, n=n, raise_errors=True)
