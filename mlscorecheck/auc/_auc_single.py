@@ -25,8 +25,10 @@ __all__ = [
     "auc_armin",
     "auc_amax",
     "acc_min",
+    "acc_rmin",
     "acc_max",
-    "acc_rmax"
+    "acc_rmax",
+    "macc_min"
 ]
 
 
@@ -376,7 +378,7 @@ def auc_armin(acc, p, n):
 
 def acc_min(auc, p, n):
     """
-    The minimum implied maximum accuracy given an AUC
+    The minimum accuracy given an AUC
 
     Args:
         auc (float): lower bound on AUC
@@ -384,16 +386,31 @@ def acc_min(auc, p, n):
         n (int): the number of negative test samples
     
     Returns:
-        float: the area
+        float: the accuracy
     """
-    if auc < 1 - min(p, n)/(2*max(p, n)):
-        return 1 - (np.sqrt(2 * p * n - 2 * auc * p * n)) / (p + n)
-    else:
-        return max(p, n)/(p + n)
+    return auc * min(p, n) / (p + n)
+
+def acc_rmin(auc, p, n):
+    """
+    The minimum accuracy given an AUC, assuming the curve does not
+    go below the random classification line
+
+    Args:
+        auc (float): the lower bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+    
+    Returns:
+        float: the accuracy
+    """
+    if auc < 0.5:
+        raise ValueError("the AUC is too small")
+    
+    return min(p, n)/(p + n)
 
 def acc_max(auc, p, n):
     """
-    The maximum implied accuracy given an AUC
+    The maximum accuracy given an AUC
 
     Args:
         auc (float): upper bound on AUC
@@ -401,13 +418,13 @@ def acc_max(auc, p, n):
         n (int): the number of negative test samples
     
     Returns:
-        float: the area
+        float: the accuracy
     """
     return (auc * min(p, n) + max(p, n)) / (p + n)
 
 def acc_rmax(auc, p, n):
     """
-    The maximum implied accuracy on a regulated minimum curve given an AUC
+    The maximum accuracy on a regulated minimum curve given an AUC
 
     Args:
         auc (float): upper bound on AUC
@@ -415,11 +432,34 @@ def acc_rmax(auc, p, n):
         n (int): the number of negative test samples
     
     Returns:
-        float: the area
+        float: the accuracy
     """
     if auc < 0.5:
         raise ValueError('auc too small')
     return (max(p, n) + min(p, n) * np.sqrt(2 * (auc - 0.5))) / (p + n)
+
+
+def macc_min(auc, p, n):
+    """
+    The minimum of the maximum accuracy
+
+    Args:
+        auc (float): lower bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+    
+    Returns:
+        float: the accuracy
+    """
+    if auc >= 1 - min(p, n)/(2*max(p, n)):
+        return 1 - (np.sqrt(2 * p * n - 2 * auc * p * n)) / (p + n)
+    else:
+        return max(p, n)/(p + n)
+
+
+
+
+
 
 def auc_from_sens_spec_wrapper(
     *, 
