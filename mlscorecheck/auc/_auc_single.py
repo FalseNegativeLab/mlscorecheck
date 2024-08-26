@@ -5,10 +5,12 @@ This module implements all AUC related functionalities
 import numpy as np
 
 __all__ = [
-    "prepare_intervals_for_auc_estimation",
-    "auc_from_sens_spec",
-    "acc_from_auc",
-    "translate",
+    "prepare_intervals",
+    "augment_intervals",
+    "auc_from",
+    "acc_from",
+    "max_acc_from",
+    "translate_scores",
     "integrate_roc_curve",
     "roc_min",
     "roc_max",
@@ -32,7 +34,7 @@ __all__ = [
 ]
 
 
-def translate(scores: dict) -> dict:
+def translate_scores(scores: dict) -> dict:
     """
     Translates the scores
 
@@ -43,22 +45,65 @@ def translate(scores: dict) -> dict:
         dict: the translated scores
     """
     scores = {**scores}
-    if "tpr" in scores:
-        if not "sens" in scores:
-            scores["sens"] = scores["tpr"]
-        else:
-            raise ValueError("tpr and sens cannot be specified together")
-    if "tnr" in scores:
-        if not "spec" in scores:
-            scores["spec"] = scores["tnr"]
-        else:
-            raise ValueError("tnr and spec cannot be specified together")
-    if "fpr" in scores:
-        if not "spec" in scores:
-            scores["spec"] = 1 - scores["fpr"]
-        else:
-            raise ValueError("fpr and spec cannot be specified together")
+
+    if "sens" in scores and "tpr" in scores and scores["sens"] != scores["tpr"]:
+        raise ValueError("differing sens and tpr cannot be specified together")
+    
+    if "sens" in scores and "fnr" in scores and scores["sens"] != 1 - scores["fnr"]:
+        raise ValueError("differing sens and fnr cannot be specified together")
+    
+    if "spec" in scores and "tnr" in scores and scores["spec"] != scores["tnr"]:
+        raise ValueError("differing spec and tnr cannot be specified together")
+    
+    if "spec" in scores and "fpr" in scores and scores["spec"] != 1 - scores["fpr"]:
+        raise ValueError("differing spec and fpr cannot be specified together")
+    
+    if "fpr" not in scores:
+        if "spec" in scores:
+            scores["fpr"] = 1 - scores["spec"]
+        if "tnr" in scores:
+            scores["fpr"] = 1 - scores["tnr"]
+    
+    if "tpr" not in scores:
+        if "sens" in scores:
+            scores["tpr"] = scores["sens"]
+        if "fnr" in scores:
+            scores["tpr"] = 1 - scores["fnr"]
+
     return scores
+
+
+def prepare_intervals(
+    scores: dict,
+    eps: float
+):
+    return {
+        score: (max(scores[score] - eps, 0), min(scores[score] + eps, 1))
+        for score in ["tpr", "fpr", "tnr", "fnr", "sens", "spec", "acc", "auc"]
+    }
+
+
+def augment_intervals(
+    intervals: dict,
+    p: int,
+    n: int
+):
+    intervals = {**intervals}
+
+    if "tpr" not in intervals and ("acc" in intervals and "fpr" in intervals):
+        lower = max(((intervals["acc"][0]) * (p + n) - (1 - intervals["fpr"][0] * n)) / p, 0)
+        upper = min(((intervals["acc"][1]) * (p + n) - (1 - intervals["fpr"][1] * n)) / p, 1)
+        intervals["tpr"] = (lower, upper)
+    if "fpr" not in intervals and ("acc" in intervals and "tpr" in intervals):
+        lower = max(((intervals["acc"][0]) * (p + n) - (intervals["tpr"][1] * p)) / n, 0)
+        upper = min(((intervals["acc"][1]) * (p + n) - (intervals["tpr"][0] * p)) / n, 1)
+        intervals["fpr"] = (1 - upper, 1 - lower)
+    if "acc" not in intervals and ("fpr" in intervals and "tpr" in intervals):
+        lower = max((intervals["sens"][0] * p + (1 - intervals["fpr"][1]) * n) / (p + n), 0)
+        upper = min((intervals["sens"][1] * p + (1 - intervals["fpr"][0]) * n) / (p + n), 1)
+        intervals["acc"] = (lower, upper)
+    
+    return intervals
 
 
 def prepare_intervals_for_auc_estimation(
@@ -243,7 +288,7 @@ def auc_min(fpr, tpr):
     The area under the minimum curve at fpr, tpr
 
     Args:
-        fpr (float): lower bound on false positive rate
+        fpr (float): upper bound on false positive rate
         tpr (float): lower bound on true positive rate
     
     Returns:
@@ -258,7 +303,7 @@ def auc_rmin(fpr, tpr):
 
     Args:
         fpr (float): lower bound on false positive rate
-        tpr (float): lower bound on true positive rate
+        tpr (float): upper bound on true positive rate
     
     Returns:
         float: the area
@@ -278,7 +323,7 @@ def auc_rmin_grid(fpr, tpr, p, n):
 
     Args:
         fpr (float): lower bound on false positive rate
-        tpr (float): lower bound on true positive rate
+        tpr (float): upper bound on true positive rate
     
     Returns:
         float: the area
@@ -298,7 +343,7 @@ def auc_max(fpr, tpr):
 
     Args:
         fpr (float): lower bound on false positive rate
-        tpr (float): lower bound on true positive rate
+        tpr (float): upper bound on true positive rate
     
     Returns:
         float: the area
@@ -346,7 +391,7 @@ def auc_amax(acc, p, n):
     The greatest area under the maximum curve at acc
 
     Args:
-        acc (float): lower bound on accuracy
+        acc (float): upper bound on accuracy
         p (int): the number of positive test samples
         n (int): the number of negative test samples
     
@@ -457,166 +502,164 @@ def macc_min(auc, p, n):
         return max(p, n)/(p + n)
 
 
-
-
-
-
-def auc_from_sens_spec_wrapper(
+def auc_from(
     *, 
     scores: dict, 
     eps: float, 
-    p: int, 
-    n: int, 
+    p: int = None, 
+    n: int = None, 
     lower: str = "min", 
-    upper: str = "max"):
-    try:
-        return auc_from_sens_spec(
-            scores=scores,
-            eps=eps,
-            p=p,
-            n=n,
-            lower=lower,
-            upper=upper,
-            raise_errors=True
-        )
-    except:
-        return None
-
-
-def auc_from_sens_spec(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
-    n: int, 
-    lower: str = "min", 
-    upper: str = "max",
-    raise_errors: bool = False
+    upper: str = "max"
 ) -> tuple:
     """
-    This module applies the estimation scheme A to estimate AUC from scores
+    This function applies the estimation schemes to estimate AUC from scores
 
     Args:
         scores (dict): the reported scores
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        lower (str): ('min'/'cmin') - the type of estimation for the lower bound
-        upper (str): ('max'/'amax') - the type of estimation for the upper bound
+        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin') - the type of estimation for the lower bound
+        upper (str): ('max'/'maxa'/'amax') - the type of estimation for the upper bound
 
     Returns:
         tuple(float, float): the interval for the AUC
     """
 
-    if not raise_errors:
-        return auc_from_sens_spec_wrapper(
-            scores=scores,
-            eps=eps,
-            p=p,
-            n=n,
-            lower=lower,
-            upper=upper
-        )
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
 
-    scores = translate(scores)
+    if p is not None and n is not None:
+        intervals = augment_intervals(intervals, p, n)
 
-    if ("sens" in scores) + ("spec" in scores) + ("acc" in scores) < 2:
-        raise ValueError("Not enough scores specified for the estimation")
-
-    intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
-
-    if lower == "min":
-        lower0 = intervals["sens"][0] * intervals["spec"][0]
-    elif lower == "cmin":
-        if intervals["sens"][0] < 1 - intervals["spec"][0]:
-            raise ValueError(
-                'sens >= 1 - spec does not hold for "\
-                            "the corrected minimum curve'
-            )
-        lower0 = 0.5 + (1 - (intervals["sens"][0] + intervals["spec"][0])) ** 2 / 2.0
-    else:
-        raise ValueError("Unsupported lower bound")
-
-    if upper == "max":
-        upper0 = 1 - (1 - intervals["sens"][1]) * (1 - intervals["spec"][1])
-    elif upper == "amax":
-        if not intervals["acc"][0] >= max(p, n) / (p + n):
-            raise ValueError("accuracy too small")
-        upper0 = 1 - ((1 - intervals["acc"][1]) * (p + n)) ** 2 / (2 * n * p)
-    else:
-        raise ValueError("Unsupported upper bound")
-
-    return (float(lower0), float(upper0))
-
-
-def acc_from_auc_wrapper(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
-    n: int, 
-    upper: str = "max"
-):
-    try:
-        return acc_from_auc(
-            scores=scores,
-            eps=eps,
-            p=p,
-            n=n,
-            upper=upper,
-            raise_errors=True
-        )
-    except:
-        return None
+    if lower in ['min', 'rmin', 'grmin'] or upper in ['max']:
+        if "fpr" not in intervals or "tpr" not in intervals:
+            raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ['grmin', 'amin', 'armin'] or upper in ['amax', 'maxa']:
+        if p is None or n is None:
+            raise ValueError("p and n must be specified")
+    if lower in ['amin', 'armin'] or upper in ['amax', 'maxa']:
+        if "acc" not in intervals:
+            raise ValueError("acc must be specified")
     
 
-def acc_from_auc(
+    if lower == 'min':
+        lower0 = auc_min(intervals["fpr"][1], intervals["tpr"][0])
+    elif lower == 'rmin':
+        lower0 = auc_rmin(intervals["fpr"][0], intervals["tpr"][1])
+    elif lower == 'grmin':
+        lower0 = auc_rmin_grid(intervals["fpr"][0], intervals["tpr"][1], p, n)
+    elif lower == 'amin':
+        lower0 = auc_amin(intervals["acc"][0], p, n)
+    elif lower == 'armin':
+        lower0 = auc_armin(intervals["acc"][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+
+    if upper == 'max':
+        upper0 = auc_max(intervals["fpr"][0], intervals["tpr"][1])
+    elif upper == 'amax':
+        upper0 = auc_amax(intervals["acc"][1], p, n)
+    elif upper == 'maxa':
+        upper0 = auc_maxa(intervals["acc"][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)
+    
+
+def acc_from(
     *, 
     scores: dict, 
     eps: float, 
     p: int, 
-    n: int, 
-    upper: str = "max",
-    raise_errors: bool = False
+    n: int,
+    lower: str = "min",
+    upper: str = "max"
 ) -> tuple:
     """
-    This module applies the estimation scheme A to estimate AUC from scores
+    This function applies the estimation schemes to estimate acc from scores
 
     Args:
         scores (dict): the reported scores
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        upper (str): 'max'/'cmax' - the type of upper bound
+        lower (str): 'min'/'rmin'
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        tuple(float, float): the interval for the accuracy
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+    
+    lower0 = None
+    upper0 = None
+
+    if lower == 'min':
+        lower0 = acc_min(intervals['auc'][0], p, n)
+    elif lower == 'rmin':
+        lower0 = acc_rmin(intervals['auc'][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+    
+    if upper == 'max':
+        upper0 = acc_max(intervals['auc'][1], p, n)
+    elif upper == 'rmax':
+        upper0 = acc_rmax(intervals['auc'][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)
+
+
+def max_acc_from(
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int,
+    lower: str = "min",
+    upper: str = "max"
+) -> tuple:
+    """
+    This function applies the estimation schemes to estimate maximum accuracy
+    from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'
+        upper (str): 'max'/'rmax' - the type of upper bound
 
     Returns:
         tuple(float, float): the interval for the maximum accuracy
     """
 
-    if not raise_errors:
-        return acc_from_auc_wrapper(
-            scores=scores,
-            eps=eps,
-            p=p,
-            n=n,
-            upper=upper
-        )
+    intervals = prepare_intervals(scores, eps)
 
-    scores = translate(scores)
-
-    auc = (max(scores["auc"] - eps, 0), min(scores["auc"] + eps, 1))
-
-    #if np.sqrt((1 - auc[0])*2*p*n) > min(p, n):
-    if auc[0] < 1 - min(p, n)/(2*max(p, n)):
-        lower = 1 - (np.sqrt(2 * p * n - 2 * auc[0] * p * n)) / (p + n)
-    else:
-        lower = max(p, n)/(p + n)
-        #raise ValueError("AUC too small")
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
     
-    if upper == "max":
-        upper = (auc[1] * min(p, n) + max(p, n)) / (p + n)
+    lower0 = None
+    upper0 = None
+
+    if lower == 'min':
+        lower0 = macc_min(intervals['auc'][0], p, n)
     else:
-        upper = (max(p, n) + min(p, n) * np.sqrt(2 * (auc[1] - 0.5))) / (p + n)
+        raise ValueError(f"unsupported lower bound {lower}")
+    
+    if upper == 'max':
+        upper0 = acc_max(intervals['auc'][1], p, n)
+    elif upper == 'rmax':
+        upper0 = acc_rmax(intervals['auc'][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
 
-    return (float(lower), float(upper))
-
+    return (lower0, upper0)
