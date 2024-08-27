@@ -48,22 +48,22 @@ def translate_scores(scores: dict) -> dict:
 
     if "sens" in scores and "tpr" in scores and scores["sens"] != scores["tpr"]:
         raise ValueError("differing sens and tpr cannot be specified together")
-    
+
     if "sens" in scores and "fnr" in scores and scores["sens"] != 1 - scores["fnr"]:
         raise ValueError("differing sens and fnr cannot be specified together")
-    
+
     if "spec" in scores and "tnr" in scores and scores["spec"] != scores["tnr"]:
         raise ValueError("differing spec and tnr cannot be specified together")
-    
+
     if "spec" in scores and "fpr" in scores and scores["spec"] != 1 - scores["fpr"]:
         raise ValueError("differing spec and fpr cannot be specified together")
-    
+
     if "fpr" not in scores:
         if "spec" in scores:
             scores["fpr"] = 1 - scores["spec"]
         if "tnr" in scores:
             scores["fpr"] = 1 - scores["tnr"]
-    
+
     if "tpr" not in scores:
         if "sens" in scores:
             scores["tpr"] = scores["sens"]
@@ -77,9 +77,20 @@ def prepare_intervals(
     scores: dict,
     eps: float
 ):
+    """
+    Create intervals from the values
+
+    Args:
+        scores (dict): the scores to transform to intervals
+        eps (float): the estimated numerical uncertainty
+
+    Returns:
+        dict: the intervals
+    """
     return {
         score: (max(scores[score] - eps, 0), min(scores[score] + eps, 1))
         for score in ["tpr", "fpr", "tnr", "fnr", "sens", "spec", "acc", "auc"]
+        if score in scores
     }
 
 
@@ -88,60 +99,33 @@ def augment_intervals(
     p: int,
     n: int
 ):
+    """
+    Augment the intervals based on the relationship between tpr, fpr and acc
+
+    Args:
+        intervals (dict): the intervals of scores
+        p (int): the number of positive samples
+        n (int): the numbere of negative samples
+
+    Returns:
+        dict: the intervals augmented
+    """
     intervals = {**intervals}
 
     if "tpr" not in intervals and ("acc" in intervals and "fpr" in intervals):
-        lower = max(((intervals["acc"][0]) * (p + n) - (1 - intervals["fpr"][0] * n)) / p, 0)
-        upper = min(((intervals["acc"][1]) * (p + n) - (1 - intervals["fpr"][1] * n)) / p, 1)
+        lower = max(((intervals["acc"][0]) * (p + n) - ((1 - intervals["fpr"][0]) * n)) / p, 0)
+        upper = min(((intervals["acc"][1]) * (p + n) - ((1 - intervals["fpr"][1]) * n)) / p, 1)
         intervals["tpr"] = (lower, upper)
     if "fpr" not in intervals and ("acc" in intervals and "tpr" in intervals):
         lower = max(((intervals["acc"][0]) * (p + n) - (intervals["tpr"][1] * p)) / n, 0)
         upper = min(((intervals["acc"][1]) * (p + n) - (intervals["tpr"][0] * p)) / n, 1)
         intervals["fpr"] = (1 - upper, 1 - lower)
     if "acc" not in intervals and ("fpr" in intervals and "tpr" in intervals):
-        lower = max((intervals["sens"][0] * p + (1 - intervals["fpr"][1]) * n) / (p + n), 0)
-        upper = min((intervals["sens"][1] * p + (1 - intervals["fpr"][0]) * n) / (p + n), 1)
+        lower = max((intervals["tpr"][0] * p + (1 - intervals["fpr"][1]) * n) / (p + n), 0)
+        upper = min((intervals["tpr"][1] * p + (1 - intervals["fpr"][0]) * n) / (p + n), 1)
         intervals["acc"] = (lower, upper)
-    
+
     return intervals
-
-
-def prepare_intervals_for_auc_estimation(
-    scores: dict, eps: float, p: int, n: int
-) -> dict:
-    """
-    Prepares all intervals
-
-    Args:
-        scores (dict): the dictionary of reported scores
-        eps (float): the numerical uncertainty
-        p (int): the number of positive samples
-        n (int): the number of negative samples
-
-    Returns:
-        dict: the intervals
-    """
-
-    results = {
-        score: (max(scores[score] - eps, 0), min(scores[score] + eps, 1))
-        for score in ["acc", "sens", "spec"]
-        if score in scores
-    }
-
-    if "sens" not in results:
-        lower = max(((results["acc"][0]) * (p + n) - (results["spec"][1] * n)) / p, 0)
-        upper = min(((results["acc"][1]) * (p + n) - (results["spec"][0] * n)) / p, 1)
-        results["sens"] = (lower, upper)
-    if "spec" not in results:
-        lower = max(((results["acc"][0]) * (p + n) - (results["sens"][1] * p)) / n, 0)
-        upper = min(((results["acc"][1]) * (p + n) - (results["sens"][0] * p)) / n, 1)
-        results["spec"] = (lower, upper)
-    if "acc" not in results:
-        lower = max((results["sens"][0] * p + results["spec"][0] * n) / (p + n), 0)
-        upper = min((results["sens"][1] * p + results["spec"][1] * n) / (p + n), 1)
-        results["acc"] = (lower, upper)
-
-    return results
 
 def integrate_roc_curve(fprs, tprs):
     """
@@ -150,7 +134,7 @@ def integrate_roc_curve(fprs, tprs):
     Args:
         fprs (np.array): the fpr values
         tprs (np.array): the tpr values
-    
+
     Returns:
         float: the integral
     """
@@ -165,7 +149,7 @@ def roc_min(fpr, tpr):
     Args:
         fpr (float): the false positive rate
         tpr (float): the true positive rate
-    
+
     Returns:
         np.array, np.array: the fpr and tpr values
     """
@@ -182,7 +166,7 @@ def roc_max(fpr, tpr):
     Args:
         fpr (float): the false positive rate
         tpr (float): the true positive rate
-    
+
     Returns:
         np.array, np.array: the fpr and tpr values
     """
@@ -199,7 +183,7 @@ def roc_rmin(fpr, tpr):
     Args:
         fpr (float): the false positive rate
         tpr (float): the true positive rate
-    
+
     Returns:
         np.array, np.array: the fpr and tpr values
     """
@@ -222,7 +206,7 @@ def roc_rmin_grid(fpr, tpr, p, n):
         tpr (float): the true positive rate
         p (int): the number of positive samples
         n: (int): the number of negative samples
-    
+
     Returns:
         np.array, np.array: the fpr and tpr values
     """
@@ -245,7 +229,7 @@ def roc_rmin_grid_correction(fpr, tpr, p, n):
         tpr (float): the true positive rate
         p (int): the number of positive samples
         n: (int): the number of negative samples
-    
+
     Returns:
         float: the fpr and tpr values
     """
@@ -255,7 +239,7 @@ def roc_rmin_grid_correction(fpr, tpr, p, n):
     a = np.ceil(fpr * p - eps) / p - fpr
     b = np.floor(tpr * n + eps) / n - tpr
 
-    return fpr * a / 2 + (1 - tpr)/2*(-b)
+    return float(fpr * a / 2 + (1 - tpr)/2*(-b))
 
 def roc_maxa(acc, p, n):
     """
@@ -266,7 +250,7 @@ def roc_maxa(acc, p, n):
         tpr (float): the true positive rate
         p (int): the number of positive samples
         n: (int): the number of negative samples
-    
+
     Returns:
         np.array, np.array: the fpr and tpr values
     """
@@ -290,11 +274,11 @@ def auc_min(fpr, tpr):
     Args:
         fpr (float): upper bound on false positive rate
         tpr (float): lower bound on true positive rate
-    
+
     Returns:
         float: the area
     """
-    
+
     return float(tpr * (1 - fpr))
 
 def auc_rmin(fpr, tpr):
@@ -304,36 +288,36 @@ def auc_rmin(fpr, tpr):
     Args:
         fpr (float): lower bound on false positive rate
         tpr (float): upper bound on true positive rate
-    
+
     Returns:
         float: the area
     """
-    
+
     if tpr < fpr:
-            raise ValueError(
-                'sens >= 1 - spec does not hold for "\
-                            "the regulated minimum curve'
-            )
+        raise ValueError(
+            'sens >= 1 - spec does not hold for "\
+                        "the regulated minimum curve'
+        )
     return float(0.5 + (tpr - fpr) ** 2 / 2.0)
 
 def auc_rmin_grid(fpr, tpr, p, n):
     """
-    The area under the regulated minimum curve at fpr, tpr, with grid 
+    The area under the regulated minimum curve at fpr, tpr, with grid
     correction
 
     Args:
         fpr (float): lower bound on false positive rate
         tpr (float): upper bound on true positive rate
-    
+
     Returns:
         float: the area
     """
-    
+
     if tpr < fpr:
-            raise ValueError(
-                'sens >= 1 - spec does not hold for "\
-                            "the regulated minimum curve'
-            )
+        raise ValueError(
+            'sens >= 1 - spec does not hold for "\
+                        "the regulated minimum curve'
+        )
     return float(0.5 + (tpr - fpr) ** 2 / 2.0) \
             + roc_rmin_grid_correction(fpr, tpr, p, n)
 
@@ -344,11 +328,11 @@ def auc_max(fpr, tpr):
     Args:
         fpr (float): lower bound on false positive rate
         tpr (float): upper bound on true positive rate
-    
+
     Returns:
         float: the area
     """
-    
+
     return float(1 - (1 - tpr) * fpr)
 
 def auc_maxa(acc, p, n):
@@ -359,14 +343,14 @@ def auc_maxa(acc, p, n):
         acc (float): upper bound on accuracy
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the area
     """
 
     if acc < max(p, n) / (p + n):
         raise ValueError("accuracy too small")
-    
+
     return float(1 - ((1 - acc) * (p + n)) ** 2 / (2 * n * p))
 
 def auc_amin(acc, p, n):
@@ -377,13 +361,13 @@ def auc_amin(acc, p, n):
         acc (float): lower bound on accuracy
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the area
     """
     if acc < max(p, n)/(p + n):
         return 0.0
-    
+
     return float(acc - (1 - acc) * max(p, n)/min(p, n))
 
 def auc_amax(acc, p, n):
@@ -394,15 +378,15 @@ def auc_amax(acc, p, n):
         acc (float): upper bound on accuracy
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the area
     """
 
     if acc > min(p, n)/(p + n):
         return 1.0
-    
-    return acc * (1 + max(p, n)/min(p, n))
+
+    return float(acc * (1 + max(p, n)/min(p, n)))
 
 def auc_armin(acc, p, n):
     """
@@ -412,14 +396,14 @@ def auc_armin(acc, p, n):
         acc (float): lower bound on accuracy
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the area
     """
     if acc < max(p, n)/(p + n):
         raise ValueError("accuracy too small")
-    
-    return auc_amin(acc, p, n)**2/2 + 0.5
+
+    return float(auc_amin(acc, p, n)**2/2 + 0.5)
 
 def acc_min(auc, p, n):
     """
@@ -429,7 +413,7 @@ def acc_min(auc, p, n):
         auc (float): lower bound on AUC
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the accuracy
     """
@@ -444,13 +428,13 @@ def acc_rmin(auc, p, n):
         auc (float): the lower bound on AUC
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the accuracy
     """
     if auc < 0.5:
         raise ValueError("the AUC is too small")
-    
+
     return min(p, n)/(p + n)
 
 def acc_max(auc, p, n):
@@ -461,7 +445,7 @@ def acc_max(auc, p, n):
         auc (float): upper bound on AUC
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the accuracy
     """
@@ -475,7 +459,7 @@ def acc_rmax(auc, p, n):
         auc (float): upper bound on AUC
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the accuracy
     """
@@ -492,23 +476,55 @@ def macc_min(auc, p, n):
         auc (float): lower bound on AUC
         p (int): the number of positive test samples
         n (int): the number of negative test samples
-    
+
     Returns:
         float: the accuracy
     """
     if auc >= 1 - min(p, n)/(2*max(p, n)):
         return 1 - (np.sqrt(2 * p * n - 2 * auc * p * n)) / (p + n)
-    else:
-        return max(p, n)/(p + n)
+
+    return max(p, n)/(p + n)
+
+
+def check_applicability(
+        intervals: dict,
+        lower: str,
+        upper: str,
+        p: int,
+        n: int
+    ):
+    """
+    Checks the applicability of the methods
+
+    Args:
+        intervals (dict): the score intervals
+        lower (str): the lower bound method
+        upper (str): the upper bound method
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Raises:
+        ValueError: when the methods are not applicable with the
+                    specified scores
+    """
+    if lower in ['min', 'rmin', 'grmin'] or upper in ['max']:
+        if "fpr" not in intervals or "tpr" not in intervals:
+            raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ['grmin', 'amin', 'armin'] or upper in ['amax', 'maxa']:
+        if p is None or n is None:
+            raise ValueError("p and n must be specified")
+    if lower in ['amin', 'armin'] or upper in ['amax', 'maxa']:
+        if "acc" not in intervals:
+            raise ValueError("acc must be specified")
 
 
 def auc_from(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int = None, 
-    n: int = None, 
-    lower: str = "min", 
+    *,
+    scores: dict,
+    eps: float,
+    p: int = None,
+    n: int = None,
+    lower: str = "min",
     upper: str = "max"
 ) -> tuple:
     """
@@ -519,8 +535,10 @@ def auc_from(
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin') - the type of estimation for the lower bound
-        upper (str): ('max'/'maxa'/'amax') - the type of estimation for the upper bound
+        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin') - the type of
+                        estimation for the lower bound
+        upper (str): ('max'/'maxa'/'amax') - the type of estimation for
+                        the upper bound
 
     Returns:
         tuple(float, float): the interval for the AUC
@@ -532,16 +550,8 @@ def auc_from(
     if p is not None and n is not None:
         intervals = augment_intervals(intervals, p, n)
 
-    if lower in ['min', 'rmin', 'grmin'] or upper in ['max']:
-        if "fpr" not in intervals or "tpr" not in intervals:
-            raise ValueError("fpr, tpr or their complements must be specified")
-    if lower in ['grmin', 'amin', 'armin'] or upper in ['amax', 'maxa']:
-        if p is None or n is None:
-            raise ValueError("p and n must be specified")
-    if lower in ['amin', 'armin'] or upper in ['amax', 'maxa']:
-        if "acc" not in intervals:
-            raise ValueError("acc must be specified")
-    
+    check_applicability(intervals, lower, upper, p, n)
+
 
     if lower == 'min':
         lower0 = auc_min(intervals["fpr"][1], intervals["tpr"][0])
@@ -566,13 +576,13 @@ def auc_from(
         raise ValueError(f"unsupported upper bound {upper}")
 
     return (lower0, upper0)
-    
+
 
 def acc_from(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
+    *,
+    scores: dict,
+    eps: float,
+    p: int,
     n: int,
     lower: str = "min",
     upper: str = "max"
@@ -596,7 +606,7 @@ def acc_from(
 
     if "auc" not in intervals:
         raise ValueError("auc must be specified")
-    
+
     lower0 = None
     upper0 = None
 
@@ -606,7 +616,7 @@ def acc_from(
         lower0 = acc_rmin(intervals['auc'][0], p, n)
     else:
         raise ValueError(f"unsupported lower bound {lower}")
-    
+
     if upper == 'max':
         upper0 = acc_max(intervals['auc'][1], p, n)
     elif upper == 'rmax':
@@ -618,10 +628,10 @@ def acc_from(
 
 
 def max_acc_from(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
+    *,
+    scores: dict,
+    eps: float,
+    p: int,
     n: int,
     lower: str = "min",
     upper: str = "max"
@@ -646,7 +656,7 @@ def max_acc_from(
 
     if "auc" not in intervals:
         raise ValueError("auc must be specified")
-    
+
     lower0 = None
     upper0 = None
 
@@ -654,7 +664,7 @@ def max_acc_from(
         lower0 = macc_min(intervals['auc'][0], p, n)
     else:
         raise ValueError(f"unsupported lower bound {lower}")
-    
+
     if upper == 'max':
         upper0 = acc_max(intervals['auc'][1], p, n)
     elif upper == 'rmax':
