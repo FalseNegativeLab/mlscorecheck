@@ -16,7 +16,8 @@ from ._auc_single import (
     acc_min,
     acc_max,
     acc_rmin,
-    acc_rmax
+    acc_rmax,
+    macc_min
 )
 
 __all__ = [
@@ -35,9 +36,11 @@ __all__ = [
     "acc_rmin_aggregated",
     "acc_rmax_aggregated",
     "acc_from_aggregated",
+    "macc_min_aggregated",
     "R",
     "F",
-    "perturbe_solutions"
+    "perturb_solutions",
+    "multi_perturb_solutions"
 ]
 
 def R(
@@ -49,7 +52,9 @@ def R(
     """
     The "representative" function
 
-    1 - R(x, k, lower, upper) = F(R(1 - x, k, 1 - upper, 1 - lower)) holds
+    1 - R(x, k, lower, upper) = F(R(1 - x, k, 1 - F(upper), 1 - F(lower))) 
+    
+    holds.
 
     Args:
         x (float): the desired average
@@ -286,11 +291,12 @@ def auc_maxa_aggregated(
     """
     return auc_maxa_solve(ps, ns, acc, return_solutions)
 
-def perturbe_solutions(
+def perturb_solutions(
         values: np.array, 
         lower_bounds: np.array, 
         upper_bounds: np.array, 
-        random_state: int=None) -> np.array:
+        random_state: int=None
+    ) -> np.array:
     """
     Applies a perturbation to a solution, by keeping the lower and upper bound and the sum
 
@@ -316,6 +322,37 @@ def perturbe_solutions(
     values = values.copy()
     values[greater] -= step
     values[lower] += step
+
+    return values
+
+def multi_perturb_solutions(
+        n_perturbations: int,
+        values: np.array, 
+        lower_bounds: np.array, 
+        upper_bounds: np.array, 
+        random_state: int=None
+    ) -> np.array:
+    """
+    Applies a multiple perturbations to a solution vector,
+    keeping its average
+
+    Args:
+        n_perturbations (int): the number of perturbations
+        values (np.array): the values to perturb
+        lower_bounds (np.array): the lower bounds
+        upper_bounds (np.array): the upper bounds
+        random_state (int|None): the random seed to use
+    
+    Returns:
+        np.array: the perturbed values
+    """
+    for _ in range(n_perturbations):
+        values = perturb_solutions(
+            values, 
+            lower_bounds, 
+            upper_bounds, 
+            random_state
+        )
 
     return values
 
@@ -409,6 +446,11 @@ def auc_amax_aggregated(
     
     return results
 
+def check_cvxopt(results, message):
+    if results['status'] != 'optimal':
+        raise ValueError('no optimal solution found for the configuration ',
+                         f'({message})')
+
 def auc_armin_solve(ps, ns, avg_acc, return_bounds=False):
     """
     Solves the armin quadratic optimization problem
@@ -447,6 +489,8 @@ def auc_armin_solve(ps, ns, avg_acc, return_bounds=False):
 
     res = qp(P=Q, q=p, G=G, h=h, A=A, b=b)
 
+    check_cvxopt(res, 'auc_armin_aggregated')
+
     results = np.array(res['x'])[:, 0]
 
     if return_bounds:
@@ -476,7 +520,7 @@ def auc_armin_aggregated(acc, ps, ns, return_solutions=False):
 
     accs, lower = auc_armin_solve(ps, ns, acc, return_bounds=True)
 
-    auc = np.mean([auc_armin(acc, p, n) for acc, p, n in zip(accs, ps, ns)])
+    auc = float(np.mean([auc_armin(acc, p, n) for acc, p, n in zip(accs, ps, ns)]))
 
     results = auc
 
@@ -486,6 +530,22 @@ def auc_armin_aggregated(acc, ps, ns, return_solutions=False):
     return results
 
 def acc_min_aggregated(auc, ps, ns, return_solutions=False):
+    """
+    The minimum based accuracy
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+    
+    Returns:
+        float | (float, (np.array, np.array, np.array, np.array, np.array)):
+            the acc or the acc and the following details: the AUC values for 
+            the individual underlying curves, the ps, ns (in proper order), the
+            lower bounds and the upper bounds
+    """
     ps = np.array(ps)
     ns = np.array(ns)
 
@@ -500,7 +560,7 @@ def acc_min_aggregated(auc, ps, ns, return_solutions=False):
 
     aucs = R(auc, k)
 
-    acc = np.mean([acc_min(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
+    acc = float(np.mean([acc_min(auc, p, n) for auc, p, n in zip(aucs, ps, ns)]))
 
     results = acc
 
@@ -510,6 +570,22 @@ def acc_min_aggregated(auc, ps, ns, return_solutions=False):
     return results
 
 def acc_max_aggregated(auc, ps, ns, return_solutions=False):
+    """
+    The maximum based accuracy
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+    
+    Returns:
+        float | (float, (np.array, np.array, np.array, np.array, np.array)):
+            the acc or the acc and the following details: the AUC values for 
+            the individual underlying curves, the ps, ns (in proper order), the
+            lower bounds and the upper bounds
+    """
     ps = np.array(ps)
     ns = np.array(ns)
 
@@ -524,7 +600,7 @@ def acc_max_aggregated(auc, ps, ns, return_solutions=False):
 
     aucs = R(auc, k)
 
-    acc = np.mean([acc_max(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
+    acc = float(np.mean([acc_max(auc, p, n) for auc, p, n in zip(aucs, ps, ns)]))
 
     results = acc
 
@@ -533,80 +609,53 @@ def acc_max_aggregated(auc, ps, ns, return_solutions=False):
 
     return results
 
-class F_acc_rmin:
-    def __init__(self, ps, ns, avg_auc):
-        self.ps = ps
-        self.ns = ns
-        self.avg_auc = avg_auc
-        self.k = len(ps)
-        self.maxs = np.array([max(p, n) for p, n in zip(ps, ns)])
-        self.mins = np.array([min(p, n) for p, n in zip(ps, ns)])
-        self.weights = np.sqrt(ps*ns)/(ps + ns)
-
-    def __call__(self, x=None, z=None):
-        if x is None and z is None:
-            return (0, matrix(1.0, (self.k, 1)))
-        
-        if x is not None:
-            f = matrix(-np.sum(np.sqrt(x)*self.weights.reshape(-1, 1)))
-            Df = matrix(-0.5/np.sqrt(x)*self.weights.reshape(-1, 1)).T
-        
-        if z is None:
-            return (f, Df)
-        
-        hess = np.diag(0.5**2*np.array(x)[:, 0]**(-3/2)*self.weights)
-        
-        hess = matrix(z[0]*hess)
-
-        return (f, Df, hess)
-
-def acc_rmin_evaluate(ps, ns, aucs):
-    return np.mean([acc_rmin(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
-
-def acc_rmin_solve(ps, ns, avg_auc, return_solutions=False):
-    F = F_acc_rmin(ps, ns, avg_auc)
-
-    k = ps.shape[0]
-
-    lower_bounds = np.repeat(0.5, k)
-
-    q = (ps + ns)**2/(2*ps*ns)/k*2
-    Q = np.diag(q)
-    A = np.repeat(1.0/k, k).reshape(-1, 1).T
-    b = np.array([2*(1 - avg_auc)])
-    G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)
-    h = np.hstack([np.repeat(1.0, k), -lower_bounds])
-    
-    Q = matrix(Q)
-    q = matrix(q)
-    G = matrix(G)
-    h = matrix(h)
-    A = matrix(A)
-    b = matrix(b)
-
-    res = cp(F, G, h, A=A, b=b)
-
-    print(res['status'])
-
-    aucs = 1 - (np.array(res['x'])[:, 0])/2
-
-    acc = acc_rmin_evaluate(ps, ns, aucs)
-
-    results = acc
-
-    if return_solutions:
-        results = acc, (aucs, lower_bounds, np.repeat(1.0, k))
-    
-    return results
-
 def acc_rmin_aggregated(auc, ps, ns, return_solutions=False):
+    """
+    The regulated minimum based accuracy
+
+    This is independent from the AUC, as when the ROC curve is
+    expected to run above the random classification line, the
+    minimum accuracy along the curve is either p/(p + n) or
+    n / (p + n).
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+    
+    Returns:
+        float | (float, (np.array, np.array, np.array)):
+            the acc or the acc and the following details: the AUC values for 
+            the individual underlying curves, the lower bounds and the upper bounds
+    """
     ps = np.array(ps)
     ns = np.array(ns)
 
-    return acc_rmin_solve(ps, ns, auc, return_solutions)
+    acc = np.mean([min(p, n)/(p + n) for p, n in zip(ps, ns)])
+    
+    results = acc
+
+    if return_solutions:
+        results = acc, (np.repeat(0.7, len(ps)), np.repeat(0.5, len(ps)), np.repeat(1.0, len(ps)))
+    
+    return results
 
 class F_acc_rmax:
+    """
+    Implements the convex programming objective for the regulated
+    accuracy maximization.
+    """
     def __init__(self, ps, ns, avg_auc):
+        """
+        The constructor of the object
+
+        Args:
+            ps (np.array): the number of positive samples
+            ns (np.array): the number of negative samples
+            avg_auc (float): the average AUC (upper bound)
+        """
         self.ps = ps
         self.ns = ns
         self.avg_auc = avg_auc
@@ -616,44 +665,109 @@ class F_acc_rmax:
         self.weights = self.mins / (ps + ns)
 
     def __call__(self, x=None, z=None):
+        """
+        The call method according to the specification in cvxopt
+
+        Evaluates the function
+
+        f(auc) = - sum limits_{i=1}^{k} sqrt{2auc_i - 1}*w_i,
+
+        where w_i = min(p_i, n_i)/(p_i + n_i).
+
+        The function originates from the objective
+
+        f_0(auc) = dfrac{1}{k} sum limits_{i=1}^{k}acc_rmax(auc_i, p_i, n_i),
+
+        by removing the multiplier 1/k and the constants parts.
+
+        Since the function is to be maximized, a negative sign is added to turn
+        it into minimization.
+
+        Also:
+            auc = sp.Symbol('auc')
+            f = sp.sqrt(2*auc - 1)
+            sp.diff(f, auc), sp.diff(sp.diff(f, auc), auc)
+
+            (1/sqrt(2*auc - 1), -1/(2*auc - 1)**(3/2))
+
+        Args:
+            x (cvxopt.matrix | None): a vector in the parameter space
+            z (cvxopt.matrix | None): a weight vector
+        
+        Returns:
+            (n, matrix): the number of non-linear constraints and a feasible
+                point when x is None and z is None
+            (matrix, matrix): the objective value at x, and the gradient
+                at x when x is not None but z is None
+            (matrix, matrix, matrx): the objective value at x, the gradient
+                at x and the weighted sum of the Hessian of the objective and
+                all non-linear constraints with the weights z if z is not None
+        """
         if x is None and z is None:
+            # The number of non-linear constraints and one point of
+            # the feasible region
             return (0, matrix(1.0, (self.k, 1)))
         
         if x is not None:
-            f = matrix(-np.sum(np.sqrt(x)*self.weights.reshape(-1, 1)))
-            Df = matrix(-0.5/np.sqrt(x)*self.weights.reshape(-1, 1)).T
+            # the function to be evaluated
+            f = matrix(-np.sum(np.sqrt(2*x-1)*self.weights.reshape(-1, 1)))
+            # the gradient
+            Df = matrix(-1.0/np.sqrt(2*x-1)*self.weights.reshape(-1, 1)).T
         
         if z is None:
             return (f, Df)
         
-        hess = np.diag(0.5**2*np.array(x)[:, 0]**(-3/2)*self.weights)
+        # the Hessian
+        hess = np.diag((2*np.array(x)[:, 0] - 1.0)**(-3/2)*self.weights)
         
         hess = matrix(z[0]*hess)
 
         return (f, Df, hess)
 
 def acc_rmax_evaluate(ps, ns, aucs):
+    """
+    Evaluates a particular configuration of rmax parameters
+
+    Args:
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        aucs (np.array): the AUC parameters
+    
+    Returns:
+        float: the mean accuracy
+    """
     maxs = np.array([max(p, n) for p, n in zip(ps, ns)])
     mins = np.array([min(p, n) for p, n in zip(ps, ns)])
 
     return np.mean((maxs + mins * np.sqrt(2*aucs - 1)) / (ps + ns))
 
 def acc_rmax_solve(ps, ns, avg_auc, return_solutions=False):
+    """
+    Solves the regulated maximium curves problem
+
+    Args:
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        avg_auc (np.array): the average AUC
+        return_solutions (bool): whether to return the solutions and
+                                further details
+
+    Returns:
+        float | (float, np.array, np.array, np.array): the mean accuracy, 
+        or the mean accuracy, the auc parameters, lower bounds and upper 
+        bounds
+    """
     F = F_acc_rmax(ps, ns, avg_auc)
 
     k = ps.shape[0]
 
     lower_bounds = np.repeat(0.5, k)
 
-    q = (ps + ns)**2/(2*ps*ns)/k*2
-    Q = np.diag(q)
     A = np.repeat(1.0/k, k).reshape(-1, 1).T
-    b = np.array([2*avg_auc - 1])
+    b = np.array([avg_auc])
     G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)
     h = np.hstack([np.repeat(1.0, k), -lower_bounds])
     
-    Q = matrix(Q)
-    q = matrix(q)
     G = matrix(G)
     h = matrix(h)
     A = matrix(A)
@@ -661,7 +775,9 @@ def acc_rmax_solve(ps, ns, avg_auc, return_solutions=False):
 
     res = cp(F, G, h, A=A, b=b)
 
-    aucs = (np.array(res['x']) + 1)/2
+    check_cvxopt(res, 'acc_rmax_aggregated')
+
+    aucs = np.array(res['x'][:, 0])
 
     acc = acc_rmax_evaluate(ps, ns, aucs)
 
@@ -673,13 +789,182 @@ def acc_rmax_solve(ps, ns, avg_auc, return_solutions=False):
     return results
 
 def acc_rmax_aggregated(auc, ps, ns, return_solutions=False):
+    """
+    The regulated maximum based accuracy
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+    
+    Returns:
+        float | (float, (np.array, np.array, np.array)):
+            the acc or the acc and the following details: the AUC values for 
+            the individual underlying curves, the lower bounds and the upper bounds
+    """
     ps = np.array(ps)
     ns = np.array(ns)
 
     return acc_rmax_solve(ps, ns, auc, return_solutions)
 
-def macc_min_aggregated():
-    pass
+class F_macc_min:
+    """
+    Implements the convex programming objective for the maximum accuracy
+    minimization.
+    """
+    def __init__(self, ps, ns, avg_auc):
+        """
+        The constructor of the object
+
+        Args:
+            ps (np.array): the number of positive samples
+            ns (np.array): the number of negative samples
+            avg_auc (float): the average AUC (upper bound)
+        """
+        self.ps = ps
+        self.ns = ns
+        self.avg_auc = avg_auc
+        self.k = len(ps)
+        self.maxs = np.array([max(p, n) for p, n in zip(ps, ns)])
+        self.mins = np.array([min(p, n) for p, n in zip(ps, ns)])
+        self.weights = np.sqrt(2*(ps*ns))/(ps + ns)
+        self.lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
+
+    def __call__(self, x=None, z=None):
+        """
+        The call method according to the specification in cvxopt
+
+        Evaluates the function originating from the objective
+
+        f_0(auc) = dfrac{1}{k} sum limits_{i=1}^{k}macc_min(auc_i, p_i, n_i),
+
+        f_0(auc) = 1/k sum (1 - sqrt(2*p_i*n_i*(1 - auc_i))/(p_i + n_i))
+
+        by removing the multiplier 1/k and the constants parts.
+
+        Also:
+            auc = sp.Symbol('auc')
+            f = sp.sqrt(1 - auc)
+            sp.diff(f, auc), sp.diff(sp.diff(f, auc), auc)
+
+            (-1/(2*sqrt(1 - auc)), -1/(4*(1 - auc)**(3/2)))
+        
+        Args:
+            x (cvxopt.matrix | None): a vector in the parameter space
+            z (cvxopt.matrix | None): a weight vector
+        
+        Returns:
+            (n, matrix): the number of non-linear constraints and a feasible
+                point when x is None and z is None
+            (matrix, matrix): the objective value at x, and the gradient
+                at x when x is not None but z is None
+            (matrix, matrix, matrx): the objective value at x, the gradient
+                at x and the weighted sum of the Hessian of the objective and
+                all non-linear constraints with the weights z if z is not None
+        """
+        if x is None and z is None:
+            return (0, matrix(self.lower_bounds, (self.k, 1)))
+        
+        if x is not None:
+            f = matrix(-np.sum(np.sqrt(1 - x)*self.weights.reshape(-1, 1)))
+            Df = matrix(1.0/(2*np.sqrt(1 - x))*self.weights.reshape(-1, 1)).T
+        
+        if z is None:
+            return (f, Df)
+        
+        hess = np.diag(1.0/(4*np.array(1 - x)[:, 0]**(3/2))*self.weights)
+        
+        hess = matrix(z[0]*hess)
+
+        return (f, Df, hess)
+
+def macc_min_evaluate(ps, ns, aucs):
+    """
+    Evaluates a particular macc_min configuration
+
+    Args:
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        aucs (np.array): the AUCs
+    
+    Returns:
+        float: the average accuracy
+    """
+    return np.mean([macc_min(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
+
+def macc_min_solve(ps, ns, avg_auc, return_solutions=False):
+    """
+    Solves the maximum accuracy minimum curves problem
+
+    Args:
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        avg_auc (np.array): the average AUC
+        return_solutions (bool): whether to return the solutions and
+                                further details
+
+    Returns:
+        float | (float, np.array, np.array, np.array): the mean accuracy, 
+        or the mean accuracy, the auc parameters, lower bounds and upper 
+        bounds
+    """
+    F = F_macc_min(ps, ns, avg_auc)
+
+    k = ps.shape[0]
+
+    lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
+
+    A = np.repeat(1.0/k, k).reshape(-1, 1).T
+    b = np.array([avg_auc])
+    G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)
+    h = np.hstack([np.repeat(1.0, k), -lower_bounds])
+    
+    G = matrix(G)
+    h = matrix(h)
+    A = matrix(A)
+    b = matrix(b)
+
+    print(lower_bounds)
+
+    res = cp(F, G, h, A=A, b=b)
+
+    check_cvxopt(res, 'macc_min_aggregated')
+
+    print(res['status'])
+
+    aucs = (np.array(res['x'])[:, 0])
+
+    acc = macc_min_evaluate(ps, ns, aucs)
+
+    results = acc
+
+    if return_solutions:
+        results = acc, (aucs, lower_bounds, np.repeat(1.0, k))
+    
+    return results
+
+def macc_min_aggregated(auc, ps, ns, return_solutions=False):
+    """
+    The minimum for the maximum average accuracy from average AUC
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+    
+    Returns:
+        float | (float, (np.array, np.array, np.array)):
+            the acc or the acc and the following details: the AUC values for 
+            the individual underlying curves, the lower bounds and the upper bounds
+    """
+    ps = np.array(ps)
+    ns = np.array(ns)
+
+    return macc_min_solve(ps, ns, auc, return_solutions)
 
 def auc_from_aggregated(
     *,

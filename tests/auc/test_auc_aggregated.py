@@ -18,6 +18,7 @@ from mlscorecheck.auc import (
     acc_max,
     acc_rmin,
     acc_rmax,
+    macc_min,
     auc_min_aggregated,
     auc_max_aggregated,
     auc_rmin_aggregated,
@@ -29,10 +30,14 @@ from mlscorecheck.auc import (
     acc_rmin_aggregated,
     acc_max_aggregated,
     acc_rmax_aggregated,
-    perturbe_solutions
+    macc_min_aggregated,
+    perturb_solutions,
+    multi_perturb_solutions,
+    R,
+    F
 )
 
-random_seeds = list(range(10))
+random_seeds = list(range(200))
 
 auc_confs = [
     {
@@ -103,6 +108,33 @@ acc_auc_confs = [
      },
 ]
 
+def test_r_f():
+    """
+    Testing the R and F functions
+    """
+
+    lower = np.array([0.1, 0.2, 0.3])
+    upper = np.array([0.9, 0.8, 0.8])
+    x = 0.78
+
+    r = 1 - R(x, lower=lower, upper=upper, k=3)
+    f = F(R(1 - x, lower=1 - F(upper), upper=1 - F(lower), k=3))
+
+    np.testing.assert_array_almost_equal(r, f)
+
+def test_multi_perturb():
+    """
+    Testing the iterated perturbation
+    """
+
+    x = np.array([0.2, 0.8, 0.5])
+    lower = np.array([0.1, 0.2, 0.3])
+    upper = np.array([0.8, 0.9, 0.7])
+
+    x_new = multi_perturb_solutions(5, x, lower, upper, 5)
+
+    np.testing.assert_almost_equal(np.mean(x), np.mean(x_new))
+
 @pytest.mark.parametrize('conf', auc_confs)
 @pytest.mark.parametrize('random_seed', random_seeds)
 def test_auc_min_aggregated(conf, random_seed):
@@ -124,8 +156,8 @@ def test_auc_min_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp_fprs = perturbe_solutions(fprs, lower, upper, random_seed)
-    tmp_tprs = perturbe_solutions(tprs, lower, upper, random_seed+1)
+    tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
+    tmp_tprs = perturb_solutions(tprs, lower, upper, random_seed+1)
     auc_tmp = np.mean([auc_min(fpr, tpr) for fpr, tpr in zip(tmp_fprs, tmp_tprs)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -152,8 +184,8 @@ def test_auc_max_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp_fprs = perturbe_solutions(fprs, lower, upper, random_seed)
-    tmp_tprs = perturbe_solutions(tprs, lower, upper, random_seed+1)
+    tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
+    tmp_tprs = perturb_solutions(tprs, lower, upper, random_seed+1)
     auc_tmp = np.mean([auc_max(fpr, tpr) for fpr, tpr in zip(tmp_fprs, tmp_tprs)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -180,12 +212,20 @@ def test_auc_rmin_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp_fprs = perturbe_solutions(fprs, lower, upper, random_seed)
-    tmp_tprs = perturbe_solutions(tprs, lower, upper, random_seed+1)
+    tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
+    tmp_tprs = perturb_solutions(tprs, lower, upper, random_seed+1)
     auc_tmp = np.mean([auc_rmin(fpr, tpr) for fpr, tpr in zip(tmp_fprs, tmp_tprs)])
     auc_tmp = np.round(auc_tmp, 8)
 
     assert auc <= auc_tmp
+
+def test_auc_rmin_aggregated_exception():
+    """
+    Testing the exception for auc_rmin_aggregated
+    """
+
+    with pytest.raises(ValueError):
+        auc_rmin_aggregated(0.8, 0.1, 5)
 
 @pytest.mark.parametrize('conf', auc_acc_confs)
 @pytest.mark.parametrize('random_seed', random_seeds)
@@ -210,7 +250,7 @@ def test_auc_maxa_aggregated(conf, random_seed):
 
     print(accs, lower, upper)
 
-    tmp = perturbe_solutions(accs, lower, upper, random_seed)
+    tmp = perturb_solutions(accs, lower, upper, random_seed)
     auc_tmp = np.mean([auc_maxa(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -237,7 +277,7 @@ def test_auc_amin_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp = perturbe_solutions(accs, lower, upper, random_seed)
+    tmp = perturb_solutions(accs, lower, upper, random_seed)
     auc_tmp = np.mean([auc_amin(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -264,7 +304,7 @@ def test_auc_amax_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp = perturbe_solutions(accs, lower, upper, random_seed)
+    tmp = perturb_solutions(accs, lower, upper, random_seed)
     auc_tmp = np.mean([auc_amax(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -291,7 +331,7 @@ def test_auc_armin_aggregated(conf, random_seed):
         return
     auc = np.round(auc, 8)
 
-    tmp = perturbe_solutions(accs, lower, upper, random_seed)
+    tmp = perturb_solutions(accs, lower, upper, random_seed)
     auc_tmp = np.mean([auc_armin(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -318,7 +358,7 @@ def test_acc_min_aggregated(conf, random_seed):
         return
     acc = np.round(acc, 8)
 
-    tmp = perturbe_solutions(aucs, lower, upper, random_seed)
+    tmp = perturb_solutions(aucs, lower, upper, random_seed)
     acc_tmp = np.mean([acc_min(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     acc_tmp = np.round(acc_tmp, 8)
 
@@ -345,7 +385,7 @@ def test_acc_max_aggregated(conf, random_seed):
         return
     acc = np.round(acc, 8)
 
-    tmp = perturbe_solutions(aucs, lower, upper, random_seed)
+    tmp = perturb_solutions(aucs, lower, upper, random_seed)
     acc_tmp = np.mean([acc_max(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     acc_tmp = np.round(acc_tmp, 8)
 
@@ -372,7 +412,7 @@ def test_acc_rmin_aggregated(conf, random_seed):
         return
     acc = np.round(acc, 8)
 
-    tmp = perturbe_solutions(aucs, lower, upper, random_seed)
+    tmp = perturb_solutions(aucs, lower, upper, random_seed)
     acc_tmp = np.mean([acc_rmin(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     acc_tmp = np.round(acc_tmp, 8)
 
@@ -399,8 +439,40 @@ def test_acc_rmax_aggregated(conf, random_seed):
         return
     acc = np.round(acc, 8)
 
-    tmp = perturbe_solutions(aucs, lower, upper, random_seed)
+    tmp = perturb_solutions(aucs, lower, upper, random_seed)
     acc_tmp = np.mean([acc_rmax(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
     acc_tmp = np.round(acc_tmp, 8)
 
     assert acc >= acc_tmp
+
+@pytest.mark.parametrize('conf', acc_auc_confs)
+@pytest.mark.parametrize('random_seed', random_seeds)
+def test_macc_min_aggregated(conf, random_seed):
+    """
+    Testing if perturbation cant find smaller objective
+
+    Args:
+        conf (dict): the configuration
+        random_seed (int): the random seed
+    """
+
+    auc = conf['auc']
+    ps = conf['ps']
+    ns = conf['ns']
+
+    try:
+        acc, (aucs, lower, upper) = macc_min_aggregated(auc, ps, ns, True)
+    except ValueError as exc:
+        return
+    acc = np.round(acc, 8)
+
+    tmp = perturb_solutions(aucs, lower, upper, random_seed)
+
+    print('aucs', aucs)
+    print('lowe', lower)
+    print('tmp', tmp)
+
+    acc_tmp = np.mean([macc_min(acc, p, n) for acc, p, n in zip(tmp, ps, ns)])
+    acc_tmp = np.round(acc_tmp, 8)
+
+    assert acc <= acc_tmp
