@@ -37,7 +37,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     INSTALL_REQUIRES = []
 else:
-    INSTALL_REQUIRES= ['numpy', 'scipy', 'scikit-learn', 'pulp']
+    INSTALL_REQUIRES= ['numpy', 'scipy', 'scikit-learn', 'pulp', 'cvxopt']
 EXTRAS_REQUIRE= {'tests': ['pytest'],
                     'docs': ['sphinx', 'sphinx-gallery', 'sphinx_rtd_theme', 'matplotlib', 'pandas', 'pulp']}
 PYTHON_REQUIRES= '>=3.5'
