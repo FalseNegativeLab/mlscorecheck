@@ -134,7 +134,7 @@ def sklearn_configurations(y_labels, n_splits):
 
     return [
         tuple(np.bincount(y_labels[test]).tolist())
-        for _, test in validator.split(y_labels, y_labels, y_labels)
+        for _, test in validator.split(y_labels, y_labels)
     ]
 
 

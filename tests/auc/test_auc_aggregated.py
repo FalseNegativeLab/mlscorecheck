@@ -38,6 +38,7 @@ random_seeds = list(range(100))
 auc_confs = [
     {"tpr": 0.8, "fpr": 0.1, "k": 5},
     {"tpr": 0.4, "fpr": 0.3, "k": 5},
+    {"tpr": 0.3, "fpr": 0.4, "k": 5},
     {"tpr": 0.8, "fpr": 0.1, "k": 10},
     {"tpr": 0.4, "fpr": 0.3, "k": 10},
 ]

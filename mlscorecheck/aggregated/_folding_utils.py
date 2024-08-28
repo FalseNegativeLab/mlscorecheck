@@ -150,7 +150,7 @@ def multiclass_stratified_folds(dataset: dict, n_folds: int) -> list:
     folds = []
     labels = np.hstack([np.repeat(key, value) for key, value in dataset.items()])
     for _, test in StratifiedKFold(n_splits=n_folds).split(
-        labels.reshape(-1, 1), labels, labels
+        labels.reshape(-1, 1), labels
     ):
         folds.append(dict(enumerate(np.bincount(labels[test]))))
 
