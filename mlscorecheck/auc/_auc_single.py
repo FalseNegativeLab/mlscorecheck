@@ -105,7 +105,7 @@ def augment_intervals(
     Args:
         intervals (dict): the intervals of scores
         p (int): the number of positive samples
-        n (int): the numbere of negative samples
+        n (int): the number of negative samples
 
     Returns:
         dict: the intervals augmented
@@ -400,8 +400,10 @@ def auc_armin(acc, p, n):
     Returns:
         float: the area
     """
-    if acc < max(p, n)/(p + n):
+    if acc < min(p, n)/(p + n):
         raise ValueError("accuracy too small")
+    elif acc >= min(p, n)/(p + n) and acc <= max(p, n)/(p + n):
+        return 0.5
 
     return float(auc_amin(acc, p, n)**2/2 + 0.5)
 

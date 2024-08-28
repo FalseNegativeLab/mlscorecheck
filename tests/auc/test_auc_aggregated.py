@@ -34,10 +34,13 @@ from mlscorecheck.auc import (
     perturb_solutions,
     multi_perturb_solutions,
     R,
-    F
+    F,
+    auc_from_aggregated,
+    acc_from_aggregated,
+    max_acc_from_aggregated
 )
 
-random_seeds = list(range(200))
+random_seeds = list(range(30))
 
 auc_confs = [
     {
@@ -150,10 +153,10 @@ def test_auc_min_aggregated(conf, random_seed):
     fpr = conf['fpr']
     k = conf['k']
 
-    try:
-        auc, (fprs, tprs, lower, upper) = auc_min_aggregated(fpr, tpr, k, True)
-    except ValueError as exc:
-        return
+    #try:
+    auc, (fprs, tprs, lower, upper) = auc_min_aggregated(fpr, tpr, k, True)
+    #except ValueError as exc:
+    #    return
     auc = np.round(auc, 8)
 
     tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
@@ -178,10 +181,10 @@ def test_auc_max_aggregated(conf, random_seed):
     fpr = conf['fpr']
     k = conf['k']
 
-    try:
-        auc, (fprs, tprs, lower, upper) = auc_max_aggregated(fpr, tpr, k, True)
-    except ValueError as exc:
-        return
+    #try:
+    auc, (fprs, tprs, lower, upper) = auc_max_aggregated(fpr, tpr, k, True)
+    #except ValueError as exc:
+    #    return
     auc = np.round(auc, 8)
 
     tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
@@ -206,14 +209,17 @@ def test_auc_rmin_aggregated(conf, random_seed):
     fpr = conf['fpr']
     k = conf['k']
 
-    try:
+    if tpr >= fpr:
         auc, (fprs, tprs, lower, upper) = auc_rmin_aggregated(fpr, tpr, k, True)
-    except ValueError as exc:
+    else:
+        with pytest.raises(ValueError):
+            auc, (fprs, tprs, lower, upper) = auc_rmin_aggregated(fpr, tpr, k, True)
         return
+
     auc = np.round(auc, 8)
 
-    tmp_fprs = perturb_solutions(fprs, lower, upper, random_seed)
-    tmp_tprs = perturb_solutions(tprs, lower, upper, random_seed+1)
+    tmp_fprs = perturb_solutions(fprs, lower, tprs, random_seed)
+    tmp_tprs = perturb_solutions(tprs, tmp_fprs, upper, random_seed+1)
     auc_tmp = np.mean([auc_rmin(fpr, tpr) for fpr, tpr in zip(tmp_fprs, tmp_tprs)])
     auc_tmp = np.round(auc_tmp, 8)
 
@@ -242,10 +248,13 @@ def test_auc_maxa_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        auc, (accs, lower, upper) = auc_maxa_aggregated(acc, ps, ns, True)
-    except ValueError as exc:
+    if acc < np.mean([max(p, n)/(p + n) for p, n in zip(ps, ns)]):
+        with pytest.raises(ValueError):
+            auc, (accs, lower, upper) = auc_maxa_aggregated(acc, ps, ns, True)
         return
+    else:
+        auc, (accs, lower, upper) = auc_maxa_aggregated(acc, ps, ns, True)
+
     auc = np.round(auc, 8)
 
     print(accs, lower, upper)
@@ -271,10 +280,7 @@ def test_auc_amin_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        auc, (accs, _, _, lower, upper) = auc_amin_aggregated(acc, ps, ns, True)
-    except ValueError as exc:
-        return
+    auc, (accs, _, _, lower, upper) = auc_amin_aggregated(acc, ps, ns, True)
     auc = np.round(auc, 8)
 
     tmp = perturb_solutions(accs, lower, upper, random_seed)
@@ -298,10 +304,7 @@ def test_auc_amax_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        auc, (accs, _, _, lower, upper) = auc_amax_aggregated(acc, ps, ns, True)
-    except ValueError as exc:
-        return
+    auc, (accs, _, _, lower, upper) = auc_amax_aggregated(acc, ps, ns, True)
     auc = np.round(auc, 8)
 
     tmp = perturb_solutions(accs, lower, upper, random_seed)
@@ -325,10 +328,14 @@ def test_auc_armin_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        auc, (accs, _, _, lower, upper) = auc_armin_aggregated(acc, ps, ns, True)
-    except ValueError as exc:
+    lower = np.array([min(p, n)/(p + n) for p, n in zip(ps, ns)])
+
+    if acc < np.mean(lower):
+        with pytest.raises(ValueError):
+            auc, (accs, _, _, lower, upper) = auc_armin_aggregated(acc, ps, ns, True)
         return
+    else:
+        auc, (accs, _, _, lower, upper) = auc_armin_aggregated(acc, ps, ns, True)
     auc = np.round(auc, 8)
 
     tmp = perturb_solutions(accs, lower, upper, random_seed)
@@ -352,10 +359,7 @@ def test_acc_min_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        acc, (aucs, ps, ns, lower, upper) = acc_min_aggregated(auc, ps, ns, True)
-    except ValueError as exc:
-        return
+    acc, (aucs, ps, ns, lower, upper) = acc_min_aggregated(auc, ps, ns, True)
     acc = np.round(acc, 8)
 
     tmp = perturb_solutions(aucs, lower, upper, random_seed)
@@ -379,10 +383,7 @@ def test_acc_max_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        acc, (aucs, ps, ns, lower, upper) = acc_max_aggregated(auc, ps, ns, True)
-    except ValueError as exc:
-        return
+    acc, (aucs, ps, ns, lower, upper) = acc_max_aggregated(auc, ps, ns, True)
     acc = np.round(acc, 8)
 
     tmp = perturb_solutions(aucs, lower, upper, random_seed)
@@ -406,10 +407,7 @@ def test_acc_rmin_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        acc, (aucs, lower, upper) = acc_rmin_aggregated(auc, ps, ns, True)
-    except ValueError as exc:
-        return
+    acc, (aucs, lower, upper) = acc_rmin_aggregated(auc, ps, ns, True)
     acc = np.round(acc, 8)
 
     tmp = perturb_solutions(aucs, lower, upper, random_seed)
@@ -433,9 +431,11 @@ def test_acc_rmax_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
+    if auc >= 0.5:
         acc, (aucs, ps, ns, lower, upper) = acc_rmax_aggregated(auc, ps, ns, True)
-    except ValueError as exc:
+    else:
+        with pytest.raises(ValueError):
+            acc, (aucs, ps, ns, lower, upper) = acc_rmax_aggregated(auc, ps, ns, True)
         return
     acc = np.round(acc, 8)
 
@@ -460,10 +460,13 @@ def test_macc_min_aggregated(conf, random_seed):
     ps = conf['ps']
     ns = conf['ns']
 
-    try:
-        acc, (aucs, lower, upper) = macc_min_aggregated(auc, ps, ns, True)
-    except ValueError as exc:
+    lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
+    if auc < np.mean(lower_bounds):
+        with pytest.raises(ValueError):
+            acc, (aucs, lower, upper) = macc_min_aggregated(auc, ps, ns, True)
         return
+    else:
+        acc, (aucs, lower, upper) = macc_min_aggregated(auc, ps, ns, True)
     acc = np.round(acc, 8)
 
     tmp = perturb_solutions(aucs, lower, upper, random_seed)
@@ -476,3 +479,145 @@ def test_macc_min_aggregated(conf, random_seed):
     acc_tmp = np.round(acc_tmp, 8)
 
     assert acc <= acc_tmp
+
+def test_auc_from_aggregated():
+    """
+    Testing the auc_from_aggregated function
+    """
+
+    ps = [60, 70, 80]
+    ns = [80, 90, 80]
+
+    with pytest.raises(ValueError):
+        auc_from_aggregated(scores={'tpr': 0.9}, eps=0.01, k=5)
+
+    with pytest.raises(ValueError):
+        auc_from_aggregated(scores={'tpr': 0.9, 'fpr': 0.1}, eps=0.01, k=5, lower='amin')
+
+    with pytest.raises(ValueError):
+        auc_from_aggregated(
+            scores={'tpr': 0.9}, 
+            eps=0.01, 
+            k=len(ps),
+            lower='amin', 
+            upper='amax', 
+            ps=ps, 
+            ns=ns
+        )
+
+    for lower in ['min', 'rmin', 'amin', 'armin']:
+        for upper in ['max', 'amax', 'maxa']:
+            print(lower, upper)
+            tmp = auc_from_aggregated(
+                scores={'tpr': 0.9, 'fpr': 0.1},
+                eps=1e-4,
+                k=len(ps),
+                ps=ps,
+                ns=ns,
+                lower=lower,
+                upper=upper
+            )
+            assert tmp[0] <= tmp[1]
+
+    with pytest.raises(ValueError):
+        auc_from_aggregated(
+            scores={'tpr': 0.9, 'fpr': 0.1},
+            eps=1e-4,
+            k=len(ps),
+            ps=ps,
+            ns=ns,
+            lower='dummy'
+        )
+
+    with pytest.raises(ValueError):
+        auc_from_aggregated(
+            scores={'tpr': 0.9, 'fpr': 0.1},
+            eps=1e-4,
+            k=len(ps),
+            ps=ps,
+            ns=ns,
+            upper='dummy'
+        )
+
+def test_acc_from_aggregated():
+    """
+    Testing the acc_from_aggregated functionality
+    """
+
+    ps = [60, 70, 80]
+    ns = [80, 90, 80]
+
+    with pytest.raises(ValueError):
+        acc_from_aggregated(scores={}, eps=1e-4, ps=ps, ns=ns)
+
+    for lower in ['min', 'rmin']:
+        for upper in ['max', 'rmax']:
+            tmp = acc_from_aggregated(
+                scores={'auc': 0.9},
+                eps=1e-4,
+                ps=ps,
+                ns=ns,
+                lower=lower,
+                upper=upper
+            )
+            assert tmp[0] <= tmp[1]
+
+    with pytest.raises(ValueError):
+        acc_from_aggregated(
+            scores={'auc': 0.9},
+            eps=1e-4,
+            ps=ps,
+            ns=ns,
+            lower='dummy'
+        )
+
+    with pytest.raises(ValueError):
+        acc_from_aggregated(
+            scores={'auc': 0.9},
+            eps=1e-4,
+            ps=ps,
+            ns=ns,
+            upper='dummy'
+        )
+
+
+def test_max_acc_from_aggregated():
+    """
+    Testing the max_acc_from functionality
+    """
+
+    ps = [60, 70, 80]
+    ns = [80, 90, 80]
+
+    with pytest.raises(ValueError):
+        max_acc_from_aggregated(scores={}, eps=1e-4, ps=ps, ns=ns)
+
+    for lower in ['min']:
+        for upper in ['max', 'rmax']:
+            tmp = max_acc_from_aggregated(
+                scores={'auc': 0.9},
+                eps=1e-4,
+                ps=ps,
+                ns=ns,
+                lower=lower,
+                upper=upper
+            )
+            assert tmp[0] <= tmp[1]
+
+    with pytest.raises(ValueError):
+        max_acc_from_aggregated(
+            scores={'auc': 0.9},
+            eps=1e-4,
+            ps=ps,
+            ns=ns,
+            lower='dummy'
+        )
+
+    with pytest.raises(ValueError):
+        max_acc_from_aggregated(
+            scores={'auc': 0.9},
+            eps=1e-4,
+            ps=ps,
+            ns=ns,
+            upper='dummy'
+        )

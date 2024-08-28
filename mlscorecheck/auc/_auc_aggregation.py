@@ -4,8 +4,11 @@ This module implements the aggregated AUC related functionalities
 
 import numpy as np
 
+import pulp as pl
+
 from cvxopt import matrix
 from cvxopt.solvers import qp, cp, cpl
+import cvxopt.solvers as solvers
 
 from ._auc_single import (
     translate_scores,
@@ -37,11 +40,256 @@ __all__ = [
     "acc_rmax_aggregated",
     "acc_from_aggregated",
     "macc_min_aggregated",
+    "max_acc_from_aggregated",
     "R",
     "F",
     "perturb_solutions",
-    "multi_perturb_solutions"
+    "multi_perturb_solutions",
+    "estimate_acc_interval",
+    "estimate_tpr_interval",
+    "estimate_fpr_interval"
 ]
+
+def acc_expression(tps, tns, ps, ns):
+    """
+    The mean accuracy expression
+
+    Args:
+        tps (list|np.array): the true positives
+        tns (list|np.array): the true negatives
+        ps (list|np.array): the positives
+        ns (list|np.array): the negatives
+    
+    Returns:
+        float|obj: the average accuracy
+    """
+    return sum((tps[idx] + tns[idx])* (1.0/(ps[idx] + ns[idx])) 
+               for idx in range(len(ps))) * 1.0/(len(ps))
+
+def tpr_expression(tps, ps):
+    """
+    The mean tpr expression
+
+    Args:
+        tps (list|np.array): the true positives
+        ps (list|np.array): the positives
+    
+    Returns:
+        float|obj: the average tpr
+    """
+    return sum([tps[idx] * (1.0/ps[idx]) 
+                for idx in range(len(ps))]) * (1.0/len(ps))
+
+def fpr_expression(tns, ns):
+    """
+    The mean fpr expression
+
+    Args:
+        tns (list|np.array): the true negatives
+        ns (list|np.array): the negatives
+    
+    Returns:
+        float|obj: the average fpr
+    """
+    return sum([1 - tns[idx] * (1.0/ns[idx]) 
+                for idx in range(len(ns))]) * (1.0/len(ns))
+
+def init_lp_variables(ps, ns):
+    """
+    Initializes the linear programming variables
+
+    Args:
+        ps (list): the postives
+        ns (list): the negatives
+    
+    Returns:
+        list, list: the true positive and true negative variables
+    """
+    tps = [pl.LpVariable(f"tp_{idx}", lowBound=0, upBound=ps[idx], cat=pl.LpInteger) 
+            for idx in range(len(ps))]
+    tns = [pl.LpVariable(f"tn_{idx}", lowBound=0, upBound=ns[idx], cat=pl.LpInteger) 
+            for idx in range(len(ns))]
+    
+    return tps, tns
+
+def extract_tp_tn_values(problem: pl.LpProblem):
+    """
+    Extracts the exact tp and tn values from a solved optimization problem
+
+    Args:
+        problem (pl.LpProblem): the linear programming problem
+    
+    Returns:
+        np.array, np.array: the true positives and true negatives
+    """
+    k = int(len(problem.variables()) / 2)
+
+    tp_values = np.zeros(k).astype(float)
+    tn_values = np.zeros(k).astype(float)
+
+    for variable in problem.variables():
+        ids = variable.name.split('_')
+        if ids[0] == 'tp':
+            tp_values[int(ids[1])] = variable.varValue
+        else:
+            tn_values[int(ids[1])] = variable.varValue
+    
+    return tp_values, tn_values
+
+def estimate_acc_interval(fpr, tpr, ps, ns):
+    """
+    Estimate the accuracy interval
+
+    Args:
+        fpr (float, float): the average fpr value interval
+        tpr (float, float): the average tpr value interval
+        ps (list): the numbers of positives
+        ns (list): the numbers of negatives
+    
+    Returns:
+        float, float: the lower and upper bounds on accuracy
+    """
+
+    tps, tns = init_lp_variables(ps, ns)
+
+    problem = pl.LpProblem("acc_minimization")
+
+    problem += tpr_expression(tps, ps) == tpr[0]
+    problem += fpr_expression(tns, ns) == fpr[1]
+
+    problem += acc_expression(tps, tns, ps, ns)
+
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    tp_values, tn_values = extract_tp_tn_values(problem)
+
+    avg_min_acc = acc_expression(tp_values, tn_values, ps, ns)
+
+    problem = pl.LpProblem("acc_maximization")
+
+    problem += tpr_expression(tps, ps) == tpr[1]
+    problem += fpr_expression(tns, ns) == fpr[0]
+
+    problem += -acc_expression(tps, tns, ps, ns)
+
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    tp_values, tn_values = extract_tp_tn_values(problem)
+
+    avg_max_acc = acc_expression(tp_values, tn_values, ps, ns)
+    
+    return (avg_min_acc, avg_max_acc)
+
+def estimate_tpr_interval(fpr, acc, ps, ns):
+    """
+    Estimate the tpr interval
+
+    Args:
+        fpr (float, float): the average fpr value interval
+        acc (float, float): the average acc value interval
+        ps (list): the numbers of positives
+        ns (list): the numbers of negatives
+    
+    Returns:
+        float, float: the lower and upper bounds on tpr
+    """
+    tps, tns = init_lp_variables(ps, ns)
+
+    problem = pl.LpProblem("tpr_minimization")
+
+    problem += acc_expression(tps, tns, ps, ns) == acc[0]
+    problem += fpr_expression(tns, ns) == fpr[1]
+
+    problem += tpr_expression(tps, ps)
+
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    tp_values, _ = extract_tp_tn_values(problem)
+
+    avg_min_tpr = tpr_expression(tp_values, ps)
+
+    problem = pl.LpProblem("tpr_maximization")
+
+    problem += acc_expression(tps, tns, ps, ns) == acc[1]
+    problem += fpr_expression(tns, ns) == fpr[0]
+
+    problem += -tpr_expression(tps, ps)
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    tp_values, _ = extract_tp_tn_values(problem)
+
+    avg_max_tpr = tpr_expression(tp_values, ps)
+    
+    return (avg_min_tpr, avg_max_tpr)
+
+def estimate_fpr_interval(tpr, acc, ps, ns):
+    """
+    Estimate the fpr interval
+
+    Args:
+        tpr (float, float): the average tpr value interval
+        acc (float, float): the average acc value interval
+        ps (list): the numbers of positives
+        ns (list): the numbers of negatives
+    
+    Returns:
+        float, float: the lower and upper bounds on fpr
+    """
+    tps, tns = init_lp_variables(ps, ns)
+
+    problem = pl.LpProblem("fpr_minimization")
+
+    problem += acc_expression(tps, tns, ps, ns) == acc[1]
+    problem += tpr_expression(tps, ps) == tpr[0]
+
+    problem += fpr_expression(tns, ns)
+
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    _, tn_values = extract_tp_tn_values(problem)
+
+    avg_min_fpr = fpr_expression(tn_values, ns)
+
+    problem = pl.LpProblem("fpr_maximization")
+
+    problem += acc_expression(tps, tns, ps, ns) == acc[0]
+    problem += tpr_expression(tps, ps) == tpr[1]
+
+    problem += -fpr_expression(tns, ns)
+    problem.solve(pl.PULP_CBC_CMD(msg=False))
+
+    _, tn_values = extract_tp_tn_values(problem)
+
+    avg_max_fpr = fpr_expression(tn_values, ns)
+    
+    return (avg_min_fpr, avg_max_fpr)
+
+def augment_intervals_aggregated(
+        intervals: dict,
+        ps: np.array,
+        ns: np.array
+    ):
+    """
+    Augment the intervals based on the relationship between tpr, fpr and acc
+
+    Args:
+        intervals (dict): the intervals of scores
+        ps (np.array): the numbers of positive samples
+        ns (np.array): the numbers of negative samples
+
+    Returns:
+        dict: the intervals augmented
+    """
+    intervals = {**intervals}
+
+    if "tpr" not in intervals and ("acc" in intervals and "fpr" in intervals):
+        intervals["tpr"] = estimate_tpr_interval(intervals['fpr'], intervals['acc'], ps, ns)
+    if "fpr" not in intervals and ("acc" in intervals and "tpr" in intervals):
+        intervals["fpr"] = estimate_fpr_interval(intervals['tpr'], intervals['acc'], ps, ns)
+    if "acc" not in intervals and ("fpr" in intervals and "tpr" in intervals):
+        intervals["acc"] = estimate_acc_interval(intervals['fpr'], intervals['tpr'], ps, ns)
+
+    return intervals
 
 def R(
         x: float, 
@@ -69,6 +317,8 @@ def R(
         lower = np.repeat(0.0, k)
     if upper is None:
         upper = np.repeat(1.0, k)
+
+    print(x, np.sum(lower), np.sum(upper), k, lower, upper)
 
     x = x * len(lower)
     if np.sum(lower) > x or np.sum(upper) < x:
@@ -159,7 +409,7 @@ def auc_max_aggregated(
     results = float(1 - np.mean([a * b for a, b in zip(1 - RL_avg_tpr, RL_avg_fpr)]))
 
     if return_solutions:
-        results = results, (RL_avg_fpr, RL_avg_tpr)
+        results = results, (RL_avg_fpr, RL_avg_tpr, np.repeat(0.0, k), np.repeat(1.0, k))
 
     return results
 
@@ -185,14 +435,13 @@ def auc_rmin_aggregated(
     """
     if tpr < fpr:
             raise ValueError(
-                'sens >= 1 - spec does not hold for "\
-                            "the corrected minimum curve'
+                'sens >= 1 - spec does not hold'
             )
     
     results = 0.5 + (fpr - tpr) ** 2 / 2.0
 
     if return_solutions:
-        results = results, (np.repeat(fpr, k), np.repeat(tpr, k))
+        results = results, (np.repeat(fpr, k), np.repeat(tpr, k), np.repeat(0.0, k), np.repeat(1.0, k))
 
     return results
 
@@ -214,6 +463,7 @@ def auc_maxa_evaluate(
         float | (float, np.array): the area or the area and the solutions
     """
     return np.mean([auc_maxa(acc, p, n) for acc, p, n in zip(accs, ps, ns)])
+
 
 def auc_maxa_solve(
         ps: np.array, 
@@ -239,8 +489,7 @@ def auc_maxa_solve(
     ns = np.array(ns)
 
     k = ps.shape[0]
-    #q = (ps + ns)**2/(2*ps*ns)/k*2
-    #q = np.repeat(0.0, k)
+    
     w = (ps + ns)**2/(2*ps*ns)
     Q = 2.0*np.diag(w)
     q = -2.0*w
@@ -259,8 +508,6 @@ def auc_maxa_solve(
 
     res = qp(P=Q, q=q, G=G, h=h, A=A, b=b)
 
-    print(res['status'])
-
     result = np.array(res['x'])[:, 0]
 
     results = float(auc_maxa_evaluate(ps, ns, result))
@@ -269,6 +516,7 @@ def auc_maxa_solve(
         results = results, (result.astype(float), lower, np.repeat(1.0, k))
 
     return results
+
 
 def auc_maxa_aggregated(
         acc: float, 
@@ -289,7 +537,12 @@ def auc_maxa_aggregated(
     Returns:
         float | (float, np.array): the area or the area and the solutions
     """
+
+    if acc < np.mean([max(p, n)/(p + n) for p, n in zip(ps, ns)]):
+        raise ValueError("accuracy too small")
+
     return auc_maxa_solve(ps, ns, acc, return_solutions)
+
 
 def perturb_solutions(
         values: np.array, 
@@ -325,6 +578,7 @@ def perturb_solutions(
 
     return values
 
+
 def multi_perturb_solutions(
         n_perturbations: int,
         values: np.array, 
@@ -355,6 +609,7 @@ def multi_perturb_solutions(
         )
 
     return values
+
 
 def auc_amin_aggregated(
         acc: float, 
@@ -391,15 +646,24 @@ def auc_amin_aggregated(
     ns = ns[sorting]
     weights = weights[sorting]
 
-    accs = R(acc, k, lower=thresholds)
-    auc = float(np.sum(accs * (weights) - weights + 1.0)/k)
+    if acc < np.mean(thresholds):
+        auc = 0.0
+        accs = np.repeat(acc, k)
+        lower = np.repeat(0.0, k)
+        upper = thresholds
+    else:
+        accs = R(acc, k, lower=thresholds)
+        auc = float(np.sum(accs * (weights) - weights + 1.0)/k)
+        lower = thresholds
+        upper = np.repeat(1.0, k)
 
     results = auc
 
     if return_solutions:
-        results = results, (accs, ps, ns, thresholds, np.repeat(1.0, k))
+        results = results, (accs, ps, ns, lower, upper)
     
     return results
+
 
 def auc_amax_aggregated(
         acc: float, 
@@ -436,22 +700,46 @@ def auc_amax_aggregated(
     ns = ns[sorting]
     weights = weights[sorting]
 
-    accs = R(acc, k, upper=thresholds)
-    auc = float(np.sum(accs * weights[::-1])/k)
+    if acc > np.mean(thresholds):
+        auc = 1.0
+        accs = np.repeat(acc, k)
+        upper = np.repeat(1.0, k)
+        lower = thresholds
+    else:
+        accs = R(acc, k, upper=thresholds)
+        auc = float(np.sum(accs * weights[::-1])/k)
+        upper = thresholds
+        lower = np.repeat(0.0, k)
 
     results = auc
 
     if return_solutions:
-        results = results, (accs, ps, ns, np.repeat(0.0, k), thresholds)
+        results = results, (accs, ps, ns, lower, upper)
     
     return results
 
+
 def check_cvxopt(results, message):
+    """
+    Checking the cvxopt results
+
+    Args:
+        results (dict): the output of cvxopt
+        message (str): the additional message
+
+    Raises:
+        ValueError: when the solution is not optimal
+    """
     if results['status'] != 'optimal':
-        raise ValueError('no optimal solution found for the configuration ',
+        raise ValueError('no optimal solution found for the configuration ' +
                          f'({message})')
 
-def auc_armin_solve(ps, ns, avg_acc, return_bounds=False):
+def auc_armin_solve(
+        ps: np.array, 
+        ns: np.array, 
+        avg_acc: float, 
+        return_bounds: bool=False
+    ):
     """
     Solves the armin quadratic optimization problem
 
@@ -489,7 +777,12 @@ def auc_armin_solve(ps, ns, avg_acc, return_bounds=False):
 
     res = qp(P=Q, q=p, G=G, h=h, A=A, b=b)
 
+    actual = solvers.options.get('show_progress', None)
+    solvers.options['show_progress'] = False
+
     check_cvxopt(res, 'auc_armin_aggregated')
+
+    solvers.options['show_progress'] = actual
 
     results = np.array(res['x'])[:, 0]
 
@@ -498,7 +791,12 @@ def auc_armin_solve(ps, ns, avg_acc, return_bounds=False):
 
     return results
 
-def auc_armin_aggregated(acc, ps, ns, return_solutions=False):
+def auc_armin_aggregated(
+        acc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The regulated minimum based AUC based on average accuracy
 
@@ -518,6 +816,19 @@ def auc_armin_aggregated(acc, ps, ns, return_solutions=False):
     ps = np.array(ps)
     ns = np.array(ns)
 
+    lower = np.array([min(p, n)/(p + n) for p, n in zip(ps, ns)])
+    upper = np.array([max(p, n)/(p + n) for p, n in zip(ps, ns)])
+
+    if acc < np.mean(lower):
+        raise ValueError("acc too small for the configuration "
+                          "(auc_armin_aggregated)")
+    elif acc >= np.mean(lower) and acc <= np.mean(upper):
+        auc = 0.5
+        results = auc
+        if return_solutions:
+            results = results, ((lower + upper)/2, ps, ns, lower, upper)
+        return results
+
     accs, lower = auc_armin_solve(ps, ns, acc, return_bounds=True)
 
     auc = float(np.mean([auc_armin(acc, p, n) for acc, p, n in zip(accs, ps, ns)]))
@@ -529,7 +840,12 @@ def auc_armin_aggregated(acc, ps, ns, return_solutions=False):
 
     return results
 
-def acc_min_aggregated(auc, ps, ns, return_solutions=False):
+def acc_min_aggregated(
+        auc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The minimum based accuracy
 
@@ -569,7 +885,12 @@ def acc_min_aggregated(auc, ps, ns, return_solutions=False):
 
     return results
 
-def acc_max_aggregated(auc, ps, ns, return_solutions=False):
+def acc_max_aggregated(
+        auc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The maximum based accuracy
 
@@ -609,7 +930,12 @@ def acc_max_aggregated(auc, ps, ns, return_solutions=False):
 
     return results
 
-def acc_rmin_aggregated(auc, ps, ns, return_solutions=False):
+def acc_rmin_aggregated(
+        auc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The regulated minimum based accuracy
 
@@ -630,6 +956,8 @@ def acc_rmin_aggregated(auc, ps, ns, return_solutions=False):
             the acc or the acc and the following details: the AUC values for 
             the individual underlying curves, the lower bounds and the upper bounds
     """
+    _ = auc
+
     ps = np.array(ps)
     ns = np.array(ns)
 
@@ -647,7 +975,12 @@ class F_acc_rmax:
     Implements the convex programming objective for the regulated
     accuracy maximization.
     """
-    def __init__(self, ps, ns, avg_auc):
+    def __init__(
+            self, 
+            ps: np.array, 
+            ns: np.array, 
+            avg_auc: float
+        ):
         """
         The constructor of the object
 
@@ -664,7 +997,10 @@ class F_acc_rmax:
         self.mins = np.array([min(p, n) for p, n in zip(ps, ns)])
         self.weights = self.mins / (ps + ns)
 
-    def __call__(self, x=None, z=None):
+    def __call__(
+            self, 
+            x: matrix=None, 
+            z: matrix=None):
         """
         The call method according to the specification in cvxopt
 
@@ -724,7 +1060,11 @@ class F_acc_rmax:
 
         return (f, Df, hess)
 
-def acc_rmax_evaluate(ps, ns, aucs):
+def acc_rmax_evaluate(
+        ps: np.array, 
+        ns: np.array, 
+        aucs: np.array
+    ):
     """
     Evaluates a particular configuration of rmax parameters
 
@@ -736,12 +1076,18 @@ def acc_rmax_evaluate(ps, ns, aucs):
     Returns:
         float: the mean accuracy
     """
+
     maxs = np.array([max(p, n) for p, n in zip(ps, ns)])
     mins = np.array([min(p, n) for p, n in zip(ps, ns)])
 
     return np.mean((maxs + mins * np.sqrt(2*aucs - 1)) / (ps + ns))
 
-def acc_rmax_solve(ps, ns, avg_auc, return_solutions=False):
+def acc_rmax_solve(
+        ps: np.array, 
+        ns: np.array, 
+        avg_auc: float, 
+        return_solutions: bool=False
+    ):
     """
     Solves the regulated maximium curves problem
 
@@ -775,20 +1121,30 @@ def acc_rmax_solve(ps, ns, avg_auc, return_solutions=False):
 
     res = cp(F, G, h, A=A, b=b)
 
+    actual = solvers.options.get('show_progress', None)
+    solvers.options['show_progress'] = False
+
     check_cvxopt(res, 'acc_rmax_aggregated')
 
-    aucs = np.array(res['x'][:, 0])
+    solvers.options['show_progress'] = actual
+
+    aucs = np.array(res['x'])[:, 0]
 
     acc = acc_rmax_evaluate(ps, ns, aucs)
 
     results = acc
 
     if return_solutions:
-        results = results, (aucs, lower_bounds, np.repeat(1.0, k))
+        results = results, (aucs, ps, ns, lower_bounds, np.repeat(1.0, k))
 
     return results
 
-def acc_rmax_aggregated(auc, ps, ns, return_solutions=False):
+def acc_rmax_aggregated(
+        auc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The regulated maximum based accuracy
 
@@ -804,6 +1160,10 @@ def acc_rmax_aggregated(auc, ps, ns, return_solutions=False):
             the acc or the acc and the following details: the AUC values for 
             the individual underlying curves, the lower bounds and the upper bounds
     """
+
+    if auc < 0.5:
+        raise ValueError("auc too small (acc_rmax_aggregated)")
+
     ps = np.array(ps)
     ns = np.array(ns)
 
@@ -814,7 +1174,12 @@ class F_macc_min:
     Implements the convex programming objective for the maximum accuracy
     minimization.
     """
-    def __init__(self, ps, ns, avg_auc):
+    def __init__(
+            self, 
+            ps: np.array, 
+            ns: np.array, 
+            avg_auc: float
+        ):
         """
         The constructor of the object
 
@@ -832,7 +1197,11 @@ class F_macc_min:
         self.weights = np.sqrt(2*(ps*ns))/(ps + ns)
         self.lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
 
-    def __call__(self, x=None, z=None):
+    def __call__(
+            self, 
+            x: matrix=None, 
+            z: matrix=None
+        ):
         """
         The call method according to the specification in cvxopt
 
@@ -863,9 +1232,12 @@ class F_macc_min:
             (matrix, matrix, matrx): the objective value at x, the gradient
                 at x and the weighted sum of the Hessian of the objective and
                 all non-linear constraints with the weights z if z is not None
+        
+        TODO: something with all variables being 1
         """
         if x is None and z is None:
             return (0, matrix(self.lower_bounds, (self.k, 1)))
+            #return (0, matrix(np.repeat(1.0, self.k), (self.k, 1)))
         
         if x is not None:
             f = matrix(-np.sum(np.sqrt(1 - x)*self.weights.reshape(-1, 1)))
@@ -880,7 +1252,11 @@ class F_macc_min:
 
         return (f, Df, hess)
 
-def macc_min_evaluate(ps, ns, aucs):
+def macc_min_evaluate(
+        ps: np.array, 
+        ns: np.array, 
+        aucs: np.array
+    ):
     """
     Evaluates a particular macc_min configuration
 
@@ -894,7 +1270,12 @@ def macc_min_evaluate(ps, ns, aucs):
     """
     return np.mean([macc_min(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
 
-def macc_min_solve(ps, ns, avg_auc, return_solutions=False):
+def macc_min_solve(
+        ps: np.array, 
+        ns: np.array, 
+        avg_auc: float, 
+        return_solutions: bool=False
+    ):
     """
     Solves the maximum accuracy minimum curves problem
 
@@ -915,24 +1296,26 @@ def macc_min_solve(ps, ns, avg_auc, return_solutions=False):
     k = ps.shape[0]
 
     lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
+    upper_bounds = np.repeat(1.0 - np.min(1/((ps+1)*(ns+1))), k)
 
     A = np.repeat(1.0/k, k).reshape(-1, 1).T
     b = np.array([avg_auc])
     G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)
-    h = np.hstack([np.repeat(1.0, k), -lower_bounds])
+    h = np.hstack([upper_bounds, -lower_bounds])
     
     G = matrix(G)
     h = matrix(h)
     A = matrix(A)
     b = matrix(b)
 
-    print(lower_bounds)
-
     res = cp(F, G, h, A=A, b=b)
+
+    actual = solvers.options.get('show_progress', None)
+    solvers.options['show_progress'] = False
 
     check_cvxopt(res, 'macc_min_aggregated')
 
-    print(res['status'])
+    solvers.options['show_progress'] = actual
 
     aucs = (np.array(res['x'])[:, 0])
 
@@ -945,7 +1328,12 @@ def macc_min_solve(ps, ns, avg_auc, return_solutions=False):
     
     return results
 
-def macc_min_aggregated(auc, ps, ns, return_solutions=False):
+def macc_min_aggregated(
+        auc: float, 
+        ps: np.array, 
+        ns: np.array, 
+        return_solutions: bool=False
+    ):
     """
     The minimum for the maximum average accuracy from average AUC
 
@@ -964,126 +1352,207 @@ def macc_min_aggregated(auc, ps, ns, return_solutions=False):
     ps = np.array(ps)
     ns = np.array(ns)
 
+    lower_bounds = 1.0 - np.array([min(p, n)/(2*max(p, n)) for p, n in zip(ps, ns)])
+
+    if auc < np.mean(lower_bounds):
+        raise ValueError("auc too small (macc_min_aggregated)")
+    
+    if auc == 1.0:
+        # the gradient would go to infinity in this case
+        results = 1.0
+
+        if return_solutions:
+            results = results, (np.repeat(1.0, len(ps)), lower_bounds, np.repeat(1.0, len(ps)))
+
     return macc_min_solve(ps, ns, auc, return_solutions)
+
+def check_applicability_aggregated(
+        intervals: dict,
+        lower: str,
+        upper: str,
+        ps: int,
+        ns: int
+    ):
+    """
+    Checks the applicability of the methods
+
+    Args:
+        intervals (dict): the score intervals
+        lower (str): the lower bound method
+        upper (str): the upper bound method
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Raises:
+        ValueError: when the methods are not applicable with the
+                    specified scores
+    """
+    if lower in ['min', 'rmin'] or upper in ['max']:
+        if "fpr" not in intervals or "tpr" not in intervals:
+            raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ['amin', 'armin'] or upper in ['amax', 'maxa']:
+        if ps is None or ns is None:
+            raise ValueError("p and n must be specified")
+    if lower in ['amin', 'armin'] or upper in ['amax', 'maxa']:
+        if "acc" not in intervals:
+            raise ValueError("acc must be specified")
+
 
 def auc_from_aggregated(
     *,
     scores: dict,
     eps: float,
-    p: int,
-    n: int,
+    k: int,
+    ps: np.array = None,
+    ns: np.array = None,
     lower: str = "min",
-    upper: str = "max",
-    k: int = None,
-    raise_error: bool = False
+    upper: str = "max"
 ) -> tuple:
     """
-    This module applies the estimation scheme A to estimate AUC from scores
-    in k-fold evaluation
+    This function applies the estimation schemes to estimate AUC from scores
 
     Args:
-        scores (dict): the reported scores average scores
+        scores (dict): the reported scores
         eps (float): the numerical uncertainty
-        p (int): the number of positive samples
-        n (int): the number of negative samples
-        lower (str): ('min'/'cmin') - the type of estimation for the lower bound
-        upper (str): ('max'/'amax') - the type of estimation for the upper bound
-        k (int): the number of folds (if any)
+        k (int): the number of evaluation sets
+        ps (int): the numbers of positive samples
+        ns (int): the numbers of negative samples
+        lower (str): ('min'/'rmin'/'amin'/'armin') - the type of
+                        estimation for the lower bound
+        upper (str): ('max'/'maxa'/'amax') - the type of estimation for
+                        the upper bound
 
     Returns:
-        tuple(float, float): the interval for the average AUC
+        tuple(float, float): the interval for the AUC
     """
 
-    scores = translate(scores)
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
 
-    if ("sens" in scores) + ("spec" in scores) + ("acc" in scores) < 2:
-        raise ValueError("Not enough scores specified for the estimation")
+    if ps is not None and ns is not None:
+        intervals = augment_intervals_aggregated(intervals, ps, ns)
 
-    if p is None or n is None:
-        raise ValueError("For k-fold estimation p and n are needed")
-    if p % k != 0 or n % k != 0:
-        raise ValueError("For k-fold, p and n must be divisible by k")
+    check_applicability_aggregated(intervals, lower, upper, ps, ns)
 
-    intervals = prepare_intervals_for_auc_estimation(scores, eps, p, n)
 
-    if lower == "min":
-        RL_avg_sens = R(intervals["sens"][0], k)
-        RL_avg_spec = R(intervals["spec"][0], k)
-
-        lower0 = np.mean([a * b for a, b in zip(RL_avg_sens, RL_avg_spec[::-1])])
-    elif lower == "cmin":
-        if intervals["sens"][0] < 1 - intervals["spec"][0]:
-            raise ValueError(
-                'sens >= 1 - spec does not hold for "\
-                            "the corrected minimum curve'
-            )
-        lower0 = 0.5 + (1 - intervals["spec"][0] - intervals["sens"][0]) ** 2 / 2.0
+    if lower == 'min':
+        lower0 = auc_min_aggregated(intervals["fpr"][1], intervals["tpr"][0], k)
+    elif lower == 'rmin':
+        lower0 = auc_rmin_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
+    elif lower == 'amin':
+        lower0 = auc_amin_aggregated(intervals["acc"][0], ps, ns)
+    elif lower == 'armin':
+        lower0 = auc_armin_aggregated(intervals["acc"][0], ps, ns)
     else:
-        raise ValueError("Unsupported lower bound")
+        raise ValueError(f"unsupported lower bound {lower}")
 
-    if upper == "max":
-        RU_avg_sens = R(intervals["sens"][1], k)
-        RU_avg_spec = R(intervals["spec"][1], k)
-
-        upper0 = 1 - np.mean(
-            [(1 - a) * (1 - b) for a, b in zip(RU_avg_sens, RU_avg_spec[::-1])]
-        )
-    elif upper == "amax":
-        if not intervals["acc"][0] >= max(p, n) / (p + n):
-            raise ValueError("accuracy too small")
-
-        upper0 = 1 - ((1 - intervals["acc"][1]) * (p + n)) ** 2 / (2 * n * p)
+    if upper == 'max':
+        upper0 = auc_max_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
+    elif upper == 'amax':
+        print(intervals['acc'][1], ps, ns)
+        upper0 = auc_amax_aggregated(intervals["acc"][1], ps, ns)
+    elif upper == 'maxa':
+        upper0 = auc_maxa_aggregated(intervals["acc"][1], ps, ns)
     else:
-        raise ValueError("Unsupported upper bound")
+        raise ValueError(f"unsupported upper bound {upper}")
 
-    return (float(lower0), float(upper0))
+    return (lower0, upper0)
+
 
 def acc_from_aggregated(
-    *, 
-    scores: dict, 
-    eps: float, 
-    ps: int, 
-    ns: int, 
-    upper: str = "max",
-    raise_errors: bool = False
+    *,
+    scores: dict,
+    eps: float,
+    ps: int,
+    ns: int,
+    lower: str = "min",
+    upper: str = "max"
 ) -> tuple:
     """
-    This module applies the estimation scheme A to estimate AUC from scores
+    This function applies the estimation schemes to estimate acc from scores
 
     Args:
         scores (dict): the reported scores
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        upper (str): 'max'/'cmax' - the type of upper bound
+        lower (str): 'min'/'rmin'
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        tuple(float, float): the interval for the accuracy
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+
+    lower0 = None
+    upper0 = None
+
+    if lower == 'min':
+        lower0 = acc_min_aggregated(intervals['auc'][0], ps, ns)
+    elif lower == 'rmin':
+        lower0 = acc_rmin_aggregated(intervals['auc'][0], ps, ns)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+
+    if upper == 'max':
+        upper0 = acc_max_aggregated(intervals['auc'][1], ps, ns)
+    elif upper == 'rmax':
+        upper0 = acc_rmax_aggregated(intervals['auc'][1], ps, ns)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)
+
+
+def max_acc_from_aggregated(
+    *,
+    scores: dict,
+    eps: float,
+    ps: int,
+    ns: int,
+    lower: str = "min",
+    upper: str = "max"
+) -> tuple:
+    """
+    This function applies the estimation schemes to estimate maximum accuracy
+    from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'
+        upper (str): 'max'/'rmax' - the type of upper bound
 
     Returns:
         tuple(float, float): the interval for the maximum accuracy
     """
 
-    if not raise_errors:
-        return acc_from_auc_kfold_wrapper(
-            scores=scores,
-            eps=eps,
-            ps=ps,
-            ns=ns,
-            upper=upper
-        )
+    intervals = prepare_intervals(scores, eps)
 
-    scores = translate(scores)
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
 
-    auc = (max(scores["auc"] - eps, 0), min(scores["auc"] + eps, 1))
+    lower0 = None
+    upper0 = None
 
-    #if np.sqrt((1 - auc[0])*2*p*n) > min(p, n):
-    if auc[0] < 1 - min(p, n)/(2*max(p, n)):
-        lower = 1 - (np.sqrt(2 * p * n - 2 * auc[0] * p * n)) / (p + n)
+    if lower == 'min':
+        lower0 = macc_min_aggregated(intervals['auc'][0], ps, ns)
     else:
-        lower = max(p, n)/(p + n)
-        #raise ValueError("AUC too small")
-    
-    if upper == "max":
-        upper = (auc[1] * min(p, n) + max(p, n)) / (p + n)
-    else:
-        upper = (max(p, n) + min(p, n) * np.sqrt(2 * (auc[1] - 0.5))) / (p + n)
+        raise ValueError(f"unsupported lower bound {lower}")
 
-    return (float(lower), float(upper))
+    if upper == 'max':
+        upper0 = acc_max_aggregated(intervals['auc'][1], ps, ns)
+    elif upper == 'rmax':
+        upper0 = acc_rmax_aggregated(intervals['auc'][1], ps, ns)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)
+
+
