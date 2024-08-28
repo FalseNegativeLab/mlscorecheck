@@ -1,0 +1,201 @@
+"""
+This module implements all AUC based accuracy
+estimation related functionalities
+"""
+
+import numpy as np
+
+from ._auc_single import prepare_intervals
+
+__all__ = [
+    "acc_from",
+    "max_acc_from",
+    "acc_min",
+    "acc_rmin",
+    "acc_max",
+    "acc_rmax",
+    "macc_min",
+]
+
+
+def acc_min(auc, p, n):
+    """
+    The minimum accuracy given an AUC
+
+    Args:
+        auc (float): lower bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+
+    Returns:
+        float: the accuracy
+    """
+    return auc * min(p, n) / (p + n)
+
+
+def acc_rmin(auc, p, n):
+    """
+    The minimum accuracy given an AUC, assuming the curve does not
+    go below the random classification line
+
+    Args:
+        auc (float): the lower bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+
+    Returns:
+        float: the accuracy
+
+    Raises:
+        ValueError: when auc < 0.5
+    """
+    if auc < 0.5:
+        raise ValueError("the AUC is too small")
+
+    return min(p, n) / (p + n)
+
+
+def acc_max(auc, p, n):
+    """
+    The maximum accuracy given an AUC
+
+    Args:
+        auc (float): upper bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+
+    Returns:
+        float: the accuracy
+    """
+    return (auc * min(p, n) + max(p, n)) / (p + n)
+
+
+def acc_rmax(auc, p, n):
+    """
+    The maximum accuracy on a regulated minimum curve given an AUC
+
+    Args:
+        auc (float): upper bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+
+    Returns:
+        float: the accuracy
+
+    Raises:
+        ValueError: when auc < 0.5
+    """
+    if auc < 0.5:
+        raise ValueError("auc too small")
+    return (max(p, n) + min(p, n) * np.sqrt(2 * (auc - 0.5))) / (p + n)
+
+
+def macc_min(auc, p, n):
+    """
+    The minimum of the maximum accuracy
+
+    Args:
+        auc (float): lower bound on AUC
+        p (int): the number of positive test samples
+        n (int): the number of negative test samples
+
+    Returns:
+        float: the accuracy
+    """
+    if auc >= 1 - min(p, n) / (2 * max(p, n)):
+        return 1 - (np.sqrt(2 * p * n - 2 * auc * p * n)) / (p + n)
+
+    return max(p, n) / (p + n)
+
+
+def acc_from(
+    *, scores: dict, eps: float, p: int, n: int, lower: str = "min", upper: str = "max"
+) -> tuple:
+    """
+    This function applies the estimation schemes to estimate acc from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'/'rmin'
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        tuple(float, float): the interval for the accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+
+    lower0 = None
+    upper0 = None
+
+    if lower == "min":
+        lower0 = acc_min(intervals["auc"][0], p, n)
+    elif lower == "rmin":
+        lower0 = acc_rmin(intervals["auc"][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+
+    if upper == "max":
+        upper0 = acc_max(intervals["auc"][1], p, n)
+    elif upper == "rmax":
+        upper0 = acc_rmax(intervals["auc"][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)
+
+
+def max_acc_from(
+    *, scores: dict, eps: float, p: int, n: int, lower: str = "min", upper: str = "max"
+) -> tuple:
+    """
+    This function applies the estimation schemes to estimate maximum accuracy
+    from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        tuple(float, float): the interval for the maximum accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+
+    lower0 = None
+    upper0 = None
+
+    if lower == "min":
+        lower0 = macc_min(intervals["auc"][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+
+    if upper == "max":
+        upper0 = acc_max(intervals["auc"][1], p, n)
+    elif upper == "rmax":
+        upper0 = acc_rmax(intervals["auc"][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return (lower0, upper0)

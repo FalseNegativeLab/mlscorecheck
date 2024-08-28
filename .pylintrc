@@ -5,6 +5,6 @@ good-names=p4,p,n,tp,tn,fp,fn,tpr,fpr,acc
 ignored-modules = numpy
 
 # Minimum lines number of a similarity.
-min-similarity-lines=30
+min-similarity-lines=50
 
 disable = too-many-arguments
