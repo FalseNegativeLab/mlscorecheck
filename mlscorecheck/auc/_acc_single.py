@@ -5,7 +5,7 @@ estimation related functionalities
 
 import numpy as np
 
-from ._auc_single import prepare_intervals
+from ._utils import prepare_intervals
 
 __all__ = [
     "acc_from",

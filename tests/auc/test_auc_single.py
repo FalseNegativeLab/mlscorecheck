@@ -21,8 +21,6 @@ from mlscorecheck.auc import (
     auc_armin,
     auc_amax,
     integrate_roc_curve,
-    translate_scores,
-    prepare_intervals,
     augment_intervals,
     auc_from,
 )
@@ -225,49 +223,6 @@ def test_auc_armin():
     acc = (lower + upper) / 2
 
     assert auc_armin(acc, p, n) == 0.5
-
-
-def test_translate_scores():
-    """
-    Testing the translation of scores
-    """
-
-    with pytest.raises(ValueError):
-        translate_scores({"sens": 0.6, "tpr": 0.7})
-
-    with pytest.raises(ValueError):
-        translate_scores({"sens": 0.6, "fnr": 0.3})
-
-    with pytest.raises(ValueError):
-        translate_scores({"spec": 0.6, "tnr": 0.7})
-
-    with pytest.raises(ValueError):
-        translate_scores({"spec": 0.6, "fpr": 0.3})
-
-    tmp = translate_scores({"spec": 0.7})
-    np.testing.assert_almost_equal(tmp["fpr"], 0.3)
-
-    tmp = translate_scores({"tnr": 0.7})
-    np.testing.assert_almost_equal(tmp["fpr"], 0.3)
-
-    tmp = translate_scores({"sens": 0.7})
-    np.testing.assert_almost_equal(tmp["tpr"], 0.7)
-
-    tmp = translate_scores({"fnr": 0.7})
-    np.testing.assert_almost_equal(tmp["tpr"], 0.3)
-
-
-def test_prepare_intervals():
-    """
-    Testing the preparation of intervals
-    """
-
-    intervals = prepare_intervals({"tpr": 0.8, "f1": 0.7}, eps=0.1)
-
-    np.testing.assert_almost_equal(intervals["tpr"][0], 0.7)
-    np.testing.assert_almost_equal(intervals["tpr"][1], 0.9)
-
-    assert len(intervals) == 1
 
 
 def test_augment_intervals():

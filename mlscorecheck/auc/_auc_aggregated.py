@@ -10,7 +10,14 @@ from cvxopt import matrix
 from cvxopt.solvers import qp
 from cvxopt import solvers
 
-from ._auc_single import translate_scores, prepare_intervals, auc_maxa, auc_armin
+from ._utils import (
+    R,
+    check_cvxopt,
+    translate_folding,
+    translate_scores,
+    prepare_intervals,
+)
+from ._auc_single import auc_maxa, auc_armin
 
 __all__ = [
     "auc_min_aggregated",
@@ -23,15 +30,10 @@ __all__ = [
     "auc_amax_aggregated",
     "auc_armin_aggregated",
     "auc_from_aggregated",
-    "R",
-    "F",
-    "perturb_solutions",
-    "multi_perturb_solutions",
     "estimate_acc_interval",
     "estimate_tpr_interval",
     "estimate_fpr_interval",
     "augment_intervals_aggregated",
-    "check_cvxopt",
 ]
 
 
@@ -297,66 +299,6 @@ def augment_intervals_aggregated(intervals: dict, ps: np.array, ns: np.array) ->
     return intervals
 
 
-def R(  # pylint: disable=invalid-name
-    x: float, k: int, lower: np.array = None, upper: np.array = None
-) -> np.array:
-    """
-    The "representative" function
-
-    1 - R(x, k, lower, upper) = F(R(1 - x, k, 1 - F(upper), 1 - F(lower)))
-
-    holds.
-
-    Args:
-        x (float): the desired average
-        k (int): the number of dimensions
-        lower (np.array|None): the lower bounds
-        upper (np.array|None): the upper bounds
-
-    Returns:
-        np.array: the representative
-
-    Raises:
-        ValueError: if the configuration cannot be satisfied
-    """
-    if lower is None:
-        lower = np.repeat(0.0, k)
-    if upper is None:
-        upper = np.repeat(1.0, k)
-
-    x = x * len(lower)
-    if np.sum(lower) > x or np.sum(upper) < x:
-        raise ValueError("infeasible configuration")
-
-    solution = lower.copy().astype(float)
-    x = x - np.sum(lower)
-
-    idx = 0
-    while x > 0 and idx < len(lower):
-        if upper[idx] - lower[idx] < x:
-            solution[idx] = upper[idx]
-            x -= upper[idx] - lower[idx]
-        else:
-            solution[idx] = solution[idx] + x
-            x = 0.0
-        idx += 1
-
-    return np.array(solution).astype(float)
-
-
-def F(x: np.array) -> np.array:  # pylint: disable=invalid-name
-    """
-    The flipping operator
-
-    Args:
-        x (np.array): the vector to flip
-
-    Returns:
-        np.array: the flipped vector
-    """
-    return x[::-1]
-
-
 def auc_min_aggregated(
     fpr: float, tpr: float, k: int, return_solutions: bool = False
 ) -> float:
@@ -564,70 +506,6 @@ def auc_maxa_aggregated(
     return auc_maxa_solve(ps, ns, acc, return_solutions)
 
 
-def perturb_solutions(
-    values: np.array,
-    lower_bounds: np.array,
-    upper_bounds: np.array,
-    random_state: int = None,
-) -> np.array:
-    """
-    Applies a perturbation to a solution, by keeping the lower and upper bound and the sum
-
-    Args:
-        values (np.array): the values to perturb
-        lower_bounds (np.array): the lower bounds
-        upper_bounds (np.array): the upper bounds
-        random_state (int|None): the random seed to use
-
-    Returns:
-        np.array: the perturbed values
-    """
-    random_state = np.random.RandomState(random_state)
-    greater = np.where(values > lower_bounds)[0]
-    lower = np.where(values < upper_bounds)[0]
-
-    greater = random_state.choice(greater)
-    lower = random_state.choice(lower)
-
-    diff = min(
-        values[greater] - lower_bounds[greater], upper_bounds[lower] - values[lower]
-    )
-    step = random_state.random_sample() * diff
-
-    values = values.copy()
-    values[greater] -= step
-    values[lower] += step
-
-    return values
-
-
-def multi_perturb_solutions(
-    n_perturbations: int,
-    values: np.array,
-    lower_bounds: np.array,
-    upper_bounds: np.array,
-    random_state: int = None,
-) -> np.array:
-    """
-    Applies a multiple perturbations to a solution vector,
-    keeping its average
-
-    Args:
-        n_perturbations (int): the number of perturbations
-        values (np.array): the values to perturb
-        lower_bounds (np.array): the lower bounds
-        upper_bounds (np.array): the upper bounds
-        random_state (int|None): the random seed to use
-
-    Returns:
-        np.array: the perturbed values
-    """
-    for _ in range(n_perturbations):
-        values = perturb_solutions(values, lower_bounds, upper_bounds, random_state)
-
-    return values
-
-
 def auc_amin_aggregated(
     acc: float, ps: np.array, ns: np.array, return_solutions: bool = False
 ) -> float:
@@ -738,23 +616,6 @@ def auc_amax_aggregated(
         results = results, (accs, ps, ns, lower, upper)
 
     return results
-
-
-def check_cvxopt(results, message):
-    """
-    Checking the cvxopt results
-
-    Args:
-        results (dict): the output of cvxopt
-        message (str): the additional message
-
-    Raises:
-        ValueError: when the solution is not optimal
-    """
-    if results["status"] != "optimal":
-        raise ValueError(
-            "no optimal solution found for the configuration " + f"({message})"
-        )
 
 
 def auc_armin_solve(
@@ -898,9 +759,10 @@ def auc_from_aggregated(
     *,
     scores: dict,
     eps: float,
-    k: int,
+    k: int = None,
     ps: np.array = None,
     ns: np.array = None,
+    folding: dict = None,
     lower: str = "min",
     upper: str = "max",
 ) -> tuple:
@@ -913,6 +775,10 @@ def auc_from_aggregated(
         k (int): the number of evaluation sets
         ps (int): the numbers of positive samples
         ns (int): the numbers of negative samples
+        folding (dict): description of a folding, alternative to specifying
+                        ps and ns, contains the keys 'p', 'n', 'n_repeats',
+                        'n_folds', 'folding' (currently 'stratified_sklearn'
+                        supported for 'folding')
         lower (str): ('min'/'rmin'/'amin'/'armin') - the type of
                         estimation for the lower bound
         upper (str): ('max'/'maxa'/'amax') - the type of estimation for
@@ -928,6 +794,13 @@ def auc_from_aggregated(
 
     scores = translate_scores(scores)
     intervals = prepare_intervals(scores, eps)
+
+    if (ps is not None or ns is not None or k is not None) and folding is not None:
+        raise ValueError("specify either (ps and ns/k) or folding")
+
+    if ps is None and ns is None and k is None and folding is not None:
+        ps, ns = translate_folding(folding)
+        k = len(ps)
 
     if ps is not None and ns is not None:
         intervals = augment_intervals_aggregated(intervals, ps, ns)

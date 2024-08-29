@@ -9,12 +9,9 @@ from cvxopt import matrix
 from cvxopt.solvers import cp
 from cvxopt import solvers
 
-from ._acc_single import (
-    prepare_intervals,
-    acc_min,
-    acc_max,
-    macc_min,
-)
+from ._utils import prepare_intervals, translate_folding
+
+from ._acc_single import acc_min, acc_max, macc_min
 from ._auc_aggregated import R, check_cvxopt
 
 __all__ = [
@@ -545,8 +542,9 @@ def acc_from_aggregated(
     *,
     scores: dict,
     eps: float,
-    ps: int,
-    ns: int,
+    ps: int = None,
+    ns: int = None,
+    folding: dict = None,
     lower: str = "min",
     upper: str = "max",
 ) -> tuple:
@@ -558,6 +556,10 @@ def acc_from_aggregated(
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
+        folding (dict): description of a folding, alternative to specifying
+                        ps and ns, contains the keys 'p', 'n', 'n_repeats',
+                        'n_folds', 'folding' (currently 'stratified_sklearn'
+                        supported for 'folding')
         lower (str): 'min'/'rmin'
         upper (str): 'max'/'rmax' - the type of upper bound
 
@@ -573,6 +575,12 @@ def acc_from_aggregated(
 
     if "auc" not in intervals:
         raise ValueError("auc must be specified")
+
+    if (ps is not None or ns is not None) and folding is not None:
+        raise ValueError("specify either (ps and ns) or folding")
+
+    if ps is None and ns is None and folding is not None:
+        ps, ns = translate_folding(folding)
 
     lower0 = None
     upper0 = None
@@ -598,8 +606,9 @@ def max_acc_from_aggregated(
     *,
     scores: dict,
     eps: float,
-    ps: int,
-    ns: int,
+    ps: int = None,
+    ns: int = None,
+    folding: dict = None,
     lower: str = "min",
     upper: str = "max",
 ) -> tuple:
@@ -612,6 +621,10 @@ def max_acc_from_aggregated(
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
+        folding (dict): description of a folding, alternative to specifying
+                        ps and ns, contains the keys 'p', 'n', 'n_repeats',
+                        'n_folds', 'folding' (currently 'stratified_sklearn'
+                        supported for 'folding')
         lower (str): 'min'
         upper (str): 'max'/'rmax' - the type of upper bound
 
@@ -627,6 +640,12 @@ def max_acc_from_aggregated(
 
     if "auc" not in intervals:
         raise ValueError("auc must be specified")
+
+    if (ps is not None or ns is not None) and folding is not None:
+        raise ValueError("specify either (ps and ns) or folding")
+
+    if ps is None and ns is None and folding is not None:
+        ps, ns = translate_folding(folding)
 
     lower0 = None
     upper0 = None

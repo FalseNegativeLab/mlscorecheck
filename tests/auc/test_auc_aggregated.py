@@ -22,15 +22,11 @@ from mlscorecheck.auc import (
     auc_amax_aggregated,
     auc_armin_aggregated,
     perturb_solutions,
-    multi_perturb_solutions,
-    R,
-    F,
     auc_from_aggregated,
     estimate_acc_interval,
     estimate_tpr_interval,
     estimate_fpr_interval,
     augment_intervals_aggregated,
-    check_cvxopt,
 )
 
 random_seeds = list(range(100))
@@ -114,38 +110,6 @@ def test_augment_intervals_aggregated():
     intervals = {"fpr": fpr_interval, "acc": acc_interval}
     intervals = augment_intervals_aggregated(intervals, ps, ns)
     assert intervals["tpr"][0] <= tpr <= intervals["tpr"][1]
-
-
-def test_r_f():
-    """
-    Testing the R and F functions
-    """
-
-    lower = np.array([0.1, 0.2, 0.3])
-    upper = np.array([0.9, 0.8, 0.8])
-    x = 0.78
-
-    r = 1 - R(x, lower=lower, upper=upper, k=3)
-    f = F(R(1 - x, lower=1 - F(upper), upper=1 - F(lower), k=3))
-
-    np.testing.assert_array_almost_equal(r, f)
-
-    with pytest.raises(ValueError):
-        R(0.1, 3, np.array([0.5, 0.5, 0.5]), np.array([0.8, 0.8, 0.8]))
-
-
-def test_multi_perturb():
-    """
-    Testing the iterated perturbation
-    """
-
-    x = np.array([0.2, 0.8, 0.5])
-    lower = np.array([0.1, 0.2, 0.3])
-    upper = np.array([0.8, 0.9, 0.7])
-
-    x_new = multi_perturb_solutions(5, x, lower, upper, 5)
-
-    np.testing.assert_almost_equal(np.mean(x), np.mean(x_new))
 
 
 @pytest.mark.parametrize("conf", auc_confs)
@@ -421,10 +385,42 @@ def test_auc_from_aggregated():
         )
 
 
-def test_check_cvxopt():
+def test_auc_from_aggregated_folding():
     """
-    Testing the check_cvxopt function
+    Testing the auc_from_aggregated with folding
+    """
+
+    result = auc_from_aggregated(
+        scores={"tpr": 0.9, "fpr": 0.1},
+        eps=0.01,
+        folding={
+            "p": 20,
+            "n": 80,
+            "n_repeats": 1,
+            "n_folds": 5,
+            "folding": "stratified_sklearn",
+        },
+    )
+
+    assert result is not None
+
+
+def test_auc_from_aggregated_error():
+    """
+    Testing the auc_from_aggregated with folding
     """
 
     with pytest.raises(ValueError):
-        check_cvxopt({"status": "dummy"}, "")
+        auc_from_aggregated(
+            scores={"tpr": 0.9, "fpr": 0.1},
+            eps=0.01,
+            ps=[10, 20],
+            ns=[20, 30],
+            folding={
+                "p": 20,
+                "n": 80,
+                "n_repeats": 1,
+                "n_folds": 5,
+                "folding": "stratified_sklearn",
+            },
+        )

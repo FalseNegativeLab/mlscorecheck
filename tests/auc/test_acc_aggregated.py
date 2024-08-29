@@ -241,3 +241,85 @@ def test_max_acc_from_aggregated():
         max_acc_from_aggregated(
             scores={"auc": 0.9}, eps=1e-4, ps=ps, ns=ns, upper="dummy"
         )
+
+
+def test_acc_from_aggregated_folding():
+    """
+    Testing the acc_from_aggregated with folding
+    """
+
+    result = acc_from_aggregated(
+        scores={"auc": 0.8},
+        eps=0.01,
+        folding={
+            "p": 20,
+            "n": 80,
+            "n_repeats": 1,
+            "n_folds": 5,
+            "folding": "stratified_sklearn",
+        },
+    )
+
+    assert result is not None
+
+
+def test_acc_from_aggregated_error():
+    """
+    Testing the acc_from_aggregated throwing exception
+    """
+
+    with pytest.raises(ValueError):
+        acc_from_aggregated(
+            scores={"acc": 0.9},
+            eps=0.01,
+            ps=[10, 20],
+            ns=[20, 30],
+            folding={
+                "p": 20,
+                "n": 80,
+                "n_repeats": 1,
+                "n_folds": 5,
+                "folding": "stratified_sklearn",
+            },
+        )
+
+
+def test_max_acc_from_aggregated_folding():
+    """
+    Testing the max_acc_from_aggregated with folding
+    """
+
+    result = max_acc_from_aggregated(
+        scores={"auc": 0.9},
+        eps=0.01,
+        folding={
+            "p": 20,
+            "n": 80,
+            "n_repeats": 1,
+            "n_folds": 5,
+            "folding": "stratified_sklearn",
+        },
+    )
+
+    assert result is not None
+
+
+def test_max_acc_from_aggregated_error():
+    """
+    Testing the max_acc_from_aggregated throwing exception
+    """
+
+    with pytest.raises(ValueError):
+        max_acc_from_aggregated(
+            scores={"acc": 0.9},
+            eps=0.01,
+            ps=[10, 20],
+            ns=[20, 30],
+            folding={
+                "p": 20,
+                "n": 80,
+                "n_repeats": 1,
+                "n_folds": 5,
+                "folding": "stratified_sklearn",
+            },
+        )

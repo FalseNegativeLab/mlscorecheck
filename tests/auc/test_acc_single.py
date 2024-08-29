@@ -18,6 +18,7 @@ from mlscorecheck.auc import (
 
 auc_scenarios = [{"auc": 0.8, "p": 20, "n": 60}, {"auc": 0.4, "p": 50, "n": 51}]
 
+
 def test_acc_min():
     """
     Testing the minimum accuracy estimation

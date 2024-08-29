@@ -4,11 +4,11 @@ This module implements all AUC related functionalities
 
 import numpy as np
 
+from ._utils import translate_scores, prepare_intervals
+
 __all__ = [
-    "prepare_intervals",
     "augment_intervals",
     "auc_from",
-    "translate_scores",
     "integrate_roc_curve",
     "roc_min",
     "roc_max",
@@ -25,66 +25,6 @@ __all__ = [
     "auc_armin",
     "auc_amax",
 ]
-
-
-def translate_scores(scores: dict) -> dict:
-    """
-    Translates the scores
-
-    Args:
-        scores (dict): the dict of scores
-
-    Returns:
-        dict: the translated scores
-
-    Raises:
-        ValueError: when the provided scores are inconsistent
-    """
-    scores = {**scores}
-
-    if "sens" in scores and "tpr" in scores and scores["sens"] != scores["tpr"]:
-        raise ValueError("differing sens and tpr cannot be specified together")
-
-    if "sens" in scores and "fnr" in scores and scores["sens"] != 1 - scores["fnr"]:
-        raise ValueError("differing sens and fnr cannot be specified together")
-
-    if "spec" in scores and "tnr" in scores and scores["spec"] != scores["tnr"]:
-        raise ValueError("differing spec and tnr cannot be specified together")
-
-    if "spec" in scores and "fpr" in scores and scores["spec"] != 1 - scores["fpr"]:
-        raise ValueError("differing spec and fpr cannot be specified together")
-
-    if "fpr" not in scores:
-        if "spec" in scores:
-            scores["fpr"] = 1 - scores["spec"]
-        if "tnr" in scores:
-            scores["fpr"] = 1 - scores["tnr"]
-
-    if "tpr" not in scores:
-        if "sens" in scores:
-            scores["tpr"] = scores["sens"]
-        if "fnr" in scores:
-            scores["tpr"] = 1 - scores["fnr"]
-
-    return scores
-
-
-def prepare_intervals(scores: dict, eps: float):
-    """
-    Create intervals from the values
-
-    Args:
-        scores (dict): the scores to transform to intervals
-        eps (float): the estimated numerical uncertainty
-
-    Returns:
-        dict: the intervals
-    """
-    return {
-        score: (max(scores[score] - eps, 0), min(scores[score] + eps, 1))
-        for score in ["tpr", "fpr", "tnr", "fnr", "sens", "spec", "acc", "auc"]
-        if score in scores
-    }
 
 
 def augment_intervals(intervals: dict, p: int, n: int):
