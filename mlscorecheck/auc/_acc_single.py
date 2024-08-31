@@ -10,6 +10,10 @@ from ._utils import prepare_intervals
 __all__ = [
     "acc_from",
     "max_acc_from",
+    "acc_lower_from",
+    "max_acc_lower_from",
+    "acc_upper_from",
+    "max_acc_upper_from",
     "acc_min",
     "acc_rmin",
     "acc_max",
@@ -108,6 +112,90 @@ def macc_min(auc, p, n):
     return max(p, n) / (p + n)
 
 
+def acc_lower_from(
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    lower: str = "min"  
+):
+    """
+    This function applies the lower bound estimation schemes to estimate 
+    acc from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'/'rmin'
+
+    Returns:
+        float: the lower bound for the accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+
+    if lower == "min":
+        lower0 = acc_min(intervals["auc"][0], p, n)
+    elif lower == "rmin":
+        lower0 = acc_rmin(intervals["auc"][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+    
+    return lower0
+
+
+def acc_upper_from(
+    *, 
+    scores: dict, 
+    eps: float, 
+    p: int, 
+    n: int, 
+    upper: str = "max"  
+):
+    """
+    This function applies the lower bound estimation schemes to estimate 
+    acc from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        float: the upper bound for the accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
+
+    if upper == "max":
+        upper0 = acc_max(intervals["auc"][1], p, n)
+    elif upper == "rmax":
+        upper0 = acc_rmax(intervals["auc"][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+    
+    return upper0
+
+
 def acc_from(
     *, scores: dict, eps: float, p: int, n: int, lower: str = "min", upper: str = "max"
 ) -> tuple:
@@ -130,20 +218,85 @@ def acc_from(
         or the scores are inconsistent
     """
 
+    lower0 = acc_lower_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        lower=lower
+    )
+    upper0 = acc_upper_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        upper=upper
+    )
+
+    return (lower0, upper0)
+
+
+def max_acc_lower_from(
+    *, scores: dict, eps: float, p: int, n: int, lower: str = "min"
+):
+    """
+    This function applies the estimation schemes to estimate maximum accuracy
+    from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): 'min'
+
+    Returns:
+        float: the lower bound for the maximum accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
     intervals = prepare_intervals(scores, eps)
 
     if "auc" not in intervals:
         raise ValueError("auc must be specified")
 
-    lower0 = None
-    upper0 = None
-
     if lower == "min":
-        lower0 = acc_min(intervals["auc"][0], p, n)
-    elif lower == "rmin":
-        lower0 = acc_rmin(intervals["auc"][0], p, n)
+        lower0 = macc_min(intervals["auc"][0], p, n)
     else:
         raise ValueError(f"unsupported lower bound {lower}")
+
+    return lower0
+
+
+def max_acc_upper_from(
+    *, scores: dict, eps: float, p: int, n: int, upper: str = "min"
+):
+    """
+    This function applies the estimation schemes to estimate maximum accuracy
+    from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        upper (str): 'max'/'rmax' - the type of upper bound
+
+    Returns:
+        float: the upper bound for the maximum accuracy
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    intervals = prepare_intervals(scores, eps)
+
+    if "auc" not in intervals:
+        raise ValueError("auc must be specified")
 
     if upper == "max":
         upper0 = acc_max(intervals["auc"][1], p, n)
@@ -152,7 +305,7 @@ def acc_from(
     else:
         raise ValueError(f"unsupported upper bound {upper}")
 
-    return (lower0, upper0)
+    return upper0
 
 
 def max_acc_from(
@@ -178,24 +331,20 @@ def max_acc_from(
         or the scores are inconsistent
     """
 
-    intervals = prepare_intervals(scores, eps)
+    lower0 = max_acc_lower_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        lower=lower
+    )
 
-    if "auc" not in intervals:
-        raise ValueError("auc must be specified")
-
-    lower0 = None
-    upper0 = None
-
-    if lower == "min":
-        lower0 = macc_min(intervals["auc"][0], p, n)
-    else:
-        raise ValueError(f"unsupported lower bound {lower}")
-
-    if upper == "max":
-        upper0 = acc_max(intervals["auc"][1], p, n)
-    elif upper == "rmax":
-        upper0 = acc_rmax(intervals["auc"][1], p, n)
-    else:
-        raise ValueError(f"unsupported upper bound {upper}")
+    upper0 = max_acc_upper_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        upper=upper
+    )
 
     return (lower0, upper0)

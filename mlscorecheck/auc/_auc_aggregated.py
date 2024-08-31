@@ -30,6 +30,8 @@ __all__ = [
     "auc_amax_aggregated",
     "auc_armin_aggregated",
     "auc_from_aggregated",
+    "auc_lower_from_aggregated",
+    "auc_upper_from_aggregated",
     "estimate_acc_interval",
     "estimate_tpr_interval",
     "estimate_fpr_interval",
@@ -447,9 +449,9 @@ def auc_maxa_solve(
     Q = 2.0 * np.diag(w)  # pylint: disable=invalid-name
     q = -2.0 * w
     A = np.repeat(1.0 / k, k).reshape(-1, 1).T  # pylint: disable=invalid-name
-    b = np.array([avg_acc])
+    b = np.array([avg_acc]).astype(float)
     G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)  # pylint: disable=invalid-name
-    lower = np.array([max(p, n) / (p + n) for p, n in zip(ps, ns)])
+    lower = np.array([max(p, n) / (p + n) for p, n in zip(ps, ns)]).astype(float)
     h = np.hstack([np.repeat(1.0, k), -lower])
 
     Q = matrix(Q)  # pylint: disable=invalid-name
@@ -648,7 +650,7 @@ def auc_armin_solve(
     # and linear term correct in the cxopt formalism
     Q = 2 * np.diag(1 + w**2 + 2 * w)  # pylint: disable=invalid-name
     A = np.repeat(1.0 / k, k).reshape(-1, 1).T  # pylint: disable=invalid-name
-    b = np.array([avg_acc])
+    b = np.array([avg_acc]).astype(float)
     G = np.vstack([np.eye(k), -np.eye(k)]).astype(float)  # pylint: disable=invalid-name
     lower = np.array([max(p, n) / (p + n) for p, n in zip(ps, ns)])
     h = np.hstack([np.repeat(1.0, k), -lower])
@@ -727,8 +729,8 @@ def auc_armin_aggregated(
     return results
 
 
-def check_applicability_aggregated(
-    intervals: dict, lower: str, upper: str, ps: int, ns: int
+def check_applicability_lower_aggregated(
+    intervals: dict, lower: str, ps: int, ns: int
 ):
     """
     Checks the applicability of the methods
@@ -736,6 +738,32 @@ def check_applicability_aggregated(
     Args:
         intervals (dict): the score intervals
         lower (str): the lower bound method
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Raises:
+        ValueError: when the methods are not applicable with the
+                    specified scores
+    """
+    if lower in ["min", "rmin"]:
+        if "fpr" not in intervals or "tpr" not in intervals:
+            raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ["amin", "armin"]:
+        if ps is None or ns is None:
+            raise ValueError("p and n must be specified")
+    if lower in ["amin", "armin"]:
+        if "acc" not in intervals:
+            raise ValueError("acc must be specified")
+
+
+def check_applicability_upper_aggregated(
+    intervals: dict, upper: str, ps: int, ns: int
+):
+    """
+    Checks the applicability of the methods
+
+    Args:
+        intervals (dict): the score intervals
         upper (str): the upper bound method
         p (int): the number of positive samples
         n (int): the number of negative samples
@@ -744,15 +772,141 @@ def check_applicability_aggregated(
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if lower in ["min", "rmin"] or upper in ["max"]:
+    if upper in ["max"]:
         if "fpr" not in intervals or "tpr" not in intervals:
             raise ValueError("fpr, tpr or their complements must be specified")
-    if lower in ["amin", "armin"] or upper in ["amax", "maxa"]:
+    if upper in ["amax", "maxa"]:
         if ps is None or ns is None:
             raise ValueError("p and n must be specified")
-    if lower in ["amin", "armin"] or upper in ["amax", "maxa"]:
+    if upper in ["amax", "maxa"]:
         if "acc" not in intervals:
             raise ValueError("acc must be specified")
+
+
+def auc_lower_from_aggregated(
+    *,
+    scores: dict,
+    eps: float,
+    k: int = None,
+    ps: np.array = None,
+    ns: np.array = None,
+    folding: dict = None,
+    lower: str = "min",
+):
+    """
+    This function applies the lower bound estimation schemes to estimate 
+    AUC from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        k (int): the number of evaluation sets
+        ps (int): the numbers of positive samples
+        ns (int): the numbers of negative samples
+        folding (dict): description of a folding, alternative to specifying
+                        ps and ns, contains the keys 'p', 'n', 'n_repeats',
+                        'n_folds', 'folding' (currently 'stratified_sklearn'
+                        supported for 'folding')
+        lower (str): ('min'/'rmin'/'amin'/'armin') - the type of
+                        estimation for the lower bound
+
+    Returns:
+        float: the lower bound for the AUC
+
+    Raises:
+        ValueError: when no optimal solution is found, or the configuration is
+        infeasible, or not enough data is provided for the estimation method
+    """
+
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
+
+    if (ps is not None or ns is not None or k is not None) and folding is not None:
+        raise ValueError("specify either (ps and ns/k) or folding")
+
+    if ps is None and ns is None and k is None and folding is not None:
+        ps, ns = translate_folding(folding)
+        k = len(ps)
+
+    if ps is not None and ns is not None:
+        intervals = augment_intervals_aggregated(intervals, ps, ns)
+
+    check_applicability_lower_aggregated(intervals, lower, ps, ns)
+
+    if lower == "min":
+        lower0 = auc_min_aggregated(intervals["fpr"][1], intervals["tpr"][0], k)
+    elif lower == "rmin":
+        lower0 = auc_rmin_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
+    elif lower == "amin":
+        lower0 = auc_amin_aggregated(intervals["acc"][0], ps, ns)
+    elif lower == "armin":
+        lower0 = auc_armin_aggregated(intervals["acc"][0], ps, ns)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+
+    return lower0
+
+
+def auc_upper_from_aggregated(
+    *,
+    scores: dict,
+    eps: float,
+    k: int = None,
+    ps: np.array = None,
+    ns: np.array = None,
+    folding: dict = None,
+    upper: str = "min",
+):
+    """
+    This function applies the upper bound estimation schemes to estimate 
+    AUC from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        k (int): the number of evaluation sets
+        ps (int): the numbers of positive samples
+        ns (int): the numbers of negative samples
+        folding (dict): description of a folding, alternative to specifying
+                        ps and ns, contains the keys 'p', 'n', 'n_repeats',
+                        'n_folds', 'folding' (currently 'stratified_sklearn'
+                        supported for 'folding')
+        upper (str): ('max'/'maxa'/'amax') - the type of estimation for
+                        the upper bound
+
+    Returns:
+        float: the upper bound for the AUC
+
+    Raises:
+        ValueError: when no optimal solution is found, or the configuration is
+        infeasible, or not enough data is provided for the estimation method
+    """
+
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
+
+    if (ps is not None or ns is not None or k is not None) and folding is not None:
+        raise ValueError("specify either (ps and ns/k) or folding")
+
+    if ps is None and ns is None and k is None and folding is not None:
+        ps, ns = translate_folding(folding)
+        k = len(ps)
+
+    if ps is not None and ns is not None:
+        intervals = augment_intervals_aggregated(intervals, ps, ns)
+
+    check_applicability_upper_aggregated(intervals, upper, ps, ns)
+
+    if upper == "max":
+        upper0 = auc_max_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
+    elif upper == "amax":
+        upper0 = auc_amax_aggregated(intervals["acc"][1], ps, ns)
+    elif upper == "maxa":
+        upper0 = auc_maxa_aggregated(intervals["acc"][1], ps, ns)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return upper0
 
 
 def auc_from_aggregated(
@@ -792,39 +946,24 @@ def auc_from_aggregated(
         infeasible, or not enough data is provided for the estimation method
     """
 
-    scores = translate_scores(scores)
-    intervals = prepare_intervals(scores, eps)
+    lower0 = auc_lower_from_aggregated(
+        scores=scores,
+        eps=eps,
+        k=k,
+        ps=ps,
+        ns=ns,
+        folding=folding,
+        lower=lower
+    )
 
-    if (ps is not None or ns is not None or k is not None) and folding is not None:
-        raise ValueError("specify either (ps and ns/k) or folding")
-
-    if ps is None and ns is None and k is None and folding is not None:
-        ps, ns = translate_folding(folding)
-        k = len(ps)
-
-    if ps is not None and ns is not None:
-        intervals = augment_intervals_aggregated(intervals, ps, ns)
-
-    check_applicability_aggregated(intervals, lower, upper, ps, ns)
-
-    if lower == "min":
-        lower0 = auc_min_aggregated(intervals["fpr"][1], intervals["tpr"][0], k)
-    elif lower == "rmin":
-        lower0 = auc_rmin_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
-    elif lower == "amin":
-        lower0 = auc_amin_aggregated(intervals["acc"][0], ps, ns)
-    elif lower == "armin":
-        lower0 = auc_armin_aggregated(intervals["acc"][0], ps, ns)
-    else:
-        raise ValueError(f"unsupported lower bound {lower}")
-
-    if upper == "max":
-        upper0 = auc_max_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
-    elif upper == "amax":
-        upper0 = auc_amax_aggregated(intervals["acc"][1], ps, ns)
-    elif upper == "maxa":
-        upper0 = auc_maxa_aggregated(intervals["acc"][1], ps, ns)
-    else:
-        raise ValueError(f"unsupported upper bound {upper}")
+    upper0 = auc_upper_from_aggregated(
+        scores=scores,
+        eps=eps,
+        k=k,
+        ps=ps,
+        ns=ns,
+        folding=folding,
+        upper=upper
+    )
 
     return (lower0, upper0)

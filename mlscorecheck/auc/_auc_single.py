@@ -9,6 +9,8 @@ from ._utils import translate_scores, prepare_intervals
 __all__ = [
     "augment_intervals",
     "auc_from",
+    "auc_lower_from",
+    "auc_upper_from",
     "integrate_roc_curve",
     "roc_min",
     "roc_max",
@@ -372,13 +374,37 @@ def auc_armin(acc, p, n):
     return float(auc_amin(acc, p, n) ** 2 / 2 + 0.5)
 
 
-def check_applicability(intervals: dict, lower: str, upper: str, p: int, n: int):
+def check_lower_applicability(intervals: dict, lower: str, p: int, n: int):
     """
     Checks the applicability of the methods
 
     Args:
         intervals (dict): the score intervals
         lower (str): the lower bound method
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Raises:
+        ValueError: when the methods are not applicable with the
+                    specified scores
+    """
+    if lower in ["min", "rmin", "grmin"]:
+        if "fpr" not in intervals or "tpr" not in intervals:
+            raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ["grmin", "amin", "armin"]:
+        if p is None or n is None:
+            raise ValueError("p and n must be specified")
+    if lower in ["amin", "armin"]:
+        if "acc" not in intervals:
+            raise ValueError("acc must be specified")
+        
+
+def check_upper_applicability(intervals: dict, upper: str, p: int, n: int):
+    """
+    Checks the applicability of the methods
+
+    Args:
+        intervals (dict): the score intervals
         upper (str): the upper bound method
         p (int): the number of positive samples
         n (int): the number of negative samples
@@ -387,16 +413,115 @@ def check_applicability(intervals: dict, lower: str, upper: str, p: int, n: int)
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if lower in ["min", "rmin", "grmin"] or upper in ["max"]:
+    if upper in ["max"]:
         if "fpr" not in intervals or "tpr" not in intervals:
             raise ValueError("fpr, tpr or their complements must be specified")
-    if lower in ["grmin", "amin", "armin"] or upper in ["amax", "maxa"]:
+    if upper in ["amax", "maxa"]:
         if p is None or n is None:
             raise ValueError("p and n must be specified")
-    if lower in ["amin", "armin"] or upper in ["amax", "maxa"]:
+    if upper in ["amax", "maxa"]:
         if "acc" not in intervals:
             raise ValueError("acc must be specified")
 
+
+def auc_lower_from(
+    *,
+    scores: dict,
+    eps: float,
+    p: int = None,
+    n: int = None,
+    lower: str = "min"
+):
+    """
+    This function applies the lower bound estimation schemes to estimate 
+    AUC from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin') - the type of
+                        estimation for the lower bound
+
+    Returns:
+        float: the lower bound for the AUC
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
+
+    if p is not None and n is not None:
+        intervals = augment_intervals(intervals, p, n)
+
+    check_lower_applicability(intervals, lower, p, n)
+
+    if lower == "min":
+        lower0 = auc_min(intervals["fpr"][1], intervals["tpr"][0])
+    elif lower == "rmin":
+        lower0 = auc_rmin(intervals["fpr"][0], intervals["tpr"][1])
+    elif lower == "grmin":
+        lower0 = auc_rmin_grid(intervals["fpr"][0], intervals["tpr"][1], p, n)
+    elif lower == "amin":
+        lower0 = auc_amin(intervals["acc"][0], p, n)
+    elif lower == "armin":
+        lower0 = auc_armin(intervals["acc"][0], p, n)
+    else:
+        raise ValueError(f"unsupported lower bound {lower}")
+    
+    return lower0
+
+
+def auc_upper_from(
+    *,
+    scores: dict,
+    eps: float,
+    p: int = None,
+    n: int = None,
+    upper: str = "max"
+):
+    """
+    This function applies the lower bound estimation schemes to estimate 
+    AUC from scores
+
+    Args:
+        scores (dict): the reported scores
+        eps (float): the numerical uncertainty
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+        upper (str): ('max'/'maxa'/'amax') - the type of estimation for
+                        the upper bound
+
+    Returns:
+        float: the upper bound for the AUC
+
+    Raises:
+        ValueError: when the parameters are not suitable for the estimation methods
+        or the scores are inconsistent
+    """
+    
+    scores = translate_scores(scores)
+    intervals = prepare_intervals(scores, eps)
+
+    if p is not None and n is not None:
+        intervals = augment_intervals(intervals, p, n)
+
+    check_upper_applicability(intervals, upper, p, n)
+
+    if upper == "max":
+        upper0 = auc_max(intervals["fpr"][0], intervals["tpr"][1])
+    elif upper == "amax":
+        upper0 = auc_amax(intervals["acc"][1], p, n)
+    elif upper == "maxa":
+        upper0 = auc_maxa(intervals["acc"][1], p, n)
+    else:
+        raise ValueError(f"unsupported upper bound {upper}")
+
+    return upper0
 
 def auc_from(
     *,
@@ -428,34 +553,20 @@ def auc_from(
         or the scores are inconsistent
     """
 
-    scores = translate_scores(scores)
-    intervals = prepare_intervals(scores, eps)
+    lower0 = auc_lower_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        lower=lower
+    )
 
-    if p is not None and n is not None:
-        intervals = augment_intervals(intervals, p, n)
-
-    check_applicability(intervals, lower, upper, p, n)
-
-    if lower == "min":
-        lower0 = auc_min(intervals["fpr"][1], intervals["tpr"][0])
-    elif lower == "rmin":
-        lower0 = auc_rmin(intervals["fpr"][0], intervals["tpr"][1])
-    elif lower == "grmin":
-        lower0 = auc_rmin_grid(intervals["fpr"][0], intervals["tpr"][1], p, n)
-    elif lower == "amin":
-        lower0 = auc_amin(intervals["acc"][0], p, n)
-    elif lower == "armin":
-        lower0 = auc_armin(intervals["acc"][0], p, n)
-    else:
-        raise ValueError(f"unsupported lower bound {lower}")
-
-    if upper == "max":
-        upper0 = auc_max(intervals["fpr"][0], intervals["tpr"][1])
-    elif upper == "amax":
-        upper0 = auc_amax(intervals["acc"][1], p, n)
-    elif upper == "maxa":
-        upper0 = auc_maxa(intervals["acc"][1], p, n)
-    else:
-        raise ValueError(f"unsupported upper bound {upper}")
+    upper0 = auc_upper_from(
+        scores=scores,
+        eps=eps,
+        p=p,
+        n=n,
+        upper=upper
+    )
 
     return (lower0, upper0)
