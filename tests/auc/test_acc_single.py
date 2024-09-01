@@ -14,6 +14,8 @@ from mlscorecheck.auc import (
     macc_min,
     acc_from,
     max_acc_from,
+    acc_upper_from,
+    max_acc_upper_from,
 )
 
 auc_scenarios = [{"auc": 0.8, "p": 20, "n": 60}, {"auc": 0.4, "p": 50, "n": 51}]
@@ -106,6 +108,9 @@ def test_acc_from():
     with pytest.raises(ValueError):
         acc_from(scores={}, eps=1e-4, p=50, n=100)
 
+    with pytest.raises(ValueError):
+        acc_upper_from(scores={}, eps=1e-4, p=50, n=100)
+
     for lower in ["min", "rmin"]:
         for upper in ["max", "rmax"]:
             tmp = acc_from(
@@ -127,6 +132,9 @@ def test_max_acc_from():
 
     with pytest.raises(ValueError):
         max_acc_from(scores={}, eps=1e-4, p=50, n=100)
+
+    with pytest.raises(ValueError):
+        max_acc_upper_from(scores={}, eps=1e-4, p=50, n=100)
 
     for lower in ["min"]:
         for upper in ["max", "rmax"]:

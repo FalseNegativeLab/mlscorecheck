@@ -27,6 +27,8 @@ from mlscorecheck.auc import (
     estimate_tpr_interval,
     estimate_fpr_interval,
     augment_intervals_aggregated,
+    check_applicability_upper_aggregated,
+    auc_upper_from_aggregated,
 )
 
 random_seeds = list(range(100))
@@ -336,8 +338,18 @@ def test_auc_from_aggregated():
         auc_from_aggregated(scores={"tpr": 0.9}, eps=0.01, k=5)
 
     with pytest.raises(ValueError):
+        check_applicability_upper_aggregated(
+            intervals={"tpr": 0.9}, upper="max", ps=None, ns=None
+        )
+
+    with pytest.raises(ValueError):
         auc_from_aggregated(
             scores={"tpr": 0.9, "fpr": 0.1}, eps=0.01, k=5, lower="amin"
+        )
+
+    with pytest.raises(ValueError):
+        check_applicability_upper_aggregated(
+            intervals={"tpr": 0.9, "fpr": 0.1}, upper="amax", ps=None, ns=None
         )
 
     with pytest.raises(ValueError):
@@ -349,6 +361,11 @@ def test_auc_from_aggregated():
             upper="amax",
             ps=ps,
             ns=ns,
+        )
+
+    with pytest.raises(ValueError):
+        check_applicability_upper_aggregated(
+            intervals={"tpr": 0.9, "fpr": 0.1}, upper="amax", ps=[], ns=[]
         )
 
     for lower in ["min", "rmin", "amin", "armin"]:
@@ -412,6 +429,21 @@ def test_auc_from_aggregated_error():
 
     with pytest.raises(ValueError):
         auc_from_aggregated(
+            scores={"tpr": 0.9, "fpr": 0.1},
+            eps=0.01,
+            ps=[10, 20],
+            ns=[20, 30],
+            folding={
+                "p": 20,
+                "n": 80,
+                "n_repeats": 1,
+                "n_folds": 5,
+                "folding": "stratified_sklearn",
+            },
+        )
+
+    with pytest.raises(ValueError):
+        auc_upper_from_aggregated(
             scores={"tpr": 0.9, "fpr": 0.1},
             eps=0.01,
             ps=[10, 20],

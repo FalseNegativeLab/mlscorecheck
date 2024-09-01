@@ -36,6 +36,8 @@ __all__ = [
     "estimate_tpr_interval",
     "estimate_fpr_interval",
     "augment_intervals_aggregated",
+    "check_applicability_lower_aggregated",
+    "check_applicability_upper_aggregated",
 ]
 
 
@@ -729,9 +731,7 @@ def auc_armin_aggregated(
     return results
 
 
-def check_applicability_lower_aggregated(
-    intervals: dict, lower: str, ps: int, ns: int
-):
+def check_applicability_lower_aggregated(intervals: dict, lower: str, ps: int, ns: int):
     """
     Checks the applicability of the methods
 
@@ -756,9 +756,7 @@ def check_applicability_lower_aggregated(
             raise ValueError("acc must be specified")
 
 
-def check_applicability_upper_aggregated(
-    intervals: dict, upper: str, ps: int, ns: int
-):
+def check_applicability_upper_aggregated(intervals: dict, upper: str, ps: int, ns: int):
     """
     Checks the applicability of the methods
 
@@ -794,7 +792,7 @@ def auc_lower_from_aggregated(
     lower: str = "min",
 ):
     """
-    This function applies the lower bound estimation schemes to estimate 
+    This function applies the lower bound estimation schemes to estimate
     AUC from scores
 
     Args:
@@ -858,7 +856,7 @@ def auc_upper_from_aggregated(
     upper: str = "min",
 ):
     """
-    This function applies the upper bound estimation schemes to estimate 
+    This function applies the upper bound estimation schemes to estimate
     AUC from scores
 
     Args:
@@ -947,23 +945,11 @@ def auc_from_aggregated(
     """
 
     lower0 = auc_lower_from_aggregated(
-        scores=scores,
-        eps=eps,
-        k=k,
-        ps=ps,
-        ns=ns,
-        folding=folding,
-        lower=lower
+        scores=scores, eps=eps, k=k, ps=ps, ns=ns, folding=folding, lower=lower
     )
 
     upper0 = auc_upper_from_aggregated(
-        scores=scores,
-        eps=eps,
-        k=k,
-        ps=ps,
-        ns=ns,
-        folding=folding,
-        upper=upper
+        scores=scores, eps=eps, k=k, ps=ps, ns=ns, folding=folding, upper=upper
     )
 
     return (lower0, upper0)

@@ -26,6 +26,8 @@ __all__ = [
     "auc_amin",
     "auc_armin",
     "auc_amax",
+    "check_lower_applicability",
+    "check_upper_applicability",
 ]
 
 
@@ -388,16 +390,15 @@ def check_lower_applicability(intervals: dict, lower: str, p: int, n: int):
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if lower in ["min", "rmin", "grmin"]:
-        if "fpr" not in intervals or "tpr" not in intervals:
-            raise ValueError("fpr, tpr or their complements must be specified")
-    if lower in ["grmin", "amin", "armin"]:
-        if p is None or n is None:
-            raise ValueError("p and n must be specified")
-    if lower in ["amin", "armin"]:
-        if "acc" not in intervals:
-            raise ValueError("acc must be specified")
-        
+    if lower in ["min", "rmin", "grmin"] and (
+        "fpr" not in intervals or "tpr" not in intervals
+    ):
+        raise ValueError("fpr, tpr or their complements must be specified")
+    if lower in ["grmin", "amin", "armin"] and (p is None or n is None):
+        raise ValueError("p and n must be specified")
+    if lower in ["amin", "armin"] and ("acc" not in intervals):
+        raise ValueError("acc must be specified")
+
 
 def check_upper_applicability(intervals: dict, upper: str, p: int, n: int):
     """
@@ -413,27 +414,19 @@ def check_upper_applicability(intervals: dict, upper: str, p: int, n: int):
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if upper in ["max"]:
-        if "fpr" not in intervals or "tpr" not in intervals:
-            raise ValueError("fpr, tpr or their complements must be specified")
-    if upper in ["amax", "maxa"]:
-        if p is None or n is None:
-            raise ValueError("p and n must be specified")
-    if upper in ["amax", "maxa"]:
-        if "acc" not in intervals:
-            raise ValueError("acc must be specified")
+    if upper in ["max"] and ("fpr" not in intervals or "tpr" not in intervals):
+        raise ValueError("fpr, tpr or their complements must be specified")
+    if upper in ["amax", "maxa"] and (p is None or n is None):
+        raise ValueError("p and n must be specified")
+    if upper in ["amax", "maxa"] and "acc" not in intervals:
+        raise ValueError("acc must be specified")
 
 
 def auc_lower_from(
-    *,
-    scores: dict,
-    eps: float,
-    p: int = None,
-    n: int = None,
-    lower: str = "min"
+    *, scores: dict, eps: float, p: int = None, n: int = None, lower: str = "min"
 ):
     """
-    This function applies the lower bound estimation schemes to estimate 
+    This function applies the lower bound estimation schemes to estimate
     AUC from scores
 
     Args:
@@ -472,20 +465,15 @@ def auc_lower_from(
         lower0 = auc_armin(intervals["acc"][0], p, n)
     else:
         raise ValueError(f"unsupported lower bound {lower}")
-    
+
     return lower0
 
 
 def auc_upper_from(
-    *,
-    scores: dict,
-    eps: float,
-    p: int = None,
-    n: int = None,
-    upper: str = "max"
+    *, scores: dict, eps: float, p: int = None, n: int = None, upper: str = "max"
 ):
     """
-    This function applies the lower bound estimation schemes to estimate 
+    This function applies the lower bound estimation schemes to estimate
     AUC from scores
 
     Args:
@@ -503,7 +491,7 @@ def auc_upper_from(
         ValueError: when the parameters are not suitable for the estimation methods
         or the scores are inconsistent
     """
-    
+
     scores = translate_scores(scores)
     intervals = prepare_intervals(scores, eps)
 
@@ -522,6 +510,7 @@ def auc_upper_from(
         raise ValueError(f"unsupported upper bound {upper}")
 
     return upper0
+
 
 def auc_from(
     *,
@@ -553,20 +542,8 @@ def auc_from(
         or the scores are inconsistent
     """
 
-    lower0 = auc_lower_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        lower=lower
-    )
+    lower0 = auc_lower_from(scores=scores, eps=eps, p=p, n=n, lower=lower)
 
-    upper0 = auc_upper_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        upper=upper
-    )
+    upper0 = auc_upper_from(scores=scores, eps=eps, p=p, n=n, upper=upper)
 
     return (lower0, upper0)

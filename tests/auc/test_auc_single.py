@@ -23,6 +23,8 @@ from mlscorecheck.auc import (
     integrate_roc_curve,
     augment_intervals,
     auc_from,
+    check_lower_applicability,
+    check_upper_applicability,
 )
 
 scenarios = [
@@ -242,6 +244,34 @@ def test_augment_intervals():
     np.testing.assert_almost_equal(
         intervals["tpr"][0], (0.8 * 140 - (1 - 0.1) * 100) / 40
     )
+
+
+def test_applicabilities():
+    """
+    Testing the check applicability functionalities
+    """
+
+    with pytest.raises(ValueError):
+        check_lower_applicability(intervals={"tpr": (0, 1)}, lower="min", p=5, n=10)
+
+    with pytest.raises(ValueError):
+        check_lower_applicability(
+            intervals={"tpr": (0, 1), "fpr": (0, 1)}, lower="grmin", p=5, n=None
+        )
+
+    with pytest.raises(ValueError):
+        check_lower_applicability(intervals={"tpr": (0, 1)}, lower="amin", p=5, n=10)
+
+    with pytest.raises(ValueError):
+        check_upper_applicability(intervals={"tpr": (0, 1)}, upper="max", p=5, n=10)
+
+    with pytest.raises(ValueError):
+        check_upper_applicability(
+            intervals={"tpr": (0, 1), "fpr": (0, 1)}, upper="amax", p=5, n=None
+        )
+
+    with pytest.raises(ValueError):
+        check_upper_applicability(intervals={"tpr": (0, 1)}, upper="amax", p=5, n=10)
 
 
 def test_auc_from():

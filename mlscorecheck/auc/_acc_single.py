@@ -112,16 +112,9 @@ def macc_min(auc, p, n):
     return max(p, n) / (p + n)
 
 
-def acc_lower_from(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
-    n: int, 
-    lower: str = "min"  
-):
+def acc_lower_from(*, scores: dict, eps: float, p: int, n: int, lower: str = "min"):
     """
-    This function applies the lower bound estimation schemes to estimate 
+    This function applies the lower bound estimation schemes to estimate
     acc from scores
 
     Args:
@@ -150,20 +143,13 @@ def acc_lower_from(
         lower0 = acc_rmin(intervals["auc"][0], p, n)
     else:
         raise ValueError(f"unsupported lower bound {lower}")
-    
+
     return lower0
 
 
-def acc_upper_from(
-    *, 
-    scores: dict, 
-    eps: float, 
-    p: int, 
-    n: int, 
-    upper: str = "max"  
-):
+def acc_upper_from(*, scores: dict, eps: float, p: int, n: int, upper: str = "max"):
     """
-    This function applies the lower bound estimation schemes to estimate 
+    This function applies the lower bound estimation schemes to estimate
     acc from scores
 
     Args:
@@ -192,7 +178,7 @@ def acc_upper_from(
         upper0 = acc_rmax(intervals["auc"][1], p, n)
     else:
         raise ValueError(f"unsupported upper bound {upper}")
-    
+
     return upper0
 
 
@@ -218,27 +204,13 @@ def acc_from(
         or the scores are inconsistent
     """
 
-    lower0 = acc_lower_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        lower=lower
-    )
-    upper0 = acc_upper_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        upper=upper
-    )
+    lower0 = acc_lower_from(scores=scores, eps=eps, p=p, n=n, lower=lower)
+    upper0 = acc_upper_from(scores=scores, eps=eps, p=p, n=n, upper=upper)
 
     return (lower0, upper0)
 
 
-def max_acc_lower_from(
-    *, scores: dict, eps: float, p: int, n: int, lower: str = "min"
-):
+def max_acc_lower_from(*, scores: dict, eps: float, p: int, n: int, lower: str = "min"):
     """
     This function applies the estimation schemes to estimate maximum accuracy
     from scores
@@ -271,9 +243,7 @@ def max_acc_lower_from(
     return lower0
 
 
-def max_acc_upper_from(
-    *, scores: dict, eps: float, p: int, n: int, upper: str = "min"
-):
+def max_acc_upper_from(*, scores: dict, eps: float, p: int, n: int, upper: str = "min"):
     """
     This function applies the estimation schemes to estimate maximum accuracy
     from scores
@@ -331,20 +301,8 @@ def max_acc_from(
         or the scores are inconsistent
     """
 
-    lower0 = max_acc_lower_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        lower=lower
-    )
+    lower0 = max_acc_lower_from(scores=scores, eps=eps, p=p, n=n, lower=lower)
 
-    upper0 = max_acc_upper_from(
-        scores=scores,
-        eps=eps,
-        p=p,
-        n=n,
-        upper=upper
-    )
+    upper0 = max_acc_upper_from(scores=scores, eps=eps, p=p, n=n, upper=upper)
 
     return (lower0, upper0)
