@@ -18,6 +18,7 @@ __all__ = [
     "roc_rmin_grid",
     "roc_rmin_grid_correction",
     "roc_maxa",
+    "roc_onmin",
     "auc_min",
     "auc_max",
     "auc_rmin",
@@ -26,6 +27,12 @@ __all__ = [
     "auc_amin",
     "auc_armin",
     "auc_amax",
+    "auc_onmin",
+    "auc_onmin_grad",
+    "auc_maxa_grad",
+    "auc_min_grad",
+    "auc_max_grad",
+    "auc_rmin_grad",
     "check_lower_applicability",
     "check_upper_applicability",
 ]
@@ -192,8 +199,7 @@ def roc_maxa(acc, p, n):
     The maximuma accuracy ROC curve with acc accuracy
 
     Args:
-        fpr (float): the false positive rate
-        tpr (float): the true positive rate
+        acc (float): the accuracy
         p (int): the number of positive samples
         n: (int): the number of negative samples
 
@@ -215,6 +221,21 @@ def roc_maxa(acc, p, n):
     return (np.array([0, 0, fpr_b, 1]), np.array([0, tpr_a, 1, 1]))
 
 
+def roc_onmin(fpr, tpr):
+    """
+    The one node ROC curve
+
+    Args:
+        fpr (float): the false positive rate
+        tpr (float): the true positive rate
+
+    Returns:
+        np.array, np.array: the fpr and tpr values
+    """
+
+    return (np.array([0, fpr, 1]), np.array([0, tpr, 1]))
+
+
 def auc_min(fpr, tpr):
     """
     The area under the minimum curve at fpr, tpr
@@ -228,6 +249,21 @@ def auc_min(fpr, tpr):
     """
 
     return float(tpr * (1 - fpr))
+
+
+def auc_min_grad(fpr, tpr):
+    """
+    The gradient of the minimum AUC
+
+    Args:
+        fpr (float): upper bound on false positive rate
+        tpr (float): lower bound on true positive rate
+
+    Returns:
+        float: the gradient magnitude
+    """
+
+    return np.sqrt((1 - fpr)**2 + (-tpr)**2)
 
 
 def auc_rmin(fpr, tpr):
@@ -251,6 +287,21 @@ def auc_rmin(fpr, tpr):
                         "the regulated minimum curve'
         )
     return float(0.5 + (tpr - fpr) ** 2 / 2.0)
+
+
+def auc_rmin_grad(fpr, tpr):
+    """
+    The gradient of the minimum AUC
+
+    Args:
+        fpr (float): upper bound on false positive rate
+        tpr (float): lower bound on true positive rate
+
+    Returns:
+        float: the gradient magnitude
+    """
+
+    return np.sqrt((tpr-fpr)**2 + (fpr-tpr)**2)
 
 
 def auc_rmin_grid(fpr, tpr, p, n):
@@ -294,6 +345,22 @@ def auc_max(fpr, tpr):
     return float(1 - (1 - tpr) * fpr)
 
 
+def auc_max_grad(fpr, tpr):
+    """
+    The gradient of the maximum AUC
+
+    Args:
+        fpr (float): upper bound on false positive rate
+        tpr (float): lower bound on true positive rate
+
+    Returns:
+        float: the gradient magnitude
+    """
+
+    return np.sqrt(fpr**2 + (tpr - 1)**2)
+    #return max(fpr**2, (tpr - 1)**2)
+
+
 def auc_maxa(acc, p, n):
     """
     The area under the maximum accuracy curve at acc
@@ -314,6 +381,26 @@ def auc_maxa(acc, p, n):
         raise ValueError("accuracy too small")
 
     return float(1 - ((1 - acc) * (p + n)) ** 2 / (2 * n * p))
+
+
+def auc_maxa_grad(acc, p, n):
+    """
+    The gradient magnitude of the amax estimation
+
+    Args:
+        acc (float): the accuracy
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Returns:
+        float: the gradient magnitude 
+    """
+
+    #d_sens = (1 - acc)*(p + n)/n
+    #d_spec = (1 - acc)*(p + n)/p
+
+    #return np.sqrt(d_sens**2 + d_spec**2)
+    return - (2*acc - 2)*(n + p)**2/(2*n*p)
 
 
 def auc_amin(acc, p, n):
@@ -376,6 +463,38 @@ def auc_armin(acc, p, n):
     return float(auc_amin(acc, p, n) ** 2 / 2 + 0.5)
 
 
+def auc_onmin(fpr, tpr):
+    """
+    The area under the one-node ROC curve
+
+    Args:
+        fpr (float): lower bound on false positive rate
+        tpr (float): upper bound on true positive rate
+
+    Returns:
+        float: the area
+    """
+
+    return (tpr + 1 - fpr) / 2.0
+
+
+def auc_onmin_grad(fpr, tpr):
+    """
+    The gradient magnitude of the onmin estimation
+
+    Args:
+        acc (float): the accuracy
+        p (int): the number of positive samples
+        n (int): the number of negative samples
+
+    Returns:
+        float: the gradient magnitude 
+    """
+
+    return np.sqrt(2*0.5**2)
+    #return 0.5
+
+
 def check_lower_applicability(intervals: dict, lower: str, p: int, n: int):
     """
     Checks the applicability of the methods
@@ -390,7 +509,7 @@ def check_lower_applicability(intervals: dict, lower: str, p: int, n: int):
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if lower in ["min", "rmin", "grmin"] and (
+    if lower in ["min", "rmin", "grmin", "onmin"] and (
         "fpr" not in intervals or "tpr" not in intervals
     ):
         raise ValueError("fpr, tpr or their complements must be specified")
@@ -457,6 +576,8 @@ def auc_lower_from(
         lower0 = auc_min(intervals["fpr"][1], intervals["tpr"][0])
     elif lower == "rmin":
         lower0 = auc_rmin(intervals["fpr"][0], intervals["tpr"][1])
+    elif lower == "onmin":
+        lower0 = auc_onmin(intervals["fpr"][0], intervals["tpr"][0])
     elif lower == "grmin":
         lower0 = auc_rmin_grid(intervals["fpr"][0], intervals["tpr"][1], p, n)
     elif lower == "amin":
@@ -520,6 +641,7 @@ def auc_from(
     n: int = None,
     lower: str = "min",
     upper: str = "max",
+    gradient_correction: bool = False
 ) -> tuple:
     """
     This function applies the estimation schemes to estimate AUC from scores
@@ -529,10 +651,11 @@ def auc_from(
         eps (float): the numerical uncertainty
         p (int): the number of positive samples
         n (int): the number of negative samples
-        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin') - the type of
-                        estimation for the lower bound
+        lower (str): ('min'/'rmin'/'grmin'/'amin'/'armin'/'onmin') - the 
+                        type of estimation for the lower bound
         upper (str): ('max'/'maxa'/'amax') - the type of estimation for
                         the upper bound
+        gradient_correction (bool): whether to use gradient correction
 
     Returns:
         tuple(float, float): the interval for the AUC
@@ -543,7 +666,9 @@ def auc_from(
     """
 
     lower0 = auc_lower_from(scores=scores, eps=eps, p=p, n=n, lower=lower)
+    lower_weight = 1.0
 
     upper0 = auc_upper_from(scores=scores, eps=eps, p=p, n=n, upper=upper)
+    upper_weight = 1.0
 
     return (lower0, upper0)

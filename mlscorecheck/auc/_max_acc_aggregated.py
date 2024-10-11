@@ -12,7 +12,11 @@ from ._utils import prepare_intervals, translate_folding
 
 from ._acc_single import macc_min
 from ._auc_aggregated import check_cvxopt
-from ._acc_aggregated import acc_max_aggregated, acc_rmax_aggregated
+from ._acc_aggregated import (
+    acc_max_aggregated, 
+    acc_rmax_aggregated,
+    acc_onmax_aggregated
+)
 
 __all__ = [
     "macc_min_aggregated",
@@ -367,7 +371,7 @@ def max_acc_upper_from_aggregated(
                         ps and ns, contains the keys 'p', 'n', 'n_repeats',
                         'n_folds', 'folding' (currently 'stratified_sklearn'
                         supported for 'folding')
-        upper (str): 'max'/'rmax' - the type of upper bound
+        upper (str): 'max'/'rmax'/'onmax' - the type of upper bound
 
     Returns:
         float: the upper bound for the maximum accuracy
@@ -392,6 +396,8 @@ def max_acc_upper_from_aggregated(
         upper0 = acc_max_aggregated(intervals["auc"][1], ps, ns)
     elif upper == "rmax":
         upper0 = acc_rmax_aggregated(intervals["auc"][1], ps, ns)
+    elif upper == "onmax":
+        upper0 = acc_onmax_aggregated(intervals["auc"][1], ps, ns)
     else:
         raise ValueError(f"unsupported upper bound {upper}")
 
@@ -422,7 +428,7 @@ def max_acc_from_aggregated(
                         'n_folds', 'folding' (currently 'stratified_sklearn'
                         supported for 'folding')
         lower (str): 'min'
-        upper (str): 'max'/'rmax' - the type of upper bound
+        upper (str): 'max'/'rmax'/'onmax' - the type of upper bound
 
     Returns:
         tuple(float, float): the interval for the accuracy

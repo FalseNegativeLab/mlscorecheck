@@ -11,7 +11,7 @@ from cvxopt import solvers
 
 from ._utils import prepare_intervals, translate_folding
 
-from ._acc_single import acc_min, acc_max
+from ._acc_single import acc_min, acc_max, acc_onmax
 from ._auc_aggregated import R, check_cvxopt
 
 __all__ = [
@@ -19,6 +19,7 @@ __all__ = [
     "acc_max_aggregated",
     "acc_rmin_aggregated",
     "acc_rmax_aggregated",
+    "acc_onmax_aggregated",
     "acc_from_aggregated",
     "acc_lower_from_aggregated",
     "acc_upper_from_aggregated",
@@ -439,6 +440,60 @@ def acc_rmax_aggregated(
         return results
 
     return acc_rmax_solve(ps, ns, auc, return_solutions)
+
+
+def acc_onmax_aggregated(
+    auc: float, ps: np.array, ns: np.array, return_solutions: bool = False
+):
+    """
+    The one-node curves based maximum accuracy
+
+    Args:
+        auc (float): the average accuracy
+        ps (np.array): the number of positive samples
+        ns (np.array): the number of negative samples
+        return_solutions (bool): whether to return the solutions to the
+                                underlying optimization problem
+
+    Returns:
+        float | (float, np.array, np.array, np.array, np.array, np.array): the
+        mean accuracy, or the mean accuracy, the auc parameters, the vectors of
+        ps, ns, and the lower bounds and upper bounds
+
+    Raises:
+        ValueError: when auc < 0.5 or no optimal solution is found
+    """
+
+    if auc < 0.5:
+        raise ValueError("auc too small (acc_onmax_aggregated)")
+
+    ps = np.array(ps)
+    ns = np.array(ns)
+
+    k = len(ps)
+
+    mins = np.array([min(p, n) for p, n in zip(ps, ns)])
+
+    weights = mins / (ps + ns)
+
+    lower_bounds = np.repeat(0.5, k)
+    upper_bounds = np.repeat(1.0, k)
+
+    sorting = np.argsort(weights)[::-1]
+
+    ps = ps[sorting]
+    ns = ns[sorting]
+    
+    aucs = R(auc, k, lower_bounds, upper_bounds)
+
+    accs = np.array([acc_onmax(auc, p, n) for auc, p, n in zip(aucs, ps, ns)])
+
+    results = float(np.mean(accs))
+
+    if return_solutions:
+        results = results, (aucs, ps, ns, lower_bounds, upper_bounds)
+    
+    return results
 
 
 def acc_lower_from_aggregated(

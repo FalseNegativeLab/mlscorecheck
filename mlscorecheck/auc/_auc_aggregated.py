@@ -22,6 +22,7 @@ from ._auc_single import auc_maxa, auc_armin
 __all__ = [
     "auc_min_aggregated",
     "auc_max_aggregated",
+    "auc_onmin_aggregated",
     "auc_rmin_aggregated",
     "auc_maxa_evaluate",
     "auc_maxa_solve",
@@ -364,6 +365,36 @@ def auc_max_aggregated(
         results = results, (
             r_avg_fpr,
             r_avg_tpr,
+            np.repeat(0.0, k),
+            np.repeat(1.0, k),
+        )
+
+    return results
+
+
+def auc_onmin_aggregated(
+    fpr: float, tpr: float, k: int, return_solutions: bool = False
+) -> float:
+    """
+    The average area under the onmin curves at the average fpr, tpr
+
+    Args:
+        fpr (list): lower bound on average false positive rate
+        tpr (list): upper bound on average true positive rate
+        return_solutions (bool): whether to return the solutions for the
+        underlying curves
+
+    Returns:
+        float | (float, np.array, np.array, np.array, np.array): the area or the area, the
+        solutions and the bounds
+    """
+
+    results = float((1 - fpr + tpr) / 2.0)
+
+    if return_solutions:
+        results = results, (
+            np.repeat(fpr, k),
+            np.repeat(tpr, k),
             np.repeat(0.0, k),
             np.repeat(1.0, k),
         )
@@ -745,7 +776,7 @@ def check_applicability_lower_aggregated(intervals: dict, lower: str, ps: int, n
         ValueError: when the methods are not applicable with the
                     specified scores
     """
-    if lower in ["min", "rmin"]:
+    if lower in ["min", "rmin", "onmin"]:
         if "fpr" not in intervals or "tpr" not in intervals:
             raise ValueError("fpr, tpr or their complements must be specified")
     if lower in ["amin", "armin"]:
@@ -805,7 +836,7 @@ def auc_lower_from_aggregated(
                         ps and ns, contains the keys 'p', 'n', 'n_repeats',
                         'n_folds', 'folding' (currently 'stratified_sklearn'
                         supported for 'folding')
-        lower (str): ('min'/'rmin'/'amin'/'armin') - the type of
+        lower (str): ('min'/'rmin'/'amin'/'armin'/'onmin') - the type of
                         estimation for the lower bound
 
     Returns:
@@ -833,6 +864,8 @@ def auc_lower_from_aggregated(
 
     if lower == "min":
         lower0 = auc_min_aggregated(intervals["fpr"][1], intervals["tpr"][0], k)
+    elif lower == "onmin":
+        lower0 = auc_onmin_aggregated(intervals["fpr"][1], intervals["tpr"][0], k)
     elif lower == "rmin":
         lower0 = auc_rmin_aggregated(intervals["fpr"][0], intervals["tpr"][1], k)
     elif lower == "amin":
@@ -931,7 +964,7 @@ def auc_from_aggregated(
                         ps and ns, contains the keys 'p', 'n', 'n_repeats',
                         'n_folds', 'folding' (currently 'stratified_sklearn'
                         supported for 'folding')
-        lower (str): ('min'/'rmin'/'amin'/'armin') - the type of
+        lower (str): ('min'/'rmin'/'amin'/'armin'/'onmin') - the type of
                         estimation for the lower bound
         upper (str): ('max'/'maxa'/'amax') - the type of estimation for
                         the upper bound
