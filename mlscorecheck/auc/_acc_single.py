@@ -332,7 +332,7 @@ def max_acc_lower_from(*, scores: dict, eps: float, p: int, n: int, lower: str =
     else:
         raise ValueError(f"unsupported lower bound {lower}")
 
-    return lower0
+    return lower0, 1
 
 
 def max_acc_upper_from(*, scores: dict, eps: float, p: int, n: int, upper: str = "min"):
@@ -369,7 +369,7 @@ def max_acc_upper_from(*, scores: dict, eps: float, p: int, n: int, upper: str =
     else:
         raise ValueError(f"unsupported upper bound {upper}")
 
-    return upper0
+    return upper0, 1
 
 
 def max_acc_from(
