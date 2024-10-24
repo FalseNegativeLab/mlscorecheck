@@ -15,6 +15,7 @@ __all__ = [
     "translate_folding",
     "translate_scores",
     "prepare_intervals",
+    "simplify_roc"
 ]
 
 
@@ -237,3 +238,40 @@ def prepare_intervals(scores: dict, eps: float):
         for score in ["tpr", "fpr", "tnr", "fnr", "sens", "spec", "acc", "auc"]
         if score in scores
     }
+
+
+def simplify_roc(fprs, tprs, ths):
+    """
+    Simplifies a ROC curve
+
+    Args:
+        fprs (np.array): the array of false positive rates
+        tprs (np.array): the array of true positive rates
+        ths (np.array): the array of thresholds
+    
+    Returns:
+        np.array, np.array, np.array: the arrays of simplified false positive
+                                        rates, true positive rates and 
+                                        thresholds
+    """
+    fprs_simp = [fprs[0]]
+    tprs_simp = [tprs[0]]
+    ths_simp = [ths[0]]
+
+    for idx in range(1, len(fprs)-1):
+        if fprs[idx] == fprs[idx+1] and fprs[idx-1] == fprs[idx]:
+            continue
+        if tprs[idx] == tprs[idx+1] and tprs[idx-1] == tprs[idx]:
+            continue
+
+        if np.abs((fprs[idx-1] + fprs[idx+1])/2 - fprs[idx]) < 1e-6 and np.abs((tprs[idx-1] + tprs[idx+1])/2 - tprs[idx]) < 1e-6:
+            continue
+        fprs_simp.append(fprs[idx])
+        tprs_simp.append(tprs[idx])
+        ths_simp.append(ths[idx])
+    
+    fprs_simp.append(fprs[-1])
+    tprs_simp.append(tprs[-1])
+    ths_simp.append(ths[-1])
+
+    return np.array(fprs_simp), np.array(tprs_simp), np.array(ths_simp)
