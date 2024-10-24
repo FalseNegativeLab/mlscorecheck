@@ -15,7 +15,10 @@ __all__ = [
     "translate_folding",
     "translate_scores",
     "prepare_intervals",
-    "simplify_roc"
+    "simplify_roc",
+    "roc_value_at",
+    "average_roc_curves_to_1",
+    "average_n_roc_curves"
 ]
 
 
@@ -240,14 +243,14 @@ def prepare_intervals(scores: dict, eps: float):
     }
 
 
-def simplify_roc(fprs, tprs, ths):
+def simplify_roc(fprs, tprs, ths=None):
     """
     Simplifies a ROC curve
 
     Args:
         fprs (np.array): the array of false positive rates
         tprs (np.array): the array of true positive rates
-        ths (np.array): the array of thresholds
+        ths (np.array/None): the array of thresholds
     
     Returns:
         np.array, np.array, np.array: the arrays of simplified false positive
@@ -256,7 +259,9 @@ def simplify_roc(fprs, tprs, ths):
     """
     fprs_simp = [fprs[0]]
     tprs_simp = [tprs[0]]
-    ths_simp = [ths[0]]
+
+    if ths is not None:
+        ths_simp = [ths[0]]
 
     for idx in range(1, len(fprs)-1):
         if fprs[idx] == fprs[idx+1] and fprs[idx-1] == fprs[idx]:
@@ -268,10 +273,86 @@ def simplify_roc(fprs, tprs, ths):
             continue
         fprs_simp.append(fprs[idx])
         tprs_simp.append(tprs[idx])
-        ths_simp.append(ths[idx])
+
+        if ths is not None:
+            ths_simp.append(ths[idx])
     
     fprs_simp.append(fprs[-1])
     tprs_simp.append(tprs[-1])
-    ths_simp.append(ths[-1])
 
-    return np.array(fprs_simp), np.array(tprs_simp), np.array(ths_simp)
+    if ths is not None:
+        ths_simp.append(ths[-1])
+
+    if ths is not None:
+        return np.array(fprs_simp), np.array(tprs_simp), np.array(ths_simp)
+    
+    return np.array(fprs_simp), np.array(tprs_simp)
+
+
+def roc_value_at(fpr, fpr_curve, tpr_curve):
+    values = []
+    for idx in range(len(fpr_curve)):
+        if fpr_curve[idx] == fpr:
+            values.append(tpr_curve[idx])
+        elif idx < len(fpr_curve) and fpr > fpr_curve[idx] and fpr < fpr_curve[idx+1]:
+            diff_left = fpr - fpr_curve[idx]
+            diff_right = fpr_curve[idx+1] - fpr
+
+            diff_sum = diff_left + diff_right
+
+            diff_left, diff_right = diff_left/diff_sum, diff_right/diff_sum
+
+            values.append(tpr_curve[idx] * diff_right + tpr_curve[idx+1]*diff_left)
+            break
+
+    return np.array(values)
+
+
+def average_roc_curves_to_1(curve0, curves):
+    fprs0, tprs0 = curve0
+
+    fprs_new = []
+    tprs_new = []
+    for fpr, tpr in zip(fprs0, tprs0):
+        tpr_x = np.array([tpr, tpr])
+        for fprs, tprs in curves:
+            tpr_js = roc_value_at(fpr, fprs, tprs)
+            tpr_x = tpr_x + tpr_js
+        
+        fprs_new.append(fpr)
+        tprs_new.append(tpr_x[0]/(1 + len(curves)))
+
+        if tpr_x[0] != tpr_x[1]:
+            fprs_new.append(fpr)
+            tprs_new.append(tpr_x[1]/(1 + len(curves)))
+    
+    return np.array(fprs_new), np.array(tprs_new)
+
+
+def average_n_roc_curves(curves):
+    fprs_new = []
+    tprs_new = []
+
+    for idx in range(len(curves)):
+        curves_b = curves[0:idx] + curves[(idx+1):]
+        fprs_a, tprs_a = average_roc_curves_to_1(curves[idx], curves_b)
+        fprs_new.append(fprs_a)
+        tprs_new.append(tprs_a)
+    
+    fprs5 = np.hstack(fprs_new)
+    tprs5 = np.hstack(tprs_new)
+
+    rates = np.vstack([fprs5, tprs5]).T.copy()
+
+    sorting = np.argsort(rates[:, 0])
+    rates = rates[sorting]
+    sorting = np.argsort(rates[:, 1])
+    rates = rates[sorting]
+    rates = np.unique(rates, axis=0)
+
+    fprs5 = rates[:, 0]
+    tprs5 = rates[:, 1]
+
+    fprs5, tprs5 = simplify_roc(fprs5, tprs5)
+
+    return fprs5, tprs5
