@@ -8,3 +8,4 @@ from ._acc_single import *
 from ._auc_aggregated import *
 from ._acc_aggregated import *
 from ._max_acc_aggregated import *
+from ._analytic import *
