@@ -15,6 +15,7 @@ __all__ = [
     "auc_lower_from",
     "auc_upper_from",
     "integrate_roc_curve",
+    "integrate_roc_curves",
     "roc_min",
     "roc_max",
     "roc_rmin",
@@ -115,7 +116,7 @@ def augment_intervals(intervals: dict, p: int, n: int):
 
 def integrate_roc_curve(fprs, tprs):
     """
-    Integrates ROC curves
+    Integrates a ROC curve
 
     Args:
         fprs (np.array): the fpr values
@@ -127,6 +128,22 @@ def integrate_roc_curve(fprs, tprs):
     diffs = np.diff(fprs)
     avgs = (tprs[:-1] + tprs[1:]) / 2
     return float(np.sum(diffs * avgs))
+
+
+def integrate_roc_curves(fprs, tprs):
+    """
+    Integrates ROC curves
+
+    Args:
+        fprs (np.array): the fpr values
+        tprs (np.array): the tpr values
+
+    Returns:
+        float: the integral
+    """
+    diffs = np.diff(fprs, axis=1)
+    avgs = (tprs[:, :-1] + tprs[:, 1:]) / 2
+    return (np.sum(diffs * avgs, axis=1)).astype(float)
 
 
 def roc_min(fpr, tpr):

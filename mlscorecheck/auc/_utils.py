@@ -24,8 +24,332 @@ __all__ = [
     "average_n_roc_curves_",
     "average_n_roc_curves",
     "exponential_fitting",
-    "exponential_fitting2"
+    "exponential_fitting2",
+    "generate_roc_curve",
+    "generate_roc_curve_slope",
+    "generate_1_roc_curve",
+    "sample_triangle"
 ]
+
+
+def generate_roc_curve(
+        tpr: float,
+        fpr: float,
+        n_nodes: int,
+        n_samples: int = 1,
+        p: int = None,
+        n: int = None,
+        random_middle = False,
+        random_state = None
+):
+    
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    tprs = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+    fprs = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+
+    tprs[:, 0] = 0.0
+    tprs[:, -1] = 1.0
+
+    fprs[:, 0] = 0.0
+    fprs[:, -1] = 1.0
+
+    if random_middle:
+        middle_indices = random_state.choice(list(range(1, n_nodes-1)), n_samples)
+    else:
+        middle_indices = np.repeat(int(n_nodes/2), n_samples)
+
+    tprs[np.arange(0, n_samples), middle_indices] = tpr
+    fprs[np.arange(0, n_samples), middle_indices] = fpr
+
+    first_indices = np.repeat(0, n_samples)
+    last_indices = middle_indices
+    queue = np.vstack((first_indices, last_indices)).T
+
+    first_indices = middle_indices.copy()
+    last_indices = np.repeat(n_nodes - 1, n_samples)
+    queue = np.vstack([queue, np.vstack((first_indices, last_indices)).T])
+
+    sample_indices = np.hstack([np.arange(0, n_samples), np.arange(0, n_samples)])
+
+    idx = 0
+    while queue.shape[0] > 0:
+
+        first_indices = queue[:, 0]
+        last_indices = queue[:, 1]
+
+        fpr_ranges = fprs[sample_indices, last_indices] - fprs[sample_indices, first_indices]
+        uniforms = random_state.random_sample(fpr_ranges.shape[0])
+        fpr_steps = (uniforms * fpr_ranges)
+
+        tpr_ranges = tprs[sample_indices, last_indices] - tprs[sample_indices, first_indices]
+        uniforms = random_state.random_sample(tpr_ranges.shape[0])
+        tpr_steps = (uniforms * tpr_ranges)
+
+        index_ranges = last_indices - first_indices - 1
+        uniforms = random_state.random_sample(index_ranges.shape[0])
+        index_steps = np.floor(index_ranges * uniforms).astype(int) + 1
+
+        fprs[sample_indices, first_indices + index_steps] = fprs[sample_indices, first_indices] + fpr_steps
+        tprs[sample_indices, first_indices + index_steps] = tprs[sample_indices, first_indices] + tpr_steps
+
+        lhs_queue = np.vstack([first_indices, first_indices + index_steps]).T
+        rhs_queue = np.vstack([first_indices + index_steps, last_indices]).T
+        queue = np.vstack([lhs_queue, rhs_queue])
+        sample_indices = np.hstack([sample_indices, sample_indices])
+
+        mask = queue[:, 0] < queue[:, 1] - 1
+        queue = queue[mask]
+        sample_indices = sample_indices[mask]
+        first_indices = queue[:, 0]
+        last_indices = queue[:, 1]
+
+        idx += 1
+    
+    if p is not None:
+        tprs = np.round(tprs * p) / p
+    if n is not None:
+        fprs = np.round(fprs * n) / n
+        
+    return fprs, tprs
+
+
+def intersection(fpr0, tpr0, fpr1, tpr1, s0, s1):
+    fpr = (fpr0 * s0 - fpr1 * s1 - tpr0 + tpr1)/(s0 - s1)
+    tpr = (fpr - fpr0) * s0  + tpr0
+    return fpr, tpr
+
+
+def sample_triangle(fpr0, tpr0, fpr1, tpr1, fpr2, tpr2, random_state):
+    r1 = np.sqrt(random_state.random_sample())
+    r2 = np.sqrt(random_state.random_sample())
+
+    fpr_new = (1 - r1) * fpr0 + r1 * (1 - r2**2) * fpr1 + r2**2 * r1 *  fpr2
+    tpr_new = (1 - r1) * tpr0 + r1 * (1 - r2**2) * tpr1 + r2**2 * r1 *  tpr2
+
+    return fpr_new, tpr_new
+
+
+def generate_1_roc_curve(
+    tpr: float,
+    fpr: float,
+    n_nodes: int,
+    p: int = None,
+    n: int = None,
+    random_middle = False,
+    random_state = None
+):
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    tprs = np.full(n_nodes, fill_value=-1, dtype=float)
+    fprs = np.full(n_nodes, fill_value=-1, dtype=float)
+    slope_left = np.full(n_nodes, fill_value=-1, dtype=float)
+    slope_right = np.full(n_nodes, fill_value=-1, dtype=float)
+
+    tprs[0] = 0.0
+    tprs[-1] = 1.0
+
+    fprs[0] = 0.0
+    fprs[-1] = 1.0
+
+    if random_middle:
+        middle_index = random_state.choice(list(range(1, n_nodes-1)))
+    else:
+        middle_index = int(n_nodes/2)
+
+    tprs[middle_index] = tpr
+    fprs[middle_index] = fpr
+
+    slope_right[0] = (tprs[middle_index] - tprs[0]) / (fprs[middle_index] - fprs[0])
+    slope_left[-1] = (tprs[-1] - tprs[middle_index]) / (fprs[-1] - fprs[middle_index])
+    slope_right[middle_index] = slope_left[-1]
+    slope_left[middle_index] = slope_right[0]
+    slope_right[-1] = 0.0
+    slope_left[0] = 1000
+
+    first_indices = np.array([0, middle_index])
+    last_indices = np.array([middle_index, n_nodes-1])
+    queue = np.vstack((first_indices, last_indices)).T
+
+    idx = 0
+    while queue.shape[0] > 0:
+        sample = np.random.choice(len(queue))
+        sample_mask = np.arange(len(queue)) == sample
+
+        segment = queue[sample]
+        first_idx, last_idx = segment
+
+        if last_idx - first_idx <= 1:
+            queue = queue[~sample_mask]
+            continue
+
+        fpr_left = fprs[first_idx]
+        fpr_right = fprs[last_idx]
+        tpr_left = tprs[first_idx]
+        tpr_right = tprs[last_idx]
+        s_left = slope_left[first_idx]
+        s_right = slope_right[last_idx]
+
+        fpr1, tpr1 = intersection(fpr_left, tpr_left, fpr_right, tpr_right, s_left, s_right)
+
+        index_new = random_state.choice(list(range(first_idx+1, last_idx)))
+
+        fpr2, tpr2 = sample_triangle(fpr_left, tpr_left, fpr_right, tpr_right, fpr1, tpr1, random_state)
+
+        fprs[index_new] = fpr2
+        tprs[index_new] = tpr2
+
+        slope_left[index_new] = (tprs[index_new] - tprs[first_idx]) / (fprs[index_new] - fprs[first_idx])
+        slope_right[first_idx] = slope_left[index_new]
+        slope_right[index_new] = (tprs[last_idx] - tprs[index_new]) / (fprs[last_idx] - fprs[index_new])
+        slope_left[last_idx] = slope_right[index_new]
+
+        lhs_item = np.hstack([first_idx, index_new])
+        rhs_item = np.hstack([index_new, last_idx])
+
+        queue = np.vstack([lhs_item, rhs_item, queue[~sample_mask]])
+
+        idx += 1
+    
+    if p is not None:
+        tprs = np.round(tprs * p) / p
+    if n is not None:
+        fprs = np.round(fprs * n) / n
+        
+    return fprs, tprs
+
+
+def generate_roc_curve_slope(
+        tpr: float,
+        fpr: float,
+        n_nodes: int,
+        n_samples: int = 1,
+        p: int = None,
+        n: int = None,
+        random_middle = False,
+        random_state = None
+):
+    
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+
+    tprs = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+    fprs = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+    slope_left = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+    slope_right = np.full((n_samples, n_nodes), fill_value=-1, dtype=float)
+
+    tprs[:, 0] = 0.0
+    tprs[:, -1] = 1.0
+
+    fprs[:, 0] = 0.0
+    fprs[:, -1] = 1.0
+
+    if random_middle:
+        middle_indices = random_state.choice(list(range(1, n_nodes-1)), n_samples)
+    else:
+        middle_indices = np.repeat(int(n_nodes/2), n_samples)
+
+    tprs[np.arange(0, n_samples), middle_indices] = tpr
+    fprs[np.arange(0, n_samples), middle_indices] = fpr
+
+    slope_right[np.arange(n_samples), 0] = (tprs[np.arange(n_samples), middle_indices] - tprs[np.arange(n_samples), 0]) / (fprs[np.arange(n_samples), middle_indices] - fprs[np.arange(n_samples), 0])
+    slope_left[np.arange(n_samples), -1] = (tprs[np.arange(n_samples), -1] - tprs[np.arange(n_samples), middle_indices]) / (fprs[np.arange(n_samples), -1] - fprs[np.arange(n_samples), middle_indices])
+    slope_right[np.arange(n_samples), middle_indices] = slope_left[np.arange(n_samples), -1]
+    slope_left[np.arange(n_samples), middle_indices] = slope_right[np.arange(n_samples), 0]
+    slope_right[np.arange(n_samples), -1] = 0.0
+    slope_left[np.arange(n_samples), 0] = np.inf
+
+    first_indices = np.repeat(0, n_samples)
+    last_indices = middle_indices
+    queue = np.vstack((first_indices, last_indices)).T
+
+    first_indices = middle_indices.copy()
+    last_indices = np.repeat(n_nodes - 1, n_samples)
+    queue_all = np.vstack([queue, np.vstack((first_indices, last_indices)).T])
+
+    sample_indices_all = np.hstack([np.arange(0, n_samples), np.arange(0, n_samples)])
+
+    idx = 0
+    while queue_all.shape[0] > 0:
+        sample = np.random.choice(len(queue_all))
+        sample_mask = np.arange(len(queue_all)) == sample
+
+        queue = queue_all[sample_mask]
+        sample_indices = sample_indices_all[sample_mask]
+
+        first_indices = queue[:, 0]
+        last_indices = queue[:, 1]
+
+        fpr_left = fprs[sample_indices, first_indices]
+        fpr_right = fprs[sample_indices, last_indices]
+
+
+
+        fpr_ranges = fpr_right - fpr_left
+        uniforms = random_state.random_sample(fpr_ranges.shape[0])
+        fpr_steps = (uniforms * fpr_ranges)
+        fpr_new = fpr_left + fpr_steps
+
+        index_ranges = last_indices - first_indices - 1
+        uniforms = random_state.random_sample(index_ranges.shape[0])
+        index_steps = np.floor(index_ranges * uniforms).astype(int) + 1
+        index_new = first_indices + index_steps
+
+        fprs[sample_indices, index_new] = fpr_new
+        tpr_right = tprs[sample_indices, last_indices]
+        tpr_left = tprs[sample_indices, first_indices]
+
+        #print(last_indices)
+        #print(slope_left[sample_indices, last_indices])
+        #print(slope_right[sample_indices, first_indices])
+
+        tpr_lower = tpr_left + (fpr_new - fpr_left) * slope_right[sample_indices, first_indices]
+        tpr_upper = np.minimum((tpr_right + (fpr_new - fpr_right) * slope_right[sample_indices, last_indices]), 
+                               (tpr_left + (fpr_new - fpr_left) * slope_left[sample_indices, first_indices]))
+
+        #print(np.sum(tpr_lower > tpr_upper))
+
+        failed_mask = tpr_lower > tpr_upper
+
+        tpr_ranges = tpr_upper - tpr_lower
+        #print(tpr_lower, tpr_upper)
+
+        if np.sum(failed_mask) > 0:
+            continue
+
+        
+        uniforms = random_state.random_sample(tpr_ranges.shape[0])
+        tpr_steps = (uniforms * tpr_ranges)
+        
+        tpr_new = tpr_lower + tpr_steps
+
+        tprs[sample_indices, index_new] = tpr_new
+
+        slope_left[sample_indices, index_new] = (tprs[sample_indices, index_new] - tprs[sample_indices, first_indices]) / (fprs[sample_indices, index_new] - fprs[sample_indices, first_indices])
+        slope_right[sample_indices, first_indices] = slope_left[sample_indices, index_new]
+        slope_right[sample_indices, index_new] = (tprs[sample_indices, last_indices] - tprs[sample_indices, index_new]) / (fprs[sample_indices, last_indices] - fprs[sample_indices, index_new])
+        slope_left[sample_indices, last_indices] = slope_right[sample_indices, index_new]
+
+        lhs_queue = np.vstack([first_indices, first_indices + index_steps]).T[~failed_mask]
+        rhs_queue = np.vstack([first_indices + index_steps, last_indices]).T[~failed_mask]
+
+        queue_all = np.vstack([queue[failed_mask], lhs_queue, rhs_queue, queue_all[~sample_mask]])
+        sample_indices_all = np.hstack([sample_indices[failed_mask], sample_indices[~failed_mask], sample_indices[~failed_mask], sample_indices_all[~sample_mask]])
+
+        mask = queue_all[:, 0] < queue_all[:, 1] - 1
+        queue_all = queue_all[mask]
+        sample_indices_all = sample_indices_all[mask]
+
+        idx += 1
+    
+    if p is not None:
+        tprs = np.round(tprs * p) / p
+    if n is not None:
+        fprs = np.round(fprs * n) / n
+        
+    return fprs, tprs
 
 
 def R(  # pylint: disable=invalid-name
