@@ -179,7 +179,10 @@ def macc_min(auc, p, n):
         float: the accuracy
     """
     if auc >= 1 - min(p, n) / (2 * max(p, n)):
-        return 1 - (np.sqrt(2 * p * n - 2 * auc * p * n)) / (p + n)
+        tmp = 2 * p * n - 2 * auc * p * n
+        if np.abs(tmp) < 1e-8:
+            tmp = 0
+        return 1 - (np.sqrt(tmp)) / (p + n)
 
     return max(p, n) / (p + n)
 

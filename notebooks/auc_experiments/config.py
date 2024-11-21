@@ -10,7 +10,7 @@ import common_datasets.binary_classification as binclas
 
 datasets = binclas.get_filtered_data_loaders(
     n_col_bounds=(0, 50), 
-    n_bounds=(2000, 10000), 
+    n_bounds=(100, 10000), 
     n_minority_bounds=(20, 1000), 
     n_from_phenotypes=1, 
     imbalance_ratio_bounds=(0.2, 20.0)
@@ -51,7 +51,7 @@ def generate_random_classifier(random_state, p=None, n=None):
         params = {'probability': True, 'C': random_state.rand()/2 + 0.001, 'tol': 1e-4}
     if mode == 3:
         classifier = KNeighborsClassifier
-        params = {'n_neighbors': random_state.randint(2, int(n_class/2))}
+        params = {'n_neighbors': random_state.randint(2, int(np.sqrt(n_class)))}
     if mode == 4:
         classifier = XGBClassifier
         params = {'random_state': 5, 'max_depth': random_state.randint(2, max(3, int(np.log(n_class))))}

@@ -4,8 +4,12 @@ This module implements some utilities for the AUC related calculations
 
 import numpy as np
 
+from scipy.optimize import minimize_scalar
+
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+
+from scipy.optimize import root_scalar
 
 from ..aggregated import determine_fold_configurations
 
@@ -23,13 +27,54 @@ __all__ = [
     "average_roc_curves_to_1",
     "average_n_roc_curves_",
     "average_n_roc_curves",
-    "exponential_fitting",
-    "exponential_fitting2",
     "generate_roc_curve",
     "generate_roc_curve_slope",
     "generate_1_roc_curve",
-    "sample_triangle"
+    "sample_triangle",
+    "p_norm_fit",
+    "p_norm_fit_joint",
+    "p_norm_fit_best",
+    "auc_estimator",
+    "p_norm_fit_auc",
+    "max_acc_estimator",
+    "integrate_roc_curve",
+    "integrate_roc_curves",
+    "sample1",
+    "sample2"
 ]
+
+
+def integrate_roc_curve(fprs, tprs):
+    """
+    Integrates a ROC curve
+
+    Args:
+        fprs (np.array): the fpr values
+        tprs (np.array): the tpr values
+
+    Returns:
+        float: the integral
+    """
+    diffs = np.diff(fprs)
+    avgs = (tprs[:-1] + tprs[1:]) / 2
+    return float(np.sum(diffs * avgs))
+
+
+def integrate_roc_curves(fprs, tprs):
+    """
+    Integrates ROC curves
+
+    Args:
+        fprs (np.array): the fpr values
+        tprs (np.array): the tpr values
+
+    Returns:
+        float: the integral
+    """
+    diffs = np.diff(fprs, axis=1)
+    avgs = (tprs[:, :-1] + tprs[:, 1:]) / 2
+    return (np.sum(diffs * avgs, axis=1)).astype(float)
+
 
 
 def generate_roc_curve(
@@ -765,117 +810,288 @@ def average_n_roc_curves(curves, random_state=None):
     return fprs1, tprs1
 
 
-def exponential_fitting(row, label, frac_label):
-
-    values = row[label].copy()
-    counts = row[frac_label].copy()
-
-    mask = values > 1e-6
-    values_nz = values[mask]
-    counts_nz = counts[mask]
-
-    ln_values = np.log(values_nz)
-    ln_counts = np.log(counts_nz).reshape(-1, 1)
-
-    linreg_a = LinearRegression(fit_intercept=False, positive=True)
-    pred_values = linreg_a\
-        .fit(ln_counts, ln_values)\
-        .predict(ln_counts)
-
-    if len(values) > 3:
-        r2_a = r2_score(ln_values, pred_values)
-    else:
-        r2_a = 1.0
-
-    values = (1 - values)
-    counts = (1 - counts)
-
-    mask = values > 1e-6
-    values_nz = values[mask]
-    counts_nz = counts[mask]
-
-    ln_values = np.log(values_nz)
-    ln_counts = np.log(counts_nz).reshape(-1, 1)
-
-    linreg_b = LinearRegression(fit_intercept=False, positive=True)
-    pred_values = linreg_b\
-        .fit(ln_counts, ln_values)\
-        .predict(ln_counts)
-
-    if len(values) > 3:
-        r2_b = r2_score(ln_values, pred_values)
-    else:
-        r2_b = 1.0
-
-    #print(r2_a, linreg_a.coef_[0], 0)
-    #print(r2_b, linreg_b.coef_[0], 1)
-
-    if r2_a > r2_b:
-        return (r2_a, linreg_a.coef_[0], 0)
-    return (r2_b, linreg_b.coef_[0], 1)
-
-    if label == 'fprs':
-        return (r2_b, linreg_b.coef_[0], 1)
-    return (r2_a, linreg_a.coef_[0], 0)
-
-def exponential_fitting2(row, label, frac_label):
-    values = row[label].copy()
-    counts = row[frac_label].copy()
-
-    if label == 'tprs':
-        r2, coef, _ = exponential_fitting2_(values, counts)
-        return r2, 1/coef, -3
-    else:
-        r2, coef, _ = exponential_fitting2_(values, 1 - counts)
-        return r2, coef, -3
-
-    r2a, coefa, _ = exponential_fitting2_(values, counts)
-    r2b, coefb, _ = exponential_fitting2_(1 - values, 1 - counts)
-
-    print(r2a, coefa, r2b, coefb)
-
-    if r2a > r2b:
-        return r2a, coefa, -2
-    else:
-        return r2b, 1.0/coefb, -3
-
-def exponential_fitting2_(values, counts):
-
-    """if len(values) <= 3:
-        return (1.0, 1.0, -1)"""
+def p_norm_fit(x, y, bracket=(-5, 3), mode='implicit'):
+    p = np.logspace(bracket[0], bracket[1], 2000)
+    if mode == 'implicit':
+        return p[np.argmin(np.mean(np.abs(1 - x**p[:, None] - y**p[:, None])**1, axis=1))]
+    elif mode == 'explicit':
+        return p[np.argmin(np.mean(np.abs(y - (1 - x**p[:, None])**(1/p[:, None]))**1, axis=1))]
 
 
-    mask = (values > 1e-6) & (counts > 1e-6)
-    values_nz = values[mask]
-    counts_nz = counts[mask]
+def p_norm_fit_joint(x, y0, y1, bracket=(-5, 0, 3), p=None, n=None, max_acc=None):
+    p0 = np.logspace(bracket[0], bracket[1], 500)
+    p1 = np.logspace(bracket[1], bracket[2], 500)
+    #p0 = np.logspace(-1, bracket[1], 4)
+    #p1 = np.logspace(1, bracket[2], 5)
 
-    ln_values = np.log(values_nz)
-    ln_counts = np.log(counts_nz)
+    err0 = np.mean(np.abs(1 - x**p0[:, None] - y0**p0[:, None])**1, axis=1)
+    err1 = np.mean(np.abs(1 - x**(p1[:, None]) - y1**(p1[:, None]))**1, axis=1)
 
-    """values2 = (1 - values)
-    counts2 = (1 - counts)
+    err = err0[:, None] + err1
 
-    mask2 = (values2 > 1e-6) & (values2 < 1)
-    values2_nz = values2[mask2]
-    counts2_nz = counts2[mask2]"""
+    if max_acc is not None:
+        #z = np.linspace(0, 1, 6)
+        z = np.linspace(0, 1, 100)
+        tmp = (((1 - (1 - z**p0[:, None])**(1/p0[:, None])) * n)[:, None] + ((1 - z**p1[:, None])**(1/p1[:, None]) * p)) / (p + n)
+        #print(tmp)
+        max_accs = np.max(tmp, axis=2)
+        mask = max_accs > max_acc
+        #print(max_accs)
+        #print(np.sum(mask), np.prod(mask.shape))
+        err[mask] = np.inf
 
-    """ln_values2 = 1/np.log(values2_nz)
-    ln_counts2 = 1/np.log(counts2_nz)"""
+    min0, min1 = np.unravel_index(np.argmin(err), err.shape)
 
-    ln_x = np.hstack([ln_counts]).reshape(-1, 1)
-    ln_y = np.hstack([ln_values])
+    return p0[min0], p1[min1]
+
+
+def p_norm_fit_best(x, y, bracket=(-5, 3), mode='implicit', p=None, n=None, max_acc=None):
+    exp = np.logspace(bracket[0], bracket[1], 2000)
+    err = np.mean(np.abs(1 - x**exp[:, None] - y**exp[:, None])**1, axis=1)
+    if max_acc is not None:
+        z = np.linspace(0, 1, min(100, n if n is not None else 100))
+        fprs = (z)[:, None]
+        tprs = ((1 - z[:, None]**exp)**(1/exp))
+        tmp = (fprs * n + tprs * p) / (p + n)
+        max_accs = np.max(tmp, axis=0)
+        mask = max_accs > max_acc
+        err[mask] = np.inf
     
-    if len(ln_x) <= 1:
-        return (1.0, 1.0, -1)
-    
-    linreg_a = LinearRegression(fit_intercept=False, positive=True)
-    pred_values = linreg_a\
-        .fit(ln_x, ln_y)\
-        .predict(ln_x)
+    return exp[np.argmin(err)]
 
-    if len(values) >= 3:
-        r2_a = r2_score(ln_y, pred_values)
-    else:
-        r2_a = 1.0
+
+def auc_estimator(fpr, tpr, p, n, mode='separate', return_details=False, integral=200, best=False, rasterize=False):
+    if fpr < 1e-6 and tpr > 1 - 1e-6 and not best:
+        return 1.0, -1, -1
+    if fpr < 1e-6 and tpr < 1e-6 and not best:
+        return 0.5, -1, -1
+    if fpr > 1 - 1e-6 and tpr > 1 - 1e-6 and not best:
+        return 0.5, -1, -1
     
-    return (r2_a, linreg_a.coef_[0], -1)
+    fpr = min(max(fpr, 1/n), 1 - 1/n)
+    tpr = min(max(tpr, 1/p), 1 - 1/p)
+
+    fprs = np.array([0.0, fpr, 1.0])
+    tprs = np.array([0.0, tpr, 1.0])
+    fracs = 1.0 - (p*tprs + n*fprs)/(p + n)
+
+    if mode == 'separate':
+        p_fpr = p_norm_fit(fracs, fprs, bracket=(-5, 0))
+        p_tpr = p_norm_fit(fracs, tprs, bracket=(0, 2))
+
+        #print(p_fpr, p_tpr)
+
+        fracs = 1.0 - np.linspace(0, 1, integral)
+        x = (1.0 - fracs**p_fpr)**(1/p_fpr)
+        y = (1.0 - fracs**p_tpr)**(1/p_tpr)
+    elif mode == 'joint':
+        if best:
+            max_acc = (n*(1 - fpr) + p*tpr) / (p + n)
+        else:
+            max_acc = None
+        p_fpr, p_tpr = p_norm_fit_joint(fracs, 
+                                        fprs, 
+                                        tprs, 
+                                        bracket=(-5, 0, 3),
+                                        p=p,
+                                        n=n,
+                                        max_acc=max_acc)
+
+        if not rasterize:
+            fracs = 1.0 - np.linspace(0, 1, integral)
+            x = (1.0 - fracs**p_fpr)**(1/p_fpr)
+            y = (1.0 - fracs**p_tpr)**(1/p_tpr)
+        else:
+            fracs = 1.0 - np.linspace(0, 1, p + n)
+            x = np.round((1.0 - fracs**p_fpr)**(1/p_fpr)*n)/n
+            y = np.round((1.0 - fracs**p_tpr)**(1/p_tpr)*p)/p
+    elif mode == 'roc':
+        p_both = p_norm_fit(1 - fprs, tprs, bracket=(0, 2))
+        p_fpr, p_tpr = p_both, p_both
+        #print(p_both)
+        if not rasterize:
+            x = np.linspace(0, 1, integral)
+            y = (1.0 - (1 - x)**p_both)**(1/p_both)
+        else:
+            x = np.linspace(0, 1, n)
+            y = np.round((1.0 - x**p_both)**(1/p_both)*p)/p
+    
+    elif mode == 'roc2':
+        if best:
+            max_acc = (n*(1 - fpr) + p*tpr) / (p + n)
+        else:
+            max_acc = None
+
+        p_both = p_norm_fit_best(1.0 - fprs, 
+                                    tprs, 
+                                    bracket=(0, 2),
+                                    p=p,
+                                    n=n,
+                                    max_acc=max_acc)
+
+        p_fpr, p_tpr = p_both, p_both
+
+        if not rasterize:
+            x = np.linspace(0, 1, integral)
+            y = (1.0 - (1 - x)**p_both)**(1/p_both)
+        else:
+            x = np.linspace(0, 1, n)
+            y = np.round((1.0 - x**p_both)**(1/p_both)*p)/p
+
+    if best and mode != 'joint' and mode != 'roc2':
+        best_acc = ((1 - fpr)*n + tpr*p) / (p + n)
+        accs = ((1 - x)*n + y * p) / (p + n)
+        mask = accs > best_acc
+        x_change = x[mask]
+        y_change = y[mask]
+
+        y_change = (best_acc * (p + n) - (1 - x_change)*n)/p
+        y[mask] = y_change
+
+    if not return_details:
+        return integrate_roc_curve(x, y), float(p_fpr), float(p_tpr)
+    else:
+        return (integrate_roc_curve(x, y), x, y)
+
+def auc_error(auc, p):
+    x = np.linspace(0, 1, 4000)
+    tprs = (1 - (1 - x)**(1/p))**p
+    auc0 = integrate_roc_curve(x, tprs[::-1])
+    return (auc0 - auc)
+
+def p_norm_fit_auc(auc, bracket=(1e-20, 1)):
+
+    if auc_error(auc, bracket[0]) < 0 and auc_error(auc, bracket[1]) < 0:
+        if auc_error(auc, bracket[0]) > auc_error(auc, bracket[1]):
+            return bracket[0]
+        else:
+            return bracket[1]
+    
+    if auc_error(auc, bracket[0]) > 0 and auc_error(auc, bracket[1]) > 0:
+        if auc_error(auc, bracket[0]) > auc_error(auc, bracket[1]):
+            return bracket[1]
+        else:
+            return bracket[0]
+
+    res = root_scalar(
+        lambda p: auc_error(auc, p), 
+        bracket=bracket
+    )
+    
+    return float(res['root'])
+
+def max_acc_estimator(auc, p, n):
+    if auc >= 1 - 1e-4:
+        return 1.0
+    #print(auc)
+    exp = p_norm_fit_auc(auc)
+    x = np.linspace(0, 1, 100)
+    tprs = (1 - (1 - x)**(1/exp))**exp
+    return np.max(((1 - x)*n + tprs*p)/(p + n))
+
+def sample0_min_max(fpr1, tpr1, fpr2, tpr2):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
+    tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+    #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.9 + tpr1[active]
+
+    return fpr_result, tpr_result
+
+def sample0_rmin_max(fpr1, tpr1, fpr2, tpr2):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    while n_active > 0:
+        
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+
+        lower_bounds = np.max(np.vstack([tpr1, fpr_result]).T, axis=1)
+
+        active = active & (tpr_result < lower_bounds)
+
+        n_active = np.sum(active)
+
+    return fpr_result, tpr_result
+
+def sample0_rmin_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    while n_active > 0:
+        
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+        #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.5 + tpr1[active]
+
+        maxa_bounds = (max_acc * (p + n) - (1 - fpr_result) * n) / p
+
+        upper_bounds = np.min(np.vstack([tpr2, maxa_bounds]).T, axis=1)
+        lower_bounds = np.max(np.vstack([tpr1, fpr_result]).T, axis=1)
+
+        active = active & ((tpr_result < lower_bounds) | (tpr_result > upper_bounds))
+
+        n_active = np.sum(active)
+
+    return fpr_result, tpr_result
+
+def sample1(fpr0, tpr0, n_samples, n_nodes, p=None, n=None, max_acc=None, mode='min-max'):
+    fpr0s = np.repeat(fpr0, n_samples)
+    tpr0s = np.repeat(tpr0, n_samples)
+    zeros = np.repeat(0.0, n_samples)
+    ones = np.repeat(1.0, n_samples)
+
+    curves_fpr = np.zeros((n_samples, n_nodes))
+    curves_tpr = np.zeros((n_samples, n_nodes))
+
+    curves_fpr[:, 0] = zeros
+    curves_tpr[:, 0] = zeros
+    curves_fpr[:, 1] = ones
+    curves_tpr[:, 1] = ones
+
+    curves_fpr[:, 2] = fpr0s
+    curves_tpr[:, 2] = tpr0s
+
+    pool = [(0, 2), (2, 1)]
+
+    for idx in range(n_nodes - 3):
+        left, right = pool[0]
+        pool = pool[1:]
+        if mode == 'min-max':
+            fprs_new, tprs_new = sample0_min_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right])
+        elif mode == 'rmin-max':
+            fprs_new, tprs_new = sample0_rmin_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right])
+        elif mode == 'rmin-maxa':
+            fprs_new, tprs_new = sample0_rmin_maxa(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], max_acc, p, n)
+        curves_fpr[:, idx+3] = fprs_new
+        curves_tpr[:, idx+3] = tprs_new
+        pool = pool + [(left, idx+3), (idx+3, right)]
+    
+    sorting = np.argsort(curves_fpr, axis=1)
+    curves_fpr = curves_fpr[np.arange(n_samples)[:, None], sorting]
+    curves_tpr = curves_tpr[np.arange(n_samples)[:, None], sorting]
+
+    if n is not None:
+        curves_fpr = np.round(curves_fpr * n) / n
+
+    if p is not None:
+        curves_tpr = np.round(curves_tpr * p) / p
+    
+    return curves_fpr, curves_tpr
+
+def sample2(fpr0, tpr0, n_samples, n_nodes, p=None, n=None, max_acc=None, mode='min-max', raw=False):
+    fprs, tprs = sample1(fpr0, tpr0, n_samples, n_nodes, p, n, max_acc, mode)
+    aucs = integrate_roc_curves(fprs, tprs)
+    n_nodes = n_nodes - np.sum((fprs[:, :-1] == fprs[:, 1:]) & (tprs[:, :-1] == tprs[:, 1:]), axis=1)
+    if not raw:
+        return np.mean(aucs)
+    else:
+        return aucs, n_nodes
