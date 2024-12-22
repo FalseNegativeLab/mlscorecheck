@@ -40,7 +40,9 @@ __all__ = [
     "integrate_roc_curve",
     "integrate_roc_curves",
     "sample1",
-    "sample2"
+    "sample2",
+    "sample0_unconstrained",
+    "sample1_unconstrained"
 ]
 
 
@@ -989,19 +991,19 @@ def max_acc_estimator(auc, p, n):
     tprs = (1 - (1 - x)**(1/exp))**exp
     return np.max(((1 - x)*n + tprs*p)/(p + n))
 
-def sample0_min_max(fpr1, tpr1, fpr2, tpr2):
+def sample0_min_max(fpr1, tpr1, fpr2, tpr2, random_state):
     active = np.repeat(True, len(fpr1))
     fpr_result = np.repeat(-1.0, len(fpr1))
     tpr_result = np.repeat(-1.0, len(fpr1))
     n_active = len(fpr1)
 
-    fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
-    tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+    fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+    tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
     #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.9 + tpr1[active]
 
     return fpr_result, tpr_result
 
-def sample0_rmin_max(fpr1, tpr1, fpr2, tpr2):
+def sample0_rmin_max(fpr1, tpr1, fpr2, tpr2, random_state):
     active = np.repeat(True, len(fpr1))
     fpr_result = np.repeat(-1.0, len(fpr1))
     tpr_result = np.repeat(-1.0, len(fpr1))
@@ -1009,8 +1011,8 @@ def sample0_rmin_max(fpr1, tpr1, fpr2, tpr2):
 
     while n_active > 0:
         
-        fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
-        tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
 
         lower_bounds = np.max(np.vstack([tpr1, fpr_result]).T, axis=1)
 
@@ -1020,7 +1022,7 @@ def sample0_rmin_max(fpr1, tpr1, fpr2, tpr2):
 
     return fpr_result, tpr_result
 
-def sample0_rmin_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n):
+def sample0_unconstrained(fpr1, tpr1, fpr2, tpr2, random_state):
     active = np.repeat(True, len(fpr1))
     fpr_result = np.repeat(-1.0, len(fpr1))
     tpr_result = np.repeat(-1.0, len(fpr1))
@@ -1028,8 +1030,28 @@ def sample0_rmin_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n):
 
     while n_active > 0:
         
-        fpr_result[active] = (fpr2[active] - fpr1[active]) * np.random.random_sample(n_active) + fpr1[active]
-        tpr_result[active] = (tpr2[active] - tpr1[active]) * np.random.random_sample(n_active) + tpr1[active]
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
+
+        lower_bounds = fpr_result
+
+        active = active & (tpr_result < lower_bounds)
+
+        n_active = np.sum(active)
+
+    return fpr_result, tpr_result
+
+def sample0_rmin_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n, random_state):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    iteration = 0
+    while n_active > 0:
+        
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
         #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.5 + tpr1[active]
 
         maxa_bounds = (max_acc * (p + n) - (1 - fpr_result) * n) / p
@@ -1041,40 +1063,139 @@ def sample0_rmin_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n):
 
         n_active = np.sum(active)
 
+        iteration += 1
+        if iteration > 20:
+            lower_mask = tpr_result < lower_bounds
+            tpr_result[lower_mask] = lower_bounds[lower_mask]
+
+            upper_mask = tpr_result > upper_bounds
+            tpr_result[upper_mask] = upper_bounds[upper_mask]
+            break
+
     return fpr_result, tpr_result
 
-def sample1(fpr0, tpr0, n_samples, n_nodes, p=None, n=None, max_acc=None, mode='min-max'):
+def sample0_min_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n, random_state):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    iteration = 0
+    while n_active > 0:
+        
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
+        #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.5 + tpr1[active]
+
+        maxa_bounds = (max_acc * (p + n) - (1 - fpr_result) * n) / p
+
+        upper_bounds = np.min(np.vstack([tpr2, maxa_bounds]).T, axis=1)
+
+        active = active & (tpr_result > upper_bounds)
+
+        n_active = np.sum(active)
+
+        iteration += 1
+        if iteration > 20:
+            upper_mask = tpr_result > upper_bounds
+            tpr_result[upper_mask] = upper_bounds[upper_mask]
+            break
+
+    return fpr_result, tpr_result
+
+def sample0_mina_maxa(fpr1, tpr1, fpr2, tpr2, max_acc, p, n, random_state):
+    active = np.repeat(True, len(fpr1))
+    fpr_result = np.repeat(-1.0, len(fpr1))
+    tpr_result = np.repeat(-1.0, len(fpr1))
+    n_active = len(fpr1)
+
+    iteration = 0
+    while n_active > 0:
+        
+        fpr_result[active] = (fpr2[active] - fpr1[active]) * random_state.random_sample(n_active) + fpr1[active]
+        tpr_result[active] = (tpr2[active] - tpr1[active]) * random_state.random_sample(n_active) + tpr1[active]
+        #tpr_result[active] = (tpr2[active] - tpr1[active]) * 0.5 + tpr1[active]
+
+        #mina_bounds = 1.0 - (max_acc * (p + n) - (fpr_result) * p) / n
+        mina_bounds = ((1 - max_acc) * (p + n) - (1 - fpr_result) * p) / n
+        maxa_bounds = (max_acc * (p + n) - (1 - fpr_result) * n) / p
+
+        lower_bounds = np.max(np.vstack([tpr1, mina_bounds]).T, axis=1)
+        upper_bounds = np.min(np.vstack([tpr2, maxa_bounds]).T, axis=1)
+
+        active = active & ((tpr_result > upper_bounds) | (tpr_result < lower_bounds))
+
+        n_active = np.sum(active)
+
+        iteration += 1
+        if iteration > 20:
+            upper_mask = tpr_result > upper_bounds
+            tpr_result[upper_mask] = upper_bounds[upper_mask]
+            break
+
+    return fpr_result, tpr_result
+
+def sample1(fpr0, tpr0, n_samples, n_nodes, p=None, n=None, max_acc=None, mode='min-max', random_state=None):
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
     fpr0s = np.repeat(fpr0, n_samples)
     tpr0s = np.repeat(tpr0, n_samples)
     zeros = np.repeat(0.0, n_samples)
     ones = np.repeat(1.0, n_samples)
 
-    curves_fpr = np.zeros((n_samples, n_nodes))
-    curves_tpr = np.zeros((n_samples, n_nodes))
+    curves_fpr = np.zeros((n_samples, n_nodes), dtype=float)
+    curves_tpr = np.zeros((n_samples, n_nodes), dtype=float)
 
     curves_fpr[:, 0] = zeros
     curves_tpr[:, 0] = zeros
     curves_fpr[:, 1] = ones
     curves_tpr[:, 1] = ones
 
-    curves_fpr[:, 2] = fpr0s
-    curves_tpr[:, 2] = tpr0s
+    if fpr0 < 1.0 - fpr0:
+        curves_fpr[:, 2] = fpr0s
+        curves_tpr[:, 2] = tpr0s
 
-    pool = [(0, 2), (2, 1)]
+        curves_fpr[:, 3] = 1.0 - tpr0s
+        curves_tpr[:, 3] = 1.0 - fpr0s
+    else:
+        curves_fpr[:, 3] = fpr0s
+        curves_tpr[:, 3] = tpr0s
 
-    for idx in range(n_nodes - 3):
+        curves_fpr[:, 2] = 1.0 - tpr0s
+        curves_tpr[:, 2] = 1.0 - fpr0s
+
+    pool = [(0, 2), (3, 1), (2, 3)]
+
+    for idx in range(n_nodes - 4):
         left, right = pool[0]
         pool = pool[1:]
         if mode == 'min-max':
-            fprs_new, tprs_new = sample0_min_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right])
+            fprs_new, tprs_new = sample0_min_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], random_state)
         elif mode == 'rmin-max':
-            fprs_new, tprs_new = sample0_rmin_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right])
+            fprs_new, tprs_new = sample0_rmin_max(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], random_state)
         elif mode == 'rmin-maxa':
-            fprs_new, tprs_new = sample0_rmin_maxa(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], max_acc, p, n)
-        curves_fpr[:, idx+3] = fprs_new
-        curves_tpr[:, idx+3] = tprs_new
-        pool = pool + [(left, idx+3), (idx+3, right)]
+            fprs_new, tprs_new = sample0_rmin_maxa(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], max_acc, p, n, random_state)
+        elif mode == 'min-maxa':
+            fprs_new, tprs_new = sample0_min_maxa(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], max_acc, p, n, random_state)
+        elif mode == 'mina-maxa':
+            fprs_new, tprs_new = sample0_mina_maxa(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], max_acc, p, n, random_state)
+        curves_fpr[:, idx+4] = fprs_new
+        curves_tpr[:, idx+4] = tprs_new
+        pool = pool + [(left, idx+4), (idx+4, right)]
     
+    sorting = np.argsort(curves_fpr, axis=1)
+    curves_fpr = curves_fpr[np.arange(n_samples)[:, None], sorting]
+    curves_tpr = curves_tpr[np.arange(n_samples)[:, None], sorting]
+
+    mask = (curves_fpr + curves_tpr <= 1)
+    max_idx = np.where(~(mask[0]))[0][0]
+
+    curves_fpr = curves_fpr[:, :max_idx]
+    curves_tpr = curves_tpr[:, :max_idx]
+
+    curves_fpr = np.hstack([curves_fpr, 1.0 - curves_tpr])
+    curves_tpr = np.hstack([curves_tpr, 1.0 - curves_fpr])
+
     sorting = np.argsort(curves_fpr, axis=1)
     curves_fpr = curves_fpr[np.arange(n_samples)[:, None], sorting]
     curves_tpr = curves_tpr[np.arange(n_samples)[:, None], sorting]
@@ -1095,3 +1216,39 @@ def sample2(fpr0, tpr0, n_samples, n_nodes, p=None, n=None, max_acc=None, mode='
         return np.mean(aucs)
     else:
         return aucs, n_nodes
+    
+def sample1_unconstrained(n_samples, n_nodes, p=None, n=None, random_state=None):
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
+    zeros = np.repeat(0.0, n_samples)
+    ones = np.repeat(1.0, n_samples)
+
+    curves_fpr = np.zeros((n_samples, n_nodes), dtype=float)
+    curves_tpr = np.zeros((n_samples, n_nodes), dtype=float)
+
+    curves_fpr[:, 0] = zeros
+    curves_tpr[:, 0] = zeros
+    curves_fpr[:, 1] = ones
+    curves_tpr[:, 1] = ones
+
+    pool = [(0, 1)]
+
+    for idx in range(n_nodes - 2):
+        left, right = pool[0]
+        pool = pool[1:]
+        fprs_new, tprs_new = sample0_unconstrained(curves_fpr[:, left], curves_tpr[:, left], curves_fpr[:, right], curves_tpr[:, right], random_state)
+        curves_fpr[:, idx+2] = fprs_new
+        curves_tpr[:, idx+2] = tprs_new
+        pool = pool + [(left, idx+2), (idx+2, right)]
+    
+    sorting = np.argsort(curves_fpr, axis=1)
+    curves_fpr = curves_fpr[np.arange(n_samples)[:, None], sorting]
+    curves_tpr = curves_tpr[np.arange(n_samples)[:, None], sorting]
+
+    if n is not None:
+        curves_fpr = np.round(curves_fpr * n) / n
+
+    if p is not None:
+        curves_tpr = np.round(curves_tpr * p) / p
+    
+    return curves_fpr, curves_tpr
