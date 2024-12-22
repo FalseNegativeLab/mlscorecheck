@@ -51,7 +51,7 @@ def generate_random_classifier(random_state, p=None, n=None):
         params = {'probability': True, 'C': random_state.rand()/2 + 0.001, 'tol': 1e-4}
     if mode == 3:
         classifier = KNeighborsClassifier
-        params = {'n_neighbors': random_state.randint(2, int(np.sqrt(n_class)))}
+        params = {'n_neighbors': random_state.randint(2, int((min_class)))}
     if mode == 4:
         classifier = XGBClassifier
         params = {'random_state': 5, 'max_depth': random_state.randint(2, max(3, int(np.log(n_class))))}
