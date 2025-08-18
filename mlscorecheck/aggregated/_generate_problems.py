@@ -437,7 +437,7 @@ def generate_dataset_folding_multiclass(
 
     # if aggregation == 'som':
     scores = calculate_multiclass_scores(
-        np.sum(np.ndarray(samples), axis=0),
+        np.sum(np.array(samples), axis=0),
         average=average,
         additional_symbols={"beta_positive": 2, "beta_negative": 2},
         rounding_decimals=rounding_decimals,
