@@ -38,7 +38,7 @@ class Folding:
             raise ValueError("specify strategy if folds are not set explicitly")
 
         self.n_folds = n_folds
-        self.n_repeats = n_repeats if n_repeats is not None else 1
+        self.n_repeats: int = n_repeats if n_repeats is not None else 1
         self.folds = folds
         self.strategy = strategy
 
@@ -77,9 +77,21 @@ class Folding:
                 p += fold["p"]
                 n += fold["n"]
 
-            term_a = (dataset.p != p) and (p % dataset.p != 0)
-            term_b = (dataset.n != n) and (n % dataset.n != 0)
-            term_c = dataset.p > 0 and dataset.n > 0 and (p // dataset.p != n // dataset.n)
+            term_a = (dataset.p is not None and dataset.p != p) and (
+                dataset.p != 0 and p % dataset.p != 0
+            )
+            term_b = (dataset.n is not None and dataset.n != n) and (
+                dataset.n != 0 and n % dataset.n != 0
+            )
+            term_c = (
+                dataset.p is not None
+                and dataset.n is not None
+                and dataset.p > 0
+                and dataset.n > 0
+                and dataset.p != 0
+                and dataset.n != 0
+                and (p // dataset.p != n // dataset.n)
+            )
 
             if term_a or term_b or term_c:
                 raise ValueError(

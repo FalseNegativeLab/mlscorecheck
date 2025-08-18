@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-def _prepare_configuration_diaretdb0(subset: str, batch, class_name: str) -> list:
+def _prepare_configuration_diaretdb0(subset: str, batch, class_name: str | list) -> list:
     """
     Prepare the testset specifications for a "one vs rest" setup
 

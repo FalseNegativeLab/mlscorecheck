@@ -41,7 +41,7 @@ def estimate_n_experiments(evaluations: list, available_scores: list | None = No
         )
         for evaluation in evaluations
     ]
-    return np.prod(counts)
+    return int(np.prod(counts))
 
 
 def check_n_datasets_mos_unknown_folds_mos(

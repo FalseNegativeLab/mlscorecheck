@@ -172,13 +172,19 @@ def check_diaretdb1_class(
         >>> results['inconsistency']
         # False
     """
-    testset = _prepare_configuration_diaretdb1(
+    testset_list = _prepare_configuration_diaretdb1(
         subset=subset,
         class_name=class_name,
         pixel_level=False,
         assumption="all",
         confidence=confidence,
     )
+
+    # Take the first testset if it's a list
+    if isinstance(testset_list, list) and len(testset_list) > 0:
+        testset = testset_list[0]
+    else:
+        raise ValueError("Expected a non-empty list from _prepare_configuration_diaretdb1")
 
     return check_1_testset_no_kfold(
         testset=testset, scores=scores, eps=eps, numerical_tolerance=numerical_tolerance

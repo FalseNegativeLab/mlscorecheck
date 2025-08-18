@@ -25,7 +25,7 @@ def estimate_n_evaluations(
     Returns:
         int: the estimated number of different fold configurations.
     """
-    dataset = Dataset(**dataset)
+    dataset_obj = Dataset(**dataset)
     n_repeats = folding.get("n_repeats", 1)
 
     available_scores = [] if available_scores is None else available_scores
@@ -33,7 +33,7 @@ def estimate_n_evaluations(
     count = sum(
         1
         for _ in kfolds_generator(
-            {"dataset": dataset.to_dict(), "folding": folding}, available_scores
+            {"dataset": dataset_obj.to_dict(), "folding": folding}, available_scores
         )
     )
 

@@ -223,7 +223,9 @@ def _check_scores_tptn_pairs(
         "beta_negative": scores.get("beta_negative"),
     }
 
-    valid_pairs = initialize_valid_pairs(p, n, iterate_by, init_tptn_intervals)
+    valid_pairs = initialize_valid_pairs(
+        p, n, iterate_by, init_tptn_intervals if init_tptn_intervals is not None else {}
+    )
 
     details = []
 

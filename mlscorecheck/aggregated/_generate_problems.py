@@ -80,8 +80,13 @@ def generate_folding(
 
     strategies = ["stratified_sklearn"] if strategies is None else strategies
 
-    dataset = Dataset(**dataset)
-    p, n = dataset.p, dataset.n
+    dataset_obj = Dataset(**dataset)
+    p, n = dataset_obj.p, dataset_obj.n
+
+    # Ensure p and n are valid integers
+    if p is None or n is None:
+        raise ValueError("Dataset must have valid p and n values")
+
     max_folds = min(p, n, max_folds)
 
     n_folds = random_state.randint(1, max_folds + 1)
@@ -93,7 +98,7 @@ def generate_folding(
 
     folding = Folding(n_folds=n_folds, n_repeats=n_repeats, strategy=strategy)
 
-    return {"folds": [fold.to_dict() for fold in folding.generate_folds(dataset, "mos")]}
+    return {"folds": [fold.to_dict() for fold in folding.generate_folds(dataset_obj, "mos")]}
 
 
 def generate_evaluation(  # pylint: disable=too-many-locals
@@ -111,7 +116,7 @@ def generate_evaluation(  # pylint: disable=too-many-locals
     no_name: bool = False,
     no_folds: bool = False,
     score_subset: list | None = None,
-) -> dict:
+) -> dict | tuple[dict, dict]:
     """
     Generate a random evaluation specification
 
@@ -212,7 +217,7 @@ def generate_experiment(
     *,
     max_evaluations: int = 5,
     evaluation_params: dict | None = None,
-    feasible_dataset_score_bounds: bool = None,
+    feasible_dataset_score_bounds: bool | None = None,
     aggregation: str | None = None,
     random_state=None,
     return_scores: bool = False,

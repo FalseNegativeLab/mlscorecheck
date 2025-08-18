@@ -54,7 +54,7 @@ class Evaluation:
             "n": sum(fold.n for fold in self.folds),
         }
 
-        self.scores = None
+        self.scores: dict | None = None
 
     def to_dict(self) -> dict:
         """
@@ -120,6 +120,9 @@ class Evaluation:
         elif self.aggregation == "mos":
             self.scores = dict_mean([fold.scores for fold in self.folds])
 
+        if self.scores is None:
+            return {}
+
         return (
             self.scores
             if rounding_decimals is None
@@ -148,7 +151,8 @@ class Evaluation:
         self.calculate_scores(score_subset=score_subset)
 
         for fold in self.folds:
-            add_bounds(lp_problem, fold.scores, self.fold_score_bounds, fold.identifier)
+            if self.fold_score_bounds is not None:
+                add_bounds(lp_problem, fold.scores, self.fold_score_bounds, fold.identifier)
 
         return lp_problem
 

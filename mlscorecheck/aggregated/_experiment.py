@@ -46,7 +46,7 @@ class Experiment:
             "n": sum(evaluation.figures["n"] for evaluation in self.evaluations),
         }
 
-        self.scores = None
+        self.scores: dict | None = None
 
     def to_dict(self) -> dict:
         """
@@ -115,6 +115,9 @@ class Experiment:
         elif self.aggregation == "mos":
             self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
 
+        if self.scores is None:
+            return {}
+
         return (
             self.scores
             if rounding_decimals is None
@@ -143,12 +146,13 @@ class Experiment:
         self.calculate_scores(score_subset=score_subset)
 
         for evaluation in self.evaluations:
-            add_bounds(
-                lp_problem,
-                evaluation.scores,
-                self.dataset_score_bounds,
-                evaluation.dataset.identifier,
-            )
+            if evaluation.scores is not None and self.dataset_score_bounds is not None:
+                add_bounds(
+                    lp_problem,
+                    evaluation.scores,
+                    self.dataset_score_bounds,
+                    evaluation.dataset.identifier,
+                )
 
         return lp_problem
 
@@ -186,11 +190,14 @@ class Experiment:
                 "scores": evaluation.scores,
                 "score_bounds": self.dataset_score_bounds,
             }
-            if self.dataset_score_bounds is not None:
+            if self.dataset_score_bounds is not None and evaluation.scores is not None:
                 tmp["bounds_flag"] = check_bounds(
                     evaluation.scores, self.dataset_score_bounds, numerical_tolerance
                 )
-                tmp["bounds_flag"] = tmp["bounds_flag"] and tmp["folds"]["bounds_flag"]
+                if tmp["folds"] is not None and isinstance(tmp["folds"], dict):
+                    tmp["bounds_flag"] = tmp["bounds_flag"] and tmp["folds"].get(
+                        "bounds_flag", True
+                    )
             else:
                 tmp["bounds_flag"] = tmp["folds"]
             results["evaluations"].append(tmp)

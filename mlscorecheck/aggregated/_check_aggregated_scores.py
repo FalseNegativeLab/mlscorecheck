@@ -71,10 +71,10 @@ def check_aggregated_scores(
             "message": "no scores suitable for aggregated consistency checks",
         }
 
-    experiment = Experiment(**experiment) if isinstance(experiment, dict) else experiment
+    experiment_obj = Experiment(**experiment) if isinstance(experiment, dict) else experiment
 
-    if experiment.aggregation == "som" and any(
-        evaluation.aggregation == "mos" for evaluation in experiment.evaluations
+    if experiment_obj.aggregation == "som" and any(
+        evaluation.aggregation == "mos" for evaluation in experiment_obj.evaluations
     ):
         raise ValueError(
             "experiment level MoS aggregation with dataset level SoM "
@@ -95,7 +95,7 @@ def check_aggregated_scores(
 
     result = solve(experiment, scores, eps, solver)
 
-    populated = experiment.populate(result)
+    populated = experiment_obj.populate(result)
     populated.calculate_scores(score_subset=list(scores.keys()))
     configuration_details = populated.check_bounds()
 

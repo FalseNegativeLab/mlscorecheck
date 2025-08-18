@@ -118,6 +118,9 @@ def check_1_testset_no_kfold(
         p = dataset_statistics[testset["name"]]["p"]
         n = dataset_statistics[testset["name"]]["n"]
 
+    if p is None or n is None:
+        raise ValueError("Testset must have valid p and n values")
+
     logger.info(
         "calling the score check with scores %s, uncertainty %s, p %d and n %d",
         str(scores),

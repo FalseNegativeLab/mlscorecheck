@@ -26,7 +26,7 @@ def random_identifier(length: int):
     return "".join(random.choice(letters) for _ in range(length))
 
 
-def check_bounds(scores: dict, bounds: dict | None = None, tolerance: float = 1e-5) -> bool:
+def check_bounds(scores: dict, bounds: dict | None = None, tolerance: float = 1e-5) -> bool | None:
     """
     Checks the bounds for the scores
 

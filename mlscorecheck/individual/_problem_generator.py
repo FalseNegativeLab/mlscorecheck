@@ -63,7 +63,7 @@ def generate_1_problem(
     zeros: list | None = None,
     add_complements: bool = False,
     random_state=None,
-) -> dict:
+) -> tuple[dict, dict]:
     """
     Generates a random problem
 
@@ -117,7 +117,7 @@ def generate_problems(
     zeros: list | None = None,
     add_complements: bool = False,
     random_state=None,
-) -> tuple[dict, dict]:
+) -> tuple[dict | list, dict | list]:
     """
     Generates a random problem
 

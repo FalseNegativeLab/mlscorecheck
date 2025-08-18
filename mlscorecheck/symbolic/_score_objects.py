@@ -113,7 +113,7 @@ class Score:  # pylint: disable=too-many-instance-attributes
             self.function = function
 
         # generating the list of argument symbols
-        arg_symbols = {arg: getattr(symbols, arg) for arg in self.args}
+        arg_symbols = {} if self.args is None else {arg: getattr(symbols, arg) for arg in self.args}
 
         if self.sqrt:
             arg_symbols["sqrt"] = symbols.sqrt
