@@ -3,6 +3,7 @@ This module implements the main check functionality for individual scores
 """
 
 import itertools
+from typing import Any
 
 import numpy as np
 
@@ -49,7 +50,7 @@ def translate_metadata(original):
     """
 
     if isinstance(original, dict):
-        result = {}
+        result: Any = {}
         for key, val in original.items():
             if isinstance(val, dict):
                 result[key] = translate_metadata(val)
@@ -169,9 +170,9 @@ def is_less_than_zero(value) -> bool:
         bool: True if the parameter is less than zero, False otherwise
     """
     if not isinstance(value, Interval | IntervalUnion):
-        return value < 0
+        return bool(value < 0)
     if isinstance(value, Interval):
-        return value.upper_bound < 0
+        return bool(value.upper_bound < 0)
     return all(interval.upper_bound < 0 for interval in value.intervals)
 
 
@@ -187,7 +188,7 @@ def is_zero(value, tolerance: float = 1e-8) -> bool:
         bool: True if the parameter is zero, False otherwise
     """
     if not isinstance(value, Interval | IntervalUnion):
-        return abs(value) < tolerance
+        return bool(abs(value) < tolerance)
     return value.contains(0.0)
 
 

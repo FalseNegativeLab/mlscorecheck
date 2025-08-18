@@ -6,6 +6,8 @@ __all__ = ["SympyAlgebra"]
 
 import importlib
 
+from typing import Any, cast
+
 from ._algebra import Algebra
 
 
@@ -105,7 +107,7 @@ class SympyAlgebra(Algebra):
         Returns:
             list: the list of arguments
         """
-        return expression.free_symbols
+        return cast(list[Any], expression.free_symbols)
 
     def is_trivial(self, expression) -> bool:
         """
@@ -181,7 +183,7 @@ class SympyAlgebra(Algebra):
         Returns:
             list: the operands
         """
-        return expression.args
+        return cast(list[Any], expression.args)
 
     def free_symbols(self, expression) -> list:
         """

@@ -13,7 +13,9 @@ __all__ = [
 NUMERICAL_TOLERANCE = 1e-6
 
 
-def check_uncertainty_and_tolerance(eps: float, numerical_tolerance: float):
+def check_uncertainty_and_tolerance(
+    eps: float | dict[str, float], numerical_tolerance: float
+) -> None:
     """
     Checking the relation of the numerical tolerance and the uncertainty
 
@@ -33,7 +35,9 @@ def check_uncertainty_and_tolerance(eps: float, numerical_tolerance: float):
         )
 
 
-def update_uncertainty(eps: float, numerical_tolerance: float):
+def update_uncertainty(
+    eps: float | dict[str, float], numerical_tolerance: float
+) -> float | dict[str, float]:
     """
     Adjusts the specified uncertainty by the numerical tolerance
 

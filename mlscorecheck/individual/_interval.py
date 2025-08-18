@@ -66,7 +66,7 @@ class Interval:
         Returns:
             bool: True if the interval contains the value, otherwise False
         """
-        return self.lower_bound <= value <= self.upper_bound
+        return bool(self.lower_bound <= value <= self.upper_bound)
 
     def intersection(self, other):
         """
@@ -98,7 +98,7 @@ class Interval:
 
         return Interval(1, 0)
 
-    def integer(self) -> int:
+    def integer(self) -> bool:
         """
         Check whether the interval fulfills integer conditions
 
@@ -108,7 +108,7 @@ class Interval:
         if self.upper_bound - self.lower_bound >= 1.0:
             return True
 
-        return np.ceil(self.lower_bound) == np.floor(self.upper_bound)
+        return bool(np.ceil(self.lower_bound) == np.floor(self.upper_bound))
 
     def shrink_to_integers(self):
         """
@@ -128,7 +128,7 @@ class Interval:
         """
         if not self.is_empty():
             integer = self.shrink_to_integers()
-            return integer.upper_bound - integer.lower_bound + 1
+            return int(integer.upper_bound - integer.lower_bound + 1)
         return 0
 
     def is_empty(self) -> bool:
@@ -138,7 +138,7 @@ class Interval:
         Returns:
             bool: True if the interval is empty, False otherwise
         """
-        return self.upper_bound < self.lower_bound
+        return bool(self.upper_bound < self.lower_bound)
 
     def __add__(self, other):
         """
@@ -323,7 +323,7 @@ class Interval:
         """
         if not isinstance(other, Interval):
             return False
-        return self.lower_bound == other.lower_bound and self.upper_bound == other.upper_bound
+        return bool(self.lower_bound == other.lower_bound and self.upper_bound == other.upper_bound)
 
     def __ne__(self, other) -> bool:
         """
@@ -556,7 +556,7 @@ class IntervalUnion:
         if not isinstance(other, IntervalUnion):
             return IntervalUnion([interval + other for interval in self.intervals])
 
-        intervals = []
+        intervals: list["Interval"] = []
         for int0 in self.intervals:
             intervals.extend(int0 + int1 for int1 in other.intervals)
 

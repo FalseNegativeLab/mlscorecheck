@@ -2,6 +2,8 @@
 Tests for the DIARETDB0 dataset
 """
 
+from typing import Any, cast
+
 from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
 from ...binary import check_n_testsets_mos_no_kfold, check_n_testsets_som_no_kfold
@@ -114,12 +116,15 @@ def check_diaretdb0_class_som(
     """
     testsets = _prepare_configuration_diaretdb0(subset, batch, class_name)
 
-    return check_n_testsets_som_no_kfold(
-        testsets=testsets,
-        scores=scores,
-        eps=eps,
-        numerical_tolerance=numerical_tolerance,
-        prefilter_by_pairs=True,
+    return cast(
+        dict[Any, Any],
+        check_n_testsets_som_no_kfold(
+            testsets=testsets,
+            scores=scores,
+            eps=eps,
+            numerical_tolerance=numerical_tolerance,
+            prefilter_by_pairs=True,
+        ),
     )
 
 

@@ -60,7 +60,7 @@ class Dataset:
         """
         Resolves the ``p`` and ``n`` values from the name of the dataset
         """
-        if self.p is None:
+        if self.p is None and self.dataset_name is not None:
             dataset = dataset_statistics[self.dataset_name]
             self.p = dataset["p"]
             self.n = dataset["n"]

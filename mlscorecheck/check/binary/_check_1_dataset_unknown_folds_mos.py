@@ -37,7 +37,7 @@ def estimate_n_evaluations(
         )
     )
 
-    return count**n_repeats
+    return int(count**n_repeats)
 
 
 def check_1_dataset_unknown_folds_mos(

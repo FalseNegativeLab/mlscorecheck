@@ -2,6 +2,8 @@
 This module implements tests for the DIARETDB1 dataset
 """
 
+from typing import Any, cast
+
 from ....core import NUMERICAL_TOLERANCE, logger
 from ....experiments import get_experiment
 from ...binary import (
@@ -103,7 +105,7 @@ def _prepare_configuration_diaretdb1(
     if only_valid:
         testsets = [tset for tset in testsets if tset["p"] > 0 and tset["n"] > 0]
 
-    return testsets if pixel_level else testset
+    return cast(list[Any], testsets if pixel_level else testset)
 
 
 def check_diaretdb1_class(

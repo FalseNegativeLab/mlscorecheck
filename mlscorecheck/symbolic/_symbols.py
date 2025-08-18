@@ -4,6 +4,7 @@ This module implements the wrapper for the symbols
 
 __all__ = ["Symbols"]
 
+from typing import Union
 from ._sage_algebra import SageAlgebra
 from ._sympy_algebra import SympyAlgebra
 
@@ -13,7 +14,7 @@ class Symbols:  # pylint: disable=too-many-instance-attributes
     A symbols class representing the basic symbols to be used
     """
 
-    def __init__(self, algebraic_system):
+    def __init__(self, algebraic_system: str = "sympy") -> None:
         """
         The constructor of the object
 
@@ -22,7 +23,7 @@ class Symbols:  # pylint: disable=too-many-instance-attributes
         """
         self.algebraic_system = algebraic_system
         if algebraic_system == "sympy":
-            self.algebra = SympyAlgebra()
+            self.algebra: Union[SympyAlgebra, SageAlgebra] = SympyAlgebra()
         elif algebraic_system == "sage":  # pragma: no cover
             self.algebra = SageAlgebra()  # pragma: no cover
 

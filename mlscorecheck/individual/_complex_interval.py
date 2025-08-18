@@ -166,7 +166,7 @@ class ComplexInterval:
         if not isinstance(other, ComplexInterval):
             return False
 
-        return self.real == other.real and self.imag == other.imag
+        return bool(self.real == other.real and self.imag == other.imag)
 
     def __ne__(self, other) -> bool:
         """

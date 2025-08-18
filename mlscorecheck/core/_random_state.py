@@ -7,7 +7,9 @@ import numpy as np
 __all__ = ["init_random_state"]
 
 
-def init_random_state(random_state=None) -> np.random.RandomState:
+def init_random_state(
+    random_state: int | np.random.RandomState | None = None,
+) -> np.random.RandomState:
     """
     Initializes a random state
 

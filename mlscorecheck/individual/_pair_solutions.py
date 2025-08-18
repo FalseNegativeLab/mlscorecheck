@@ -104,19 +104,20 @@ class Solution:
 
         message = None
         term = None
-        for condition in self.conditions:
-            if condition["mode"] == "non-negative":
-                value = Expression(**condition).evaluate(subs)
-                if self.check_non_negative(value):
-                    message = "negative base"
-                    term = condition["expression"]
-                    break
-            elif condition["mode"] == "non-zero":
-                value = Expression(**condition).evaluate(subs)
-                if self.check_non_zero(value):
-                    message = "zero division"
-                    term = condition["expression"]
-                    break
+        if self.conditions is not None:
+            for condition in self.conditions:
+                if condition["mode"] == "non-negative":
+                    value = Expression(**condition).evaluate(subs)
+                    if self.check_non_negative(value):
+                        message = "negative base"
+                        term = condition["expression"]
+                        break
+                elif condition["mode"] == "non-zero":
+                    value = Expression(**condition).evaluate(subs)
+                    if self.check_non_zero(value):
+                        message = "zero division"
+                        term = condition["expression"]
+                        break
 
         if message is not None:
             return {"tp": None, "tn": None, "message": message, "term": term}
@@ -186,7 +187,9 @@ def load_solutions():
     Returns:
         dict: the dictionary of the solutions
     """
-    sio = files("mlscorecheck").joinpath(os.path.join("individual", "solutions.json")).read_text()  # pylint: disable=unspecified-encoding
+    sio = (
+        files("mlscorecheck").joinpath(os.path.join("individual", "solutions.json")).read_text()
+    )  # pylint: disable=unspecified-encoding
 
     solutions_dict = json.loads(sio)
 

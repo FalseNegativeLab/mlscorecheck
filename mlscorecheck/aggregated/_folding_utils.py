@@ -3,6 +3,7 @@ This module implements some functionalities related to folding
 """
 
 import copy
+from typing import Any, cast
 
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
@@ -194,7 +195,7 @@ def create_folds_multiclass(dataset: dict, folding: dict) -> list:
         raise ValueError("either specify the folds or the folding strategy")
 
     if "folds" in folding:
-        return folding["folds"]
+        return cast(list[Any], folding["folds"])
     if folding.get("strategy") == "stratified_sklearn":
         folds = multiclass_stratified_folds(dataset, folding.get("n_folds", 1))
     else:

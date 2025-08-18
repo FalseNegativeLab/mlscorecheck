@@ -3,11 +3,12 @@ This module implements some operations related to dictionaries
 """
 
 import numpy as np
+from typing import Any
 
 __all__ = ["dict_mean", "dict_minmax"]
 
 
-def dict_mean(dicts: list) -> dict:
+def dict_mean(dicts: list[dict[str, float]]) -> dict[str, float]:
     """
     Calculates the mean of scores in a dictionary
 
@@ -29,7 +30,7 @@ def dict_mean(dicts: list) -> dict:
     return result
 
 
-def dict_minmax(dicts: list) -> dict:
+def dict_minmax(dicts: list[dict[str, float]]) -> dict[str, tuple[float, float]]:
     """
     Calculates the min-max of scores in a dictionary
 
@@ -48,4 +49,4 @@ def dict_minmax(dicts: list) -> dict:
             if tmp[key] > result[key][1]:
                 result[key][1] = tmp[key]
 
-    return result
+    return {key: (value[0], value[1]) for key, value in result.items()}

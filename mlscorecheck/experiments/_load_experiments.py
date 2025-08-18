@@ -3,6 +3,7 @@ This module implements the loading of complete experimental settings
 """
 
 import os
+from typing import Any, cast
 
 __all__ = [
     "get_experiment",
@@ -20,10 +21,10 @@ __all__ = [
 
 from ..core import load_json
 
-experiments: dict = {}
+experiments: dict[str, Any] = {}
 
 
-def get_experiment(name):
+def get_experiment(name: str) -> dict[str, Any]:
     """
     Returns the experiment dataset based on the identifier
 
@@ -34,7 +35,7 @@ def get_experiment(name):
         dict: the experiment dataset
     """
     if name in experiments:
-        return experiments[name]
+        return cast(dict[str, Any], experiments[name])
 
     if name == "retina.drive":
         experiments[name] = load_drive()
@@ -59,7 +60,7 @@ def get_experiment(name):
     else:
         raise ValueError(f"unknown dataset {name}")
 
-    return experiments[name]
+    return cast(dict[str, Any], experiments[name])
 
 
 def load_chase_db1() -> dict:
@@ -84,7 +85,7 @@ def load_diaretdb0() -> dict:
         dict: the experiment specifications
     """
     prefix = os.path.join("experiments", "retina", "diaretdb0")
-    return load_json(prefix, "diaretdb0.json")
+    return cast(dict[Any, Any], load_json(prefix, "diaretdb0.json"))
 
 
 def load_diaretdb1() -> dict:
@@ -95,7 +96,7 @@ def load_diaretdb1() -> dict:
         dict: the experiment specifications
     """
     prefix = os.path.join("experiments", "retina", "diaretdb1")
-    return load_json(prefix, "diaretdb1.json")
+    return cast(dict[Any, Any], load_json(prefix, "diaretdb1.json"))
 
 
 def load_drishti_gs() -> dict:
@@ -165,7 +166,7 @@ def load_tpehg() -> dict:
         dict: the drive experiments
     """
     prefix = os.path.join("experiments", "ehg")
-    return load_json(prefix, "tpehg.json")["distribution"]
+    return cast(dict[Any, Any], load_json(prefix, "tpehg.json")["distribution"])
 
 
 def load_isic2016() -> dict:
@@ -176,7 +177,7 @@ def load_isic2016() -> dict:
         dict: the testset
     """
     prefix = os.path.join("experiments", "skinlesion", "isic2016")
-    return load_json(prefix, "isic2016.json")["distribution"]
+    return cast(dict[Any, Any], load_json(prefix, "isic2016.json")["distribution"])
 
 
 def load_isic2017() -> dict:
@@ -188,4 +189,4 @@ def load_isic2017() -> dict:
         dict: the testset
     """
     prefix = os.path.join("experiments", "skinlesion", "isic2017")
-    return load_json(prefix, "isic2017.json")["distribution"]
+    return cast(dict[Any, Any], load_json(prefix, "isic2017.json")["distribution"])

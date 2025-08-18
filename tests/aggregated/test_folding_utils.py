@@ -33,9 +33,7 @@ def test_generate_datasets_with_all_kfolds():
     evaluation = {"dataset": {"p": 5, "n": 7}, "folding": {"n_folds": 3}}
 
     datasets = list(
-        repeated_kfolds_generator(
-            evaluation, available_scores=["acc", "bacc", "sens", "spec"]
-        )
+        repeated_kfolds_generator(evaluation, available_scores=["acc", "bacc", "sens", "spec"])
     )
     assert len(datasets) == 2
 
@@ -45,9 +43,7 @@ def test_generate_datasets_with_all_kfolds():
     }
 
     datasets = list(
-        repeated_kfolds_generator(
-            evaluation, available_scores=["acc", "bacc", "sens", "spec"]
-        )
+        repeated_kfolds_generator(evaluation, available_scores=["acc", "bacc", "sens", "spec"])
     )
     assert len(datasets) == 4
 
@@ -58,9 +54,7 @@ def test_generate_datasets_with_all_kfolds():
     }
 
     datasets = list(
-        repeated_kfolds_generator(
-            evaluation, available_scores=["acc", "bacc", "sens", "spec"]
-        )
+        repeated_kfolds_generator(evaluation, available_scores=["acc", "bacc", "sens", "spec"])
     )
     assert "fold_score_bounds" in datasets[0]
 
@@ -70,9 +64,7 @@ def test_generate_datasets_with_all_kfolds():
     }
 
     datasets = list(
-        repeated_kfolds_generator(
-            evaluation, available_scores=["acc", "bacc", "sens", "spec"]
-        )
+        repeated_kfolds_generator(evaluation, available_scores=["acc", "bacc", "sens", "spec"])
     )
 
 
@@ -88,23 +80,17 @@ def test_exceptions():
         _check_specification_and_determine_p_n({"p": 2}, {})
 
     with pytest.raises(ValueError):
-        _check_specification_and_determine_p_n(
-            {"p": 2, "n": 5, "dataset_name": "dummy"}, {}
-        )
+        _check_specification_and_determine_p_n({"p": 2, "n": 5, "dataset_name": "dummy"}, {})
 
 
 def test_create_folds():
     """
     Testing the creation of folds
     """
-    folds = _create_folds(
-        5, 10, score_bounds={"acc": (0.0, 1.0)}, n_repeats=1, n_folds=1
-    )
+    folds = _create_folds(5, 10, score_bounds={"acc": (0.0, 1.0)}, n_repeats=1, n_folds=1)
     assert len(folds) == 1
 
-    folds = _create_folds(
-        p=5, n=10, n_folds=2, n_repeats=2, score_bounds={"acc": (0.0, 1.0)}
-    )
+    folds = _create_folds(p=5, n=10, n_folds=2, n_repeats=2, score_bounds={"acc": (0.0, 1.0)})
     assert len(folds) == 1
 
     folds = _create_folds(
@@ -133,7 +119,7 @@ def sklearn_configurations(y_labels, n_splits):
 
     return [
         tuple(np.bincount(y_labels[test]).tolist())
-        for _, test in validator.split(y_labels, y_labels, y_labels)
+        for _, test in validator.split(y_labels, y_labels)
     ]
 
 
@@ -155,9 +141,9 @@ def test_stratified_configurations_sklearn(random_state):
 
     y_labels = np.hstack([np.repeat(0, n_0), np.repeat(1, n_1)])
 
-    assert stratified_configurations_sklearn(
-        n_1, n_0, n_splits
-    ) == sklearn_configurations(y_labels, n_splits)
+    assert stratified_configurations_sklearn(n_1, n_0, n_splits) == sklearn_configurations(
+        y_labels, n_splits
+    )
 
 
 def test_determine_fold_configurations():
@@ -205,23 +191,17 @@ def test_fold_partitioning_generator():
 
     assert all((not any_zero(fold[0])) and (not any_zero(fold[1])) for fold in folds)
 
-    folds = list(
-        fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=True)
-    )
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=True))
 
     assert all(not any_zero(fold[1]) for fold in folds)
     assert any(any_zero(fold[0]) for fold in folds)
 
-    folds = list(
-        fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=True, n_non_zero=False)
-    )
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=True, n_non_zero=False))
 
     assert all(not any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
 
-    folds = list(
-        fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=False)
-    )
+    folds = list(fold_partitioning_generator(p=6, n=6, k=3, p_non_zero=False, n_non_zero=False))
 
     assert any(any_zero(fold[0]) for fold in folds)
     assert any(any_zero(fold[1]) for fold in folds)
@@ -232,32 +212,24 @@ def test_fold_partitioning_generator_p_min():
     Testing the fold partitioning generator with p_min
     """
 
-    folds = fold_partitioning_generator(
-        p=6, n=7, k=3, p_non_zero=True, n_non_zero=True, p_min=2
+    folds = fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=True, n_non_zero=True, p_min=2)
+
+    assert len(list(folds)) == 1
+
+    folds = list(
+        fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=False, n_non_zero=True, p_min=2)
     )
 
     assert len(list(folds)) == 1
 
     folds = list(
-        fold_partitioning_generator(
-            p=6, n=7, k=3, p_non_zero=False, n_non_zero=True, p_min=2
-        )
+        fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=True, n_non_zero=False, p_min=2)
     )
 
     assert len(list(folds)) == 1
 
     folds = list(
-        fold_partitioning_generator(
-            p=6, n=7, k=3, p_non_zero=True, n_non_zero=False, p_min=2
-        )
-    )
-
-    assert len(list(folds)) == 1
-
-    folds = list(
-        fold_partitioning_generator(
-            p=6, n=7, k=3, p_non_zero=False, n_non_zero=False, p_min=2
-        )
+        fold_partitioning_generator(p=6, n=7, k=3, p_non_zero=False, n_non_zero=False, p_min=2)
     )
 
     assert len(list(folds)) == 1
@@ -325,9 +297,7 @@ def exhaustive_min_max_p(
 @pytest.mark.parametrize("k", list(range(2, 6)))
 @pytest.mark.parametrize("p_non_zero", [True, False])
 @pytest.mark.parametrize("n_non_zero", [True, False])
-def test_determine_min_max_p(
-    p, n, k, p_non_zero, n_non_zero
-):  # pylint: disable=invalid-name
+def test_determine_min_max_p(p, n, k, p_non_zero, n_non_zero):  # pylint: disable=invalid-name
     """
     Testing the determination of minimum and maximum p with exhaustive search
 
@@ -414,15 +384,17 @@ def test_multiclass_create_folds_exception():
             dataset={"p": 5, "n": 7}, folding={"folds": "dummy", "n_repeats": 5}
         )
 
+
 def test_multiclass_fold_partitioning_generator_22():
     """
     Smoke-test for the multiclass fold partitioning generator (22)
     """
 
     count = 0
-    for _  in multiclass_fold_partitioning_generator_22(10, 10, 10):
+    for _ in multiclass_fold_partitioning_generator_22(10, 10, 10):
         count += 1
     assert count > 0
+
 
 def test_multiclass_fold_partitioning_generator_2n():
     """
@@ -433,6 +405,7 @@ def test_multiclass_fold_partitioning_generator_2n():
     for _ in multiclass_fold_partitioning_generator_2n(10, 10, [10, 6, 4]):
         count += 1
     assert count > 0
+
 
 def test_multiclass_fold_partitioning_generator_kn():
     """

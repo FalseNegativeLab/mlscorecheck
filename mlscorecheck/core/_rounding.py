@@ -7,7 +7,9 @@ import numpy as np
 __all__ = ["round_scores"]
 
 
-def round_scores(to_round: dict, rounding_decimals: int | None = None):
+def round_scores(
+    to_round: dict[str, float], rounding_decimals: int | None = None
+) -> dict[str, float]:
     """
     Rounds the scores
 

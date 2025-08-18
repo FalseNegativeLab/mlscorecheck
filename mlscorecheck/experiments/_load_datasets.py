@@ -1,17 +1,27 @@
 """
-This module implements some dataset loaders
+This module implements the loading of datasets
 """
 
 import os
+from typing import Any, Union
+
+__all__ = ["dataset_statistics", "load_ml_datasets", "lookup_dataset", "resolve_pn"]
+
+"""
+This module implements the loading of datasets
+"""
+
+import os
+from typing import Any, cast
 
 __all__ = ["dataset_statistics", "load_ml_datasets", "lookup_dataset", "resolve_pn"]
 
 from ..core import load_json
 
-dataset_statistics: dict = {}
+dataset_statistics: dict[str, Any] = {}
 
 
-def resolve_pn(dataset_conf):
+def resolve_pn(dataset_conf: Any) -> Any:
     """
     Resolve the dataset configuration from the integrated statistics
 
@@ -24,18 +34,20 @@ def resolve_pn(dataset_conf):
         dict: the dataset configuration extended by the 'p' and 'n' figures
     """
     if isinstance(dataset_conf, dict):
-        result = {**dataset_conf}
+        result: Any = {**dataset_conf}
         if result.get("dataset") is not None:
             tmp = lookup_dataset(result["dataset"])
             result["p"] = tmp["p"]
             result["n"] = tmp["n"]
     elif isinstance(dataset_conf, list):
         result = [resolve_pn(dataset) for dataset in dataset_conf]
+    else:
+        result = dataset_conf
 
     return result
 
 
-def lookup_dataset(dataset: str) -> dict:
+def lookup_dataset(dataset: str) -> dict[str, Any]:
     """
     Look up a dataset
 
@@ -50,7 +62,7 @@ def lookup_dataset(dataset: str) -> dict:
             f"No statistics about dataset {dataset} are available. "
             "Didn't you forget to identify like 'common_datasets.ecoli1'?"
         )
-    return dataset_statistics[dataset]
+    return cast(dict[str, Any], dataset_statistics[dataset])
 
 
 def load_ml_datasets():

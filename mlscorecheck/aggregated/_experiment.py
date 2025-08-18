@@ -113,7 +113,13 @@ class Experiment:
         if self.aggregation == "som":
             self.scores = calculate_scores_for_lp(self.figures, score_subset=score_subset)
         elif self.aggregation == "mos":
-            self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
+            self.scores = dict_mean(
+                [
+                    evaluation.scores
+                    for evaluation in self.evaluations
+                    if evaluation.scores is not None
+                ]
+            )
 
         if self.scores is None:
             return {}

@@ -5,11 +5,12 @@ This module implements the loading of data
 import json
 import os
 from importlib.resources import files
+from typing import Any
 
 __all__ = ["load_json"]
 
 
-def load_json(directory: str, file: str) -> dict:
+def load_json(directory: str, file: str) -> Any:
     """
     Load a JSON file from the package
 

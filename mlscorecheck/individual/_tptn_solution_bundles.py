@@ -47,7 +47,14 @@ from ._tptn_solutions import (
     upm_tp,
 )
 
-__all__ = ["tp_solutions", "tn_solutions", "tptn_solutions", "is_applicable_tptn"]
+__all__ = [
+    "tp_solutions",
+    "tn_solutions",
+    "tptn_solutions",
+    "is_applicable_tptn",
+    "sens_tp",
+    "spec_tn",
+]
 
 
 def is_applicable_tptn(score: str, value: float, to_compute: str) -> bool:

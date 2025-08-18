@@ -2,6 +2,8 @@
 This module implements the problem solver
 """
 
+from typing import Any
+
 from ..core import logger
 from ..individual import Solutions
 from ._algebra import Algebra
@@ -179,10 +181,11 @@ class ProblemSolver:
         """
         self.score0 = score0
         self.score1 = score1
-        self.solutions = None
-        self.denoms = None
-        self.bases = None
-        self.conditions = None
+        self.solutions: Any = None  # Can be None or list
+        self.denoms: Any = None  # Can be None or list
+        self.bases: Any = None  # Can be None or list
+        self.conditions: Any = None  # Can be None or list
+        self.str_solutions: Any = None  # Can be None or list
         self.str_solutions = None
 
     def corner_case_solution(self, solution):
@@ -279,8 +282,8 @@ class ProblemSolver:
         algebra = self.score0.symbols.algebra
 
         for solution in self.solutions:
-            denoms_sol = {}
-            bases_sol = {}
+            denoms_sol: Any = {}
+            bases_sol: Any = {}
 
             for _, sol in solution.items():
                 denoms, bases = collect_denominators_and_bases(

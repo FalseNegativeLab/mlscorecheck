@@ -307,7 +307,13 @@ def get_dataset_score_bounds(
     Returns:
         dict(str,tuple(float,float)): the score bounds
     """
-    score_bounds = dict_minmax([evaluation.scores for evaluation in experiment.evaluations])
+    score_bounds = dict_minmax(
+        [
+            evaluation.scores
+            for evaluation in experiment.evaluations
+            if evaluation.scores is not None
+        ]
+    )
     for key, value in score_bounds.items():
         score_bounds[key] = (
             max(0.0, value[0] - numerical_tolerance),
@@ -349,8 +355,8 @@ def generate_scores_for_testsets(
         testset["tn"] = random_state.randint(testset["n"] + 1)
 
     if aggregation == "mos":
-        scores = [calculate_scores_for_lp(testset) for testset in testsets]
-        scores = round_scores(dict_mean(scores), rounding_decimals=rounding_decimals)
+        scores_list = [calculate_scores_for_lp(testset) for testset in testsets]
+        scores = round_scores(dict_mean(scores_list), rounding_decimals=rounding_decimals)
         return {key: value for key, value in scores.items() if key in subset}
 
     mean_figures = dict_mean(testsets)
@@ -431,7 +437,7 @@ def generate_dataset_folding_multiclass(
     ]
 
     if aggregation == "mos":
-        scores = [
+        scores_list = [
             calculate_multiclass_scores(
                 sample,
                 average=average,
@@ -440,7 +446,7 @@ def generate_dataset_folding_multiclass(
             )
             for sample in samples
         ]
-        scores = round_scores(dict_mean(scores), rounding_decimals=rounding_decimals)
+        scores = round_scores(dict_mean(scores_list), rounding_decimals=rounding_decimals)
         return dataset, folding, scores
 
     # if aggregation == 'som':

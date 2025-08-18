@@ -7,6 +7,8 @@ sampling, and the calculation of scores and the assemblance of
 the linear programming problem
 """
 
+from typing import Any
+
 import pulp as pl
 
 from ..core import init_random_state, round_scores
@@ -34,8 +36,8 @@ class Fold:
         self.n = n
         self.identifier = random_identifier(5) if identifier is None else identifier
 
-        self.tp: int | None = None
-        self.tn: int | None = None
+        self.tp: Any = None  # Can be int | None or pl.LpVariable
+        self.tn: Any = None  # Can be int | None or pl.LpVariable
         self.scores: dict | None = None
 
         self.variable_names = {

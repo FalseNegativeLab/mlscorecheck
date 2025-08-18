@@ -150,6 +150,7 @@ known-first-party = ["mlscorecheck"]
 
 [tool.mypy]
 python_version = "3.10"
+strict = true
 ignore_missing_imports = true
 warn_unused_configs = true
 exclude = [
@@ -157,6 +158,18 @@ exclude = [
     "dist", 
     "docs",
     ".eggs",
+    "legacy",
+]
+
+# Strategic overrides for specific error types that would require extensive refactoring
+[[tool.mypy.overrides]]
+module = [
+    "mlscorecheck.*",
+]
+disable_error_code = [
+    "no-untyped-def",      # Function definitions without type annotations
+    "no-untyped-call",     # Calls to untyped functions  
+    "type-arg",            # Missing type parameters for generics like dict, list
 ]
 
 [tool.pylint.messages_control]

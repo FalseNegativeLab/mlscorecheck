@@ -2,10 +2,13 @@
 This module implements functions for safe evaluations
 """
 
+from typing import Any, Union
+from types import FunctionType
+
 __all__ = ["safe_eval", "safe_call"]
 
 
-def safe_eval(expression: str, subs: dict):
+def safe_eval(expression: str, subs: dict[str, float]) -> Any:
     """
     Evaluates a str mathematical expression in a safe way
     # TODO: write better
@@ -21,7 +24,9 @@ def safe_eval(expression: str, subs: dict):
     return eval(expression, subs)  # pylint: disable=eval-used
 
 
-def check_applicability(params: dict, non_applicable: list | None = None) -> bool:
+def check_applicability(
+    params: dict[str, float], non_applicable: list[dict[str, str | float]] | None = None
+) -> bool:
     """
     Checks if a parameter configuration is applicable according to the
     non-applicability configurations
@@ -43,14 +48,20 @@ def check_applicability(params: dict, non_applicable: list | None = None) -> boo
         flag = True
         for key, value in configuration.items():
             if isinstance(value, str):
-                value = params.get(value)
-            flag = flag and (params.get(key) == value)
+                actual_value = params.get(value)
+            else:
+                actual_value = value
+            flag = flag and (params.get(key) == actual_value)
         if flag:
             return False
     return True
 
 
-def safe_call(function, params: dict, non_applicable: list | None = None):
+def safe_call(
+    function: Union[FunctionType, Any],
+    params: dict[str, float],
+    non_applicable: list[dict[str, str | float]] | None = None,
+) -> Any:
     """
     Safe call to a function
 

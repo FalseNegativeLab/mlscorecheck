@@ -34,7 +34,7 @@ def mean_average_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         float: the MAE score
     """
-    return np.mean(np.abs(y_true - y_pred))
+    return float(np.mean(np.abs(y_true - y_pred)))
 
 
 def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -48,7 +48,7 @@ def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         float: the MSE score
     """
-    return np.mean((y_true - y_pred) ** 2)
+    return float(np.mean((y_true - y_pred) ** 2))
 
 
 def root_mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -62,7 +62,7 @@ def root_mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         float: the RMSE score
     """
-    return np.sqrt(mean_squared_error(y_true, y_pred))
+    return float(np.sqrt(mean_squared_error(y_true, y_pred)))
 
 
 def r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -76,7 +76,7 @@ def r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Returns:
         float: the R2 score
     """
-    return 1.0 - np.sum((y_true - y_pred) ** 2) / (np.var(y_true) * y_true.shape[0])
+    return float(1.0 - np.sum((y_true - y_pred) ** 2) / (np.var(y_true) * y_true.shape[0]))
 
 
 regression_scores = {

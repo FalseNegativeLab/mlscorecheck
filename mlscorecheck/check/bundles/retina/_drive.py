@@ -3,6 +3,8 @@ This module implements the test suit for the retina vessel
 segmentation drive dataset
 """
 
+from typing import Any
+
 from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
 from ...binary import (
@@ -239,7 +241,7 @@ def check_drive_vessel_image_assumption(
             The evidence for satisfying the consistency constraints.
 
     """
-    images = get_experiment("retina.drive")
+    images: Any = get_experiment("retina.drive")
     testset = [
         image
         for image in images[(annotator, assumption)]["train"]["images"]

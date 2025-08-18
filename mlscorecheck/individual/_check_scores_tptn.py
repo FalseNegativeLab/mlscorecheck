@@ -4,6 +4,7 @@ tp and tn combinations.
 """
 
 import copy
+from typing import Any
 
 from ..core import NUMERICAL_TOLERANCE, logger, update_uncertainty
 from ._interval import Interval, IntervalUnion
@@ -403,8 +404,10 @@ def _check_scores_tptn_intervals(
 
             # Handle cases where params values don't have to_tuple method
             try:
-                score0_interval = params[score0].to_tuple()  # type: ignore[union-attr]
-                score1_interval = params[score1].to_tuple()  # type: ignore[union-attr]
+                score0_val: Any = params[score0]
+                score1_val: Any = params[score1]
+                score0_interval = score0_val.to_tuple()
+                score1_interval = score1_val.to_tuple()
             except AttributeError:
                 # If either doesn't have to_tuple, skip this pair for interval-based checks
                 continue
