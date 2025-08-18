@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlscorecheck"
+version = "1.0.3"
+description = "ML score check: checking the validity of machine learning and computer vision scores"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Gyorgy Kovacs", email = "gyuriofkovacs@gmail.com"},
+]
+maintainers = [
+    {name = "Gyorgy Kovacs", email = "gyuriofkovacs@gmail.com"},
+]
+keywords = ["machine learning", "computer vision", "score validation", "consistency checking"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "pulp",
+]
+
+[project.optional-dependencies]
+tests = ["pytest"]
+docs = [
+    "sphinx",
+    "sphinx-gallery",
+    "sphinx_rtd_theme",
+    "matplotlib",
+    "pandas",
+    "pulp",
+]
+dev = [
+    "pytest",
+    "sphinx",
+    "sphinx-gallery",
+    "sphinx_rtd_theme",
+    "matplotlib",
+    "pandas",
+    "pulp",
+]
+
+[project.urls]
+Homepage = "https://github.com/gykovacs/mlscorecheck"
+Repository = "https://github.com/gykovacs/mlscorecheck"
+Documentation = "https://mlscorecheck.readthedocs.io/"
+"Bug Tracker" = "https://github.com/gykovacs/mlscorecheck/issues"
+
+[tool.setuptools]
+packages = ["mlscorecheck"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+mlscorecheck = [
+    "individual/solutions.json",
+    "scores/scores.json",
+    "experiments/machine_learning/common_datasets.json",
+    "experiments/machine_learning/sklearn.json",
+    "experiments/ehg/tpehg.json",
+    "experiments/retina/drive/drive_1_test_fov.json",
+    "experiments/retina/drive/drive_1_test_all.json",
+    "experiments/retina/drive/drive_1_train_fov.json",
+    "experiments/retina/drive/drive_1_train_all.json",
+    "experiments/retina/drive/drive_2_test_fov.json",
+    "experiments/retina/drive/drive_2_test_all.json",
+    "experiments/retina/drive/drive_2_train_fov.json",
+    "experiments/retina/drive/drive_2_train_all.json",
+    "experiments/retina/chase_db1/manual1.json",
+    "experiments/retina/chase_db1/manual2.json",
+    "experiments/retina/diaretdb0/diaretdb0.json",
+    "experiments/retina/diaretdb1/diaretdb1.json",
+    "experiments/retina/drishti_gs/drishti_gs_test.json",
+    "experiments/retina/drishti_gs/drishti_gs_train.json",
+    "experiments/retina/hrf/with_fov.json",
+    "experiments/retina/hrf/without_fov.json",
+    "experiments/retina/stare/ah.json",
+    "experiments/retina/stare/vk.json",
+    "experiments/skinlesion/isic2016/isic2016.json",
+    "experiments/skinlesion/isic2017/isic2017.json",
+    "experiments/skinlesion/isic2017/isic2017m.json",
+    "experiments/skinlesion/isic2017/isic2017sk.json",
+]

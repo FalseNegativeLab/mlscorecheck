@@ -111,7 +111,7 @@ def check_diaretdb1_class(
     confidence: float,
     scores: dict,
     eps,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Tests the scores describing the labeling of images in DIARETDB1. The problem is
@@ -191,7 +191,7 @@ def check_diaretdb1_segmentation_image_assumption(
     confidence: float,
     scores: dict,
     eps,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Tests the scores describing the segmentation of images in DIARETDB1. This test function
@@ -269,7 +269,7 @@ def check_diaretdb1_segmentation_image(
     confidence: float,
     scores: dict,
     eps,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Tests the scores describing the segmentation of images in DIARETDB1. This test function
@@ -356,7 +356,7 @@ def check_diaretdb1_segmentation_aggregated_assumption(
     solver_name: str = None,
     timeout: int = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Tests the scores describing the segmentation of multiple images of DIARETDB1 in an aggregated
@@ -445,7 +445,7 @@ def check_diaretdb1_segmentation_aggregated(
     solver_name: str = None,
     timeout: int = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Tests the scores describing the segmentation of multiple images of DIARETDB1 in an aggregated
