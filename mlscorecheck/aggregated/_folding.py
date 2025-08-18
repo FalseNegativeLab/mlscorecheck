@@ -102,6 +102,10 @@ class Folding:
 
             return [Fold(**fold) for fold in self.folds]
 
+        # Type narrowing for dataset attributes
+        if dataset.p is None or dataset.n is None:
+            raise ValueError("Dataset p and n must not be None")
+
         p, n = dataset.p, dataset.n
 
         if aggregation == "som":

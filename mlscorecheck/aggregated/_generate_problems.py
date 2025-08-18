@@ -143,7 +143,7 @@ def generate_evaluation(  # pylint: disable=too-many-locals
     """
     random_state = init_random_state(random_state)
 
-    result = {
+    result: dict = {
         "dataset": generate_dataset(
             max_p=max_p, max_n=max_n, random_state=random_state, no_name=no_name
         )
@@ -223,7 +223,7 @@ def generate_experiment(
     return_scores: bool = False,
     rounding_decimals: int | None = None,
     score_subset: list | None = None,
-) -> dict:
+) -> dict | tuple[dict, dict]:
     """
     Generate a random experiment specification
 
@@ -253,7 +253,7 @@ def generate_experiment(
     aggregation = aggregation if aggregation is not None else random_state.choice(["som", "mos"])
 
     evaluations = [
-        generate_evaluation(**evaluation_params, random_state=random_state)
+        generate_evaluation(**evaluation_params, random_state=random_state, return_scores=False)
         for _ in range(n_evaluations)
     ]
 
@@ -272,7 +272,10 @@ def generate_experiment(
 
     if evaluation_params.get("feasible_fold_score_bounds") is not None:
         for idx, evaluation in enumerate(experiment.evaluations):
-            evaluations[idx]["fold_score_bounds"] = get_fold_score_bounds(
+            # Since return_scores=False, evaluations[idx] should be dict
+            eval_dict = evaluations[idx]
+            assert isinstance(eval_dict, dict), "Evaluation should be dict when return_scores=False"
+            eval_dict["fold_score_bounds"] = get_fold_score_bounds(
                 evaluation, evaluation_params["feasible_fold_score_bounds"]
             )
 

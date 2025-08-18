@@ -602,7 +602,7 @@ def get_all_objects(algebraic_system: str = "sympy") -> dict:
         dict: the dictionary of all score objects
     """
     symbols = Symbols(algebraic_system=algebraic_system)
-    score_objects_list = [cls(symbols=symbols) for cls in Score.__subclasses__()]
+    score_objects_list = [cls(symbols) for cls in Score.__subclasses__()]  # type: ignore[call-arg]
     score_objects = {obj.abbreviation: obj for obj in score_objects_list}
 
     return score_objects
@@ -619,7 +619,7 @@ def get_objects_without_complements(algebraic_system: str = "sympy") -> dict:
         dict: the dictionary of score objects
     """
     symbols = Symbols(algebraic_system=algebraic_system)
-    score_objects_list = [cls(symbols=symbols) for cls in Score.__subclasses__()]
+    score_objects_list = [cls(symbols) for cls in Score.__subclasses__()]  # type: ignore[call-arg]
     score_objects = {
         obj.abbreviation: obj
         for obj in score_objects_list

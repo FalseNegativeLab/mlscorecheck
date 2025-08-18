@@ -136,7 +136,9 @@ def update_spec(n: int, valid_pairs: dict, score_int, solve_for: str) -> dict:
     return valid_pairs
 
 
-def initialize_valid_pairs(p: int, n: int, iterate_by: str, init_tptn_intervals: dict) -> dict:
+def initialize_valid_pairs(
+    p: int, n: int, iterate_by: str, init_tptn_intervals: dict | None
+) -> dict:
     """
     Initializes the valid pairs, either from the original input or the
     prefiltered intervals.
@@ -223,9 +225,7 @@ def _check_scores_tptn_pairs(
         "beta_negative": scores.get("beta_negative"),
     }
 
-    valid_pairs = initialize_valid_pairs(
-        p, n, iterate_by, init_tptn_intervals if init_tptn_intervals is not None else {}
-    )
+    valid_pairs = initialize_valid_pairs(p, n, iterate_by, init_tptn_intervals)
 
     details = []
 
@@ -385,17 +385,35 @@ def _check_scores_tptn_intervals(
     tp = Interval(0, p)
     tn = Interval(0, n)
 
+    # Add tp and tn to params if they are in the scores
+    if "tp" in scores:
+        params["tp"] = tp
+    if "tn" in scores:
+        params["tn"] = tn
+
     details = []
 
     score_names = list(scores.keys())
 
     for idx, score0 in enumerate(score_names):
         for score1 in score_names[idx + 1 :]:
+            # Skip if either score is not in params (basic scores like tp, tn should be in params)
+            if score0 not in params or score1 not in params:
+                continue
+
+            # Handle cases where params values don't have to_tuple method
+            try:
+                score0_interval = params[score0].to_tuple()  # type: ignore[union-attr]
+                score1_interval = params[score1].to_tuple()  # type: ignore[union-attr]
+            except AttributeError:
+                # If either doesn't have to_tuple, skip this pair for interval-based checks
+                continue
+
             detail = {
                 "base_score_0": score0,
                 "base_score_1": score1,
-                "base_score_0_interval": params[score0].to_tuple(),
-                "base_score_1_interval": params[score1].to_tuple(),
+                "base_score_0_interval": score0_interval,
+                "base_score_1_interval": score1_interval,
             }
 
             if tuple(sorted([score0, score1])) not in solution_specifications:

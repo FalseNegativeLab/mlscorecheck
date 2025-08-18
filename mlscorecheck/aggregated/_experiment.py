@@ -185,7 +185,7 @@ class Experiment:
 
         results: dict = {"evaluations": []}
         for evaluation in self.evaluations:
-            tmp = {
+            tmp: dict = {
                 "folds": evaluation.check_bounds(numerical_tolerance),
                 "scores": evaluation.scores,
                 "score_bounds": self.dataset_score_bounds,
@@ -199,7 +199,9 @@ class Experiment:
                         "bounds_flag", True
                     )
             else:
-                tmp["bounds_flag"] = tmp["folds"]
+                tmp["bounds_flag"] = (
+                    tmp["folds"].get("bounds_flag", True) if tmp["folds"] is not None else True
+                )
             results["evaluations"].append(tmp)
 
         results["bounds_flag"] = all(

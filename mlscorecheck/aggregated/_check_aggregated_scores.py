@@ -93,7 +93,7 @@ def check_aggregated_scores(
         options=["RandomS 1", "RandomC 1", "randomS 1", "randomC 1"],
     )
 
-    result = solve(experiment, scores, eps, solver)
+    result = solve(experiment_obj, scores, eps, solver)
 
     populated = experiment_obj.populate(result)
     populated.calculate_scores(score_subset=list(scores.keys()))

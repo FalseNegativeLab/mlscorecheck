@@ -338,8 +338,9 @@ class ProblemSolver:
         """
         results: list = []
 
-        for sol, conds in zip(self.str_solutions, self.conditions, strict=False):
-            results.append({"solution": sol, "conditions": conds})
+        if self.str_solutions is not None and self.conditions is not None:
+            for sol, conds in zip(self.str_solutions, self.conditions, strict=False):
+                results.append({"solution": sol, "conditions": conds})
 
         solution: Solutions = Solutions(
             scores=[self.score0.abbreviation, self.score1.abbreviation],

@@ -156,7 +156,7 @@ def check_n_datasets_mos_unknown_folds_mos(
         "aggregation": "mos",
     }
 
-    results = {"details": [], "inconsistency": True}
+    results: dict = {"details": [], "inconsistency": True}
 
     for experiment_config in experiment_kfolds_generator(experiment, list(scores.keys())):
         result = check_n_datasets_mos_known_folds_mos(
