@@ -4,15 +4,15 @@ Testing the check functionality
 
 from mlscorecheck.core import NUMERICAL_TOLERANCE
 from mlscorecheck.individual import (
+    Interval,
+    IntervalUnion,
     create_intervals,
     create_problems_2,
-    load_solutions,
-    Interval,
-    resolve_aliases_and_complements,
     is_less_than_zero,
+    load_solutions,
+    resolve_aliases_and_complements,
+    translate_metadata,
     unify_results,
-    IntervalUnion,
-    translate_metadata
 )
 from mlscorecheck.scores import score_functions_with_solutions, score_specifications
 
@@ -38,7 +38,7 @@ def test_translate_metadata():
 
     assert result == [1, 2, 3]
 
-    assert 1 == translate_metadata(1)
+    assert translate_metadata(1) == 1
 
 def test_resolve_aliases_and_complements():
     """

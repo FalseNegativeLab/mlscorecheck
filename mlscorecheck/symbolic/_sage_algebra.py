@@ -121,7 +121,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         Returns:
             list: the list of arguments
         """
-        return set(expression.args())  # pragma: no cover
+        return list(expression.args())  # pragma: no cover
 
     def is_trivial(self, expression) -> bool:  # pragma: no cover
         """
@@ -133,9 +133,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         Returns:
             bool: True if the expression is trivial, False otherwise
         """
-        return (
-            True if expression is None else expression.is_trivially_equal(1)
-        )  # pragma: no cover
+        return True if expression is None else expression.is_trivially_equal(1)  # pragma: no cover
 
     def is_root(self, expression) -> bool:  # pragma: no cover
         """
@@ -210,7 +208,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         Returns:
             list: the operands
         """
-        return tuple(expression.operands())  # pragma: no cover
+        return list(expression.operands())  # pragma: no cover
 
     def free_symbols(self, expression) -> list:  # pragma: no cover
         """
@@ -222,6 +220,4 @@ class SageAlgebra(Algebra):  # pragma: no cover
         Returns:
             list: the list of free symbols
         """
-        return [
-            str(var) for var in list(expression.free_variables())
-        ]  # pragma: no cover
+        return [str(var) for var in list(expression.free_variables())]  # pragma: no cover

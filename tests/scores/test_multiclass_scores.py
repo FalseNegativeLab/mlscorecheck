@@ -2,19 +2,17 @@
 This module tests the multiclass scores
 """
 
-import pytest
-
 import numpy as np
-
+import pytest
 from sklearn.metrics import precision_recall_fscore_support
 
 from mlscorecheck.core import safe_call
-from mlscorecheck.scores import multiclass_score_map, multiclass_score
 from mlscorecheck.individual import (
+    create_confusion_matrix,
     generate_multiclass_dataset,
     sample_multiclass_dataset,
-    create_confusion_matrix,
 )
+from mlscorecheck.scores import multiclass_score, multiclass_score_map
 
 
 @pytest.mark.parametrize("score", list(multiclass_score_map.keys()))

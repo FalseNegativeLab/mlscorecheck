@@ -2,9 +2,9 @@
 This module tests the fold abstraction
 """
 
+import numpy as np
 import pulp as pl
 
-import numpy as np
 from mlscorecheck.aggregated import Fold
 
 TOL = 1e-5

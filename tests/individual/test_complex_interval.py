@@ -2,7 +2,7 @@
 Testing the complex interval
 """
 
-from mlscorecheck.individual import Interval, IntervalUnion, ComplexInterval
+from mlscorecheck.individual import ComplexInterval, Interval, IntervalUnion
 
 
 def test_arithmetics():

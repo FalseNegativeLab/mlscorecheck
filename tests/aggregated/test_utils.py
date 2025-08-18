@@ -2,7 +2,7 @@
 This module tests the linear programming functionalities
 """
 
-from mlscorecheck.aggregated import compare_scores, random_identifier, check_bounds
+from mlscorecheck.aggregated import check_bounds, compare_scores, random_identifier
 
 
 def test_random_identifier():

@@ -5,8 +5,8 @@ aggregation
 
 import pytest
 
-from mlscorecheck.check.binary import check_1_dataset_known_folds_mos
 from mlscorecheck.aggregated import generate_evaluation
+from mlscorecheck.check.binary import check_1_dataset_known_folds_mos
 
 
 @pytest.mark.parametrize("random_seed", list(range(10)))

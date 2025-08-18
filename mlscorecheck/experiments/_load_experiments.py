@@ -20,7 +20,7 @@ __all__ = [
 
 from ..core import load_json
 
-experiments = {}
+experiments: dict = {}
 
 
 def get_experiment(name):
@@ -150,9 +150,7 @@ def load_drive() -> dict:
     for annotator in [1, 2]:
         for assumption in ["fov", "all"]:
             tmp = {
-                "train": load_json(
-                    prefix, f"drive_{annotator}_train_{assumption}.json"
-                ),
+                "train": load_json(prefix, f"drive_{annotator}_train_{assumption}.json"),
                 "test": load_json(prefix, f"drive_{annotator}_test_{assumption}.json"),
             }
             results[(annotator, assumption)] = tmp

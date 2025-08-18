@@ -24,8 +24,8 @@ def generate_problem_and_scores(
     add_complements: bool = None,
     score_subset: list = None,
     rounding_decimals: int = None,
-    random_state=None
-) -> (dict, dict):
+    random_state=None,
+) -> tuple[dict, dict]:
     """
     Generates a random problem and random but feasible scores
 
@@ -62,7 +62,7 @@ def generate_1_problem(
     max_n: int = 1000,
     zeros: list = None,
     add_complements: bool = False,
-    random_state=None
+    random_state=None,
 ) -> dict:
     """
     Generates a random problem
@@ -116,8 +116,8 @@ def generate_problems(
     max_n: int = 1000,
     zeros: list = None,
     add_complements: bool = False,
-    random_state=None
-) -> (dict, dict):
+    random_state=None,
+) -> tuple[dict, dict]:
     """
     Generates a random problem
 
@@ -220,9 +220,9 @@ def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
     sample = np.zeros(shape=(len(dataset), len(dataset)), dtype=int)
 
     for class_idx, count in dataset.items():
-        sample_row = random_state.multinomial(
-            count, np.ones(len(dataset)) / len(dataset), size=1
-        )[0]
+        sample_row = random_state.multinomial(count, np.ones(len(dataset)) / len(dataset), size=1)[
+            0
+        ]
 
         # while np.any(sample_row == 0):
         #    zidx = np.where(sample_row == 0)[0][0]

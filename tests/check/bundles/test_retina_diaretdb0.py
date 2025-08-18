@@ -4,9 +4,11 @@ This module tests the test bundle for the DIARETDB0 dataset
 
 import pytest
 
-from mlscorecheck.check.bundles.retina import check_diaretdb0_class
-from mlscorecheck.check.bundles.retina import _prepare_configuration_diaretdb0
 from mlscorecheck.aggregated import generate_scores_for_testsets
+from mlscorecheck.check.bundles.retina import (
+    _prepare_configuration_diaretdb0,
+    check_diaretdb0_class,
+)
 
 
 @pytest.mark.parametrize(

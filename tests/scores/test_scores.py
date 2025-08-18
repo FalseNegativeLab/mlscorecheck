@@ -9,10 +9,10 @@ import pytest
 from mlscorecheck.core import safe_call, safe_eval
 from mlscorecheck.individual import generate_1_problem
 from mlscorecheck.scores import (
-    score_functions_with_complements,
-    score_functions_standardized_with_complements,
-    score_specifications,
     score_function_aliases,
+    score_functions_standardized_with_complements,
+    score_functions_with_complements,
+    score_specifications,
 )
 
 functions = score_functions_with_complements

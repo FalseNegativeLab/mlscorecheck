@@ -6,8 +6,8 @@ over the datasets
 
 import pytest
 
-from mlscorecheck.check.binary import check_n_datasets_mos_kfold_som
 from mlscorecheck.aggregated import generate_experiment
+from mlscorecheck.check.binary import check_n_datasets_mos_kfold_som
 
 
 @pytest.mark.parametrize("random_seed", list(range(10)))

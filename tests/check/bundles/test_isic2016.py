@@ -4,8 +4,8 @@ This module tests the tests developed for the ISIC2016 dataset
 
 import pytest
 
-from mlscorecheck.check.bundles.skinlesion import check_isic2016
 from mlscorecheck.aggregated import generate_scores_for_testsets
+from mlscorecheck.check.bundles.skinlesion import check_isic2016
 from mlscorecheck.experiments import get_experiment
 
 

@@ -4,18 +4,17 @@ This module tests the Evaluation abstraction
 
 import warnings
 
-import pytest
-
 import pulp as pl
+import pytest
 
 from mlscorecheck.aggregated import (
     Evaluation,
-    generate_dataset,
-    generate_folding,
-    generate_evaluation,
-    solve,
     compare_scores,
+    generate_dataset,
+    generate_evaluation,
+    generate_folding,
     get_fold_score_bounds,
+    solve,
 )
 
 from ._evaluate_lp import evaluate_timeout

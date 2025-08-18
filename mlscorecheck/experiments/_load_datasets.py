@@ -8,7 +8,7 @@ __all__ = ["dataset_statistics", "load_ml_datasets", "lookup_dataset", "resolve_
 
 from ..core import load_json
 
-dataset_statistics = {}
+dataset_statistics: dict = {}
 
 
 def resolve_pn(dataset_conf):
@@ -65,9 +65,7 @@ def load_ml_datasets():
             "n": entry["n"],
         }
 
-    data = load_json(
-        os.path.join("experiments", "machine_learning"), "common_datasets.json"
-    )
+    data = load_json(os.path.join("experiments", "machine_learning"), "common_datasets.json")
 
     for entry in data["datasets"]:
         dataset_statistics["common_datasets." + entry["name"]] = {

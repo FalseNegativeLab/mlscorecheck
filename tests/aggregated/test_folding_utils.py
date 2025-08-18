@@ -4,27 +4,26 @@ This module tests the operations related to fold structures
 
 import itertools
 
-import pytest
-
 import numpy as np
+import pytest
 from sklearn.model_selection import StratifiedKFold
 
-from mlscorecheck.individual import generate_multiclass_dataset
 from mlscorecheck.aggregated import (
-    stratified_configurations_sklearn,
-    determine_fold_configurations,
-    _create_folds,
-    repeated_kfolds_generator,
-    fold_partitioning_generator,
     _check_specification_and_determine_p_n,
-    determine_min_max_p,
-    multiclass_stratified_folds,
-    transform_multiclass_fold_to_binary,
+    _create_folds,
     create_folds_multiclass,
-    multiclass_fold_partitioning_generator_22,
+    determine_fold_configurations,
+    determine_min_max_p,
+    fold_partitioning_generator,
     multiclass_fold_partitioning_generator_2n,
-    multiclass_fold_partitioning_generator_kn
+    multiclass_fold_partitioning_generator_22,
+    multiclass_fold_partitioning_generator_kn,
+    multiclass_stratified_folds,
+    repeated_kfolds_generator,
+    stratified_configurations_sklearn,
+    transform_multiclass_fold_to_binary,
 )
+from mlscorecheck.individual import generate_multiclass_dataset
 
 
 def test_generate_datasets_with_all_kfolds():

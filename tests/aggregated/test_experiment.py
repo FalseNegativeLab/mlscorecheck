@@ -11,18 +11,16 @@ not tested with 2 decimals, since accidentally with whatever
 bounds it is likely to become feasible.
 """
 
-import pulp as pl
-
-import pytest
-
 import numpy as np
+import pulp as pl
+import pytest
 
 from mlscorecheck.aggregated import (
     Experiment,
-    solve,
-    generate_experiment,
     compare_scores,
+    generate_experiment,
     get_dataset_score_bounds,
+    solve,
 )
 
 from ._evaluate_lp import evaluate_timeout

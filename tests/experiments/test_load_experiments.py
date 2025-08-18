@@ -5,17 +5,17 @@ This module tests the loading of experiments
 import pytest
 
 from mlscorecheck.experiments import (
-    load_drive,
-    load_tpehg,
-    load_stare,
-    load_isic2016,
-    load_isic2017,
+    get_experiment,
     load_chase_db1,
     load_diaretdb0,
     load_diaretdb1,
-    load_hrf,
     load_drishti_gs,
-    get_experiment,
+    load_drive,
+    load_hrf,
+    load_isic2016,
+    load_isic2017,
+    load_stare,
+    load_tpehg,
 )
 
 

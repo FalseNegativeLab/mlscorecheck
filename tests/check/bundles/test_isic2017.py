@@ -4,11 +4,11 @@ This module tests the tests developed for the ISIC2017 dataset
 
 import pytest
 
-from mlscorecheck.check.bundles.skinlesion import (
-    check_isic2017,
-    _prepare_testset_isic2017,
-)
 from mlscorecheck.aggregated import generate_scores_for_testsets
+from mlscorecheck.check.bundles.skinlesion import (
+    _prepare_testset_isic2017,
+    check_isic2017,
+)
 
 subsets = [
     (["M"], ["SK", "N"]),

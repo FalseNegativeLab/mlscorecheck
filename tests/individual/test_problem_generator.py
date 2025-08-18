@@ -2,17 +2,16 @@
 This module tests the problem generator
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
-
+from mlscorecheck.core import round_scores
 from mlscorecheck.individual import (
-    generate_problems,
-    generate_problem_and_scores,
     generate_multiclass_dataset,
+    generate_problem_and_scores,
+    generate_problems,
     sample_multiclass_dataset,
 )
-from mlscorecheck.core import round_scores
 from mlscorecheck.scores import calculate_scores
 
 

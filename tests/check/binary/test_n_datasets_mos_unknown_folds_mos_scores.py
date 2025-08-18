@@ -2,15 +2,14 @@
 Testing the case with multiple datasets and unknown folds in MoS aggregations
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
-
+from mlscorecheck.aggregated import generate_experiment
 from mlscorecheck.check.binary import (
     check_n_datasets_mos_unknown_folds_mos,
     estimate_n_experiments,
 )
-from mlscorecheck.aggregated import generate_experiment
 
 subsets = [["acc", "sens", "spec", "bacc"], ["acc", "sens"], ["acc", "spec"], ["acc"]]
 

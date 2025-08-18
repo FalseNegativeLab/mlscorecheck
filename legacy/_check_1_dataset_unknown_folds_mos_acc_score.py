@@ -5,8 +5,8 @@ k-fold evaluation with unknown folds.
 
 import itertools
 
-from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import Evaluation
+from ...core import NUMERICAL_TOLERANCE
 
 __all__ = ['check_1_dataset_unknown_folds_mos_acc_score']
 

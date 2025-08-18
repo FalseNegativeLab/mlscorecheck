@@ -2,15 +2,14 @@
 This module tests the tptn solutions of the individual scores
 """
 
-import pytest
-
 import numpy as np
+import pytest
 
 from mlscorecheck.core import safe_call
 from mlscorecheck.individual import (
-    tptn_solutions,
-    is_applicable_tptn,
     generate_1_problem,
+    is_applicable_tptn,
+    tptn_solutions,
 )
 from mlscorecheck.scores import calculate_scores
 

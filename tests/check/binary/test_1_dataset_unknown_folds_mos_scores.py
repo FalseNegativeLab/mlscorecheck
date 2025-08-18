@@ -2,15 +2,14 @@
 Testing the test functionality with MoS aggregation and unknown folds
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
-
+from mlscorecheck.aggregated import Evaluation
 from mlscorecheck.check.binary import (
     check_1_dataset_unknown_folds_mos,
     estimate_n_evaluations,
 )
-from mlscorecheck.aggregated import Evaluation
 
 subsets = [["acc", "sens", "spec", "bacc"], ["acc", "sens"], ["acc", "spec"], ["acc"]]
 

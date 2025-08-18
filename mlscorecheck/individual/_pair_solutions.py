@@ -21,7 +21,7 @@ class Solution:
     non-zero and non-negative conditions as expressions
     """
 
-    def __init__(self, solution: dict, conditions: list = None):
+    def __init__(self, solution: dict, conditions: list | None = None):
         """
         Constructor of the solution
 
@@ -33,15 +33,18 @@ class Solution:
         self.conditions = conditions
 
         # extracting all symbols
-        self.all_symbols = set()
+        self.all_symbols: set = set()
 
         for item in self.solution.values():
             self.all_symbols = self.all_symbols.union(item["symbols"])
 
-        for cond in self.conditions:
-            self.all_symbols = self.all_symbols.union(cond["symbols"])
+        if self.conditions is not None:
+            for cond in self.conditions:
+                self.all_symbols = self.all_symbols.union(cond["symbols"])
 
-        self.conditions = sorted(self.conditions, key=lambda x: -x["depth"])
+            self.conditions = sorted(self.conditions, key=lambda x: -x["depth"])
+        else:
+            self.conditions = []
 
     def to_dict(self):
         """
@@ -118,10 +121,7 @@ class Solution:
         if message is not None:
             return {"tp": None, "tn": None, "message": message, "term": term}
 
-        res = {
-            key: Expression(**value).evaluate(subs)
-            for key, value in self.solution.items()
-        }
+        res = {key: Expression(**value).evaluate(subs) for key, value in self.solution.items()}
         if "tp" in self.solution:
             res["tp_formula"] = self.solution["tp"]["expression"]
 
@@ -187,9 +187,7 @@ def load_solutions():
         dict: the dictionary of the solutions
     """
     sio = (
-        files("mlscorecheck")
-        .joinpath(os.path.join("individual", "solutions.json"))
-        .read_text()
+        files("mlscorecheck").joinpath(os.path.join("individual", "solutions.json")).read_text()
     )  # pylint: disable=unspecified-encoding
 
     solutions_dict = json.loads(sio)

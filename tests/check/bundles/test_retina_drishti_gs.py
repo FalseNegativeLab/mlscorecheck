@@ -4,14 +4,13 @@ This module tests the tests developed for the DRISHTI_GS dataset
 
 import pytest
 
+from mlscorecheck.aggregated import generate_scores_for_testsets
 from mlscorecheck.check.bundles.retina import (
     _prepare_testsets_drishti_gs,
-    check_drishti_gs_segmentation_image,
     check_drishti_gs_segmentation_aggregated,
+    check_drishti_gs_segmentation_image,
 )
-
 from mlscorecheck.experiments import get_experiment
-from mlscorecheck.aggregated import generate_scores_for_testsets
 
 data = get_experiment("retina.drishti_gs")
 test_identifiers = list(data["test"].keys())

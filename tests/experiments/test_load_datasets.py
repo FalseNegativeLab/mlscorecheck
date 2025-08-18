@@ -2,9 +2,8 @@
 This module tests the dataset functionalities
 """
 
-import os
 import json
-
+import os
 from importlib.resources import files
 
 import pytest

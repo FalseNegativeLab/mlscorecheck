@@ -7,7 +7,7 @@ import numpy as np
 __all__ = ["round_scores"]
 
 
-def round_scores(to_round: dict, rounding_decimals: int = None):
+def round_scores(to_round: dict, rounding_decimals: int | None = None):
     """
     Rounds the scores
 
@@ -24,7 +24,4 @@ def round_scores(to_round: dict, rounding_decimals: int = None):
     if not isinstance(to_round, dict):
         return float(np.round(to_round, rounding_decimals))
 
-    return {
-        key: float(np.round(value, rounding_decimals))
-        for key, value in to_round.items()
-    }
+    return {key: float(np.round(value, rounding_decimals)) for key, value in to_round.items()}

@@ -6,7 +6,7 @@ import warnings
 
 import pulp as pl
 
-from mlscorecheck.aggregated import compare_scores, Experiment
+from mlscorecheck.aggregated import Experiment, compare_scores
 
 __all__ = ["evaluate_timeout"]
 

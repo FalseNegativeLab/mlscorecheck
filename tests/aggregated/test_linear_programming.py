@@ -4,7 +4,7 @@ Testing some linear programming capabilities
 
 import pulp as pl
 
-from mlscorecheck.aggregated import Evaluation, generate_evaluation, solve, add_bounds
+from mlscorecheck.aggregated import Evaluation, add_bounds, generate_evaluation, solve
 
 
 def test_solve():

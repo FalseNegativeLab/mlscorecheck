@@ -1,7 +1,8 @@
-import os
 import codecs
+import os
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
 
 def readme():
     with codecs.open('README.rst', encoding='utf-8-sig') as f:

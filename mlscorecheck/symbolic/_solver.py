@@ -48,12 +48,10 @@ def _collect_denominators_and_bases(
     else:
         for operand in algebra.operands(expression):
             if not algebra.is_trivial(operand):
-                _collect_denominators_and_bases(
-                    operand, denoms, bases, algebra, depth + 1
-                )
+                _collect_denominators_and_bases(operand, denoms, bases, algebra, depth + 1)
 
 
-def collect_denominators_and_bases(expression, algebra: Algebra) -> (list, list):
+def collect_denominators_and_bases(expression, algebra: Algebra) -> tuple[list, list]:
     """
     Top level function for recursively collecting all denominators and bases
 
@@ -114,9 +112,7 @@ def solve_order(score0: Score, score1: Score):
         for score_idx, score in enumerate([score0, score1]):
             key = (figure, score_idx)
             if figure in algebra.free_symbols(score.equation_polynomial):
-                sols[key] = algebra.solve(
-                    score.equation_polynomial, getattr(symbols, figure)
-                )
+                sols[key] = algebra.solve(score.equation_polynomial, getattr(symbols, figure))
                 lens[key] = len(str(sols[key][0][getattr(symbols, figure)]))
 
     min_length = 1e10
@@ -237,9 +233,7 @@ class ProblemSolver:
 
             # substitution into the other equation if needed
             equation1_tmp = (
-                algebra.subs(equation1, v0_sol)
-                if sym0 in algebra.args(equation1)
-                else equation1
+                algebra.subs(equation1, v0_sol) if sym0 in algebra.args(equation1) else equation1
             )
 
             # solving for sym1
@@ -296,9 +290,7 @@ class ProblemSolver:
                 bases = list(bases)
                 for denom, depth in denoms:
                     denom_str = str(denom)
-                    if (denom_str not in denoms_sol) or (
-                        denoms_sol[denom_str][1] < depth
-                    ):
+                    if (denom_str not in denoms_sol) or (denoms_sol[denom_str][1] < depth):
                         denoms_sol[denom_str] = (denom, depth)
                 for base, exponent, depth in bases:
                     base_str = str((base, exponent))

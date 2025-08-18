@@ -5,10 +5,10 @@ This module tests the top level interfaces to the aggregated score checks
 import pytest
 
 from mlscorecheck.aggregated import (
+    Experiment,
     check_aggregated_scores,
     generate_experiment,
     round_scores,
-    Experiment,
 )
 
 random_seeds = list(range(20))

@@ -4,16 +4,15 @@ This module tests the test functionalities implemented for the DIARETDB1 dataset
 
 import pytest
 
+from mlscorecheck.aggregated import generate_scores_for_testsets
 from mlscorecheck.check.bundles.retina import (
     _prepare_configuration_diaretdb1,
     check_diaretdb1_class,
-    check_diaretdb1_segmentation_image,
     check_diaretdb1_segmentation_aggregated,
     check_diaretdb1_segmentation_aggregated_assumption,
+    check_diaretdb1_segmentation_image,
 )
-
 from mlscorecheck.experiments import get_experiment
-from mlscorecheck.aggregated import generate_scores_for_testsets
 
 class_names = [
     ["hardexudates"],

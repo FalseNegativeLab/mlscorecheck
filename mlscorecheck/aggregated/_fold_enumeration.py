@@ -22,7 +22,7 @@ __all__ = [
     "_check_specification_and_determine_p_n",
     "multiclass_fold_partitioning_generator_22",
     "multiclass_fold_partitioning_generator_2n",
-    "multiclass_fold_partitioning_generator_kn"
+    "multiclass_fold_partitioning_generator_kn",
 ]
 
 
@@ -75,9 +75,7 @@ def integer_partitioning_generator(n: int, m: int):  # pylint: disable=invalid-n
         x[m] = n - s[m - 1]
 
 
-def all_integer_partitioning_generator(
-    n, k, non_zero, max_count
-):  # pylint: disable=invalid-name
+def all_integer_partitioning_generator(n, k, non_zero, max_count):  # pylint: disable=invalid-name
     """
     Generate all integer partitioning of n to k parts (including 0 parts)
 
@@ -114,8 +112,7 @@ def not_enough_diverse_folds(p_values, n_values):
     """
 
     return len(p_values) > 1 and (
-        sum(p_tmp > 0 for p_tmp in p_values) < 2
-        or sum(n_tmp > 0 for n_tmp in n_values) < 2
+        sum(p_tmp > 0 for p_tmp in p_values) < 2 or sum(n_tmp > 0 for n_tmp in n_values) < 2
     )
 
 
@@ -185,17 +182,13 @@ def fold_partitioning_generator(
     for p_a in range(min_p_a, max_p_a + 1):
         p_b = p - p_a
 
-        for ps_a in all_integer_partitioning_generator(
-            p_a, k_a, p_non_zero, c_a - n_non_zero
-        ):
+        for ps_a in all_integer_partitioning_generator(p_a, k_a, p_non_zero, c_a - n_non_zero):
             if any(p_tmp < p_min for p_tmp in ps_a):
                 continue
 
             ns_a = [c_a - tmp for tmp in ps_a]
 
-            for ps_b in all_integer_partitioning_generator(
-                p_b, k_b, p_non_zero, c_b - n_non_zero
-            ):
+            for ps_b in all_integer_partitioning_generator(p_b, k_b, p_non_zero, c_b - n_non_zero):
                 if any(p_tmp < p_min for p_tmp in ps_b):
                     continue
 
@@ -210,7 +203,7 @@ def fold_partitioning_generator(
                 yield ps_all, ns_all
 
 
-def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> (int, int):
+def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> tuple[int, int]:
     """
     Checking if the dataset specification is correct and determining the p and n values
 
@@ -271,14 +264,10 @@ def kfolds_generator(evaluation: dict, available_scores: list, repeat_idx=0):
 
     if "sens" not in available_scores and "bacc" not in available_scores:
         p_zero = True
-        logger.info(
-            "sens and bacc not among the reported scores, p=0 folds are also considered"
-        )
+        logger.info("sens and bacc not among the reported scores, p=0 folds are also considered")
     if "spec" not in available_scores and "bacc" not in available_scores:
         n_zero = True
-        logger.info(
-            "spec and bacc not among the reported scores, n=0 folds are also considered"
-        )
+        logger.info("spec and bacc not among the reported scores, n=0 folds are also considered")
 
     if evaluation["dataset"].get("dataset_name") is not None:
         evaluation["dataset"][
@@ -321,17 +310,13 @@ def repeated_kfolds_generator(evaluation: dict, available_scores: list):
         dict: one evaluation
     """
     n_repeats = evaluation["folding"].get("n_repeats", 1)
-    generators = [
-        kfolds_generator(evaluation, available_scores, idx) for idx in range(n_repeats)
-    ]
+    generators = [kfolds_generator(evaluation, available_scores, idx) for idx in range(n_repeats)]
 
     if n_repeats > 1:
         for folds in itertools.product(*generators):
             yield {
                 "dataset": copy.deepcopy(evaluation["dataset"]),
-                "folding": {
-                    "folds": [fold for fold_list in folds for fold in fold_list]
-                },
+                "folding": {"folds": [fold for fold_list in folds for fold in fold_list]},
                 "fold_score_bounds": copy.deepcopy(evaluation.get("fold_score_bounds")),
                 "aggregation": evaluation.get("aggregation"),
             }
@@ -370,6 +355,7 @@ def experiment_kfolds_generator(experiment: dict, available_scores: list):
             "aggregation": experiment["aggregation"],
         }
 
+
 def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int):
     """
     Generates the configurations for two folds of cardinalities n0 and n1 and two
@@ -387,10 +373,8 @@ def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int):
     lower_bound = max(c0 - n1, 0)
 
     for c_00 in range(lower_bound, upper_bound + 1):
-        yield {
-            0: (c_00, n0 - c_00),
-            1: (c0 - c_00, n1 - c0 + c_00)
-        }
+        yield {0: (c_00, n0 - c_00), 1: (c0 - c_00, n1 - c0 + c_00)}
+
 
 def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list):
     """
@@ -410,14 +394,10 @@ def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list):
             yield part
         else:
             for part_deep in multiclass_fold_partitioning_generator_2n(
-                part[0][1],
-                part[1][1],
-                cs[1:]
-                ):
-                yield {
-                    0: (part[0][0], *(part_deep[0])),
-                    1: (part[1][0], *(part_deep[1]))
-                }
+                part[0][1], part[1][1], cs[1:]
+            ):
+                yield {0: (part[0][0], *(part_deep[0])), 1: (part[1][0], *(part_deep[1]))}
+
 
 def multiclass_fold_partitioning_generator_kn(ns: list, cs: list):
     """

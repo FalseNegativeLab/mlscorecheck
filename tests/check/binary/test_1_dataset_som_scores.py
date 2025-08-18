@@ -4,8 +4,8 @@ Testing the checking of scores on 1 dataset using kfold with SoM aggregation
 
 import pytest
 
-from mlscorecheck.check.binary import check_1_dataset_kfold_som
 from mlscorecheck.aggregated import generate_evaluation
+from mlscorecheck.check.binary import check_1_dataset_kfold_som
 
 
 @pytest.mark.parametrize("random_seed", list(range(10)))

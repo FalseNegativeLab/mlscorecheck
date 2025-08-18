@@ -5,8 +5,8 @@ This module tests the functionalities related to problem generation
 import pytest
 
 from mlscorecheck.aggregated import (
-    generate_scores_for_testsets,
     generate_dataset_folding_multiclass,
+    generate_scores_for_testsets,
 )
 
 

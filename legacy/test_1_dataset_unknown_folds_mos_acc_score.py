@@ -3,13 +3,12 @@ This module tests the accuracy score testing functionality in the kfold MoS case
 with unknown folds (only k and the number of repetitions known)
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
-
+from mlscorecheck.aggregated import Evaluation, Folding, generate_dataset
 from mlscorecheck.check.binary import check_1_dataset_unknown_folds_mos_acc_score
-from mlscorecheck.aggregated import (generate_dataset,
-                                        Evaluation, Folding)
+
 
 @pytest.mark.parametrize('random_seed', range(20))
 def test_consistency(random_seed: int):

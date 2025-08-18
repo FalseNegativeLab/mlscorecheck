@@ -4,13 +4,15 @@ This module tests the problem solver
 
 import pytest
 
-from mlscorecheck.symbolic import ProblemSolver, Symbols
-from mlscorecheck.symbolic import get_symbolic_toolkit, get_all_objects
 from mlscorecheck.symbolic import (
+    ProblemSolver,
+    Symbols,
     _collect_denominators_and_bases,
+    check_recurrent_solution,
     collect_denominators_and_bases,
+    get_all_objects,
+    get_symbolic_toolkit,
 )
-from mlscorecheck.symbolic import check_recurrent_solution
 
 symbolic_toolkit = get_symbolic_toolkit()
 

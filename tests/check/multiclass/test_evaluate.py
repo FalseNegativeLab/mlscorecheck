@@ -6,6 +6,7 @@ import warnings
 
 from ._evaluate import evaluate_timeout
 
+
 def test_evaluate_timeout():
     """
     Testing the timeout evaluation

@@ -4,8 +4,7 @@ This module tests the functionalities of the algebra abstractions
 
 import pytest
 
-from mlscorecheck.symbolic import symbolic_toolkits
-from mlscorecheck.symbolic import SympyAlgebra, SageAlgebra, Symbols
+from mlscorecheck.symbolic import SageAlgebra, Symbols, SympyAlgebra, symbolic_toolkits
 
 
 @pytest.mark.skipif("sympy" not in symbolic_toolkits, reason="sympy not installed")

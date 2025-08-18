@@ -13,6 +13,7 @@ from mlscorecheck.scores import calculate_multiclass_scores
 
 from ._evaluate import evaluate_timeout
 
+
 @pytest.mark.parametrize("random_seed", list(range(10)))
 def test_consistent_configuration(random_seed):
     """

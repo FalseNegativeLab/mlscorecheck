@@ -5,11 +5,11 @@ Testing the score objects
 import pytest
 
 from mlscorecheck.symbolic import (
-    get_base_objects,
-    get_symbolic_toolkit,
-    get_all_objects,
-    get_objects_without_complements,
     Score,
+    get_all_objects,
+    get_base_objects,
+    get_objects_without_complements,
+    get_symbolic_toolkit,
 )
 
 symbolic_toolkit = get_symbolic_toolkit()

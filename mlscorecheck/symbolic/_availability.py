@@ -32,11 +32,11 @@ symbolic_toolkits.append(check_importability("sage"))
 symbolic_toolkits = [package for package in symbolic_toolkits if package is not None]
 
 
-def get_symbolic_toolkit() -> str:
+def get_symbolic_toolkit() -> str | None:
     """
     Returns the name of an available symbolic toolkit (in sympy, sage order)
 
     Returns:
-        str: the name of the available module
+        str | None: the name of the available module, or None if none available
     """
     return symbolic_toolkits[0] if len(symbolic_toolkits) > 0 else None

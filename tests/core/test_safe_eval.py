@@ -2,7 +2,7 @@
 Testing the safe eval and safe call functionalities
 """
 
-from mlscorecheck.core import safe_eval, safe_call
+from mlscorecheck.core import safe_call, safe_eval
 
 
 def test_safe_eval():

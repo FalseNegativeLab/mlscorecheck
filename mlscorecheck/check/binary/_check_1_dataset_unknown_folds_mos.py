@@ -48,7 +48,7 @@ def check_1_dataset_unknown_folds_mos(
     solver_name: str = None,
     timeout: int = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Checking the consistency of scores calculated in a k-fold cross validation on a single
@@ -141,8 +141,7 @@ def check_1_dataset_unknown_folds_mos(
 
     results = {"details": []}
 
-    idx = 0
-    for evaluation_0 in repeated_kfolds_generator(evaluation, list(scores.keys())):
+    for idx, evaluation_0 in enumerate(repeated_kfolds_generator(evaluation, list(scores.keys()))):
         tmp = {
             "folds": evaluation_0["folding"]["folds"],
             "details": check_1_dataset_known_folds_mos(
@@ -161,7 +160,6 @@ def check_1_dataset_unknown_folds_mos(
         results["details"].append(tmp)
         if not tmp["details"]["inconsistency"]:
             break
-        idx += 1
 
     results["inconsistency"] = all(tmp["details"]["inconsistency"] for tmp in results["details"])
 

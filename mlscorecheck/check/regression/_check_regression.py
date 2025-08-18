@@ -87,9 +87,7 @@ regression_scores = {
 }
 
 
-def calculate_regression_scores(
-    y_true: np.array, y_pred: np.array, subset=None
-) -> dict:
+def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None) -> dict:
     """
     Calculate the performance scores for a regression problem
 
@@ -112,7 +110,7 @@ def calculate_regression_scores(
 
 def generate_regression_problem_and_scores(
     random_state=None, max_n_samples=1000, subset=None, rounding_decimals=None
-) -> (float, int, dict):
+) -> tuple[float, int, dict]:
     """
     Generate a regression problem and corresponding scores
 
@@ -165,9 +163,7 @@ def expand_regression_scores(
         dict: the extended set of score intervals
     """
     scores = {
-        key: Interval(
-            value - eps - numerical_tolerance, value + eps + numerical_tolerance
-        )
+        key: Interval(value - eps - numerical_tolerance, value + eps + numerical_tolerance)
         for key, value in scores.items()
     }
 
@@ -176,9 +172,7 @@ def expand_regression_scores(
         if key not in scores:
             for sol, formula in value.items():
                 if sol in scores:
-                    to_add[key] = safe_eval(
-                        formula, scores | {"var": var, "n_samples": n_samples}
-                    )
+                    to_add[key] = safe_eval(formula, scores | {"var": var, "n_samples": n_samples})
                     break
 
     return scores | to_add
@@ -256,8 +250,6 @@ def check_1_testset_no_kfold(
         >>> result['inconsistency']
         # True
     """
-    intervals = expand_regression_scores(
-        var, n_samples, scores, eps, numerical_tolerance
-    )
+    intervals = expand_regression_scores(var, n_samples, scores, eps, numerical_tolerance)
 
     return check_relations(intervals)

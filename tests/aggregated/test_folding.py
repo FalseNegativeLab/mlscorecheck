@@ -4,7 +4,7 @@ This module tests the Folding abstraction
 
 import pytest
 
-from mlscorecheck.aggregated import Folding, Dataset, generate_folding, generate_dataset
+from mlscorecheck.aggregated import Dataset, Folding, generate_dataset, generate_folding
 
 
 def test_instantiation():

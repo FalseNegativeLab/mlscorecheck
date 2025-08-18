@@ -4,8 +4,9 @@ This module tests the 1 dataset, kfold SoM, micro averaging consistency test
 
 import pytest
 
-from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
 from mlscorecheck.aggregated import generate_dataset_folding_multiclass
+from mlscorecheck.check.multiclass import check_1_dataset_known_folds_som_micro
+
 
 @pytest.mark.parametrize("random_seed", range(20))
 def test_consistent(random_seed: int):

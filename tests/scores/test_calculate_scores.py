@@ -2,16 +2,15 @@
 This module tests the score calculation capabilities
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
-
 from mlscorecheck.scores import (
+    calculate_multiclass_scores,
     calculate_scores,
     calculate_scores_for_lp,
-    calculate_multiclass_scores,
+    score_functions_with_solutions,
 )
-from mlscorecheck.scores import score_functions_with_solutions
 
 
 def test_calculate_scores():

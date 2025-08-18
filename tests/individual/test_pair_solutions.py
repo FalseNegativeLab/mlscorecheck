@@ -6,20 +6,18 @@ import pytest
 
 from mlscorecheck.core import safe_call
 from mlscorecheck.individual import (
-    load_solutions,
-    Solution,
     Interval,
     IntervalUnion,
+    Solution,
+    generate_1_problem,
+    load_solutions,
     sqrt,
 )
-
 from mlscorecheck.scores import (
-    score_functions_without_complements,
     score_functions_standardized_without_complements,
+    score_functions_without_complements,
     score_specifications,
 )
-
-from mlscorecheck.individual import generate_1_problem
 
 solutions = load_solutions()
 scores = score_specifications
@@ -108,7 +106,7 @@ def test_solution(sol: tuple, zeros: list, random_state: int):
     if score0 is None or score1 is None:
         return
 
-    result = solutions[sol].evaluate({**evaluation, **{sol[0]: score0, sol[1]: score1}})
+    result = solutions[sol].evaluate({**evaluation, sol[0]: score0, sol[1]: score1})
 
     solvable, failed = check_tptn(evaluation["tp"], evaluation["tn"], result)
     assert solvable or not failed
@@ -144,7 +142,7 @@ def test_solution_failure(sol: tuple, zeros: list, random_state: int):
 
     adjust_evaluation(evaluation)
 
-    result = solutions[sol].evaluate({**evaluation, **{sol[0]: score0, sol[1]: score1}})
+    result = solutions[sol].evaluate({**evaluation, sol[0]: score0, sol[1]: score1})
 
     solvable, failed = check_tptn(evaluation["tp"], evaluation["tn"], result)
     assert solvable or failed

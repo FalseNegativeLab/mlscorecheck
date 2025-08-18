@@ -5,8 +5,8 @@ mean-of-scores aggregation over the datasets
 
 import pytest
 
-from mlscorecheck.check.binary import check_n_testsets_mos_no_kfold
 from mlscorecheck.aggregated import generate_experiment
+from mlscorecheck.check.binary import check_n_testsets_mos_no_kfold
 
 
 @pytest.mark.parametrize("random_seed", list(range(10)))

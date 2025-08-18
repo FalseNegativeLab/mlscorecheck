@@ -4,14 +4,12 @@ This file tests the test bundle for the STARE dataset
 
 import pytest
 
-from mlscorecheck.check.bundles.retina import (
-    check_stare_vessel_image,
-    check_stare_vessel_aggregated,
-)
-
-from mlscorecheck.experiments import get_experiment
-
 from mlscorecheck.aggregated import generate_scores_for_testsets
+from mlscorecheck.check.bundles.retina import (
+    check_stare_vessel_aggregated,
+    check_stare_vessel_image,
+)
+from mlscorecheck.experiments import get_experiment
 
 
 @pytest.mark.parametrize("random_state", [1, 2, 3, 4, 5])
