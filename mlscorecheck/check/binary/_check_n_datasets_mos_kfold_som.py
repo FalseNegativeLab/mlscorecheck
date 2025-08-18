@@ -17,12 +17,12 @@ def check_n_datasets_mos_kfold_som(
     evaluations: list,
     scores: dict,
     eps,
-    dataset_score_bounds: dict = None,
+    dataset_score_bounds: dict | None = None,
     *,
-    solver_name: str = None,
-    timeout: int = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     This function checks the consistency of scores calculated on multiple datasets with k-fold

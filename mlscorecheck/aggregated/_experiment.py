@@ -19,7 +19,7 @@ class Experiment:
     """
 
     def __init__(
-        self, evaluations: list, aggregation: str, dataset_score_bounds: dict = None
+        self, evaluations: list, aggregation: str, dataset_score_bounds: dict | None = None
     ):
         """
         Constructor of the experiment
@@ -61,7 +61,7 @@ class Experiment:
             "aggregation": self.aggregation,
         }
 
-    def sample_figures(self, random_state=None, score_subset: list = None):
+    def sample_figures(self, random_state=None, score_subset: list | None = None):
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -81,7 +81,7 @@ class Experiment:
         return self
 
     def calculate_scores(
-        self, rounding_decimals: int = None, score_subset: list = None
+        self, rounding_decimals: int | None = None, score_subset: list | None = None
     ) -> dict:
         """
         Calculates the scores
@@ -93,12 +93,8 @@ class Experiment:
         Returns:
             dict(str,float): the scores
         """
-        score_subset = (
-            ["acc", "sens", "spec", "bacc"] if score_subset is None else score_subset
-        )
-        score_subset = [
-            score for score in score_subset if score in ["acc", "sens", "spec", "bacc"]
-        ]
+        score_subset = ["acc", "sens", "spec", "bacc"] if score_subset is None else score_subset
+        score_subset = [score for score in score_subset if score in ["acc", "sens", "spec", "bacc"]]
 
         for evaluation in self.evaluations:
             evaluation.calculate_scores(score_subset=score_subset)
@@ -111,21 +107,13 @@ class Experiment:
                 evaluation.figures["tn"] for evaluation in self.evaluations
             )
         else:
-            self.figures["tp"] = sum(
-                evaluation.figures["tp"] for evaluation in self.evaluations
-            )
-            self.figures["tn"] = sum(
-                evaluation.figures["tn"] for evaluation in self.evaluations
-            )
+            self.figures["tp"] = sum(evaluation.figures["tp"] for evaluation in self.evaluations)
+            self.figures["tn"] = sum(evaluation.figures["tn"] for evaluation in self.evaluations)
 
         if self.aggregation == "som":
-            self.scores = calculate_scores_for_lp(
-                self.figures, score_subset=score_subset
-            )
+            self.scores = calculate_scores_for_lp(self.figures, score_subset=score_subset)
         elif self.aggregation == "mos":
-            self.scores = dict_mean(
-                [evaluation.scores for evaluation in self.evaluations]
-            )
+            self.scores = dict_mean([evaluation.scores for evaluation in self.evaluations])
 
         return (
             self.scores
@@ -133,7 +121,7 @@ class Experiment:
             else round_scores(self.scores, rounding_decimals)
         )
 
-    def init_lp(self, lp_problem: pl.LpProblem, scores: dict = None) -> pl.LpProblem:
+    def init_lp(self, lp_problem: pl.LpProblem, scores: dict | None = None) -> pl.LpProblem:
         """
         Initializes a linear programming problem
 
@@ -191,7 +179,7 @@ class Experiment:
                     indicating the overall results
         """
 
-        results = {"evaluations": []}
+        results: dict = {"evaluations": []}
         for evaluation in self.evaluations:
             tmp = {
                 "folds": evaluation.check_bounds(numerical_tolerance),

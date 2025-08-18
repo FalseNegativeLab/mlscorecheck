@@ -151,13 +151,7 @@ known-first-party = ["mlscorecheck"]
 [tool.mypy]
 python_version = "3.10"
 ignore_missing_imports = true
-no_strict_optional = true
-allow_untyped_defs = true
-allow_incomplete_defs = true
-allow_untyped_calls = true
-# Disable strict checks for scientific code
-warn_return_any = false
-warn_unused_configs = false
+warn_unused_configs = true
 exclude = [
     "build",
     "dist", 

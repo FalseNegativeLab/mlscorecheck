@@ -18,7 +18,7 @@ def check_1_dataset_kfold_som(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    prefilter_by_pairs: bool = True
+    prefilter_by_pairs: bool = True,
 ) -> dict:
     """
     This function checks the consistency of scores calculated by applying k-fold cross validation

@@ -6,14 +6,15 @@ from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
 from ...binary import check_n_testsets_mos_no_kfold, check_n_testsets_som_no_kfold
 
-__all__ = ['_prepare_configuration_diaretdb0',
-            'check_diaretdb0_class',
-            'check_diaretdb0_class_som',
-            'check_diaretdb0_class_mos']
+__all__ = [
+    "_prepare_configuration_diaretdb0",
+    "check_diaretdb0_class",
+    "check_diaretdb0_class_som",
+    "check_diaretdb0_class_mos",
+]
 
-def _prepare_configuration_diaretdb0(subset: str,
-                                    batch,
-                                    class_name: str) -> list:
+
+def _prepare_configuration_diaretdb0(subset: str, batch, class_name: str) -> list:
     """
     Prepare the testset specifications for a "one vs rest" setup
 
@@ -27,33 +28,35 @@ def _prepare_configuration_diaretdb0(subset: str,
     Returns:
         list: the list of testset specification
     """
-    data = get_experiment('retina.diaretdb0')
+    data = get_experiment("retina.diaretdb0")
     testsets = []
     class_name = [class_name] if isinstance(class_name, str) else class_name
 
-    classes = data['classes']
-    data = data[subset + 'sets']
-    batch = list(data.keys()) if batch == 'all' else batch
-
+    classes = data["classes"]
+    data = data[subset + "sets"]
+    batch = list(data.keys()) if batch == "all" else batch
 
     for bdx in batch:
         tmp = {"identifier": bdx}
         for img_iden in data[bdx]:
             if any(class_ in classes[img_iden] for class_ in class_name):
-                tmp['p'] = tmp.get('p', 0) + 1
+                tmp["p"] = tmp.get("p", 0) + 1
             else:
-                tmp['n'] = tmp.get('n', 0) + 1
+                tmp["n"] = tmp.get("n", 0) + 1
         testsets.append(tmp)
 
     return testsets
 
-def check_diaretdb0_class_som(subset: str,
-                                    batch,
-                                    class_name,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb0_class_som(
+    subset: str,
+    batch,
+    class_name,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Testing the scores calculated for the DIARETDB0 dataset. The dataset is an image
     labeling dataset, where various images can be labeled by the lesion recognized on the
@@ -109,28 +112,30 @@ def check_diaretdb0_class_som(subset: str,
             - ``'evidence'``:
                 The evidence for satisfying the consistency constraints.
     """
-    testsets = _prepare_configuration_diaretdb0(subset,
-                                                batch,
-                                                class_name)
+    testsets = _prepare_configuration_diaretdb0(subset, batch, class_name)
 
-    return check_n_testsets_som_no_kfold(testsets=testsets,
-                                                    scores=scores,
-                                                    eps=eps,
-                                                    numerical_tolerance=numerical_tolerance,
-                                                    prefilter_by_pairs=True)
+    return check_n_testsets_som_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=True,
+    )
 
 
-def check_diaretdb0_class_mos(subset: str,
-                                    batch,
-                                    class_name,
-                                    scores: dict,
-                                    eps,
-                                    *,
-                                    score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+def check_diaretdb0_class_mos(
+    subset: str,
+    batch,
+    class_name,
+    scores: dict,
+    eps,
+    *,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Testing the scores calculated for the DIARETDB0 dataset. The dataset is an image
     labeling dataset, where various images can be labeled by the lesion recognized on the
@@ -186,31 +191,33 @@ def check_diaretdb0_class_mos(subset: str,
             - ``'lp_configuration'``:
                 Contains the actual configuration of the linear programming solver.
     """
-    testsets = _prepare_configuration_diaretdb0(subset,
-                                                batch,
-                                                class_name)
+    testsets = _prepare_configuration_diaretdb0(subset, batch, class_name)
 
-    return check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        numerical_tolerance=numerical_tolerance,
-                                                        testset_score_bounds=score_bounds,
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity)
+    return check_n_testsets_mos_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        testset_score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+    )
 
 
-def check_diaretdb0_class(subset: str,
-                            batch,
-                            class_name,
-                            scores: dict,
-                            eps,
-                            *,
-                            score_bounds: dict = None,
-                            solver_name: str = None,
-                            timeout: int = None,
-                            verbosity: int = 1,
-                            numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+def check_diaretdb0_class(
+    subset: str,
+    batch,
+    class_name,
+    scores: dict,
+    eps,
+    *,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Testing the scores calculated for the DIARETDB0 dataset. The dataset is an image
     labeling dataset, where various images can be labeled by the lesion recognized on the
@@ -264,25 +271,31 @@ def check_diaretdb0_class(subset: str,
         # {'inconsistency_som': True, 'inconsistency_mos': False}
     """
     results = {}
-    results['details_som'] = check_diaretdb0_class_som(subset=subset,
-                                                        batch=batch,
-                                                        class_name=class_name,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        numerical_tolerance=numerical_tolerance)
+    results["details_som"] = check_diaretdb0_class_som(
+        subset=subset,
+        batch=batch,
+        class_name=class_name,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['details_mos'] = check_diaretdb0_class_mos(subset=subset,
-                                                        batch=batch,
-                                                        class_name=class_name,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        numerical_tolerance=numerical_tolerance,
-                                                        score_bounds=score_bounds,
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity)
+    results["details_mos"] = check_diaretdb0_class_mos(
+        subset=subset,
+        batch=batch,
+        class_name=class_name,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+    )
 
-    results['inconsistency'] = {'inconsistency_som': results['details_som']['inconsistency'],
-                                'inconsistency_mos': results['details_mos']['inconsistency']}
+    results["inconsistency"] = {
+        "inconsistency_som": results["details_som"]["inconsistency"],
+        "inconsistency_mos": results["details_mos"]["inconsistency"],
+    }
 
     return results

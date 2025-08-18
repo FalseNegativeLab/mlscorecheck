@@ -62,11 +62,11 @@ def collect_denominators_and_bases(expression, algebra: Algebra) -> tuple[list, 
     Returns:
         list, list: the collected denominators and bases
     """
-    denoms = []
-    bases = []
+    denoms: list = []
+    bases: list = []
     _collect_denominators_and_bases(expression, denoms, bases, algebra, depth=0)
-    denom_dict = {}
-    base_dict = {}
+    denom_dict: dict = {}
+    base_dict: dict = {}
 
     for denom, depth in denoms:
         denom_str = str(denom)
@@ -130,12 +130,12 @@ def solve_order(score0: Score, score1: Score):
 
     first_variable = None
     second_variable = None
-    if min_variable[0] == "tp":
+    if min_variable is not None and min_variable[0] == "tp":
         first_variable = symbols.tp
         second_variable = symbols.tn
         if min_variable[1] == 1:
             score0, score1 = score1, score0
-    elif min_variable[0] == "tn":
+    elif min_variable is not None and min_variable[0] == "tn":
         first_variable = symbols.tn
         second_variable = symbols.tp
         if min_variable[1] == 1:
@@ -336,12 +336,12 @@ class ProblemSolver:
         Returns:
             Solution: the solution object
         """
-        results = []
+        results: list = []
 
-        for solution, conditions in zip(self.str_solutions, self.conditions, strict=False):
-            results.append({"solution": solution, "conditions": conditions})
+        for sol, conds in zip(self.str_solutions, self.conditions, strict=False):
+            results.append({"solution": sol, "conditions": conds})
 
-        solution = Solutions(
+        solution: Solutions = Solutions(
             scores=[self.score0.abbreviation, self.score1.abbreviation],
             solutions=results,
         )

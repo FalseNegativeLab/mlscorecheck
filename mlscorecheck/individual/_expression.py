@@ -15,7 +15,7 @@ class Expression:
     """
 
     def __init__(
-        self, expression: str, symbols: list, functional_symbols: list = None, **kwargs
+        self, expression: str, symbols: list, functional_symbols: list | None = None, **kwargs
     ):
         """
         The constructor of the expression

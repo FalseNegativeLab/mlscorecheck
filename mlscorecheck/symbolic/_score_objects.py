@@ -65,8 +65,8 @@ class Score:  # pylint: disable=too-many-instance-attributes
         descriptor: dict,
         *,
         function,
-        expression: str = None,
-        equation: str = None
+        expression: str | None = None,
+        equation: str | None = None,
     ):
         """
         Constructor of the base class
@@ -103,9 +103,7 @@ class Score:  # pylint: disable=too-many-instance-attributes
             kwargs["lower_bound"] = self.range[0]
         if self.range[1] < np.inf:
             kwargs["upper_bound"] = self.range[1]
-        self.symbol = self.symbols.algebra.create_symbol(
-            self.abbreviation, real=True, **kwargs
-        )
+        self.symbol = self.symbols.algebra.create_symbol(self.abbreviation, real=True, **kwargs)
 
         # setting the score function
         if isinstance(function, str):
@@ -588,9 +586,9 @@ def get_base_objects(algebraic_system: str = "sympy") -> dict:
             FowlkesMallowsIndex,
         ]
     ]
-    score_objects = {obj.abbreviation: obj for obj in score_objects}
+    score_objects_dict = {obj.abbreviation: obj for obj in score_objects}
 
-    return score_objects
+    return score_objects_dict
 
 
 def get_all_objects(algebraic_system: str = "sympy") -> dict:
@@ -604,8 +602,8 @@ def get_all_objects(algebraic_system: str = "sympy") -> dict:
         dict: the dictionary of all score objects
     """
     symbols = Symbols(algebraic_system=algebraic_system)
-    score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
-    score_objects = {obj.abbreviation: obj for obj in score_objects}
+    score_objects_list = [cls(symbols=symbols) for cls in Score.__subclasses__()]
+    score_objects = {obj.abbreviation: obj for obj in score_objects_list}
 
     return score_objects
 
@@ -621,10 +619,10 @@ def get_objects_without_complements(algebraic_system: str = "sympy") -> dict:
         dict: the dictionary of score objects
     """
     symbols = Symbols(algebraic_system=algebraic_system)
-    score_objects = [cls(symbols=symbols) for cls in Score.__subclasses__()]
+    score_objects_list = [cls(symbols=symbols) for cls in Score.__subclasses__()]
     score_objects = {
         obj.abbreviation: obj
-        for obj in score_objects
+        for obj in score_objects_list
         if obj.abbreviation in score_functions_without_complements
     }
 

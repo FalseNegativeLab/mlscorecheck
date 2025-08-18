@@ -16,7 +16,7 @@ def check_1_testset_no_kfold_micro(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    prefilter_by_pairs: bool = True
+    prefilter_by_pairs: bool = True,
 ) -> dict:
     """
     Checking the consistency of scores calculated by taking the micro average of class level

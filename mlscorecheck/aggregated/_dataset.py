@@ -1,6 +1,7 @@
 """
 This module implements an abstraction for a dataset
 """
+
 # disabling pylint false positives
 # pylint: disable=no-member
 
@@ -17,10 +18,10 @@ class Dataset:
 
     def __init__(
         self,
-        p: int = None,
-        n: int = None,
-        dataset_name: str = None,
-        identifier: str = None,
+        p: int | None = None,
+        n: int | None = None,
+        dataset_name: str | None = None,
+        identifier: str | None = None,
     ):
         """
         Constructor of a dataset

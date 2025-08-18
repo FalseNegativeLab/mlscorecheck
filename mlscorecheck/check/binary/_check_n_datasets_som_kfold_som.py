@@ -19,7 +19,7 @@ def check_n_datasets_som_kfold_som(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    prefilter_by_pairs: bool = True
+    prefilter_by_pairs: bool = True,
 ):
     """
     Checking the consistency of scores calculated by applying k-fold
@@ -104,9 +104,7 @@ def check_n_datasets_som_kfold_som(
     evaluations = translate_metadata(evaluations)
 
     if any(evaluation.get("aggregation", "som") != "som" for evaluation in evaluations):
-        raise ValueError(
-            "the aggregation specifications cannot be anything else but 'rom'"
-        )
+        raise ValueError("the aggregation specifications cannot be anything else but 'rom'")
 
     evaluations = copy.deepcopy(evaluations)
 

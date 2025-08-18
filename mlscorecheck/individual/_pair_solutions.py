@@ -186,9 +186,7 @@ def load_solutions():
     Returns:
         dict: the dictionary of the solutions
     """
-    sio = (
-        files("mlscorecheck").joinpath(os.path.join("individual", "solutions.json")).read_text()
-    )  # pylint: disable=unspecified-encoding
+    sio = files("mlscorecheck").joinpath(os.path.join("individual", "solutions.json")).read_text()  # pylint: disable=unspecified-encoding
 
     solutions_dict = json.loads(sio)
 

@@ -18,11 +18,11 @@ def check_1_dataset_known_folds_som_macro(
     scores: dict,
     eps,
     *,
-    class_score_bounds: dict = None,
-    solver_name: str = None,
-    timeout: int = None,
+    class_score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     This function checks the consistency of scores calculated by taking the macro average

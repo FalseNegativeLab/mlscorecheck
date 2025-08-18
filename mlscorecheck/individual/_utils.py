@@ -24,7 +24,7 @@ __all__ = [
     "is_less_than_zero",
     "is_zero",
     "unify_results",
-    "translate_metadata"
+    "translate_metadata",
 ]
 
 solutions = solution_specifications
@@ -34,6 +34,7 @@ aliases = score_function_aliases
 complementers = score_function_complements
 functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
+
 
 def translate_metadata(original):
     """
@@ -53,10 +54,10 @@ def translate_metadata(original):
             if isinstance(val, dict):
                 result[key] = translate_metadata(val)
             else:
-                if key in ('n_positive', 'n_minority', 'n_1'):
-                    result['p'] = val
-                elif key in ('n_negative', 'n_majority', 'n_0'):
-                    result['n'] = val
+                if key in ("n_positive", "n_minority", "n_1"):
+                    result["p"] = val
+                elif key in ("n_negative", "n_majority", "n_0"):
+                    result["n"] = val
                 else:
                     result[key] = val
     elif isinstance(original, list):
@@ -65,6 +66,7 @@ def translate_metadata(original):
         result = original
 
     return result
+
 
 def resolve_aliases_and_complements(scores: dict) -> dict:
     """
@@ -93,9 +95,7 @@ def resolve_aliases_and_complements(scores: dict) -> dict:
     return complemented
 
 
-def create_intervals(
-    scores: dict, eps, numerical_tolerance: float = NUMERICAL_TOLERANCE
-) -> dict:
+def create_intervals(scores: dict, eps, numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Turns the scores into intervals using the uncertainty specifications,
     the interval for a score will be (score - eps, score + eps).
@@ -121,9 +121,7 @@ def create_intervals(
 
     # creating the intervals
     intervals = {
-        key: Interval(
-            val - eps[key] - numerical_tolerance, val + eps[key] + numerical_tolerance
-        )
+        key: Interval(val - eps[key] - numerical_tolerance, val + eps[key] + numerical_tolerance)
         for key, val in scores.items()
     }
 
@@ -135,9 +133,7 @@ def create_intervals(
             lower_bound = score_descriptors[key].get("lower_bound", -np.inf)
             upper_bound = score_descriptors[key].get("upper_bound", np.inf)
 
-            intervals[key] = intervals[key].intersection(
-                Interval(lower_bound, upper_bound)
-            )
+            intervals[key] = intervals[key].intersection(Interval(lower_bound, upper_bound))
 
     return intervals
 
@@ -155,11 +151,9 @@ def create_problems_2(scores: list) -> list:
         list(tuple): all possible triplets of the form (base0, base1, target)
     """
     bases = list(itertools.combinations(scores, 2))
-    problems = []
+    problems: list = []
     for base0, base1 in bases:
-        problems.extend(
-            (base0, base1, score) for score in scores if score not in {base0, base1}
-        )
+        problems.extend((base0, base1, score) for score in scores if score not in {base0, base1})
 
     return problems
 

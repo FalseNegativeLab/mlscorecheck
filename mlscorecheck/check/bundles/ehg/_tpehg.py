@@ -15,11 +15,11 @@ def check_tpehg(
     n_folds: int,
     n_repeats: int,
     *,
-    score_bounds: dict = None,
-    solver_name: str = None,
-    timeout: int = None,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Checks the cross-validated TPEHG scores

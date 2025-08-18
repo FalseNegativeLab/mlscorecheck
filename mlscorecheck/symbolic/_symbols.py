@@ -30,12 +30,8 @@ class Symbols:  # pylint: disable=too-many-instance-attributes
         self.tn = self.algebra.create_symbol("tn", nonnegative=True, real=True)
         self.p = self.algebra.create_symbol("p", positive=True, real=True)
         self.n = self.algebra.create_symbol("n", positive=True, real=True)
-        self.beta_positive = self.algebra.create_symbol(
-            "beta_positive", positive=True, real=True
-        )
-        self.beta_negative = self.algebra.create_symbol(
-            "beta_negative", positive=True, real=True
-        )
+        self.beta_positive = self.algebra.create_symbol("beta_positive", positive=True, real=True)
+        self.beta_negative = self.algebra.create_symbol("beta_negative", positive=True, real=True)
         self.sqrt = self.algebra.sqrt
 
     def get_algebra(self):

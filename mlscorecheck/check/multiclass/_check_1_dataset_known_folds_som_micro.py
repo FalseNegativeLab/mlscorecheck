@@ -19,7 +19,7 @@ def check_1_dataset_known_folds_som_micro(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    prefilter_by_pairs: bool = True
+    prefilter_by_pairs: bool = True,
 ) -> dict:
     """
     This function checks the consistency of scores calculated by taking the micro average of

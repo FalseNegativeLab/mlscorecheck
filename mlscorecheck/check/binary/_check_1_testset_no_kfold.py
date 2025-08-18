@@ -18,7 +18,7 @@ def check_1_testset_no_kfold(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    prefilter_by_pairs: bool = True
+    prefilter_by_pairs: bool = True,
 ) -> dict:
     """
     Use this check if the scores are calculated on one single test set
@@ -108,7 +108,8 @@ def check_1_testset_no_kfold(
         warnings.warn(
             'Additional fields beyond ("p", "n") or "name" present '
             "in the specification, you might want to use another check "
-            "function specialized to datasets", stacklevel=2
+            "function specialized to datasets",
+            stacklevel=2,
         )
 
     p = testset.get("p")

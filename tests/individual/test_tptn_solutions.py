@@ -65,7 +65,7 @@ def test_tptn_solutions(figure: str, score: str, zeros: list, random_state: int)
     ):
         return
 
-    val = np.array(val)
+    val = np.ndarray(val)
     assert np.any(np.abs(evaluation[figure] - val) < 1e-8)
 
 
@@ -116,7 +116,7 @@ def test_tptn_solutions_failure(figure: str, score: str, random_state: int):
                 assert True
                 return
 
-            val = np.array(val)
+            val = np.ndarray(val)
             assert np.all(np.abs(evaluation[figure] - val) > 1e-8)
 
     scores[score] = 0

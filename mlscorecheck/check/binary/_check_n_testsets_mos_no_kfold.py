@@ -15,10 +15,10 @@ def check_n_testsets_mos_no_kfold(
     testsets: list,
     scores: dict,
     eps,
-    testset_score_bounds: dict = None,
+    testset_score_bounds: dict | None = None,
     *,
-    solver_name: str = None,
-    timeout: int = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:

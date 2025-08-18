@@ -116,9 +116,7 @@ def not_enough_diverse_folds(p_values, n_values):
     )
 
 
-def determine_min_max_p(
-    *, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero
-):  # pylint: disable=too-many-locals
+def determine_min_max_p(*, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero):  # pylint: disable=too-many-locals
     """
     Determines the minimum and maximum number of positives that can appear in folds
     of type A
@@ -145,9 +143,7 @@ def determine_min_max_p(
     return min_p_a, max_p_a
 
 
-def fold_partitioning_generator(
-    *, p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1
-):  # pylint: disable=invalid-name,too-many-locals
+def fold_partitioning_generator(*, p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1):  # pylint: disable=invalid-name,too-many-locals
     """
     Generates the fold partitioning
 
@@ -270,9 +266,9 @@ def kfolds_generator(evaluation: dict, available_scores: list, repeat_idx=0):
         logger.info("spec and bacc not among the reported scores, n=0 folds are also considered")
 
     if evaluation["dataset"].get("dataset_name") is not None:
-        evaluation["dataset"][
-            "identifier"
-        ] = f'{evaluation["dataset"]["dataset_name"]}_{random_identifier(3)}'
+        evaluation["dataset"]["identifier"] = (
+            f"{evaluation['dataset']['dataset_name']}_{random_identifier(3)}"
+        )
     else:
         evaluation["dataset"]["identifier"] = random_identifier(6)
 
@@ -416,7 +412,6 @@ def multiclass_fold_partitioning_generator_kn(ns: list, cs: list):
             yield part
         else:
             for part_deep in multiclass_fold_partitioning_generator_kn(ns[1:], part[1]):
-
                 if ns[0] == ns[1] and part[0] > part_deep[0]:
                     continue
 

@@ -46,7 +46,7 @@ def test_calculate_multiclass_scores(average):
     Args:
         average (str): the mode of averaging
     """
-    confm = np.array([[5, 8, 3], [3, 10, 2], [2, 4, 11]])
+    confm = np.ndarray([[5, 8, 3], [3, 10, 2], [2, 4, 11]])
     scores = calculate_multiclass_scores(
         confusion_matrix=confm,
         additional_symbols={"beta_positive": 2, "beta_negative": 2},

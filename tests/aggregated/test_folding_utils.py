@@ -123,7 +123,7 @@ def sklearn_configurations(y_labels, n_splits):
     Generating the sklearn fold configurations
 
     Args:
-        y_labels (np.array): an array of y labels
+        y_labels (np.ndarray): an array of y labels
         n_splits (int): the number of splits
 
     Returns:

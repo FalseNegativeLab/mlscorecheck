@@ -27,10 +27,10 @@ def check_aggregated_scores(
     experiment: dict,
     scores: dict,
     eps,
-    solver_name: str = None,
-    timeout: int = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Check aggregated scores
@@ -71,9 +71,7 @@ def check_aggregated_scores(
             "message": "no scores suitable for aggregated consistency checks",
         }
 
-    experiment = (
-        Experiment(**experiment) if isinstance(experiment, dict) else experiment
-    )
+    experiment = Experiment(**experiment) if isinstance(experiment, dict) else experiment
 
     if experiment.aggregation == "som" and any(
         evaluation.aggregation == "mos" for evaluation in experiment.evaluations
@@ -85,9 +83,7 @@ def check_aggregated_scores(
         )
 
     solver_name = (
-        PREFERRED_SOLVER
-        if solver_name is None or solver_name not in solvers
-        else solver_name
+        PREFERRED_SOLVER if solver_name is None or solver_name not in solvers else solver_name
     )
 
     solver = pl.getSolver(

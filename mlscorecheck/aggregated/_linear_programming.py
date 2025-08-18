@@ -1,6 +1,7 @@
 """
 Some general purpose linear programming functionalities
 """
+
 import numpy as np
 import pulp as pl
 
@@ -10,9 +11,7 @@ from ._utils import random_identifier
 __all__ = ["add_bounds", "solve", "create_lp_target"]
 
 
-def add_bounds(
-    lp_problem: pl.LpProblem, variables: dict, bounds: dict, label: str
-) -> pl.LpProblem:
+def add_bounds(lp_problem: pl.LpProblem, variables: dict, bounds: dict, label: str) -> pl.LpProblem:
     """
     Adding bounds to a linear program
 

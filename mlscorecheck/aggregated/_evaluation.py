@@ -22,7 +22,7 @@ class Evaluation:
         dataset: dict,
         folding: dict,
         aggregation: str,
-        fold_score_bounds: dict = None,
+        fold_score_bounds: dict | None = None,
     ):
         """
         Constructor of the object
@@ -70,7 +70,7 @@ class Evaluation:
             "aggregation": self.aggregation,
         }
 
-    def sample_figures(self, random_state=None, score_subset: list = None):
+    def sample_figures(self, random_state=None, score_subset: list | None = None):
         """
         Samples the figures in the evaluation
 
@@ -90,7 +90,7 @@ class Evaluation:
         return self
 
     def calculate_scores(
-        self, rounding_decimals: int = None, score_subset: list = None
+        self, rounding_decimals: int | None = None, score_subset: list | None = None
     ) -> dict:
         """
         Calculates the scores
@@ -116,9 +116,7 @@ class Evaluation:
             self.figures["tn"] = sum(fold.tn for fold in self.folds)
 
         if self.aggregation == "som":
-            self.scores = calculate_scores_for_lp(
-                self.figures, score_subset=score_subset
-            )
+            self.scores = calculate_scores_for_lp(self.figures, score_subset=score_subset)
         elif self.aggregation == "mos":
             self.scores = dict_mean([fold.scores for fold in self.folds])
 
@@ -128,7 +126,7 @@ class Evaluation:
             else round_scores(self.scores, rounding_decimals)
         )
 
-    def init_lp(self, lp_problem: pl.LpProblem, scores: dict = None) -> pl.LpProblem:
+    def init_lp(self, lp_problem: pl.LpProblem, scores: dict | None = None) -> pl.LpProblem:
         """
         Initializes a linear programming problem
 
@@ -180,7 +178,7 @@ class Evaluation:
             dict: a summary of the test, with the boolean flag under ``bounds_flag``
                     indicating the overall results
         """
-        results = {"folds": []}
+        results: dict = {"folds": []}
         for fold in self.folds:
             tmp = {
                 "fold": fold.to_dict() | {"tp": fold.tp, "tn": fold.tn},

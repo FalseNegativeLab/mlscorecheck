@@ -58,7 +58,7 @@ def generate_folding(
     dataset: dict,
     max_folds: int = 10,
     max_repeats: int = 5,
-    strategies: list = None,
+    strategies: list | None = None,
     random_state=None,
     no_folds: bool = False,
 ) -> dict:
@@ -93,9 +93,7 @@ def generate_folding(
 
     folding = Folding(n_folds=n_folds, n_repeats=n_repeats, strategy=strategy)
 
-    return {
-        "folds": [fold.to_dict() for fold in folding.generate_folds(dataset, "mos")]
-    }
+    return {"folds": [fold.to_dict() for fold in folding.generate_folds(dataset, "mos")]}
 
 
 def generate_evaluation(  # pylint: disable=too-many-locals
@@ -104,15 +102,15 @@ def generate_evaluation(  # pylint: disable=too-many-locals
     max_n: int = 500,
     max_folds: int = 10,
     max_repeats: int = 5,
-    strategies: list = None,
-    feasible_fold_score_bounds: bool = None,
-    aggregation: str = None,
+    strategies: list | None = None,
+    feasible_fold_score_bounds: bool | None = None,
+    aggregation: str | None = None,
     random_state=None,
     return_scores: bool = False,
-    rounding_decimals: int = None,
+    rounding_decimals: int | None = None,
     no_name: bool = False,
     no_folds: bool = False,
-    score_subset: list = None,
+    score_subset: list | None = None,
 ) -> dict:
     """
     Generate a random evaluation specification
@@ -154,9 +152,7 @@ def generate_evaluation(  # pylint: disable=too-many-locals
         no_folds=no_folds,
     )
 
-    aggregation = (
-        aggregation if aggregation is not None else random_state.choice(["som", "mos"])
-    )
+    aggregation = aggregation if aggregation is not None else random_state.choice(["som", "mos"])
 
     evaluation = Evaluation(
         dataset=result["dataset"], folding=result["folding"], aggregation=aggregation
@@ -170,16 +166,12 @@ def generate_evaluation(  # pylint: disable=too-many-locals
         scores["beta_positive"] = 2
         scores["beta_negative"] = 2
     else:
-        scores = evaluation.calculate_scores(
-            rounding_decimals, score_subset=score_subset
-        )
+        scores = evaluation.calculate_scores(rounding_decimals, score_subset=score_subset)
 
     if feasible_fold_score_bounds is None:
         result["fold_score_bounds"] = None
     else:
-        result["fold_score_bounds"] = get_fold_score_bounds(
-            evaluation, feasible_fold_score_bounds
-        )
+        result["fold_score_bounds"] = get_fold_score_bounds(evaluation, feasible_fold_score_bounds)
 
     result["aggregation"] = aggregation
 
@@ -219,13 +211,13 @@ def get_fold_score_bounds(
 def generate_experiment(
     *,
     max_evaluations: int = 5,
-    evaluation_params: dict = None,
+    evaluation_params: dict | None = None,
     feasible_dataset_score_bounds: bool = None,
-    aggregation: str = None,
+    aggregation: str | None = None,
     random_state=None,
     return_scores: bool = False,
-    rounding_decimals: int = None,
-    score_subset: list = None,
+    rounding_decimals: int | None = None,
+    score_subset: list | None = None,
 ) -> dict:
     """
     Generate a random experiment specification
@@ -253,18 +245,16 @@ def generate_experiment(
 
     n_evaluations = random_state.randint(1, max_evaluations + 1)
 
-    aggregation = (
-        aggregation if aggregation is not None else random_state.choice(["som", "mos"])
-    )
+    aggregation = aggregation if aggregation is not None else random_state.choice(["som", "mos"])
 
     evaluations = [
         generate_evaluation(**evaluation_params, random_state=random_state)
         for _ in range(n_evaluations)
     ]
 
-    experiment = Experiment(
-        evaluations=evaluations, aggregation=aggregation
-    ).sample_figures(random_state)
+    experiment = Experiment(evaluations=evaluations, aggregation=aggregation).sample_figures(
+        random_state
+    )
     if aggregation == "som":
         scores = calculate_scores(
             problem=experiment.figures | {"beta_positive": 2, "beta_negative": 2},
@@ -273,9 +263,7 @@ def generate_experiment(
         scores["beta_positive"] = 2
         scores["beta_negative"] = 2
     else:
-        scores = experiment.calculate_scores(
-            rounding_decimals, score_subset=score_subset
-        )
+        scores = experiment.calculate_scores(rounding_decimals, score_subset=score_subset)
 
     if evaluation_params.get("feasible_fold_score_bounds") is not None:
         for idx, evaluation in enumerate(experiment.evaluations):
@@ -286,9 +274,7 @@ def generate_experiment(
     if feasible_dataset_score_bounds is None:
         score_bounds = None
     else:
-        score_bounds = get_dataset_score_bounds(
-            experiment, feasible_dataset_score_bounds
-        )
+        score_bounds = get_dataset_score_bounds(experiment, feasible_dataset_score_bounds)
 
     experiment = {
         "evaluations": evaluations,
@@ -313,9 +299,7 @@ def get_dataset_score_bounds(
     Returns:
         dict(str,tuple(float,float)): the score bounds
     """
-    score_bounds = dict_minmax(
-        [evaluation.scores for evaluation in experiment.evaluations]
-    )
+    score_bounds = dict_minmax([evaluation.scores for evaluation in experiment.evaluations])
     for key, value in score_bounds.items():
         score_bounds[key] = (
             max(0.0, value[0] - numerical_tolerance),
@@ -419,11 +403,7 @@ def generate_dataset_folding_multiclass(
         min_class_size=min_class_size,
     )
 
-    folding = {
-        "n_folds": min(
-            [min(list(dataset.values())), random_state.randint(2, max_n_folds)]
-        )
-    }
+    folding = {"n_folds": min([min(list(dataset.values())), random_state.randint(2, max_n_folds)])}
 
     if random_state.randint(2) == 0:
         folding = folding | {
@@ -432,9 +412,7 @@ def generate_dataset_folding_multiclass(
         }
     elif random_state.randint(2) == 0:
         folding = {
-            "folds": multiclass_stratified_folds(
-                dataset=dataset, n_folds=folding["n_folds"]
-            )
+            "folds": multiclass_stratified_folds(dataset=dataset, n_folds=folding["n_folds"])
         }
     else:
         folding = {"n_folds": 1}
@@ -459,7 +437,7 @@ def generate_dataset_folding_multiclass(
 
     # if aggregation == 'som':
     scores = calculate_multiclass_scores(
-        np.sum(np.array(samples), axis=0),
+        np.sum(np.ndarray(samples), axis=0),
         average=average,
         additional_symbols={"beta_positive": 2, "beta_negative": 2},
         rounding_decimals=rounding_decimals,

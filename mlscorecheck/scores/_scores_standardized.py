@@ -6,33 +6,35 @@ This is a generated file, do not modify it.
 import math
 
 __all__ = [
-'accuracy_standardized',
-'error_rate_standardized',
-'sensitivity_standardized',
-'false_negative_rate_standardized',
-'false_positive_rate_standardized',
-'specificity_standardized',
-'positive_predictive_value_standardized',
-'false_discovery_rate_standardized',
-'false_omission_rate_standardized',
-'negative_predictive_value_standardized',
-'f_beta_positive_standardized',
-'f_beta_negative_standardized',
-'f1_positive_standardized',
-'f1_negative_standardized',
-'unified_performance_measure_standardized',
-'geometric_mean_standardized',
-'fowlkes_mallows_index_standardized',
-'markedness_standardized',
-'positive_likelihood_ratio_standardized',
-'negative_likelihood_ratio_standardized',
-'matthews_correlation_coefficient_standardized',
-'bookmaker_informedness_standardized',
-'prevalence_threshold_standardized',
-'diagnostic_odds_ratio_standardized',
-'jaccard_index_standardized',
-'balanced_accuracy_standardized',
-'cohens_kappa_standardized']
+    "accuracy_standardized",
+    "error_rate_standardized",
+    "sensitivity_standardized",
+    "false_negative_rate_standardized",
+    "false_positive_rate_standardized",
+    "specificity_standardized",
+    "positive_predictive_value_standardized",
+    "false_discovery_rate_standardized",
+    "false_omission_rate_standardized",
+    "negative_predictive_value_standardized",
+    "f_beta_positive_standardized",
+    "f_beta_negative_standardized",
+    "f1_positive_standardized",
+    "f1_negative_standardized",
+    "unified_performance_measure_standardized",
+    "geometric_mean_standardized",
+    "fowlkes_mallows_index_standardized",
+    "markedness_standardized",
+    "positive_likelihood_ratio_standardized",
+    "negative_likelihood_ratio_standardized",
+    "matthews_correlation_coefficient_standardized",
+    "bookmaker_informedness_standardized",
+    "prevalence_threshold_standardized",
+    "diagnostic_odds_ratio_standardized",
+    "jaccard_index_standardized",
+    "balanced_accuracy_standardized",
+    "cohens_kappa_standardized",
+]
+
 
 def accuracy_standardized(*, tp, tn, p, n):
     """
@@ -47,7 +49,8 @@ def accuracy_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return (tp + tn)/(p + n)
+    return (tp + tn) / (p + n)
+
 
 def error_rate_standardized(*, tp, tn, p, n):
     """
@@ -62,7 +65,8 @@ def error_rate_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 1 - (tp + tn)/(p + n)
+    return 1 - (tp + tn) / (p + n)
+
 
 def sensitivity_standardized(*, tp, p):
     """
@@ -75,7 +79,8 @@ def sensitivity_standardized(*, tp, p):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/p
+    return tp / p
+
 
 def false_negative_rate_standardized(*, tp, p):
     """
@@ -88,7 +93,8 @@ def false_negative_rate_standardized(*, tp, p):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 1 - tp/p
+    return 1 - tp / p
+
 
 def false_positive_rate_standardized(*, tn, n):
     """
@@ -101,7 +107,8 @@ def false_positive_rate_standardized(*, tn, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 1 - tn/n
+    return 1 - tn / n
+
 
 def specificity_standardized(*, tn, n):
     """
@@ -114,7 +121,8 @@ def specificity_standardized(*, tn, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tn/n
+    return tn / n
+
 
 def positive_predictive_value_standardized(*, tp, tn, n):
     """
@@ -128,7 +136,8 @@ def positive_predictive_value_standardized(*, tp, tn, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/(tp + n - tn)
+    return tp / (tp + n - tn)
+
 
 def false_discovery_rate_standardized(*, tp, tn, n):
     """
@@ -142,7 +151,8 @@ def false_discovery_rate_standardized(*, tp, tn, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 1 - tp/(tp + n - tn)
+    return 1 - tp / (tp + n - tn)
+
 
 def false_omission_rate_standardized(*, tp, tn, p):
     """
@@ -156,7 +166,8 @@ def false_omission_rate_standardized(*, tp, tn, p):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 1 - tn/(tn + p - tp)
+    return 1 - tn / (tn + p - tp)
+
 
 def negative_predictive_value_standardized(*, tp, tn, p):
     """
@@ -170,7 +181,8 @@ def negative_predictive_value_standardized(*, tp, tn, p):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tn/(tn + p - tp)
+    return tn / (tn + p - tp)
+
 
 def f_beta_positive_standardized(*, tp, tn, p, n, beta_positive):
     """
@@ -186,7 +198,8 @@ def f_beta_positive_standardized(*, tp, tn, p, n, beta_positive):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_positive**2)*tp) / (tp + beta_positive**2*p + n - tn)
+    return ((1 + beta_positive**2) * tp) / (tp + beta_positive**2 * p + n - tn)
+
 
 def f_beta_negative_standardized(*, tp, tn, p, n, beta_negative):
     """
@@ -202,7 +215,8 @@ def f_beta_negative_standardized(*, tp, tn, p, n, beta_negative):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return ((1 + beta_negative**2)*tn) / (tn + beta_negative**2*n + p - tp)
+    return ((1 + beta_negative**2) * tn) / (tn + beta_negative**2 * n + p - tp)
+
 
 def f1_positive_standardized(*, tp, tn, p, n):
     """
@@ -217,7 +231,8 @@ def f1_positive_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return (2*tp) / (tp + p + n - tn)
+    return (2 * tp) / (tp + p + n - tn)
+
 
 def f1_negative_standardized(*, tp, tn, p, n):
     """
@@ -232,7 +247,8 @@ def f1_negative_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return (2*tn) / (tn + n + p - tp)
+    return (2 * tn) / (tn + n + p - tp)
+
 
 def unified_performance_measure_standardized(*, tp, tn, p, n):
     """
@@ -247,7 +263,8 @@ def unified_performance_measure_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return 4*tn*tp/(tn*(n + p - tn + tp) + tp*(n + p + tn - tp))
+    return 4 * tn * tp / (tn * (n + p - tn + tp) + tp * (n + p + tn - tp))
+
 
 def geometric_mean_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     """
@@ -262,7 +279,8 @@ def geometric_mean_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return sqrt(tp)*sqrt(tn)/(sqrt(p)*sqrt(n))
+    return sqrt(tp) * sqrt(tn) / (sqrt(p) * sqrt(n))
+
 
 def fowlkes_mallows_index_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     """
@@ -277,7 +295,8 @@ def fowlkes_mallows_index_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/sqrt(p*(n - tn + tp))
+    return tp / sqrt(p * (n - tn + tp))
+
 
 def markedness_standardized(*, tp, tn, p, n):
     """
@@ -292,7 +311,8 @@ def markedness_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/(tp + n - tn) + tn/(tn + p - tp) - 1
+    return tp / (tp + n - tn) + tn / (tn + p - tp) - 1
+
 
 def positive_likelihood_ratio_standardized(*, tp, tn, p, n):
     """
@@ -307,7 +327,8 @@ def positive_likelihood_ratio_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return n*tp/((n-tn)*p)
+    return n * tp / ((n - tn) * p)
+
 
 def negative_likelihood_ratio_standardized(*, tp, tn, p, n):
     """
@@ -322,7 +343,8 @@ def negative_likelihood_ratio_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return n*(p - tp)/(tn*p)
+    return n * (p - tp) / (tn * p)
+
 
 def matthews_correlation_coefficient_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     """
@@ -337,7 +359,8 @@ def matthews_correlation_coefficient_standardized(*, tp, tn, p, n, sqrt=math.sqr
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return (tn*tp - (n - tn)*(p - tp))/sqrt(n*p*(n - tn + tp)*(p + tn - tp))
+    return (tn * tp - (n - tn) * (p - tp)) / sqrt(n * p * (n - tn + tp) * (p + tn - tp))
+
 
 def bookmaker_informedness_standardized(*, tp, tn, p, n):
     """
@@ -352,7 +375,8 @@ def bookmaker_informedness_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/p + tn/n - 1
+    return tp / p + tn / n - 1
+
 
 def prevalence_threshold_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     """
@@ -367,7 +391,8 @@ def prevalence_threshold_standardized(*, tp, tn, p, n, sqrt=math.sqrt):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return -p*(n*sqrt(tp*(n - tn)/(n*p)) - n + tn)/(-n*tp + p*(n - tn))
+    return -p * (n * sqrt(tp * (n - tn) / (n * p)) - n + tn) / (-n * tp + p * (n - tn))
+
 
 def diagnostic_odds_ratio_standardized(*, tp, tn, p, n):
     """
@@ -382,7 +407,8 @@ def diagnostic_odds_ratio_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tn*tp/((n-tn)*(p-tp))
+    return tn * tp / ((n - tn) * (p - tp))
+
 
 def jaccard_index_standardized(*, tp, tn, p, n):
     """
@@ -399,6 +425,7 @@ def jaccard_index_standardized(*, tp, tn, p, n):
     """
     return tp / (n - tn + p)
 
+
 def balanced_accuracy_standardized(*, tp, tn, p, n):
     """
     The standardized balanced_accuracy score
@@ -412,7 +439,8 @@ def balanced_accuracy_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return tp/(2*p) + tn/(2*n)
+    return tp / (2 * p) + tn / (2 * n)
+
 
 def cohens_kappa_standardized(*, tp, tn, p, n):
     """
@@ -427,4 +455,4 @@ def cohens_kappa_standardized(*, tp, tn, p, n):
     Returns:
         int|float|Interval|IntervalUnion: the score
     """
-    return -2*(n*p - n*tp - p*tn)/(n**2 - n*tn + n*tp + p**2 + p*tn - p*tp)
+    return -2 * (n * p - n * tp - p * tn) / (n**2 - n * tn + n * tp + p**2 + p * tn - p * tp)

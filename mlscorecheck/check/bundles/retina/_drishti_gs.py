@@ -66,7 +66,7 @@ def check_drishti_gs_segmentation_image(
     scores: dict,
     eps: float,
     *,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ):
     """
     Testing the segmentation results on one image.
@@ -139,11 +139,11 @@ def check_drishti_gs_segmentation_aggregated_mos(
     scores: dict,
     eps: float,
     *,
-    score_bounds: dict = None,
-    solver_name: str = None,
-    timeout: int = None,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ):
     """
     Testing the scores shared for a set of images with the MoS aggregation.
@@ -211,7 +211,7 @@ def check_drishti_gs_segmentation_aggregated_som(
     scores: dict,
     eps: float,
     *,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ):
     """
     Testing the scores shared for a set of images with the SoM aggregation.
@@ -276,11 +276,11 @@ def check_drishti_gs_segmentation_aggregated(
     scores: dict,
     eps: float,
     *,
-    score_bounds: dict = None,
-    solver_name: str = None,
-    timeout: int = None,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ):
     """
     Testing the scores shared for a set of images with both the MoS and SoM aggregations.

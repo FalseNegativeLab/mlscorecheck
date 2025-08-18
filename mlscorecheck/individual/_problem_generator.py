@@ -20,10 +20,10 @@ def generate_problem_and_scores(
     *,
     max_p: int = 1000,
     max_n: int = 1000,
-    zeros: list = None,
-    add_complements: bool = None,
-    score_subset: list = None,
-    rounding_decimals: int = None,
+    zeros: list | None = None,
+    add_complements: bool | None = None,
+    score_subset: list | None = None,
+    rounding_decimals: int | None = None,
     random_state=None,
 ) -> tuple[dict, dict]:
     """
@@ -45,7 +45,7 @@ def generate_problem_and_scores(
         max_p=max_p,
         max_n=max_n,
         zeros=zeros,
-        add_complements=add_complements,
+        add_complements=add_complements if add_complements is not None else False,
         random_state=random_state,
     )
     evaluation["beta_negative"] = 2
@@ -60,7 +60,7 @@ def generate_1_problem(
     *,
     max_p: int = 1000,
     max_n: int = 1000,
-    zeros: list = None,
+    zeros: list | None = None,
     add_complements: bool = False,
     random_state=None,
 ) -> dict:
@@ -114,7 +114,7 @@ def generate_problems(
     n_problems: int = 1,
     max_p: int = 1000,
     max_n: int = 1000,
-    zeros: list = None,
+    zeros: list | None = None,
     add_complements: bool = False,
     random_state=None,
 ) -> tuple[dict, dict]:
@@ -183,7 +183,7 @@ def generate_multiclass_dataset(
     return classes
 
 
-def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
+def create_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     """
     Creates a confusion matrix
 
@@ -203,7 +203,7 @@ def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
     return confusion_matrix
 
 
-def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
+def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.ndarray:
     """
     Samples a multiclass dataset
 
@@ -212,7 +212,7 @@ def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.array:
         random_state (None|int|np.random.RandomState): the random seed to use
 
     Returns:
-        np.array: the confusion matrix
+        np.ndarray: the confusion matrix
     """
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)

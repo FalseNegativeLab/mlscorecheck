@@ -44,13 +44,7 @@ preferred_order = [
 
 
 def iterate_tptn(
-    *,
-    score: str,
-    score_value: float,
-    valid_pairs: dict,
-    sol_fun,
-    params: dict,
-    iterate_by: str
+    *, score: str, score_value: float, valid_pairs: dict, sol_fun, params: dict, iterate_by: str
 ) -> dict:
     """
     Iterate through the potential values of tp or tn and construct feasible pairs
@@ -70,9 +64,7 @@ def iterate_tptn(
     results = {}
 
     for value in valid_pairs:
-        if not is_applicable_tptn(
-            score, score_value, "tp" if iterate_by == "tn" else "tn"
-        ):
+        if not is_applicable_tptn(score, score_value, "tp" if iterate_by == "tn" else "tn"):
             results[value] = valid_pairs[value]
             continue
 
@@ -107,17 +99,11 @@ def update_sens(p: int, valid_pairs: dict, score_int, solve_for: str) -> dict:
     ints = ints.intersection(Interval(0, p + 1)).shrink_to_integers()
 
     if solve_for == "tp":
-        valid_pairs = {
-            key: value.intersection(ints) for key, value in valid_pairs.items()
-        }
-        valid_pairs = {
-            key: value for key, value in valid_pairs.items() if not value.is_empty()
-        }
+        valid_pairs = {key: value.intersection(ints) for key, value in valid_pairs.items()}
+        valid_pairs = {key: value for key, value in valid_pairs.items() if not value.is_empty()}
     else:
         valid_pairs = {
-            value: interval
-            for value, interval in valid_pairs.items()
-            if ints.contains(value)
+            value: interval for value, interval in valid_pairs.items() if ints.contains(value)
         }
 
     return valid_pairs
@@ -140,25 +126,17 @@ def update_spec(n: int, valid_pairs: dict, score_int, solve_for: str) -> dict:
     ints = ints.intersection(Interval(0, n + 1)).shrink_to_integers()
 
     if solve_for == "tn":
-        valid_pairs = {
-            key: value.intersection(ints) for key, value in valid_pairs.items()
-        }
-        valid_pairs = {
-            key: value for key, value in valid_pairs.items() if not value.is_empty()
-        }
+        valid_pairs = {key: value.intersection(ints) for key, value in valid_pairs.items()}
+        valid_pairs = {key: value for key, value in valid_pairs.items() if not value.is_empty()}
     else:
         valid_pairs = {
-            value: interval
-            for value, interval in valid_pairs.items()
-            if ints.contains(value)
+            value: interval for value, interval in valid_pairs.items() if ints.contains(value)
         }
 
     return valid_pairs
 
 
-def initialize_valid_pairs(
-    p: int, n: int, iterate_by: str, init_tptn_intervals: dict
-) -> dict:
+def initialize_valid_pairs(p: int, n: int, iterate_by: str, init_tptn_intervals: dict) -> dict:
     """
     Initializes the valid pairs, either from the original input or the
     prefiltered intervals.
@@ -197,8 +175,8 @@ def _check_scores_tptn_pairs(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    solve_for: str = None,
-    init_tptn_intervals: dict = None
+    solve_for: str | None = None,
+    init_tptn_intervals: dict | None = None,
 ) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
@@ -226,8 +204,7 @@ def _check_scores_tptn_pairs(
 
     if solve_for not in {"tp", "tn"}:
         raise ValueError(
-            "The specified ``solve_for`` variable needs to be either "
-            "``tp`` or ``tn``."
+            "The specified ``solve_for`` variable needs to be either ``tp`` or ``tn``."
         )
 
     iterate_by = "tn" if solve_for == "tp" else "tp"
@@ -367,12 +344,7 @@ def update_tptn(tp, tn, sols: list):
 
 
 def _check_scores_tptn_intervals(
-    p: int,
-    n: int,
-    scores: dict,
-    eps,
-    *,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    p: int, n: int, scores: dict, eps, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
@@ -435,13 +407,9 @@ def _check_scores_tptn_intervals(
                 )
                 continue
 
-            logger.info(
-                "evaluating the tp and tn solution for %s and %s", score0, score1
-            )
+            logger.info("evaluating the tp and tn solution for %s and %s", score0, score1)
 
-            sols = solution_specifications[(tuple(sorted([score0, score1])))].evaluate(
-                params
-            )
+            sols = solution_specifications[(tuple(sorted([score0, score1])))].evaluate(params)
 
             if check_all_negative_base(sols):
                 details.append(
@@ -458,20 +426,15 @@ def _check_scores_tptn_intervals(
                     detail
                     | {
                         "inconsistency": False,
-                        "explanation": "zero division indicates an "
-                        "underdetermined system",
+                        "explanation": "zero division indicates an underdetermined system",
                     }
                 )
                 logger.info("all zero divisions - iteration continued")
                 continue
 
-            logger.info(
-                "intervals before: %s, %s", str(tp.to_tuple()), str(tn.to_tuple())
-            )
+            logger.info("intervals before: %s, %s", str(tp.to_tuple()), str(tn.to_tuple()))
             tp, tn = update_tptn(tp, tn, sols)
-            logger.info(
-                "intervals after: %s, %s", str(tp.to_tuple()), str(tn.to_tuple())
-            )
+            logger.info("intervals after: %s, %s", str(tp.to_tuple()), str(tn.to_tuple()))
 
             details.append(
                 detail
@@ -501,8 +464,8 @@ def check_scores_tptn_pairs(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-    solve_for: str = None,
-    prefilter_by_pairs: bool = False
+    solve_for: str | None = None,
+    prefilter_by_pairs: bool = False,
 ) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.

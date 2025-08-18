@@ -103,4 +103,4 @@ def test_sample_multiclass_dataset(random_seed):
     assert len(dataset) == len(sample)
     sums = np.sum(sample, axis=1)
 
-    assert np.all(sums == np.array(list(dataset.values())))
+    assert np.all(sums == np.ndarray(list(dataset.values())))

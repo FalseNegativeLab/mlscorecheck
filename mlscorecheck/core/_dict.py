@@ -18,7 +18,7 @@ def dict_mean(dicts: list) -> dict:
         dict: the dictionary with the mean figures
     """
 
-    result = dict.fromkeys(dicts[0], 0)
+    result = dict.fromkeys(dicts[0], 0.0)
 
     for tmp in dicts:
         for key in tmp:

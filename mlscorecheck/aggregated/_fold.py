@@ -21,7 +21,7 @@ class Fold:
     Abstract representation of a fold
     """
 
-    def __init__(self, p: int, n: int, identifier: str = None):
+    def __init__(self, p: int, n: int, identifier: str | None = None):
         """
         Constructor of a fold
 
@@ -34,9 +34,9 @@ class Fold:
         self.n = n
         self.identifier = random_identifier(5) if identifier is None else identifier
 
-        self.tp = None
-        self.tn = None
-        self.scores = None
+        self.tp: int | None = None
+        self.tn: int | None = None
+        self.scores: dict | None = None
 
         self.variable_names = {
             "tp": f"tp_{self.identifier}".replace("-", "_"),
@@ -70,7 +70,7 @@ class Fold:
         return self
 
     def calculate_scores(
-        self, rounding_decimals: int = None, score_subset: list = None
+        self, rounding_decimals: int | None = None, score_subset: list | None = None
     ) -> dict:
         """
         Calculate the scores for the fold
@@ -117,7 +117,7 @@ class Fold:
         self.tp.setInitialValue(int(tp_init))
         self.tn.setInitialValue(int(tn_init))
 
-    def init_lp(self, scores: dict = None):
+    def init_lp(self, scores: dict | None = None):
         """
         Initialize a linear programming problem by creating the variables for the fold
 

@@ -23,13 +23,13 @@ __all__ = [
 rules = [{"score0": "mae", "score1": "rmse", "relation": "le"}]
 
 
-def mean_average_error(y_true: np.array, y_pred: np.array) -> float:
+def mean_average_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     The mean average error (MAE) regression performance score
 
     Args:
-        y_true (np.array): the true labels
-        y_pred (np.array): the predicted labels
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
 
     Returns:
         float: the MAE score
@@ -37,13 +37,13 @@ def mean_average_error(y_true: np.array, y_pred: np.array) -> float:
     return np.mean(np.abs(y_true - y_pred))
 
 
-def mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
+def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     The mean squared error (MSE) regression performance score
 
     Args:
-        y_true (np.array): the true labels
-        y_pred (np.array): the predicted labels
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
 
     Returns:
         float: the MSE score
@@ -51,13 +51,13 @@ def mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     return np.mean((y_true - y_pred) ** 2)
 
 
-def root_mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
+def root_mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     The root mean squared error (RMSE) regression performance score
 
     Args:
-        y_true (np.array): the true labels
-        y_pred (np.array): the predicted labels
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
 
     Returns:
         float: the RMSE score
@@ -65,13 +65,13 @@ def root_mean_squared_error(y_true: np.array, y_pred: np.array) -> float:
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
 
-def r_squared(y_true: np.array, y_pred: np.array) -> float:
+def r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     The R squared (r2) regression performance score
 
     Args:
-        y_true (np.array): the true labels
-        y_pred (np.array): the predicted labels
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
 
     Returns:
         float: the R2 score
@@ -87,13 +87,13 @@ regression_scores = {
 }
 
 
-def calculate_regression_scores(y_true: np.array, y_pred: np.array, subset=None) -> dict:
+def calculate_regression_scores(y_true: np.ndarray, y_pred: np.ndarray, subset=None) -> dict:
     """
     Calculate the performance scores for a regression problem
 
     Args:
-        y_true (np.array): the true labels
-        y_pred (np.array): the predicted labels
+        y_true (np.ndarray): the true labels
+        y_pred (np.ndarray): the predicted labels
         subset (None|list(str)): the scores to calculate
 
     Returns:
@@ -191,7 +191,7 @@ def check_relations(scores: dict) -> dict:
             - ``'inconsistency'`` (bool): whether an inconsistency has been identified
             - ``'details'`` (list(dict)): the details of the analysis, with the following entries
     """
-    results = {"details": []}
+    results: dict = {"details": []}
 
     for rule in rules:
         if rule["score0"] in scores and rule["score1"] in scores:

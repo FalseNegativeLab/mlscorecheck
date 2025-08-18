@@ -16,10 +16,10 @@ class Folding:
 
     def __init__(
         self,
-        n_folds: int = None,
-        n_repeats: int = None,
-        folds: list = None,
-        strategy: str = None,
+        n_folds: int | None = None,
+        n_repeats: int | None = None,
+        folds: list | None = None,
+        strategy: str | None = None,
     ):
         """
         Constructor of the folding
@@ -34,7 +34,7 @@ class Folding:
             raise ValueError("specify either n_folds,n_repeats,strategy or folds")
         if (n_folds is None) and (n_repeats is None) and (folds is None):
             raise ValueError("specify either n_folds,strategy or folds")
-        if ((folds is None) and (strategy is None)) and (n_folds > 1):
+        if ((folds is None) and (strategy is None)) and (n_folds is not None and n_folds > 1):
             raise ValueError("specify strategy if folds are not set explicitly")
 
         self.n_folds = n_folds
@@ -79,9 +79,7 @@ class Folding:
 
             term_a = (dataset.p != p) and (p % dataset.p != 0)
             term_b = (dataset.n != n) and (n % dataset.n != 0)
-            term_c = (
-                dataset.p > 0 and dataset.n > 0 and (p // dataset.p != n // dataset.n)
-            )
+            term_c = dataset.p > 0 and dataset.n > 0 and (p // dataset.p != n // dataset.n)
 
             if term_a or term_b or term_c:
                 raise ValueError(

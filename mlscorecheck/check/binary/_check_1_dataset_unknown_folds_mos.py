@@ -11,7 +11,9 @@ from ._check_1_dataset_known_folds_mos import check_1_dataset_known_folds_mos
 __all__ = ["check_1_dataset_unknown_folds_mos", "estimate_n_evaluations"]
 
 
-def estimate_n_evaluations(dataset: dict, folding: dict, available_scores: list = None) -> int:
+def estimate_n_evaluations(
+    dataset: dict, folding: dict, available_scores: list | None = None
+) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
@@ -43,10 +45,10 @@ def check_1_dataset_unknown_folds_mos(
     folding: dict,
     scores: dict,
     eps,
-    fold_score_bounds: dict = None,
+    fold_score_bounds: dict | None = None,
     *,
-    solver_name: str = None,
-    timeout: int = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
     verbosity: int = 1,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
@@ -139,7 +141,7 @@ def check_1_dataset_unknown_folds_mos(
         "aggregation": "mos",
     }
 
-    results = {"details": []}
+    results: dict = {"details": []}
 
     for idx, evaluation_0 in enumerate(repeated_kfolds_generator(evaluation, list(scores.keys()))):
         tmp = {
