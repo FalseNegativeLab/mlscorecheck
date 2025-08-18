@@ -6,8 +6,8 @@ from ....experiments import get_experiment
 from ...binary import check_1_testset_no_kfold
 from ....core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_isic2017',
-            '_prepare_testset_isic2017']
+__all__ = ["check_isic2017", "_prepare_testset_isic2017"]
+
 
 def _prepare_testset_isic2017(target, against):
     """
@@ -22,24 +22,22 @@ def _prepare_testset_isic2017(target, against):
     Returns:
         dict: the testset
     """
-    data = get_experiment('skinlesion.isic2017')
+    data = get_experiment("skinlesion.isic2017")
 
     target = [target] if isinstance(target, str) else target
     against = [against] if isinstance(against, str) else against
 
-    mapping = {'M': 'melanoma',
-                'SK': 'seborrheic keratosis',
-                'N': 'nevus'}
+    mapping = {"M": "melanoma", "SK": "seborrheic keratosis", "N": "nevus"}
 
-    return {'p': sum(data[mapping[tmp]] for tmp in target),
-            'n': sum(data[mapping[tmp]] for tmp in against)}
+    return {
+        "p": sum(data[mapping[tmp]] for tmp in target),
+        "n": sum(data[mapping[tmp]] for tmp in against),
+    }
 
-def check_isic2017(*,
-                    target,
-                    against,
-                    scores: dict,
-                    eps: float,
-                    numerical_tolerance: float = NUMERICAL_TOLERANCE):
+
+def check_isic2017(
+    *, target, against, scores: dict, eps: float, numerical_tolerance: float = NUMERICAL_TOLERANCE
+):
     """
     Tests if the scores are consistent with the test set of the ISIC2017
     skin lesion classification dataset. The dataset contains three classes,
@@ -56,11 +54,11 @@ def check_isic2017(*,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    positive or f-beta negative, also set 'beta_positive' and
+                                    'beta_negative'. Full names in camel case, like
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -71,21 +69,21 @@ def check_isic2017(*,
         dict: A dictionary containing the results of the consistency check. The dictionary
         includes the following keys:
 
-            - ``'inconsistency'``:
-                A boolean flag indicating whether the set of feasible true
-                positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the dataset.
-            - ``'details'``:
-                A list providing further details from the analysis of the scores one
-                after the other.
-            - ``'n_valid_tptn_pairs'``:
-                The number of tp and tn pairs that are compatible with all
-                scores.
-            - ``'prefiltering_details'``:
-                The results of the prefiltering by using the solutions for
-                the score pairs.
-            - ``'evidence'``:
-                The evidence for satisfying the consistency constraints.
+        - ``'inconsistency'``:
+            A boolean flag indicating whether the set of feasible true
+            positive (tp) and true negative (tn) pairs is empty. If True,
+            it indicates that the provided scores are not consistent with the dataset.
+        - ``'details'``:
+            A list providing further details from the analysis of the scores one
+            after the other.
+        - ``'n_valid_tptn_pairs'``:
+            The number of tp and tn pairs that are compatible with all
+            scores.
+        - ``'prefiltering_details'``:
+            The results of the prefiltering by using the solutions for
+            the score pairs.
+        - ``'evidence'``:
+            The evidence for satisfying the consistency constraints.
 
     Examples:
         >>> from mlscorecheck.check.bundles.skinlesion import check_isic2017
@@ -100,8 +98,10 @@ def check_isic2017(*,
 
     testset = _prepare_testset_isic2017(target, against)
 
-    return check_1_testset_no_kfold(scores=scores,
-                                            testset=testset,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance,
-                                            prefilter_by_pairs=True)
+    return check_1_testset_no_kfold(
+        scores=scores,
+        testset=testset,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=True,
+    )

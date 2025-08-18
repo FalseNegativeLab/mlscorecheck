@@ -11,9 +11,7 @@ from ._check_1_dataset_known_folds_mos import check_1_dataset_known_folds_mos
 __all__ = ["check_1_dataset_unknown_folds_mos", "estimate_n_evaluations"]
 
 
-def estimate_n_evaluations(
-    dataset: dict, folding: dict, available_scores: list = None
-) -> int:
+def estimate_n_evaluations(dataset: dict, folding: dict, available_scores: list = None) -> int:
     """
     Estimates the number of estimations with different fold combinations.
 
@@ -59,20 +57,21 @@ def check_1_dataset_unknown_folds_mos(
     consistency of each. The scores are inconsistent if all the k-fold configurations
     lead to inconsistencies identified.
 
-    The test operates by constructing a linear program describing the experiment and checkings its
+    The test operates by constructing a linear program describing the experiment and checking its
     feasibility.
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add fold_score_bounds when, for example, the minimum and
     the maximum scores over the folds are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    'positive_predictive_value', synonyms, like 'true_positive_rate'
+    or 'tpr' instead of 'sens' and complements, like
+    'false_positive_rate' for (1 - 'spec') can also be used.
 
-    Note that depending on the size of the dataset (especially the number of minority instances)
-    and the folding configuration, this test might lead to an untractable number of problems to
-    be solved. Use the function ``estimate_n_evaluations`` to get an upper bound estimate
-    on the number of fold combinations.
+    Note:
+        Depending on the size of the dataset (especially the number of minority instances)
+        and the folding configuration, this test might lead to an untractable number of problems to
+        be solved. Use the function ``estimate_n_evaluations`` to get an upper bound estimate
+        on the number of fold combinations.
 
     The evaluation of possible fold configurations stops when a feasible configuration is found.
 
@@ -85,12 +84,12 @@ def check_1_dataset_unknown_folds_mos(
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
-                            0: silent, non-zero: verbose.
+            0: silent, non-zero: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -114,9 +113,9 @@ def check_1_dataset_unknown_folds_mos(
         >>> folding = {'n_folds': 2, 'n_repeats': 1}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
         >>> result = check_1_dataset_unknown_folds_mos(dataset=dataset,
-                                                        folding=folding,
-                                                        scores=scores,
-                                                        eps=1e-3)
+        ...     folding=folding,
+        ...     scores=scores,
+        ...     eps=1e-3)
         >>> result['inconsistency']
         # False
 
@@ -124,9 +123,9 @@ def check_1_dataset_unknown_folds_mos(
         >>> folding = {'n_folds': 3, 'n_repeats': 1}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
         >>> result = check_1_dataset_unknown_folds_mos(dataset=dataset,
-                                                        folding=folding,
-                                                        scores=scores,
-                                                        eps=1e-4)
+        ...     folding=folding,
+        ...     scores=scores,
+        ...     eps=1e-4)
         >>> result['inconsistency']
         # True
     """
@@ -164,8 +163,6 @@ def check_1_dataset_unknown_folds_mos(
             break
         idx += 1
 
-    results["inconsistency"] = all(
-        tmp["details"]["inconsistency"] for tmp in results["details"]
-    )
+    results["inconsistency"] = all(tmp["details"]["inconsistency"] for tmp in results["details"])
 
     return results

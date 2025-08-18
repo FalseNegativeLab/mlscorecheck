@@ -8,11 +8,14 @@ from ...binary import check_n_testsets_mos_no_kfold
 from ...binary import check_1_testset_no_kfold
 from ....core import NUMERICAL_TOLERANCE
 
-__all__ = ['check_chasedb1_vessel_image',
-            'check_chasedb1_vessel_aggregated',
-            'check_chasedb1_vessel_aggregated_mos',
-            'check_chasedb1_vessel_aggregated_som',
-            '_filter_chasedb1']
+__all__ = [
+    "check_chasedb1_vessel_image",
+    "check_chasedb1_vessel_aggregated",
+    "check_chasedb1_vessel_aggregated_mos",
+    "check_chasedb1_vessel_aggregated_som",
+    "_filter_chasedb1",
+]
+
 
 def _filter_chasedb1(data, imageset, annotator):
     """
@@ -26,21 +29,24 @@ def _filter_chasedb1(data, imageset, annotator):
     Returns:
         list: the image subset specification
     """
-    if imageset == 'all':
-        return data[annotator]['images']
+    if imageset == "all":
+        return data[annotator]["images"]
 
-    return [dataset for dataset in data[annotator]['images'] if dataset['identifier'] in imageset]
+    return [dataset for dataset in data[annotator]["images"] if dataset["identifier"] in imageset]
 
-def check_chasedb1_vessel_aggregated_mos(imageset,
-                            annotator: str,
-                            scores: dict,
-                            eps,
-                            *,
-                            score_bounds: dict = None,
-                            solver_name: str = None,
-                            timeout: int = None,
-                            verbosity: int = 1,
-                            numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_chasedb1_vessel_aggregated_mos(
+    imageset,
+    annotator: str,
+    scores: dict,
+    eps,
+    *,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Checking the consistency of scores with calculated for some images of
     the CHASEDB1 dataset with the mean of scores aggregation.
@@ -82,48 +88,46 @@ def check_chasedb1_vessel_aggregated_mos(imageset,
             - ``'lp_configuration'``:
                 Contains the actual configuration of the linear programming solver.
     """
-    data = get_experiment('retina.chase_db1')
+    data = get_experiment("retina.chase_db1")
 
     testsets = _filter_chasedb1(data, imageset, annotator)
 
-    return check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                scores=scores,
-                                                eps=eps,
-                                                testset_score_bounds=score_bounds,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
+    return check_n_testsets_mos_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        testset_score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
 
 
-def check_chasedb1_vessel_aggregated_som(imageset,
-                            annotator,
-                            scores,
-                            eps,
-                            numerical_tolerance=NUMERICAL_TOLERANCE):
+def check_chasedb1_vessel_aggregated_som(
+    imageset, annotator, scores, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+):
     """
     Tests the consistency of scores calculated on the CHASEDB1 dataset using
     the score-of-means aggregation.
 
     Args:
         imageset (str|list): 'all' if all images are used, or a list of identifiers of
-                            images (e.g. ['11R', '07L'])
+            images (e.g. ['11R', '07L'])
         annotator (str): the annotation to be used ('manual1'/'manual2')
         scores (dict): the scores to check ('acc', 'sens', 'spec',
-                        'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
-                        'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
-                        'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+            'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n', 'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+            'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta positive or f-beta negative, also set
+            'beta_positive' and 'beta_negative'. Full names in camel case, like
+            'positive_predictive_value', synonyms, like 'true_positive_rate'
+            or 'tpr' instead of 'sens' and complements, like
+            'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -145,26 +149,31 @@ def check_chasedb1_vessel_aggregated_som(imageset,
             - ``'evidence'``:
                 The evidence for satisfying the consistency constraints.
     """
-    data = get_experiment('retina.chase_db1')
+    data = get_experiment("retina.chase_db1")
 
     testsets = _filter_chasedb1(data, imageset, annotator)
 
-    return check_n_testsets_som_no_kfold(testsets=testsets,
-                                                scores=scores,
-                                                eps=eps,
-                                                numerical_tolerance=numerical_tolerance,
-                                                prefilter_by_pairs=True)
+    return check_n_testsets_som_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=True,
+    )
 
-def check_chasedb1_vessel_aggregated(imageset,
-                                annotator: str,
-                                scores: dict,
-                                eps,
-                                *,
-                                score_bounds: dict = None,
-                                solver_name: str = None,
-                                timeout: int = None,
-                                verbosity: int = 1,
-                                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_chasedb1_vessel_aggregated(
+    imageset,
+    annotator: str,
+    scores: dict,
+    eps,
+    *,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Testing the scores calculated for the CHASEDB1 dataset with both assumptions
     on the mode of aggregation.
@@ -209,34 +218,39 @@ def check_chasedb1_vessel_aggregated(imageset,
     """
     results = {}
 
-    results['details_mos'] = check_chasedb1_vessel_aggregated_mos(
-                                                        imageset=imageset,
-                                                        annotator=annotator,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        score_bounds=score_bounds,
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity,
-                                                        numerical_tolerance=numerical_tolerance)
-    results['details_som'] = check_chasedb1_vessel_aggregated_som(
-                                                        imageset=imageset,
-                                                        annotator=annotator,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        numerical_tolerance=numerical_tolerance)
+    results["details_mos"] = check_chasedb1_vessel_aggregated_mos(
+        imageset=imageset,
+        annotator=annotator,
+        scores=scores,
+        eps=eps,
+        score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
+    results["details_som"] = check_chasedb1_vessel_aggregated_som(
+        imageset=imageset,
+        annotator=annotator,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['inconsistency'] = {f'inconsistency_{tmp}': results[f'details_{tmp}']['inconsistency']
-                                    for tmp in ['mos', 'som']}
+    results["inconsistency"] = {
+        f"inconsistency_{tmp}": results[f"details_{tmp}"]["inconsistency"] for tmp in ["mos", "som"]
+    }
     return results
 
 
-def check_chasedb1_vessel_image(image_identifier: str,
-                            annotator: str,
-                            scores: dict,
-                            eps,
-                            *,
-                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+def check_chasedb1_vessel_image(
+    image_identifier: str,
+    annotator: str,
+    scores: dict,
+    eps,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+):
     """
     Testing the scores calculated for one image of the CHASEDB1 dataset
 
@@ -247,11 +261,11 @@ def check_chasedb1_vessel_image(image_identifier: str,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    positive or f-beta negative, also set 'beta_positive' and
+                                    'beta_negative'. Full names in camel case, like
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -263,21 +277,21 @@ def check_chasedb1_vessel_image(image_identifier: str,
         dict: A dictionary containing the results of the consistency check. The dictionary
         includes the following keys:
 
-            - ``'inconsistency'``:
-                A boolean flag indicating whether the set of feasible true
-                positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the experiment.
-            - ``'details'``:
-                A list providing further details from the analysis of the scores one
-                after the other.
-            - ``'n_valid_tptn_pairs'``:
-                The number of tp and tn pairs that are compatible with all
-                scores.
-            - ``'prefiltering_details'``:
-                The results of the prefiltering by using the solutions for
-                the score pairs.
-            - ``'evidence'``:
-                The evidence for satisfying the consistency constraints.
+        - ``'inconsistency'``:
+            A boolean flag indicating whether the set of feasible true
+            positive (tp) and true negative (tn) pairs is empty. If True,
+            it indicates that the provided scores are not consistent with the experiment.
+        - ``'details'``:
+            A list providing further details from the analysis of the scores one
+            after the other.
+        - ``'n_valid_tptn_pairs'``:
+            The number of tp and tn pairs that are compatible with all
+            scores.
+        - ``'prefiltering_details'``:
+            The results of the prefiltering by using the solutions for
+            the score pairs.
+        - ``'evidence'``:
+            The evidence for satisfying the consistency constraints.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_chasedb1_vessel_image
@@ -290,12 +304,15 @@ def check_chasedb1_vessel_image(image_identifier: str,
         >>> results['inconsistency']
         # False
     """
-    images = get_experiment('retina.chase_db1')
-    image = [image for image in images[annotator]['images']
-                if image['identifier'] == image_identifier][0]
+    images = get_experiment("retina.chase_db1")
+    image = [
+        image for image in images[annotator]["images"] if image["identifier"] == image_identifier
+    ][0]
 
-    return check_1_testset_no_kfold(testset=image,
-                                            scores=scores,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance,
-                                            prefilter_by_pairs=True)
+    return check_1_testset_no_kfold(
+        testset=image,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=True,
+    )

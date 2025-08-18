@@ -29,31 +29,32 @@ def check_1_testset_no_kfold_macro(
     The test operates by constructing a linear programming problem representing the experiment
     and checking its feasibility.
 
-    Note that this test can only check the consistency of the 'acc', 'sens', 'spec'
-    and 'bacc' scores. Note that without bounds, if there is a large number of classes, it is
-    likely that there will be a configuration matching the scores provided. In order to
-    increase the strength of the test, one can add ``class_scores_bounds`` when, for example,
-    besides the average score, the minimum and the maximum scores over the classes
-    are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    Note:
+        This test can only check the consistency of the 'acc', 'sens', 'spec'
+        and 'bacc' scores. Without bounds, if there is a large number of classes, it is
+        likely that there will be a configuration matching the scores provided. In order to
+        increase the strength of the test, one can add ``class_scores_bounds`` when, for example,
+        besides the average score, the minimum and the maximum scores over the classes
+        are also provided. Full names in camel case, like
+        'positive_predictive_value', synonyms, like 'true_positive_rate'
+        or 'tpr' instead of 'sens' and complements, like
+        'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         testset (dict): the specification of the testset
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         class_score_bounds (None|dict(str,tuple(float,float))): bounds on the scores in the
-                                                                classes
+            classes
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity level of the pulp linear programming solver
-                            0: silent, non-zero: verbose.
+            0: silent, non-zero: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary

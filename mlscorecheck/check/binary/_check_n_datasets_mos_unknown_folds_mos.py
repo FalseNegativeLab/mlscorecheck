@@ -62,20 +62,21 @@ def check_n_datasets_mos_unknown_folds_mos(
     consistency of each. The scores are inconsistent if all the k-fold configurations
     lead to inconsistencies identified.
 
-    The test operates by constructing a linear program describing the experiment and checkings its
+    The test operates by constructing a linear program describing the experiment and checking its
     feasibility.
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add dataset_score_bounds when, for example, the minimum and
     the maximum scores over the datasets are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    'positive_predictive_value', synonyms, like 'true_positive_rate'
+    or 'tpr' instead of 'sens' and complements, like
+    'false_positive_rate' for (1 - 'spec') can also be used.
 
-    Note that depending on the size of the dataset (especially the number of minority instances)
-    and the folding configuration, this test might lead to an untractable number of problems to
-    be solved. Use the function ``estimate_n_experiments`` to get an upper bound estimate
-    on the number of fold combinations.
+    Note:
+        Depending on the size of the dataset (especially the number of minority instances)
+        and the folding configuration, this test might lead to an untractable number of problems to
+        be solved. Use the function ``estimate_n_experiments`` to get an upper bound estimate
+        on the number of fold combinations.
 
     The evaluation of possible fold configurations stops when a feasible configuration is found.
 
@@ -84,16 +85,16 @@ def check_n_datasets_mos_unknown_folds_mos(
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         dataset_score_bounds (None|dict(str,dict(float,float))): bounds on the scores in the
-                                                                    datasets
+            datasets
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the pulp linear programming solver,
-                            0: silent, non-zero: verbose
+            0: silent, non-zero: verbose
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -114,38 +115,34 @@ def check_n_datasets_mos_unknown_folds_mos(
     Examples:
         >>> from mlscorecheck.check.binary import check_n_datasets_mos_unknown_folds_mos
         >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                        'folding': {'n_folds': 4, 'n_repeats': 1}}
+        ...     'folding': {'n_folds': 4, 'n_repeats': 1}}
         >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                        'folding': {'n_folds': 3, 'n_repeats': 1}}
+        ...     'folding': {'n_folds': 3, 'n_repeats': 1}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.343}
         >>> result = check_n_datasets_mos_unknown_folds_mos(evaluations=evaluations,
-                                                            scores=scores,
-                                                            eps=1e-3)
+        ...     scores=scores,
+        ...     eps=1e-3)
         >>> result['inconsistency']
         # False
 
         >>> evaluation0 = {'dataset': {'p': 13, 'n': 73},
-                        'folding': {'n_folds': 4, 'n_repeats': 1}}
+        ...     'folding': {'n_folds': 4, 'n_repeats': 1}}
         >>> evaluation1 = {'dataset': {'p': 7, 'n': 26},
-                        'folding': {'n_folds': 3, 'n_repeats': 1}}
+        ...     'folding': {'n_folds': 3, 'n_repeats': 1}}
         >>> evaluations = [evaluation0, evaluation1]
         >>> scores = {'acc': 0.357, 'sens': 0.323, 'spec': 0.362, 'bacc': 0.9}
         >>> result = check_n_datasets_mos_unknown_folds_mos(evaluations=evaluations,
-                                                            scores=scores,
-                                                            eps=1e-3)
+        ...     scores=scores,
+        ...     eps=1e-3)
         >>> result['inconsistency']
         # True
     """
     evaluations = translate_metadata(evaluations)
 
     if any(evaluation.get("aggregation", "mos") != "mos" for evaluation in evaluations):
-        raise ValueError(
-            'the aggregation specified in each dataset must be "mor" or nothing.'
-        )
-    if any(
-        evaluation.get("fold_score_bounds") is not None for evaluation in evaluations
-    ):
+        raise ValueError('the aggregation specified in each dataset must be "mor" or nothing.')
+    if any(evaluation.get("fold_score_bounds") is not None for evaluation in evaluations):
         raise ValueError("do not specify fold score bounds through this interface")
 
     evaluations = copy.deepcopy(evaluations)

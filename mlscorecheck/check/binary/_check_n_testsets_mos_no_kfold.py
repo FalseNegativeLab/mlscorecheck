@@ -24,33 +24,33 @@ def check_n_testsets_mos_no_kfold(
 ) -> dict:
     """
     This function checks the consistency of scores calculated on multiple testsets with no k-fold
-    and aggregating the figures over the testsets in the mean of scores fashion.
+    and aggregates the figures over the testsets in the mean of scores fashion.
 
-    The test operates by constructing a linear program describing the experiment and checkings its
+    The test operates by constructing a linear program describing the experiment and checking its
     feasibility.
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add ``testset_score_bounds`` when, for example, the minimum
     and the maximum scores over the testsets are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    'positive_predictive_value', synonyms, like 'true_positive_rate'
+    or 'tpr' instead of 'sens' and complements, like
+    'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         testsets (list(dict)): the list of testset specifications
         scores (dict(str,float)): the scores to check
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         testset_score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
-                                                                scores in the testsets
+            scores in the testsets
         solver_name (None|str): the solver to use
         timeout (None|int): the timeout for the linear programming solver in seconds
         verbosity (int): the verbosity of the linear programming solver,
-                            0: silent, 1: verbose.
+            0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -75,21 +75,23 @@ def check_n_testsets_mos_no_kfold(
 
     Examples:
         >>> from mlscorecheck.check.binary import check_n_testsets_mos_no_kfold
-        >>> testsets = [{'p': 349, 'n': 50},
-                        {'p': 478, 'n': 323},
-                        {'p': 324, 'n': 83},
-                        {'p': 123, 'n': 145}]
+        >>> testsets = [
+        ...     {'p': 349, 'n': 50},
+        ...     {'p': 478, 'n': 323},
+        ...     {'p': 324, 'n': 83},
+        ...     {'p': 123, 'n': 145}
+        ... ]
         >>> scores = {'acc': 0.6441, 'sens': 0.6706, 'spec': 0.3796, 'bacc': 0.5251}
         >>> result = check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                    eps=1e-4,
-                                                    scores=scores)
+        ...     eps=1e-4,
+        ...     scores=scores)
         >>> result['inconsistency']
         # False
 
         >>> scores['sens'] = 0.6756
         >>> result = check_n_datasets_mos_no_kfold(testsets=testsets,
-                                                    eps=1e-4,
-                                                    scores=scores)
+        ...     eps=1e-4,
+        ...     scores=scores)
         >>> result['inconsistency']
         # True
     """

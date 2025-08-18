@@ -27,15 +27,15 @@ def check_1_dataset_known_folds_mos(
     This function checks the consistency of scores calculated by applying k-fold cross validation
     to a single dataset and aggregating the figures over the folds in the mean of scores fashion.
 
-    The test operates by constructing a linear program describing the experiment and checkings its
+    The test operates by constructing a linear program describing the experiment and checking its
     feasibility.
 
     The test can only check the consistency of the 'acc', 'sens', 'spec' and 'bacc'
     scores. For a stronger test, one can add ``fold_score_bounds`` when, for example, the minimum
     and the maximum scores over the folds are also provided. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+    'positive_predictive_value', synonyms, like 'true_positive_rate'
+    or 'tpr' instead of 'sens' and complements, like
+    'false_positive_rate' for (1 - 'spec') can also be used.
 
     Args:
         dataset (dict): The dataset specification.
@@ -46,12 +46,12 @@ def check_1_dataset_known_folds_mos(
         solver_name (None|str): The solver to use.
         timeout (None|int): The timeout for the linear programming solver in seconds.
         verbosity (int): The verbosity level of the pulp linear programming solver.
-                         0: silent, non-zero: verbose.
+            0: silent, non-zero: verbose.
         numerical_tolerance (float): In practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -80,9 +80,9 @@ def check_1_dataset_known_folds_mos(
         >>> folding = {'folds': [{'p': 52, 'n': 94}, {'p': 74, 'n': 37}]}
         >>> scores = {'acc': 0.573, 'sens': 0.768, 'bacc': 0.662}
         >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
-                                                    folding=folding,
-                                                    scores=scores,
-                                                    eps=1e-3)
+        ...     folding=folding,
+        ...     scores=scores,
+        ...     eps=1e-3)
         >>> result['inconsistency']
         # False
 
@@ -90,9 +90,9 @@ def check_1_dataset_known_folds_mos(
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6}
         >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
-                                                    folding=folding,
-                                                    scores=scores,
-                                                    eps=1e-2)
+        ...     folding=folding,
+        ...     scores=scores,
+        ...     eps=1e-2)
         >>> result['inconsistency']
         # True
 
@@ -100,11 +100,11 @@ def check_1_dataset_known_folds_mos(
         >>> folding = {'n_folds': 4, 'n_repeats': 2, 'strategy': 'stratified_sklearn'}
         >>> scores = {'acc': 0.9, 'spec': 0.9, 'sens': 0.6, 'bacc': 0.1, 'f1': 0.95}
         >>> result = check_1_dataset_known_folds_mos(dataset=dataset,
-                                                    folding=folding,
-                                                    fold_score_bounds={'acc': (0.8, 1.0)},
-                                                    scores=scores,
-                                                    eps=1e-2,
-                                                    numerical_tolerance=1e-6)
+        ...     folding=folding,
+        ...     fold_score_bounds={'acc': (0.8, 1.0)},
+        ...     scores=scores,
+        ...     eps=1e-2,
+        ...     numerical_tolerance=1e-6)
         >>> result['inconsistency']
         # True
     """

@@ -8,18 +8,17 @@ from ...binary import check_n_testsets_mos_no_kfold
 from ...binary import check_n_testsets_som_no_kfold
 from ....core import NUMERICAL_TOLERANCE, logger
 
-__all__ = ['_prepare_configuration_diaretdb1',
-            'check_diaretdb1_class',
-            'check_diaretdb1_segmentation_image_assumption',
-            'check_diaretdb1_segmentation_image',
-            'check_diaretdb1_segmentation_aggregated_assumption',
-            'check_diaretdb1_segmentation_aggregated']
+__all__ = [
+    "_prepare_configuration_diaretdb1",
+    "check_diaretdb1_class",
+    "check_diaretdb1_segmentation_image_assumption",
+    "check_diaretdb1_segmentation_image",
+    "check_diaretdb1_segmentation_aggregated_assumption",
+    "check_diaretdb1_segmentation_aggregated",
+]
 
-def _prepare_testsets_diaretdb1(subset_indices,
-                                    data,
-                                    key,
-                                    assumption,
-                                    threshold):
+
+def _prepare_testsets_diaretdb1(subset_indices, data, key, assumption, threshold):
     """
     Helper function for generating the diaretdb1 evaluation configuration
 
@@ -34,11 +33,11 @@ def _prepare_testsets_diaretdb1(subset_indices,
         list, dict: the image level testsets and the overall testset
     """
     testsets = []
-    testset = {'p': 0, 'n': 0}
+    testset = {"p": 0, "n": 0}
 
     for img_idx in subset_indices:
-        values = data[img_idx][key][assumption]['values']
-        counts = data[img_idx][key][assumption]['counts']
+        values = data[img_idx][key][assumption]["values"]
+        counts = data[img_idx][key][assumption]["counts"]
 
         total_p = 0
         total_n = 0
@@ -48,21 +47,17 @@ def _prepare_testsets_diaretdb1(subset_indices,
             else:
                 total_n += count
 
+        testsets.append({"identifier": img_idx, "p": total_p, "n": total_n})
 
-        testsets.append({'identifier': img_idx, 'p': total_p, 'n': total_n})
-
-        testset['p'] += (total_p > 0)
-        testset['n'] += (total_p == 0)
+        testset["p"] += total_p > 0
+        testset["n"] += total_p == 0
 
     return testsets, testset
 
-def _prepare_configuration_diaretdb1(*,
-                                        subset,
-                                        class_name,
-                                        pixel_level: bool,
-                                        assumption: str,
-                                        confidence: float,
-                                        only_valid=False) -> list:
+
+def _prepare_configuration_diaretdb1(
+    *, subset, class_name, pixel_level: bool, assumption: str, confidence: float, only_valid=False
+) -> list:
     """
     Prepares the experiment confuguration based on the description
 
@@ -86,35 +81,38 @@ def _prepare_configuration_diaretdb1(*,
     """
 
     class_name = [class_name] if isinstance(class_name, str) else class_name
-    data = get_experiment('retina.diaretdb1')
+    data = get_experiment("retina.diaretdb1")
 
     subset_indices = data[subset] if isinstance(subset, str) else subset
-    data = data['distributions']
+    data = data["distributions"]
 
-    mapping = {'hardexudates': 'he',
-                'softexudates': 'se',
-                'hemorrhages': 'hr',
-                'redsmalldots': 'rsd'}
-    key = '-'.join(sorted([mapping[class_] for class_ in class_name]))
+    mapping = {
+        "hardexudates": "he",
+        "softexudates": "se",
+        "hemorrhages": "hr",
+        "redsmalldots": "rsd",
+    }
+    key = "-".join(sorted([mapping[class_] for class_ in class_name]))
 
-    testsets, testset = _prepare_testsets_diaretdb1(subset_indices,
-                                                    data,
-                                                    key,
-                                                    assumption,
-                                                    confidence*255)
+    testsets, testset = _prepare_testsets_diaretdb1(
+        subset_indices, data, key, assumption, confidence * 255
+    )
 
     if only_valid:
-        testsets = [tset for tset in testsets if tset['p'] > 0 and tset['n'] > 0]
+        testsets = [tset for tset in testsets if tset["p"] > 0 and tset["n"] > 0]
 
     return testsets if pixel_level else testset
 
-def check_diaretdb1_class(*,
-                            subset: str,
-                            class_name,
-                            confidence: float,
-                            scores: dict,
-                            eps,
-                            numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb1_class(
+    *,
+    subset: str,
+    class_name,
+    confidence: float,
+    scores: dict,
+    eps,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the scores describing the labeling of images in DIARETDB1. The problem is
     a multi-labeling problem, this test function supports binary the testing of
@@ -129,11 +127,11 @@ def check_diaretdb1_class(*,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    positive or f-beta negative, also set 'beta_positive' and
+                                    'beta_negative'. Full names in camel case, like
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -145,21 +143,21 @@ def check_diaretdb1_class(*,
         dict: A dictionary containing the results of the consistency check. The dictionary
         includes the following keys:
 
-            - ``'inconsistency'``:
-                A boolean flag indicating whether the set of feasible true
-                positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the experiment.
-            - ``'details'``:
-                A list providing further details from the analysis of the scores one
-                after the other.
-            - ``'n_valid_tptn_pairs'``:
-                The number of tp and tn pairs that are compatible with all
-                scores.
-            - ``'prefiltering_details'``:
-                The results of the prefiltering by using the solutions for
-                the score pairs.
-            - ``'evidence'``:
-                The evidence for satisfying the consistency constraints.
+        - ``'inconsistency'``:
+            A boolean flag indicating whether the set of feasible true
+            positive (tp) and true negative (tn) pairs is empty. If True,
+            it indicates that the provided scores are not consistent with the experiment.
+        - ``'details'``:
+            A list providing further details from the analysis of the scores one
+            after the other.
+        - ``'n_valid_tptn_pairs'``:
+            The number of tp and tn pairs that are compatible with all
+            scores.
+        - ``'prefiltering_details'``:
+            The results of the prefiltering by using the solutions for
+            the score pairs.
+        - ``'evidence'``:
+            The evidence for satisfying the consistency constraints.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_class
@@ -172,25 +170,29 @@ def check_diaretdb1_class(*,
         >>> results['inconsistency']
         # False
     """
-    testset = _prepare_configuration_diaretdb1(subset=subset,
-                                class_name=class_name,
-                                pixel_level=False,
-                                assumption='all',
-                                confidence=confidence)
+    testset = _prepare_configuration_diaretdb1(
+        subset=subset,
+        class_name=class_name,
+        pixel_level=False,
+        assumption="all",
+        confidence=confidence,
+    )
 
-    return check_1_testset_no_kfold(testset=testset,
-                                            scores=scores,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_1_testset_no_kfold(
+        testset=testset, scores=scores, eps=eps, numerical_tolerance=numerical_tolerance
+    )
 
-def check_diaretdb1_segmentation_image_assumption(*,
-                                    image_identifier: str,
-                                    class_name,
-                                    assumption: str,
-                                    confidence: float,
-                                    scores: dict,
-                                    eps,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb1_segmentation_image_assumption(
+    *,
+    image_identifier: str,
+    class_name,
+    assumption: str,
+    confidence: float,
+    scores: dict,
+    eps,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the scores describing the segmentation of images in DIARETDB1. This test function
     supports binary the testing of binary subproblems (for example, the pixels of the
@@ -221,13 +223,13 @@ def check_diaretdb1_segmentation_image_assumption(*,
         dict: A dictionary containing the results of the consistency check. The dictionary
         includes the following keys:
 
-            - ``'inconsistency'``:
-                A boolean flag indicating whether the set of feasible true
-                positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the experiment.
-            - ``'details'``:
-                A list providing further details from the analysis of the scores one
-                after the other.
+        - ``'inconsistency'``:
+            A boolean flag indicating whether the set of feasible true
+            positive (tp) and true negative (tn) pairs is empty. If True,
+            it indicates that the provided scores are not consistent with the experiment.
+        - ``'details'``:
+            A list providing further details from the analysis of the scores one
+            after the other.
             - ``'n_valid_tptn_pairs'``:
                 The number of tp and tn pairs that are compatible with all
                 scores.
@@ -237,31 +239,38 @@ def check_diaretdb1_segmentation_image_assumption(*,
             - ``'evidence'``:
                 The evidence for satisfying the consistency constraints.
     """
-    testset_test = _prepare_configuration_diaretdb1(subset='test',
-                                class_name=class_name,
-                                pixel_level=True,
-                                assumption=assumption,
-                                confidence=confidence)
-    testset_train = _prepare_configuration_diaretdb1(subset='train',
-                                class_name=class_name,
-                                pixel_level=True,
-                                assumption=assumption,
-                                confidence=confidence)
-    testset = [tset for tset in testset_test + testset_train
-                    if tset['identifier'] == image_identifier][0]
+    testset_test = _prepare_configuration_diaretdb1(
+        subset="test",
+        class_name=class_name,
+        pixel_level=True,
+        assumption=assumption,
+        confidence=confidence,
+    )
+    testset_train = _prepare_configuration_diaretdb1(
+        subset="train",
+        class_name=class_name,
+        pixel_level=True,
+        assumption=assumption,
+        confidence=confidence,
+    )
+    testset = [
+        tset for tset in testset_test + testset_train if tset["identifier"] == image_identifier
+    ][0]
 
-    return check_1_testset_no_kfold(testset=testset,
-                                            scores=scores,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_1_testset_no_kfold(
+        testset=testset, scores=scores, eps=eps, numerical_tolerance=numerical_tolerance
+    )
 
-def check_diaretdb1_segmentation_image(*,
-                                    image_identifier: str,
-                                    class_name,
-                                    confidence: float,
-                                    scores: dict,
-                                    eps,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb1_segmentation_image(
+    *,
+    image_identifier: str,
+    class_name,
+    confidence: float,
+    scores: dict,
+    eps,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the scores describing the segmentation of images in DIARETDB1. This test function
     supports binary the testing of binary subproblems (for example, the pixels of the
@@ -276,11 +285,11 @@ def check_diaretdb1_segmentation_image(*,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    positive or f-beta negative, also set 'beta_positive' and
+                                    'beta_negative'. Full names in camel case, like
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float): the numerical uncertainty
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -291,10 +300,10 @@ def check_diaretdb1_segmentation_image(*,
     Returns:
         dict: The summary of the results, with the following entries:
 
-            - ``'inconsistency'``:
-                All findings.
-            - ``details*``:
-                The details of the analysis for the two assumptions.
+        - ``'inconsistency'``:
+            All findings.
+        - ``details*``:
+            The details of the analysis for the two assumptions.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_diaretdb1_segmentation_image
@@ -308,40 +317,47 @@ def check_diaretdb1_segmentation_image(*,
         # {'inconsistency_fov': True, 'inconsistency_all': False}
     """
     results = {}
-    results['details_fov'] = check_diaretdb1_segmentation_image_assumption(
-                                    image_identifier=image_identifier,
-                                    class_name=class_name,
-                                    confidence=confidence,
-                                    assumption='fov',
-                                    scores=scores,
-                                    eps=eps,
-                                    numerical_tolerance=numerical_tolerance)
-    results['details_all'] = check_diaretdb1_segmentation_image_assumption(
-                                    image_identifier=image_identifier,
-                                    class_name=class_name,
-                                    confidence=confidence,
-                                    assumption='all',
-                                    scores=scores,
-                                    eps=eps,
-                                    numerical_tolerance=numerical_tolerance)
-    results['inconsistency'] = {'inconsistency_fov': results['details_fov']['inconsistency'],
-                                'inconsistency_all': results['details_all']['inconsistency']}
+    results["details_fov"] = check_diaretdb1_segmentation_image_assumption(
+        image_identifier=image_identifier,
+        class_name=class_name,
+        confidence=confidence,
+        assumption="fov",
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+    )
+    results["details_all"] = check_diaretdb1_segmentation_image_assumption(
+        image_identifier=image_identifier,
+        class_name=class_name,
+        confidence=confidence,
+        assumption="all",
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+    )
+    results["inconsistency"] = {
+        "inconsistency_fov": results["details_fov"]["inconsistency"],
+        "inconsistency_all": results["details_all"]["inconsistency"],
+    }
 
     return results
 
-def check_diaretdb1_segmentation_aggregated_assumption(*,
-                                    subset: str,
-                                    class_name,
-                                    assumption: str,
-                                    confidence: float,
-                                    only_valid: bool,
-                                    scores: dict,
-                                    eps,
-                                    score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb1_segmentation_aggregated_assumption(
+    *,
+    subset: str,
+    class_name,
+    assumption: str,
+    confidence: float,
+    only_valid: bool,
+    scores: dict,
+    eps,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the scores describing the segmentation of multiple images of DIARETDB1 in an aggregated
     way. This test function supports binary the testing of binary subproblems (for example, the
@@ -381,49 +397,56 @@ def check_diaretdb1_segmentation_aggregated_assumption(*,
                 The details of the analysis for the two assumptions.
     """
 
-    testsets = _prepare_configuration_diaretdb1(subset=subset,
-                                class_name=class_name,
-                                pixel_level=True,
-                                assumption=assumption,
-                                confidence=confidence,
-                                only_valid=only_valid)
+    testsets = _prepare_configuration_diaretdb1(
+        subset=subset,
+        class_name=class_name,
+        pixel_level=True,
+        assumption=assumption,
+        confidence=confidence,
+        only_valid=only_valid,
+    )
 
     results = {}
-    results['details_som'] = check_n_testsets_som_no_kfold(testsets=testsets,
-                                                    scores=scores,
-                                                    eps=eps,
-                                                    numerical_tolerance=numerical_tolerance)
-    results['inconsistency'] = {'inconsistency_som': results['details_som']['inconsistency']}
+    results["details_som"] = check_n_testsets_som_no_kfold(
+        testsets=testsets, scores=scores, eps=eps, numerical_tolerance=numerical_tolerance
+    )
+    results["inconsistency"] = {"inconsistency_som": results["details_som"]["inconsistency"]}
 
-    if not (any(testset['p'] == 0 for testset in testsets) and 'sens' in scores):
-        results['details_mos'] = check_n_testsets_mos_no_kfold(
-                                                        testsets=testsets,
-                                                        scores=scores,
-                                                        eps=eps,
-                                                        testset_score_bounds=score_bounds,
-                                                        solver_name=solver_name,
-                                                        timeout=timeout,
-                                                        verbosity=verbosity,
-                                                        numerical_tolerance=numerical_tolerance)
-        results['inconsistency']['inconsistency_mos'] = results['details_mos']['inconsistency']
+    if not (any(testset["p"] == 0 for testset in testsets) and "sens" in scores):
+        results["details_mos"] = check_n_testsets_mos_no_kfold(
+            testsets=testsets,
+            scores=scores,
+            eps=eps,
+            testset_score_bounds=score_bounds,
+            solver_name=solver_name,
+            timeout=timeout,
+            verbosity=verbosity,
+            numerical_tolerance=numerical_tolerance,
+        )
+        results["inconsistency"]["inconsistency_mos"] = results["details_mos"]["inconsistency"]
     else:
-        logger.info('some testsets have 0 positives and the sens score is specified, thus, MoS'
-                    'aggregation is undefined')
+        logger.info(
+            "some testsets have 0 positives and the sens score is specified, thus, MoS"
+            "aggregation is undefined"
+        )
 
     return results
 
-def check_diaretdb1_segmentation_aggregated(*,
-                                    subset: str,
-                                    class_name,
-                                    confidence: float,
-                                    only_valid: bool,
-                                    scores: dict,
-                                    eps,
-                                    score_bounds: dict = None,
-                                    solver_name: str = None,
-                                    timeout: int = None,
-                                    verbosity: int = 1,
-                                    numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_diaretdb1_segmentation_aggregated(
+    *,
+    subset: str,
+    class_name,
+    confidence: float,
+    only_valid: bool,
+    scores: dict,
+    eps,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the scores describing the segmentation of multiple images of DIARETDB1 in an aggregated
     way. This test function supports binary the testing of binary subproblems (for example, the
@@ -480,44 +503,48 @@ def check_diaretdb1_segmentation_aggregated(*,
 
     results = {}
 
-    results['details_fov'] = check_diaretdb1_segmentation_aggregated_assumption(
-                                    subset=subset,
-                                    class_name=class_name,
-                                    assumption='fov',
-                                    confidence=confidence,
-                                    only_valid=only_valid,
-                                    scores=scores,
-                                    eps=eps,
-                                    score_bounds=score_bounds,
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+    results["details_fov"] = check_diaretdb1_segmentation_aggregated_assumption(
+        subset=subset,
+        class_name=class_name,
+        assumption="fov",
+        confidence=confidence,
+        only_valid=only_valid,
+        scores=scores,
+        eps=eps,
+        score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['details_all'] = check_diaretdb1_segmentation_aggregated_assumption(
-                                    subset=subset,
-                                    class_name=class_name,
-                                    assumption='all',
-                                    confidence=confidence,
-                                    only_valid=only_valid,
-                                    scores=scores,
-                                    eps=eps,
-                                    score_bounds=score_bounds,
-                                    solver_name=solver_name,
-                                    timeout=timeout,
-                                    verbosity=verbosity,
-                                    numerical_tolerance=numerical_tolerance)
+    results["details_all"] = check_diaretdb1_segmentation_aggregated_assumption(
+        subset=subset,
+        class_name=class_name,
+        assumption="all",
+        confidence=confidence,
+        only_valid=only_valid,
+        scores=scores,
+        eps=eps,
+        score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['inconsistency'] = {'inconsistency_fov_som':
-                                    results['details_fov']['details_som']['inconsistency'],
-                                'inconsistency_all_som':
-                                    results['details_all']['details_som']['inconsistency']}
+    results["inconsistency"] = {
+        "inconsistency_fov_som": results["details_fov"]["details_som"]["inconsistency"],
+        "inconsistency_all_som": results["details_all"]["details_som"]["inconsistency"],
+    }
 
-    if 'details_mos' in results['details_fov']:
-        results['inconsistency']['inconsistency_fov_mos'] = \
-            results['details_fov']['details_mos']['inconsistency']
-    if 'details_mos' in results['details_all']:
-        results['inconsistency']['inconsistency_all_mos'] = \
-            results['details_all']['details_mos']['inconsistency']
+    if "details_mos" in results["details_fov"]:
+        results["inconsistency"]["inconsistency_fov_mos"] = results["details_fov"]["details_mos"][
+            "inconsistency"
+        ]
+    if "details_mos" in results["details_all"]:
+        results["inconsistency"]["inconsistency_all_mos"] = results["details_all"]["details_mos"][
+            "inconsistency"
+        ]
 
     return results

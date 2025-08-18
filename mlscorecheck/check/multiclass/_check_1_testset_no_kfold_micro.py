@@ -28,22 +28,20 @@ def check_1_testset_no_kfold_micro(
     Args:
         testset (dict): the specification of the testset
         scores (dict(str,float)): the scores to check ('acc', 'sens', 'spec',
-                                    'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
-                                    'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
-                                    'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+            'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n', 'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
+            'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta positive or f-beta negative, also set
+            'beta_positive' and 'beta_negative'. Full names in camel case, like
+            'positive_predictive_value', synonyms, like 'true_positive_rate'
+            or 'tpr' instead of 'sens' and complements, like
+            'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
-                                    the scores, some further tolerance is applied. This is
-                                    orders of magnitude smaller than the uncertainty of the
-                                    scores. It does ensure that the specificity of the test
-                                    is 1, it might slightly decrease the sensitivity.
+            the scores, some further tolerance is applied. This is
+            orders of magnitude smaller than the uncertainty of the
+            scores. It does ensure that the specificity of the test
+            is 1, it might slightly decrease the sensitivity.
         prefilter_by_pairs (bool): whether to prefilter the solution space by pair
-                                    solutions when possible to speed up the process
+            solutions when possible to speed up the process
 
     Returns:
         dict: A dictionary containing the results of the consistency check. The dictionary
@@ -72,17 +70,17 @@ def check_1_testset_no_kfold_micro(
         >>> from mlscorecheck.check.multiclass import check_1_testset_no_kfold_micro
         >>> testset = {0: 10, 1: 100, 2: 80}
         >>> scores = {'acc': 0.5158, 'sens': 0.2737, 'spec': 0.6368,
-            'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
+        ...     'bacc': 0.4553, 'ppv': 0.2737, 'npv': 0.6368}
         >>> results = check_1_testset_no_kfold_micro(testset=testset,
-                                            scores=scores,
-                                            eps=1e-4)
+        ...     scores=scores,
+        ...     eps=1e-4)
         >>> results['inconsistency']
         # False
 
         >>> scores['acc'] = 0.5258
         >>> results = check_1_testset_no_kfold_micro(testset=testset,
-                                            scores=scores,
-                                            eps=1e-4)
+        ...     scores=scores,
+        ...     eps=1e-4)
         >>> results['inconsistency']
         # True
     """

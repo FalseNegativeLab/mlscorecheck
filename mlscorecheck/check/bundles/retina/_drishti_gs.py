@@ -8,15 +8,16 @@ from ...binary import check_1_testset_no_kfold
 from ...binary import check_n_testsets_mos_no_kfold
 from ...binary import check_n_testsets_som_no_kfold
 
-__all__ = ['_prepare_testsets_drishti_gs',
-            'check_drishti_gs_segmentation_image',
-            'check_drishti_gs_segmentation_aggregated_mos',
-            'check_drishti_gs_segmentation_aggregated_som',
-            'check_drishti_gs_segmentation_aggregated']
+__all__ = [
+    "_prepare_testsets_drishti_gs",
+    "check_drishti_gs_segmentation_image",
+    "check_drishti_gs_segmentation_aggregated_mos",
+    "check_drishti_gs_segmentation_aggregated_som",
+    "check_drishti_gs_segmentation_aggregated",
+]
 
-def _prepare_testsets_drishti_gs(subset,
-                                    target: str,
-                                    confidence: float):
+
+def _prepare_testsets_drishti_gs(subset, target: str, confidence: float):
     """
     Preparing the testsets for the DRISHTI_GS dataset
 
@@ -29,15 +30,15 @@ def _prepare_testsets_drishti_gs(subset,
     Returns:
         list(dict): the list of testset specifications
     """
-    data = get_experiment('retina.drishti_gs')
+    data = get_experiment("retina.drishti_gs")
 
-    if subset in ['train', 'test']:
+    if subset in ["train", "test"]:
         entries = data[subset]
     else:
         subset = [subset] if isinstance(subset, str) else subset
         entries = {}
         for identifier in subset:
-            entries[identifier] = data['train'].get(identifier, data['test'].get(identifier))
+            entries[identifier] = data["train"].get(identifier, data["test"].get(identifier))
 
     threshold = 255 * confidence
     testsets = []
@@ -46,22 +47,25 @@ def _prepare_testsets_drishti_gs(subset,
         tmp = entries[entry][target]
         total_p = 0
         total_n = 0
-        for count, value in zip(tmp['counts'], tmp['values']):
+        for count, value in zip(tmp["counts"], tmp["values"]):
             if value >= threshold:
                 total_p += count
             else:
                 total_n += count
-        testsets.append({'p': total_p, 'n': total_n, 'identifier': entry})
+        testsets.append({"p": total_p, "n": total_n, "identifier": entry})
 
     return testsets
 
-def check_drishti_gs_segmentation_image(image_identifier: str,
-                                            confidence: float,
-                                            target: str,
-                                            scores: dict,
-                                            eps: float,
-                                            *,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+
+def check_drishti_gs_segmentation_image(
+    image_identifier: str,
+    confidence: float,
+    target: str,
+    scores: dict,
+    eps: float,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+):
     """
     Testing the segmentation results on one image.
 
@@ -74,11 +78,11 @@ def check_drishti_gs_segmentation_image(image_identifier: str,
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
-                                positive or f-beta negative, also set 'beta_positive' and
-                                'beta_negative'. Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    positive or f-beta negative, also set 'beta_positive' and
+                                    'beta_negative'. Full names in camel case, like
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
@@ -117,26 +121,28 @@ def check_drishti_gs_segmentation_image(image_identifier: str,
         >>> results['inconsistency']
         # False
     """
-    testset = _prepare_testsets_drishti_gs(subset=[image_identifier],
-                                            target=target,
-                                            confidence=confidence)[0]
+    testset = _prepare_testsets_drishti_gs(
+        subset=[image_identifier], target=target, confidence=confidence
+    )[0]
 
-    return check_1_testset_no_kfold(testset=testset,
-                                            scores=scores,
-                                            eps=eps,
-                                            numerical_tolerance=numerical_tolerance)
+    return check_1_testset_no_kfold(
+        testset=testset, scores=scores, eps=eps, numerical_tolerance=numerical_tolerance
+    )
 
-def check_drishti_gs_segmentation_aggregated_mos(subset,
-                                            confidence: float,
-                                            target: str,
-                                            scores: dict,
-                                            eps: float,
-                                            *,
-                                            score_bounds: dict = None,
-                                            solver_name: str = None,
-                                            timeout: int = None,
-                                            verbosity: int = 1,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+
+def check_drishti_gs_segmentation_aggregated_mos(
+    subset,
+    confidence: float,
+    target: str,
+    scores: dict,
+    eps: float,
+    *,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+):
     """
     Testing the scores shared for a set of images with the MoS aggregation.
 
@@ -182,26 +188,29 @@ def check_drishti_gs_segmentation_aggregated_mos(subset,
             - ``'lp_configuration'``:
                 Contains the actual configuration of the linear programming solver.
     """
-    testsets = _prepare_testsets_drishti_gs(subset=subset,
-                                            target=target,
-                                            confidence=confidence)
+    testsets = _prepare_testsets_drishti_gs(subset=subset, target=target, confidence=confidence)
 
-    return check_n_testsets_mos_no_kfold(testsets=testsets,
-                                                scores=scores,
-                                                eps=eps,
-                                                testset_score_bounds=score_bounds,
-                                                solver_name=solver_name,
-                                                timeout=timeout,
-                                                verbosity=verbosity,
-                                                numerical_tolerance=numerical_tolerance)
+    return check_n_testsets_mos_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        testset_score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-def check_drishti_gs_segmentation_aggregated_som(subset: str,
-                                            confidence: float,
-                                            target: str,
-                                            scores: dict,
-                                            eps: float,
-                                            *,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+
+def check_drishti_gs_segmentation_aggregated_som(
+    subset: str,
+    confidence: float,
+    target: str,
+    scores: dict,
+    eps: float,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+):
     """
     Testing the scores shared for a set of images with the SoM aggregation.
 
@@ -247,27 +256,30 @@ def check_drishti_gs_segmentation_aggregated_som(subset: str,
             - ``'evidence'``:
                 The evidence for satisfying the consistency constraints.
     """
-    testsets = _prepare_testsets_drishti_gs(subset=subset,
-                                            target=target,
-                                            confidence=confidence)
+    testsets = _prepare_testsets_drishti_gs(subset=subset, target=target, confidence=confidence)
 
-    return check_n_testsets_som_no_kfold(testsets=testsets,
-                                                scores=scores,
-                                                eps=eps,
-                                                numerical_tolerance=numerical_tolerance,
-                                                prefilter_by_pairs=True)
+    return check_n_testsets_som_no_kfold(
+        testsets=testsets,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+        prefilter_by_pairs=True,
+    )
 
-def check_drishti_gs_segmentation_aggregated(subset: str,
-                                            confidence: float,
-                                            target: str,
-                                            scores: dict,
-                                            eps: float,
-                                            *,
-                                            score_bounds: dict = None,
-                                            solver_name: str = None,
-                                            timeout: int = None,
-                                            verbosity: int = 1,
-                                            numerical_tolerance: float = NUMERICAL_TOLERANCE):
+
+def check_drishti_gs_segmentation_aggregated(
+    subset: str,
+    confidence: float,
+    target: str,
+    scores: dict,
+    eps: float,
+    *,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+):
     """
     Testing the scores shared for a set of images with both the MoS and SoM aggregations.
 
@@ -294,10 +306,10 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
     Returns:
         dict: The summary of the results, with the following entries:
 
-            - ``'inconsistency'``:
-                All findings.
-            - ``details*``:
-                The details of the analysis for the two assumptions.
+        - ``'inconsistency'``:
+            All findings.
+        - ``details*``:
+            The details of the analysis for the two assumptions.
 
     Examples:
         >>> from mlscorecheck.check.bundles.retina import check_drishti_gs_segmentation_aggregated
@@ -312,25 +324,31 @@ def check_drishti_gs_segmentation_aggregated(subset: str,
     """
     results = {}
 
-    results['details_mos'] = check_drishti_gs_segmentation_aggregated_mos(subset=subset,
-                                                    confidence=confidence,
-                                                    target=target,
-                                                    scores=scores,
-                                                    eps=eps,
-                                                    score_bounds=score_bounds,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
-                                                    numerical_tolerance=numerical_tolerance)
+    results["details_mos"] = check_drishti_gs_segmentation_aggregated_mos(
+        subset=subset,
+        confidence=confidence,
+        target=target,
+        scores=scores,
+        eps=eps,
+        score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['details_som'] = check_drishti_gs_segmentation_aggregated_som(subset=subset,
-                                                    confidence=confidence,
-                                                    target=target,
-                                                    scores=scores,
-                                                    eps=eps,
-                                                    numerical_tolerance=numerical_tolerance)
+    results["details_som"] = check_drishti_gs_segmentation_aggregated_som(
+        subset=subset,
+        confidence=confidence,
+        target=target,
+        scores=scores,
+        eps=eps,
+        numerical_tolerance=numerical_tolerance,
+    )
 
-    results['inconsistency'] = {'inconsistency_som': results['details_som']['inconsistency'],
-                                'inconsistency_mos': results['details_mos']['inconsistency']}
+    results["inconsistency"] = {
+        "inconsistency_som": results["details_som"]["inconsistency"],
+        "inconsistency_mos": results["details_mos"]["inconsistency"],
+    }
 
     return results

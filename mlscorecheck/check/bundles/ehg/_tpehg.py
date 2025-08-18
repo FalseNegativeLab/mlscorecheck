@@ -6,27 +6,30 @@ from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
 from ...binary import check_1_dataset_unknown_folds_mos
 
-__all__ = ['check_tpehg']
+__all__ = ["check_tpehg"]
 
-def check_tpehg(scores: dict,
-                eps,
-                n_folds: int,
-                n_repeats: int,
-                *,
-                score_bounds: dict = None,
-                solver_name: str = None,
-                timeout: int = None,
-                verbosity: int = 1,
-                numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+
+def check_tpehg(
+    scores: dict,
+    eps,
+    n_folds: int,
+    n_repeats: int,
+    *,
+    score_bounds: dict = None,
+    solver_name: str = None,
+    timeout: int = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Checks the cross-validated TPEHG scores
 
     Args:
         scores (dict(str,float)): the dictionary of scores (supports only 'acc', 'sens', 'spec',
                                     'bacc'). Full names in camel case, like
-                                'positive_predictive_value', synonyms, like 'true_positive_rate'
-                                or 'tpr' instead of 'sens' and complements, like
-                                'false_positive_rate' for (1 - 'spec') can also be used.
+                                    'positive_predictive_value', synonyms, like 'true_positive_rate'
+                                    or 'tpr' instead of 'sens' and complements, like
+                                    'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainties
         n_folds (int): the number of folds
         n_repeats (int): the number of repetitions
@@ -46,14 +49,14 @@ def check_tpehg(scores: dict,
         dict: A dictionary containing the results of the consistency check. The dictionary
         includes the following keys:
 
-            - ``'inconsistency'``:
-                A boolean flag indicating whether the set of feasible true
-                positive (tp) and true negative (tn) pairs is empty. If True,
-                it indicates that the provided scores are not consistent with the experiment.
-            - ``'details'``:
-                A list of dictionaries containing the details of the consistency tests. Each
-                entry contains the specification of the folds being tested and the
-                outcome of the ``check_1_dataset_known_folds_mos`` function.
+        - ``'inconsistency'``:
+            A boolean flag indicating whether the set of feasible true
+            positive (tp) and true negative (tn) pairs is empty. If True,
+            it indicates that the provided scores are not consistent with the experiment.
+        - ``'details'``:
+            A list of dictionaries containing the details of the consistency tests. Each
+            entry contains the specification of the folds being tested and the
+            outcome of the ``check_1_dataset_known_folds_mos`` function.
 
     Examples:
         >>> from mlscorecheck.check.bundles.ehg import check_tpehg
@@ -67,15 +70,19 @@ def check_tpehg(scores: dict,
         >>> results['inconsistency']
         # True
     """
-    evaluation = {'dataset': get_experiment('ehg.tpehg'),
-                    'folding': {'n_folds': n_folds, 'n_repeats': n_repeats}}
+    evaluation = {
+        "dataset": get_experiment("ehg.tpehg"),
+        "folding": {"n_folds": n_folds, "n_repeats": n_repeats},
+    }
 
-    return check_1_dataset_unknown_folds_mos(scores=scores,
-                                                    eps=eps,
-                                                    dataset=evaluation['dataset'],
-                                                    folding=evaluation['folding'],
-                                                    fold_score_bounds=score_bounds,
-                                                    solver_name=solver_name,
-                                                    timeout=timeout,
-                                                    verbosity=verbosity,
-                                                    numerical_tolerance=numerical_tolerance)
+    return check_1_dataset_unknown_folds_mos(
+        scores=scores,
+        eps=eps,
+        dataset=evaluation["dataset"],
+        folding=evaluation["folding"],
+        fold_score_bounds=score_bounds,
+        solver_name=solver_name,
+        timeout=timeout,
+        verbosity=verbosity,
+        numerical_tolerance=numerical_tolerance,
+    )
