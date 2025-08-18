@@ -197,7 +197,7 @@ def create_confusion_matrix(y_true: np.array, y_pred: np.array) -> np.array:
     n_classes = max(y_true.max(), y_pred.max()) + 1
     confusion_matrix = np.zeros(shape=(n_classes, n_classes), dtype=int)
 
-    for true, pred in zip(y_true, y_pred):
+    for true, pred in zip(y_true, y_pred, strict=False):
         confusion_matrix[true, pred] += 1
 
     return confusion_matrix

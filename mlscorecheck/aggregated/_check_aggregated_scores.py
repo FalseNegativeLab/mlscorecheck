@@ -6,16 +6,15 @@ calculation structures
 import pulp as pl
 
 from ..core import (
-    logger,
     NUMERICAL_TOLERANCE,
     check_uncertainty_and_tolerance,
+    logger,
     update_uncertainty,
 )
 from ..individual import resolve_aliases_and_complements
-
 from ._experiment import Experiment
 from ._linear_programming import solve
-from ._utils import compare_scores, aggregated_scores
+from ._utils import aggregated_scores, compare_scores
 
 __all__ = ["check_aggregated_scores"]
 

@@ -6,8 +6,8 @@ This is a generated file, do not edit.
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
-from ._utils import is_zero, unify_results
 from ._interval import sqrt
+from ._utils import is_zero, unify_results
 
 __all__ = [
 "acc_tp",

@@ -346,7 +346,7 @@ class ProblemSolver:
         """
         results = []
 
-        for solution, conditions in zip(self.str_solutions, self.conditions):
+        for solution, conditions in zip(self.str_solutions, self.conditions, strict=False):
             results.append({"solution": solution, "conditions": conditions})
 
         solution = Solutions(

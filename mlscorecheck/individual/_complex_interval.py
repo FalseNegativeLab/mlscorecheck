@@ -138,7 +138,7 @@ class ComplexInterval:
             ComplexInterval: the ratio of the objects
         """
         if not isinstance(other, ComplexInterval):
-            if not isinstance(other, (Interval, IntervalUnion)):
+            if not isinstance(other, Interval | IntervalUnion):
                 other = Interval(other, other)
             other = ComplexInterval(other, Interval(0, 0))
 

@@ -1,2 +1,25 @@
 [flake8]
 max-line-length = 100
+ignore = 
+    # Allow star imports in __init__.py files
+    F403,
+    F405,
+    # Allow unused imports in __init__.py files (they're for public API)
+    F401,
+    # Scientific naming conventions
+    N803,
+    N806,
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .eggs,
+    docs/_build,
+per-file-ignores =
+    __init__.py:F401,F403,F405
+    # Allow long lines in mathematical formula files
+    */individual/_tptn_solutions.py:E501
+    # Allow long lines in docstring score lists  
+    */check/bundles/*:E501
+    */check/multiclass/*:E501

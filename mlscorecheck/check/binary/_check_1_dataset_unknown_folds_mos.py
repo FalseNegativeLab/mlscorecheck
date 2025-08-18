@@ -3,8 +3,8 @@ This module implements consistency testing for scores calculated in a k-fold cro
 scenario with unknown fold configuration.
 """
 
+from ...aggregated import Dataset, kfolds_generator, repeated_kfolds_generator
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import Dataset, repeated_kfolds_generator, kfolds_generator
 from ...individual import translate_metadata
 from ._check_1_dataset_known_folds_mos import check_1_dataset_known_folds_mos
 

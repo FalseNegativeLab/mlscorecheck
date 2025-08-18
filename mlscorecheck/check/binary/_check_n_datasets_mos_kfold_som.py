@@ -6,9 +6,9 @@ in k-fold scenarios and mean of scores aggregation on multiple datasets.
 
 import copy
 
-from ...aggregated import check_aggregated_scores, Experiment
-from ...individual import translate_metadata
+from ...aggregated import Experiment, check_aggregated_scores
 from ...core import NUMERICAL_TOLERANCE
+from ...individual import translate_metadata
 
 __all__ = ["check_n_datasets_mos_kfold_som"]
 

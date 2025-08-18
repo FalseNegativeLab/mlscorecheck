@@ -9,11 +9,11 @@ import copy
 
 import numpy as np
 
-from ._check_n_datasets_mos_known_folds_mos import check_n_datasets_mos_known_folds_mos
-from ._check_1_dataset_unknown_folds_mos import estimate_n_evaluations
-from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import experiment_kfolds_generator
+from ...core import NUMERICAL_TOLERANCE
 from ...individual import translate_metadata
+from ._check_1_dataset_unknown_folds_mos import estimate_n_evaluations
+from ._check_n_datasets_mos_known_folds_mos import check_n_datasets_mos_known_folds_mos
 
 __all__ = ["check_n_datasets_mos_unknown_folds_mos", "estimate_n_experiments"]
 
@@ -53,7 +53,7 @@ def check_n_datasets_mos_unknown_folds_mos(
     solver_name: str = None,
     timeout: int = None,
     verbosity: int = 1,
-    numerical_tolerance: float = NUMERICAL_TOLERANCE
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
     Checking the consistency of scores calculated in k-fold cross validation on multiple
@@ -158,10 +158,10 @@ def check_n_datasets_mos_unknown_folds_mos(
 
     results = {"details": [], "inconsistency": True}
 
-    for experiment in experiment_kfolds_generator(experiment, list(scores.keys())):
+    for experiment_config in experiment_kfolds_generator(experiment, list(scores.keys())):
         result = check_n_datasets_mos_known_folds_mos(
-            evaluations=experiment["evaluations"],
-            dataset_score_bounds=experiment.get("dataset_score_bounds"),
+            evaluations=experiment_config["evaluations"],
+            dataset_score_bounds=experiment_config.get("dataset_score_bounds"),
             scores=scores,
             eps=eps,
             timeout=timeout,

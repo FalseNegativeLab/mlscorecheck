@@ -4,9 +4,9 @@ scores calculated by the score-of-means aggregation
 in a kfold scenario on one single dataset.
 """
 
+from ...aggregated import Experiment
 from ...core import NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs, translate_metadata
-from ...aggregated import Experiment
 
 __all__ = ["check_1_dataset_kfold_som"]
 

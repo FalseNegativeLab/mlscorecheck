@@ -2,10 +2,5 @@
 This module brings together all functionalities.
 """
 
-from . import check
-from . import core
-from . import experiments
-from . import symbolic
-from . import individual
-from . import aggregated
+from . import aggregated, check, core, experiments, individual, symbolic
 from ._version import *

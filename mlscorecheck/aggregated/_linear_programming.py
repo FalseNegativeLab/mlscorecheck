@@ -1,12 +1,10 @@
 """
 Some general purpose linear programming functionalities
 """
+import numpy as np
 import pulp as pl
 
-import numpy as np
-
 from ..core import logger
-
 from ._utils import random_identifier
 
 __all__ = ["add_bounds", "solve", "create_lp_target"]
@@ -95,7 +93,7 @@ def solve(obj, scores: dict, eps, solver=None) -> pl.LpProblem:
         pl.LpProblem: the solved linear programming problem
     """
     if not isinstance(eps, dict):
-        eps = {key: eps for key in ["acc", "sens", "spec", "bacc"]}
+        eps = dict.fromkeys(["acc", "sens", "spec", "bacc"], eps)
 
     lp_problem = pl.LpProblem(f"feasibility_{random_identifier(8)}")
 

@@ -6,11 +6,10 @@ tp and tn combinations.
 import copy
 
 from ..core import NUMERICAL_TOLERANCE, logger, update_uncertainty
-
 from ._interval import Interval, IntervalUnion
-from ._utils import resolve_aliases_and_complements, create_intervals
-from ._tptn_solution_bundles import tptn_solutions, sens_tp, spec_tn, is_applicable_tptn
 from ._pair_solutions import solution_specifications
+from ._tptn_solution_bundles import is_applicable_tptn, sens_tp, spec_tn, tptn_solutions
+from ._utils import create_intervals, resolve_aliases_and_complements
 
 __all__ = [
     "check_scores_tptn_pairs",
@@ -188,7 +187,7 @@ def initialize_valid_pairs(
         return valid_pairs
 
     init_interval = Interval(0, n + 1) if iterate_by == "tp" else Interval(0, p + 1)
-    return {key: init_interval for key in range(p + 1 if iterate_by == "tp" else n + 1)}
+    return dict.fromkeys(range(p + 1 if iterate_by == "tp" else n + 1), init_interval)
 
 
 def _check_scores_tptn_pairs(
@@ -237,7 +236,7 @@ def _check_scores_tptn_pairs(
     scores = resolve_aliases_and_complements(scores)
 
     # updating the uncertainties
-    eps = eps if isinstance(eps, dict) else {score: eps for score in scores}
+    eps = eps if isinstance(eps, dict) else dict.fromkeys(scores, eps)
     eps = update_uncertainty(eps, numerical_tolerance)
 
     params = {
@@ -398,7 +397,7 @@ def _check_scores_tptn_intervals(
     scores = resolve_aliases_and_complements(scores)
 
     # updating the uncertainties
-    eps = eps if isinstance(eps, dict) else {score: eps for score in scores}
+    eps = eps if isinstance(eps, dict) else dict.fromkeys(scores, eps)
     eps = update_uncertainty(eps, numerical_tolerance)
 
     params = {

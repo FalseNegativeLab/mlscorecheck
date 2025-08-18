@@ -3,9 +3,8 @@ This module implements the consistency testing for multiclass macro averages
 supposing one evaluation set
 """
 
-from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import transform_multiclass_fold_to_binary
-
+from ...core import NUMERICAL_TOLERANCE
 from ..binary import check_1_dataset_known_folds_mos
 
 __all__ = ["check_1_testset_no_kfold_macro"]

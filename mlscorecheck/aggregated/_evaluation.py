@@ -4,12 +4,12 @@ This module implements the abstraction for an Evaluation
 
 import pulp as pl
 
+from ..core import NUMERICAL_TOLERANCE, dict_mean, init_random_state, round_scores
+from ..scores import calculate_scores_for_lp
 from ._dataset import Dataset
 from ._folding import Folding
-from ..core import init_random_state, dict_mean, round_scores, NUMERICAL_TOLERANCE
-from ..scores import calculate_scores_for_lp
-from ._utils import check_bounds, aggregated_scores
 from ._linear_programming import add_bounds
+from ._utils import aggregated_scores, check_bounds
 
 
 class Evaluation:

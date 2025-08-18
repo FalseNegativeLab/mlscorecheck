@@ -8,10 +8,11 @@ import importlib
 import numpy as np
 
 from ..core import safe_eval
-from ..scores import score_specifications
-from ..scores import score_functions_standardized_with_complements
-from ..scores import score_functions_without_complements
-
+from ..scores import (
+    score_functions_standardized_with_complements,
+    score_functions_without_complements,
+    score_specifications,
+)
 from ._symbols import Symbols
 
 __all__ = [
@@ -127,13 +128,13 @@ class Score:  # pylint: disable=too-many-instance-attributes
 
         # setting the equation
         if equation is not None:
-            subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+            subs = {self.abbreviation: self.symbol, **arg_symbols}
             self.equation = safe_eval(equation, subs)
         else:
             self.equation = self.symbol - self.expression
 
         # setting the polynomial equation
-        subs = {**{self.abbreviation: self.symbol}, **arg_symbols}
+        subs = {self.abbreviation: self.symbol, **arg_symbols}
         self.equation_polynomial = safe_eval(descriptor["polynomial_equation"], subs)
 
     def get_algebra(self):

@@ -6,16 +6,16 @@ import itertools
 
 import numpy as np
 
-from ._pair_solutions import solution_specifications
+from ..core import NUMERICAL_TOLERANCE
 from ..scores import (
-    score_functions_without_complements,
-    score_functions_standardized_without_complements,
     score_function_aliases,
     score_function_complements,
+    score_functions_standardized_without_complements,
+    score_functions_without_complements,
     score_specifications,
 )
 from ._interval import Interval, IntervalUnion
-from ..core import NUMERICAL_TOLERANCE
+from ._pair_solutions import solution_specifications
 
 __all__ = [
     "create_intervals",
@@ -117,7 +117,7 @@ def create_intervals(
 
     # turning the uncertainty into a score specific dictionary if it isnt that
     if not isinstance(eps, dict):
-        eps = {key: eps for key in scores}
+        eps = dict.fromkeys(scores, eps)
 
     # creating the intervals
     intervals = {
@@ -174,7 +174,7 @@ def is_less_than_zero(value) -> bool:
     Returns:
         bool: True if the parameter is less than zero, False otherwise
     """
-    if not isinstance(value, (Interval, IntervalUnion)):
+    if not isinstance(value, Interval | IntervalUnion):
         return value < 0
     if isinstance(value, Interval):
         return value.upper_bound < 0
@@ -192,7 +192,7 @@ def is_zero(value, tolerance: float = 1e-8) -> bool:
     Returns:
         bool: True if the parameter is zero, False otherwise
     """
-    if not isinstance(value, (Interval, IntervalUnion)):
+    if not isinstance(value, Interval | IntervalUnion):
         return abs(value) < tolerance
     return value.contains(0.0)
 
@@ -212,7 +212,7 @@ def unify_results(value_list):
         return None
     if all(value is None for value in value_list):
         return None
-    if not any(isinstance(value, (Interval, IntervalUnion)) for value in value_list):
+    if not any(isinstance(value, Interval | IntervalUnion) for value in value_list):
         return [value for value in value_list if value is not None]
 
     intervals = []

@@ -4,9 +4,8 @@ This module implements an abstraction for a dataset
 # disabling pylint false positives
 # pylint: disable=no-member
 
-from ._utils import random_identifier
-
 from ..experiments import dataset_statistics
+from ._utils import random_identifier
 
 __all__ = ["Dataset"]
 

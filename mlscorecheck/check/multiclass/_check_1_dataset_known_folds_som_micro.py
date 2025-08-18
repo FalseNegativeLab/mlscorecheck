@@ -5,9 +5,8 @@ with SoM aggregation.
 
 import copy
 
-from ...core import NUMERICAL_TOLERANCE
 from ...aggregated import create_folds_multiclass
-
+from ...core import NUMERICAL_TOLERANCE
 from ._check_1_testset_no_kfold_micro import check_1_testset_no_kfold_micro
 
 __all__ = ["check_1_dataset_known_folds_som_micro"]

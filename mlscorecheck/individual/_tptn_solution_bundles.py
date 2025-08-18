@@ -3,48 +3,48 @@ This module implements some bundles of tp, tn solutions for scores
 """
 
 from ._tptn_solutions import (
-    mcc_tp,
-    mcc_tn,
-    acc_tp,
     acc_tn,
+    acc_tp,
+    bacc_tn,
+    bacc_tp,
+    bm_tn,
+    bm_tp,
+    dor_tn,
+    dor_tp,
+    f1n_tn,
+    f1n_tp,
+    f1p_tn,
+    f1p_tp,
+    fbn_tn,
+    fbn_tp,
+    fbp_tn,
+    fbp_tp,
+    fm_tn,
+    fm_tp,
+    gm_tn,
+    gm_tp,
+    ji_tn,
+    ji_tp,
+    kappa_tn,
+    kappa_tp,
+    lrn_tn,
+    lrn_tp,
+    lrp_tn,
+    lrp_tp,
+    mcc_tn,
+    mcc_tp,
+    mk_tn,
+    mk_tp,
+    npv_tn,
+    npv_tp,
+    ppv_tn,
+    ppv_tp,
+    pt_tn,
+    pt_tp,
     sens_tp,
     spec_tn,
-    ppv_tp,
-    ppv_tn,
-    npv_tp,
-    npv_tn,
-    fbp_tp,
-    fbp_tn,
-    f1p_tp,
-    f1p_tn,
-    fbn_tp,
-    fbn_tn,
-    f1n_tp,
-    f1n_tn,
-    upm_tp,
     upm_tn,
-    gm_tp,
-    gm_tn,
-    fm_tp,
-    fm_tn,
-    mk_tp,
-    mk_tn,
-    lrp_tp,
-    lrp_tn,
-    lrn_tp,
-    lrn_tn,
-    bm_tp,
-    bm_tn,
-    pt_tp,
-    pt_tn,
-    dor_tp,
-    dor_tn,
-    ji_tp,
-    ji_tn,
-    bacc_tp,
-    bacc_tn,
-    kappa_tp,
-    kappa_tn,
+    upm_tp,
 )
 
 __all__ = ["tp_solutions", "tn_solutions", "tptn_solutions", "is_applicable_tptn"]
@@ -64,10 +64,7 @@ def is_applicable_tptn(score: str, value: float, to_compute: str) -> bool:
     """
     if score == "pt" and value == 0.0 and to_compute == "tp":
         return False
-    if score == "pt" and value == 1.0 and to_compute == "tn":
-        return False
-
-    return True
+    return not (score == "pt" and value == 1.0 and to_compute == "tn")
 
 
 tp_solutions = {

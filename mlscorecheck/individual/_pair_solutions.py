@@ -5,13 +5,12 @@ The Solution abstractions enable the evaluation of the solution
 formulas with scalars and intervals too.
 """
 
-import os
 import json
-
+import os
 from importlib.resources import files
 
-from ._interval import Interval, IntervalUnion
 from ._expression import Expression
+from ._interval import Interval, IntervalUnion
 
 __all__ = ["load_solutions", "Solution", "Solutions", "solution_specifications"]
 
@@ -63,7 +62,7 @@ class Solution:
         Returns:
             bool: True if the condition fails, False otherwise
         """
-        if isinstance(value, (Interval, IntervalUnion)):
+        if isinstance(value, Interval | IntervalUnion):
             if isinstance(value, Interval):
                 if value.upper_bound < 0:
                     return True
@@ -84,8 +83,8 @@ class Solution:
         Returns:
             bool: True if the condition fails, False otherwise
         """
-        return (isinstance(value, (Interval, IntervalUnion)) and value.contains(0)) or (
-            not isinstance(value, (Interval, IntervalUnion)) and abs(value) < 1e-8
+        return (isinstance(value, Interval | IntervalUnion) and value.contains(0)) or (
+            not isinstance(value, Interval | IntervalUnion) and abs(value) < 1e-8
         )
 
     def evaluate(self, subs):

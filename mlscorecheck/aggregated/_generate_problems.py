@@ -5,19 +5,15 @@ evaluations and experiments.
 
 import numpy as np
 
-from ..core import init_random_state, dict_minmax, dict_mean, round_scores
+from ..core import dict_mean, dict_minmax, init_random_state, round_scores
 from ..experiments import dataset_statistics
-from ..scores import calculate_scores, calculate_scores_for_lp
-
-from ..individual import sample_multiclass_dataset, generate_multiclass_dataset
-from ._folding_utils import multiclass_stratified_folds, create_folds_multiclass
-from ..scores import calculate_multiclass_scores
-
-
+from ..individual import generate_multiclass_dataset, sample_multiclass_dataset
+from ..scores import calculate_multiclass_scores, calculate_scores, calculate_scores_for_lp
 from ._dataset import Dataset
-from ._folding import Folding
 from ._evaluation import Evaluation
 from ._experiment import Experiment
+from ._folding import Folding
+from ._folding_utils import create_folds_multiclass, multiclass_stratified_folds
 
 __all__ = [
     "generate_dataset",
@@ -412,7 +408,7 @@ def generate_dataset_folding_multiclass(
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
 
-    if not aggregation in {"mos", "som"}:
+    if aggregation not in {"mos", "som"}:
         raise ValueError(f"Unknown aggregation: {aggregation}")
 
     dataset = generate_multiclass_dataset(

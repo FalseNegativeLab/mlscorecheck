@@ -4,8 +4,8 @@ scores calculated by the mean-of-scores aggregation
 in a k-fold scenario on one single dataset.
 """
 
+from ...aggregated import Evaluation, Experiment, check_aggregated_scores
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import check_aggregated_scores, Experiment, Evaluation
 from ...individual import translate_metadata
 
 __all__ = ["check_1_dataset_known_folds_mos"]

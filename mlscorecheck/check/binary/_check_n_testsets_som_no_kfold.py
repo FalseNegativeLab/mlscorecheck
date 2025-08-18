@@ -4,9 +4,9 @@ scores calculated by the score-of-means aggregation
 over multiple testsets (with no kfold).
 """
 
+from ...aggregated import Dataset, Experiment
 from ...core import NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs, translate_metadata
-from ...aggregated import Experiment, Dataset
 
 __all__ = ["check_n_testsets_som_no_kfold"]
 

@@ -4,8 +4,8 @@ This module implements the testing of regression scores
 
 import numpy as np
 
-from ...individual import Interval
 from ...core import NUMERICAL_TOLERANCE, round_scores, safe_eval
+from ...individual import Interval
 
 __all__ = [
     "check_1_testset_no_kfold",

@@ -48,9 +48,9 @@ class SageAlgebra(Algebra):  # pragma: no cover
             self.algebra.assume(var <= 0)  # pragma: no cover
         if kwargs.get("real", False):  # pragma: no cover
             self.algebra.assume(var, "real")  # pragma: no cover
-        if kwargs.get("upper_bound", None) is not None:  # pragma: no cover
+        if kwargs.get("upper_bound") is not None:  # pragma: no cover
             self.algebra.assume(var <= kwargs["upper_bound"])  # pragma: no cover
-        if kwargs.get("lower_bound", None) is not None:  # pragma: no cover
+        if kwargs.get("lower_bound") is not None:  # pragma: no cover
             self.algebra.assume(var >= kwargs["lower_bound"])  # pragma: no cover
 
         return var  # pragma: no cover

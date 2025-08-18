@@ -18,7 +18,7 @@ def sqrt(obj):
         Interval|IntervalUnion|numeric: the square root of the parameter
     """
 
-    result = obj**0.5 if isinstance(obj, (Interval, IntervalUnion)) else obj ** 0.5
+    result = obj**0.5 if isinstance(obj, Interval | IntervalUnion) else obj ** 0.5
 
     return result
 
@@ -305,7 +305,7 @@ class Interval:
         Returns:
             Interval: the ratio
         """
-        if not isinstance(other, (Interval, IntervalUnion)):
+        if not isinstance(other, Interval | IntervalUnion):
             other = Interval(other, other)
 
         return other / self
@@ -469,7 +469,7 @@ class IntervalUnion:
                         to_drop.append(jdx)
 
         intervals = [
-            interval for idx, interval in enumerate(intervals) if not idx in to_drop
+            interval for idx, interval in enumerate(intervals) if idx not in to_drop
         ]
 
         # chaining the intervals
@@ -582,7 +582,7 @@ class IntervalUnion:
         Returns:
             IntervalUnion: the sum
         """
-        if not isinstance(other, (IntervalUnion,)):
+        if not isinstance(other, IntervalUnion):
             return IntervalUnion([interval + other for interval in self.intervals])
 
         intervals = []
@@ -613,7 +613,7 @@ class IntervalUnion:
         Returns:
             IntervalUnion: the difference
         """
-        if not isinstance(other, (IntervalUnion,)):
+        if not isinstance(other, IntervalUnion):
             return IntervalUnion([interval - other for interval in self.intervals])
 
         intervals = []
@@ -710,7 +710,7 @@ class IntervalUnion:
         Returns:
             IntervalUnion: the ratio
         """
-        if not isinstance(other, (Interval, IntervalUnion)):
+        if not isinstance(other, Interval | IntervalUnion):
             other = Interval(other, other)
 
         if not isinstance(other, IntervalUnion):
@@ -752,15 +752,14 @@ class IntervalUnion:
             bool: whether the objects equal
         """
         if not isinstance(other, IntervalUnion):
-            if isinstance(other, Interval):
-                if len(self.intervals) == 1:
-                    return self.intervals[0] == other
+            if isinstance(other, Interval) and len(self.intervals) == 1:
+                return self.intervals[0] == other
             return False
 
         if len(self.intervals) != len(other.intervals):
             return False
 
-        for int0, int1 in zip(self.intervals, other.intervals):
+        for int0, int1 in zip(self.intervals, other.intervals, strict=False):
             if int0 != int1:
                 return False
 

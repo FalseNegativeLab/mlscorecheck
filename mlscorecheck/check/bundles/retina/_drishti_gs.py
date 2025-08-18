@@ -2,11 +2,13 @@
 This module implements tests for the DRISHTI_GS dataset
 """
 
-from ....experiments import get_experiment
 from ....core import NUMERICAL_TOLERANCE
-from ...binary import check_1_testset_no_kfold
-from ...binary import check_n_testsets_mos_no_kfold
-from ...binary import check_n_testsets_som_no_kfold
+from ....experiments import get_experiment
+from ...binary import (
+    check_1_testset_no_kfold,
+    check_n_testsets_mos_no_kfold,
+    check_n_testsets_som_no_kfold,
+)
 
 __all__ = [
     "_prepare_testsets_drishti_gs",
@@ -47,7 +49,7 @@ def _prepare_testsets_drishti_gs(subset, target: str, confidence: float):
         tmp = entries[entry][target]
         total_p = 0
         total_n = 0
-        for count, value in zip(tmp["counts"], tmp["values"]):
+        for count, value in zip(tmp["counts"], tmp["values"], strict=False):
             if value >= threshold:
                 total_p += count
             else:

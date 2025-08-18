@@ -5,9 +5,9 @@ scores calculated from one single confusion matrix.
 
 import warnings
 
-from ...core import logger, NUMERICAL_TOLERANCE
-from ...individual import check_scores_tptn_pairs, translate_metadata
+from ...core import NUMERICAL_TOLERANCE, logger
 from ...experiments import dataset_statistics
+from ...individual import check_scores_tptn_pairs, translate_metadata
 
 __all__ = ["check_1_testset_no_kfold"]
 
@@ -108,7 +108,7 @@ def check_1_testset_no_kfold(
         warnings.warn(
             'Additional fields beyond ("p", "n") or "name" present '
             "in the specification, you might want to use another check "
-            "function specialized to datasets"
+            "function specialized to datasets", stacklevel=2
         )
 
     p = testset.get("p")

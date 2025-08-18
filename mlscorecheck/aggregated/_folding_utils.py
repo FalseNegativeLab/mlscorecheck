@@ -5,7 +5,6 @@ This module implements some functionalities related to folding
 import copy
 
 import numpy as np
-
 from sklearn.model_selection import StratifiedKFold
 
 from ._utils import random_identifier

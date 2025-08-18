@@ -3,9 +3,8 @@ This module implements the multiclass tests in a k-fold MoS scenario with micro
 averaging of scores.
 """
 
+from ...aggregated import create_folds_multiclass, transform_multiclass_fold_to_binary
 from ...core import NUMERICAL_TOLERANCE
-from ...aggregated import transform_multiclass_fold_to_binary, create_folds_multiclass
-
 from ..binary import check_n_datasets_mos_kfold_som
 
 __all__ = ["check_1_dataset_known_folds_mos_micro"]

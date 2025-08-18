@@ -7,10 +7,9 @@ import math
 
 import numpy as np
 
-from ..core import safe_call, round_scores, logger
-from ._score_bundles import score_functions_with_solutions
-from ._score_bundles import score_specifications
+from ..core import logger, round_scores, safe_call
 from ._multiclass_scores import multiclass_score_map
+from ._score_bundles import score_functions_with_solutions, score_specifications
 
 __all__ = ['calculate_scores',
             'calculate_scores_for_lp',

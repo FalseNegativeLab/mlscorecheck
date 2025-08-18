@@ -2,10 +2,9 @@
 This module implements some functionalities related to fold structures
 """
 
+from ._dataset import Dataset
 from ._fold import Fold
 from ._folding_utils import _create_folds
-
-from ._dataset import Dataset
 
 __all__ = ["Folding"]
 

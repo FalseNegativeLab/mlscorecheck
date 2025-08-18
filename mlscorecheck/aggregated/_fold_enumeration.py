@@ -302,7 +302,7 @@ def kfolds_generator(evaluation: dict, available_scores: list, repeat_idx=0):
                 "n": n_,
                 "identifier": f"{evaluation['dataset']['identifier']}_f{idx}_k{jdx}_r{repeat_idx}",
             }
-            for idx, (p_, n_) in enumerate(zip(p_vals, n_vals))
+            for idx, (p_, n_) in enumerate(zip(p_vals, n_vals, strict=False))
         ]
 
 

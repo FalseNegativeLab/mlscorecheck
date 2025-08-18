@@ -2,11 +2,13 @@
 This module implements tests for the DIARETDB1 dataset
 """
 
-from ....experiments import get_experiment
-from ...binary import check_1_testset_no_kfold
-from ...binary import check_n_testsets_mos_no_kfold
-from ...binary import check_n_testsets_som_no_kfold
 from ....core import NUMERICAL_TOLERANCE, logger
+from ....experiments import get_experiment
+from ...binary import (
+    check_1_testset_no_kfold,
+    check_n_testsets_mos_no_kfold,
+    check_n_testsets_som_no_kfold,
+)
 
 __all__ = [
     "_prepare_configuration_diaretdb1",
@@ -41,7 +43,7 @@ def _prepare_testsets_diaretdb1(subset_indices, data, key, assumption, threshold
 
         total_p = 0
         total_n = 0
-        for count, value in zip(counts, values):
+        for count, value in zip(counts, values, strict=False):
             if value >= threshold:
                 total_p += count
             else:

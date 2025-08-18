@@ -6,9 +6,9 @@ in a kfold scenario on multiple datasets.
 
 import copy
 
+from ...aggregated import Experiment
 from ...core import NUMERICAL_TOLERANCE
 from ...individual import check_scores_tptn_pairs, translate_metadata
-from ...aggregated import Experiment
 
 __all__ = ["check_n_datasets_som_kfold_som"]
 

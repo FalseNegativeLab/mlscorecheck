@@ -2,8 +2,8 @@
 This module implements some utilities used by each data abstraction
 """
 
-import string
 import random
+import string
 
 import numpy as np
 
@@ -72,7 +72,7 @@ def compare_scores(
         scores1 = {key: scores1[key] for key in subset}
 
     if not isinstance(eps, dict):
-        eps = {key: eps for key in scores0}
+        eps = dict.fromkeys(scores0, eps)
 
     return all(
         abs(scores0[key] - scores1[key]) <= eps[key] + tolerance

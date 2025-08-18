@@ -11,8 +11,7 @@ import pulp as pl
 
 from ..core import init_random_state, round_scores
 from ..scores import calculate_scores_for_lp
-
-from ._utils import random_identifier, aggregated_scores
+from ._utils import aggregated_scores, random_identifier
 
 __all__ = ["Fold"]
 

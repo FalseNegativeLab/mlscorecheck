@@ -2,9 +2,9 @@
 This module implements the tests for the ISIC2017 dataset
 """
 
+from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
 from ...binary import check_1_testset_no_kfold
-from ....core import NUMERICAL_TOLERANCE
 
 __all__ = ["check_isic2017", "_prepare_testset_isic2017"]
 

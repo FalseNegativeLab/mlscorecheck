@@ -2,9 +2,8 @@
 This module implements the loading of data
 """
 
-import os
 import json
-
+import os
 from importlib.resources import files
 
 __all__ = ["load_json"]

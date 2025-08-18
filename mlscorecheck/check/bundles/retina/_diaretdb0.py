@@ -4,8 +4,7 @@ Tests for the DIARETDB0 dataset
 
 from ....core import NUMERICAL_TOLERANCE
 from ....experiments import get_experiment
-from ...binary import (check_n_testsets_mos_no_kfold,
-                        check_n_testsets_som_no_kfold)
+from ...binary import check_n_testsets_mos_no_kfold, check_n_testsets_som_no_kfold
 
 __all__ = ['_prepare_configuration_diaretdb0',
             'check_diaretdb0_class',
