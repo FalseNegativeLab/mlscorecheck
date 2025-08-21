@@ -4,6 +4,7 @@ to be used.
 """
 
 import abc
+from typing import Any
 
 __all__ = ["Algebra"]
 
@@ -14,13 +15,13 @@ class Algebra(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         """
         The constructor of the algebra
         """
 
     @abc.abstractmethod
-    def create_symbol(self, name: str, **kwargs):
+    def create_symbol(self, name: str, **kwargs: Any) -> Any:
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -33,7 +34,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def num_denom(self, expression):
+    def num_denom(self, expression: Any) -> tuple[Any, Any]:
         """
         Extract the numerator and denominator
 
@@ -45,7 +46,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def simplify(self, expression):
+    def simplify(self, expression: Any) -> Any:
         """
         Simplify the expression
 
@@ -57,7 +58,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def solve(self, equation, var):
+    def solve(self, equation: Any, var: Any) -> list[dict[str, Any]]:
         """
         Solve an equation for a variable
 
@@ -70,7 +71,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def subs(self, expression, subs_dict):
+    def subs(self, expression: Any, subs_dict: dict[str, Any]) -> Any:
         """
         Substitute a substitution into the expression
 
@@ -83,7 +84,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def args(self, expression) -> list:
+    def args(self, expression: Any) -> list[Any]:
         """
         The list of arguments
 
@@ -95,7 +96,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_trivial(self, expression) -> bool:
+    def is_trivial(self, expression: Any) -> bool:
         """
         Checks if the expression is trivial
 
@@ -107,7 +108,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_root(self, expression) -> bool:
+    def is_root(self, expression: Any) -> bool:
         """
         Checks if the expression is a root
 
@@ -119,7 +120,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_division(self, expression) -> bool:
+    def is_division(self, expression: Any) -> bool:
         """
         Checks if the expression is a division
 
@@ -131,7 +132,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_power(self, expression) -> bool:
+    def is_power(self, expression: Any) -> bool:
         """
         Checks if the expression is a power
 
@@ -143,7 +144,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def operands(self, expression) -> list:
+    def operands(self, expression: Any) -> list[Any]:
         """
         Returns the list of operands
 
@@ -155,7 +156,7 @@ class Algebra(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def free_symbols(self, expression) -> list:
+    def free_symbols(self, expression: Any) -> list[Any]:
         """
         Get all free symbols in an expression
 

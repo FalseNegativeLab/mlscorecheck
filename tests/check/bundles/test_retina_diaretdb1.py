@@ -31,9 +31,7 @@ test_identifiers = data["test"]
 @pytest.mark.parametrize("confidence", [0.5, 0.75])
 @pytest.mark.parametrize("subset", ["train", "test"])
 @pytest.mark.parametrize("class_name", class_names)
-def test_check_success_class(
-    random_seed: str, confidence: float, subset: str, class_name
-):
+def test_check_success_class(random_seed: str, confidence: float, subset: str, class_name):
     """
     Testing the image labeling in a consistent setup
 
@@ -44,13 +42,15 @@ def test_check_success_class(
         class_name (str|list): the names of the lesions constituting the positive class
     """
 
-    testset = _prepare_configuration_diaretdb1(
+    testset_list = _prepare_configuration_diaretdb1(
         subset=subset,
         class_name=class_name,
         confidence=confidence,
         pixel_level=False,
         assumption="fov",
     )
+
+    testset = testset_list[0]  # Extract the first testset from the list
 
     scores = generate_scores_for_testsets(
         [testset],
@@ -75,9 +75,7 @@ def test_check_success_class(
 @pytest.mark.parametrize("confidence", [0.5, 0.75])
 @pytest.mark.parametrize("subset", ["train", "test"])
 @pytest.mark.parametrize("class_name", class_names)
-def test_check_failure_class(
-    random_seed: int, confidence: float, subset: str, class_name
-):
+def test_check_failure_class(random_seed: int, confidence: float, subset: str, class_name):
     """
     Testing the image labeling in an inconsistent setup
 
@@ -88,13 +86,15 @@ def test_check_failure_class(
         class_name (str|list): the names of the lesions constituting the positive class
     """
 
-    testset = _prepare_configuration_diaretdb1(
+    testset_list = _prepare_configuration_diaretdb1(
         subset=subset,
         class_name=class_name,
         confidence=confidence,
         pixel_level=False,
         assumption="fov",
     )
+
+    testset = testset_list[0]  # Extract the first testset from the list
 
     scores = generate_scores_for_testsets(
         [testset],

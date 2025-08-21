@@ -3,6 +3,8 @@ This module implements the scores as objects representing some
 additional algebraic properties of the scores beyond their formulation.
 """
 
+from typing import Callable, Union, Any
+
 import importlib
 
 import numpy as np
@@ -64,10 +66,10 @@ class Score:  # pylint: disable=too-many-instance-attributes
         symbols: Symbols,
         descriptor: dict,
         *,
-        function,
+        function: Union[Callable, str],
         expression: str | None = None,
         equation: str | None = None,
-    ):
+    ) -> None:
         """
         Constructor of the base class
 
@@ -135,14 +137,14 @@ class Score:  # pylint: disable=too-many-instance-attributes
         subs = {self.abbreviation: self.symbol, **arg_symbols}
         self.equation_polynomial = safe_eval(descriptor["polynomial_equation"], subs)
 
-    def get_algebra(self):
+    def get_algebra(self) -> Any:
         """
         Return the algebra behind the symbols
         """
 
         return self.symbols.algebra
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns a dictionary representation
 
@@ -162,7 +164,7 @@ class Accuracy(Score):
     The accuracy score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -177,7 +179,7 @@ class ErrorRate(Score):
     The error rate score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -192,7 +194,7 @@ class Sensitivity(Score):
     The sensitivity score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -207,7 +209,7 @@ class FalseNegativeRate(Score):
     The false negative rate
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -222,7 +224,7 @@ class FalsePositiveRate(Score):
     The false positive rate
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -237,7 +239,7 @@ class Specificity(Score):
     The specificity score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -252,7 +254,7 @@ class PositivePredictiveValue(Score):
     The positive predictive value
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -267,7 +269,7 @@ class FalseDiscoveryRate(Score):
     The false discovery rate
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -282,7 +284,7 @@ class FalseOmissionRate(Score):
     The false omission rate
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -297,7 +299,7 @@ class NegativePredictiveValue(Score):
     The negative predictive value
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -312,7 +314,7 @@ class FBetaPositive(Score):
     The f-beta plus score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -327,7 +329,7 @@ class F1Positive(Score):
     The f1-plus score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -342,7 +344,7 @@ class FBetaNegative(Score):
     The f-beta minus score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -357,7 +359,7 @@ class F1Negative(Score):
     The f1-minus score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -372,7 +374,7 @@ class GeometricMean(Score):
     The geometric mean score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -387,7 +389,7 @@ class FowlkesMallowsIndex(Score):
     The Fowlkes-Mallows-index
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -402,7 +404,7 @@ class UnifiedPerformanceMeasure(Score):
     The unified performance measure score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -417,7 +419,7 @@ class Markedness(Score):
     The markedness score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -432,7 +434,7 @@ class PositiveLikelihoodRatio(Score):
     The positive likelihood ratio score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -447,7 +449,7 @@ class NegativeLikelihoodRatio(Score):
     The negative likelihood ratio score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -462,7 +464,7 @@ class Informedness(Score):
     The informedness score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -477,7 +479,7 @@ class PrevalenceThreshold(Score):
     The prevalence threshold
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -492,7 +494,7 @@ class DiagnosticOddsRatio(Score):
     The diagnostic odds ratio
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -507,7 +509,7 @@ class JaccardIndex(Score):
     The Jaccard index
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -522,7 +524,7 @@ class BalancedAccuracy(Score):
     The balanced accuracy score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -534,10 +536,10 @@ class BalancedAccuracy(Score):
 
 class CohensKappa(Score):
     """
-    Cohen's kappa
+    Cohen kappa
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 
@@ -552,7 +554,7 @@ class MatthewsCorrelationCoefficient(Score):
     The MatthewsCorrelationCoefficient score
     """
 
-    def __init__(self, symbols):
+    def __init__(self, symbols: Symbols) -> None:
         """
         The constructor of the score
 

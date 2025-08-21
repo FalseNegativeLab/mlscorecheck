@@ -105,7 +105,7 @@ def _prepare_configuration_diaretdb1(
     if only_valid:
         testsets = [tset for tset in testsets if tset["p"] > 0 and tset["n"] > 0]
 
-    return cast(list[Any], testsets if pixel_level else testset)
+    return cast(list[Any], testsets) if pixel_level else [testset]
 
 
 def check_diaretdb1_class(

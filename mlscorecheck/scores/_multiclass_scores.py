@@ -64,7 +64,10 @@ __all__ = [
 ]
 
 
-def multiclass_score_macro(confusion_matrix, score_function, additional_params=None, name=None):
+def multiclass_score_macro(confusion_matrix: np.ndarray, 
+                          score_function,
+                          additional_params=None,
+                          name=None) -> float:
     """
     Calculates the multiclass macro average score
 
@@ -104,7 +107,10 @@ def multiclass_score_macro(confusion_matrix, score_function, additional_params=N
     return np.mean(scores)
 
 
-def multiclass_score_micro(confusion_matrix, score_function, additional_params=None, name=None):
+def multiclass_score_micro(confusion_matrix: np.ndarray, 
+                          score_function,
+                          additional_params=None,
+                          name=None) -> float:
     """
     Calculates the multiclass micro average score
 
@@ -141,7 +147,10 @@ def multiclass_score_micro(confusion_matrix, score_function, additional_params=N
     )
 
 
-def multiclass_score_weighted(confusion_matrix, score_function, additional_params=None, name=None):
+def multiclass_score_weighted(confusion_matrix: np.ndarray, 
+                             score_function,
+                             additional_params=None,
+                             name=None) -> float:
     """
     Calculates the multiclass weighted macro average score
 
@@ -183,7 +192,11 @@ def multiclass_score_weighted(confusion_matrix, score_function, additional_param
     return np.sum(scores)
 
 
-def multiclass_score(confusion_matrix, score_function, average, additional_params=None, name=None):
+def multiclass_score(confusion_matrix: np.ndarray, 
+                    score_function,
+                    average: str,
+                    additional_params=None,
+                    name=None) -> float:
     """
     Calculates the multiclass average score
 
@@ -207,7 +220,7 @@ def multiclass_score(confusion_matrix, score_function, average, additional_param
     raise ValueError(f"averaging {average} is not supported")
 
 
-def multiclass_accuracy(*, confusion_matrix, average):
+def multiclass_accuracy(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -221,7 +234,7 @@ def multiclass_accuracy(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, accuracy_standardized, average, name="acc")
 
 
-def multiclass_sensitivity(*, confusion_matrix, average):
+def multiclass_sensitivity(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -235,7 +248,7 @@ def multiclass_sensitivity(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, sensitivity_standardized, average, name="sens")
 
 
-def multiclass_specificity(*, confusion_matrix, average):
+def multiclass_specificity(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -249,7 +262,7 @@ def multiclass_specificity(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, specificity_standardized, average, name="spec")
 
 
-def multiclass_balanced_accuracy(*, confusion_matrix, average):
+def multiclass_balanced_accuracy(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -263,7 +276,7 @@ def multiclass_balanced_accuracy(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, balanced_accuracy_standardized, average, name="bacc")
 
 
-def multiclass_positive_predictive_value(*, confusion_matrix, average):
+def multiclass_positive_predictive_value(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -279,7 +292,7 @@ def multiclass_positive_predictive_value(*, confusion_matrix, average):
     )
 
 
-def multiclass_negative_predictive_value(*, confusion_matrix, average):
+def multiclass_negative_predictive_value(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -295,7 +308,7 @@ def multiclass_negative_predictive_value(*, confusion_matrix, average):
     )
 
 
-def multiclass_f_beta_positive(*, beta_positive, confusion_matrix, average):
+def multiclass_f_beta_positive(*, beta_positive: float, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -316,7 +329,7 @@ def multiclass_f_beta_positive(*, beta_positive, confusion_matrix, average):
     )
 
 
-def multiclass_f_beta_negative(*, beta_negative, confusion_matrix, average):
+def multiclass_f_beta_negative(*, beta_negative: float, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -337,7 +350,7 @@ def multiclass_f_beta_negative(*, beta_negative, confusion_matrix, average):
     )
 
 
-def multiclass_f1_positive(*, confusion_matrix, average):
+def multiclass_f1_positive(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -351,7 +364,7 @@ def multiclass_f1_positive(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, f1_positive_standardized, average, name="f1p")
 
 
-def multiclass_f1_negative(*, confusion_matrix, average):
+def multiclass_f1_negative(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -365,7 +378,7 @@ def multiclass_f1_negative(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, f1_negative_standardized, average, name="f1n")
 
 
-def multiclass_unified_performance_measure(*, confusion_matrix, average):
+def multiclass_unified_performance_measure(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -381,7 +394,7 @@ def multiclass_unified_performance_measure(*, confusion_matrix, average):
     )
 
 
-def multiclass_geometric_mean(*, confusion_matrix, average):
+def multiclass_geometric_mean(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -395,7 +408,7 @@ def multiclass_geometric_mean(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, geometric_mean_standardized, average, name="gm")
 
 
-def multiclass_fowlkes_mallows_index(*, confusion_matrix, average):
+def multiclass_fowlkes_mallows_index(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -411,7 +424,7 @@ def multiclass_fowlkes_mallows_index(*, confusion_matrix, average):
     )
 
 
-def multiclass_markedness(*, confusion_matrix, average):
+def multiclass_markedness(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -425,7 +438,7 @@ def multiclass_markedness(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, markedness_standardized, average, name="mk")
 
 
-def multiclass_positive_likelihood_ratio(*, confusion_matrix, average):
+def multiclass_positive_likelihood_ratio(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -441,7 +454,7 @@ def multiclass_positive_likelihood_ratio(*, confusion_matrix, average):
     )
 
 
-def multiclass_negative_likelihood_ratio(*, confusion_matrix, average):
+def multiclass_negative_likelihood_ratio(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -457,7 +470,7 @@ def multiclass_negative_likelihood_ratio(*, confusion_matrix, average):
     )
 
 
-def multiclass_matthews_correlation_coefficient(*, confusion_matrix, average):
+def multiclass_matthews_correlation_coefficient(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -473,7 +486,7 @@ def multiclass_matthews_correlation_coefficient(*, confusion_matrix, average):
     )
 
 
-def multiclass_bookmaker_informedness(*, confusion_matrix, average):
+def multiclass_bookmaker_informedness(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -489,7 +502,7 @@ def multiclass_bookmaker_informedness(*, confusion_matrix, average):
     )
 
 
-def multiclass_prevalence_threshold(*, confusion_matrix, average):
+def multiclass_prevalence_threshold(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -503,7 +516,7 @@ def multiclass_prevalence_threshold(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, prevalence_threshold_standardized, average, name="pt")
 
 
-def multiclass_diagnostic_odds_ratio(*, confusion_matrix, average):
+def multiclass_diagnostic_odds_ratio(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -519,7 +532,7 @@ def multiclass_diagnostic_odds_ratio(*, confusion_matrix, average):
     )
 
 
-def multiclass_jaccard_index(*, confusion_matrix, average):
+def multiclass_jaccard_index(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 
@@ -533,7 +546,7 @@ def multiclass_jaccard_index(*, confusion_matrix, average):
     return multiclass_score(confusion_matrix, jaccard_index_standardized, average, name="ji")
 
 
-def multiclass_cohens_kappa(*, confusion_matrix, average):
+def multiclass_cohens_kappa(*, confusion_matrix: np.ndarray, average: str) -> float:
     """
     Calculates the multiclass score
 

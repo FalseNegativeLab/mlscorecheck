@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """
 This module implements the scores with normal parameterizations
 This is a generated file, do not modify it.

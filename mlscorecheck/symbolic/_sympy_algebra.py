@@ -16,7 +16,7 @@ class SympyAlgebra(Algebra):
     The required algebra driven by sympy
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructor of the algebra
         """
@@ -25,7 +25,7 @@ class SympyAlgebra(Algebra):
         self.algebra = importlib.import_module("sympy")
         self.sqrt = self.algebra.sqrt
 
-    def create_symbol(self, name: str, **kwargs):
+    def create_symbol(self, name: str, **kwargs: Any) -> Any:
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -42,7 +42,7 @@ class SympyAlgebra(Algebra):
             del kwargs["lower_bound"]
         return self.algebra.Symbol(name, **kwargs)
 
-    def num_denom(self, expression):
+    def num_denom(self, expression: Any) -> tuple[Any, Any]:
         """
         Extract the numerator and denominator
 
@@ -54,7 +54,7 @@ class SympyAlgebra(Algebra):
         """
         return expression.as_numer_denom()
 
-    def simplify(self, expression):
+    def simplify(self, expression: Any) -> Any:
         """
         Simplify the expression
 
@@ -66,7 +66,7 @@ class SympyAlgebra(Algebra):
         """
         return self.algebra.simplify(expression)
 
-    def solve(self, equation, var, **kwargs):
+    def solve(self, equation: Any, var: Any, **kwargs: Any) -> list[dict[str, Any]]:
         """
         Solve an equation for a variable
 
@@ -84,7 +84,7 @@ class SympyAlgebra(Algebra):
             solutions.append({var: res})
         return solutions
 
-    def subs(self, expression, subs_dict):
+    def subs(self, expression: Any, subs_dict: dict[str, Any]) -> Any:
         """
         Substitute a substitution into the expression
 
@@ -97,7 +97,7 @@ class SympyAlgebra(Algebra):
         """
         return expression.subs(subs_dict)
 
-    def args(self, expression) -> list:
+    def args(self, expression: Any) -> list[Any]:
         """
         The list of arguments
 
@@ -109,7 +109,7 @@ class SympyAlgebra(Algebra):
         """
         return cast(list[Any], expression.free_symbols)
 
-    def is_trivial(self, expression) -> bool:
+    def is_trivial(self, expression: Any) -> bool:
         """
         Checks if the expression is trivial
         TODO: checking other constants
@@ -122,7 +122,7 @@ class SympyAlgebra(Algebra):
         """
         return True if expression is None else expression == 1
 
-    def is_root(self, expression) -> bool:
+    def is_root(self, expression: Any) -> bool:
         """
         Checks if the expression is a root
 
@@ -138,7 +138,7 @@ class SympyAlgebra(Algebra):
                 return True
         return False
 
-    def is_power(self, expression) -> bool:
+    def is_power(self, expression: Any) -> bool:
         """
         Checks whether the expression is a power
 
@@ -150,7 +150,7 @@ class SympyAlgebra(Algebra):
         """
         return isinstance(expression, self.algebra.core.power.Pow)
 
-    def is_division(self, expression) -> bool:
+    def is_division(self, expression: Any) -> bool:
         """
         Checks whether the expression is a division
 
@@ -173,7 +173,7 @@ class SympyAlgebra(Algebra):
                     return True
         return False
 
-    def operands(self, expression) -> list:
+    def operands(self, expression: Any) -> list[Any]:
         """
         Returns the list of operands
 
@@ -185,7 +185,7 @@ class SympyAlgebra(Algebra):
         """
         return cast(list[Any], expression.args)
 
-    def free_symbols(self, expression) -> list:
+    def free_symbols(self, expression: Any) -> list[Any]:
         """
         Get all free symbols in an expression
 

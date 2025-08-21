@@ -1,13 +1,16 @@
 """
-This module implements the interval arithmetics
+Interval arithmetics
 """
 
+from typing import Union
 import numpy as np
+
+from ..core import NUMERICAL_TOLERANCE
 
 __all__ = ["Interval", "IntervalUnion", "sqrt"]
 
 
-def sqrt(obj):
+def sqrt(obj) -> "Interval | IntervalUnion | float":
     """
     Square root of an interval or interval union
 
@@ -28,7 +31,7 @@ class Interval:
     The interval abstraction
     """
 
-    def __init__(self, lower_bound, upper_bound):
+    def __init__(self, lower_bound: float, upper_bound: float) -> None:
         """
         Constructor of the interval
 
@@ -56,7 +59,7 @@ class Interval:
         """
         return (self.lower_bound, self.upper_bound)
 
-    def contains(self, value) -> bool:
+    def contains(self, value: float) -> bool:
         """
         Check if the interval contains the value
 
@@ -68,7 +71,7 @@ class Interval:
         """
         return bool(self.lower_bound <= value <= self.upper_bound)
 
-    def intersection(self, other):
+    def intersection(self, other: "Interval | IntervalUnion") -> "Interval":
         """
         Returns the intersection of two intervals
 
@@ -110,7 +113,7 @@ class Interval:
 
         return bool(np.ceil(self.lower_bound) == np.floor(self.upper_bound))
 
-    def shrink_to_integers(self):
+    def shrink_to_integers(self) -> "Interval":
         """
         Shrinks the interval to integers
 
@@ -140,7 +143,7 @@ class Interval:
         """
         return bool(self.upper_bound < self.lower_bound)
 
-    def __add__(self, other):
+    def __add__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The addition operator
 
@@ -164,7 +167,7 @@ class Interval:
             upper_bound=self.upper_bound + other.upper_bound,
         )
 
-    def __radd__(self, other):
+    def __radd__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The right hand addition
 
@@ -176,7 +179,7 @@ class Interval:
         """
         return self + other
 
-    def __sub__(self, other):
+    def __sub__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The subtraction operator
 
@@ -200,7 +203,7 @@ class Interval:
             upper_bound=self.upper_bound - other.lower_bound,
         )
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The right hand subtraction
 
@@ -212,7 +215,7 @@ class Interval:
         """
         return (-1) * self + other
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The multiplication operator
 
@@ -238,7 +241,7 @@ class Interval:
 
         return Interval(min(term0, term1, term2, term3), max(term0, term1, term2, term3))
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Union[int, float, "Interval"]) -> Union["Interval", "IntervalUnion"]:
         """
         The right hand multiplication operator
 
@@ -250,7 +253,9 @@ class Interval:
         """
         return self.__mul__(other)
 
-    def __truediv__(self, other):
+    def __truediv__(
+        self, other: Union[int, float, "Interval"]
+    ) -> Union["Interval", "IntervalUnion"]:
         """
         The division operator
 
@@ -287,7 +292,9 @@ class Interval:
 
         return IntervalUnion([self * res_0, self * res_1])
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(
+        self, other: Union[int, float, "Interval"]
+    ) -> Union["Interval", "IntervalUnion"]:
         """
         The right hand division operator
 
@@ -337,7 +344,7 @@ class Interval:
         """
         return not self.__eq__(other)
 
-    def __neg__(self):
+    def __neg__(self) -> "Interval":
         """
         The negation operator
 
@@ -346,7 +353,7 @@ class Interval:
         """
         return (-1) * self
 
-    def __pow__(self, other):
+    def __pow__(self, other: Union[int, float]) -> "Interval":
         """
         The power operation on the interval
 
@@ -374,7 +381,7 @@ class Interval:
 
         return res
 
-    def representing_int(self):
+    def representing_int(self) -> Union[int, None]:
         """
         Returns a representative integer
 
@@ -383,7 +390,7 @@ class Interval:
         """
         shrunk = self.shrink_to_integers()
         if not shrunk.is_empty():
-            return shrunk.lower_bound
+            return int(shrunk.lower_bound)
         return None
 
 
@@ -392,7 +399,7 @@ class IntervalUnion:
     The interval union abstraction
     """
 
-    def __init__(self, intervals):
+    def __init__(self, intervals: Union["Interval", tuple, list]):
         """
         Constructor of the object
 
@@ -425,7 +432,7 @@ class IntervalUnion:
         """
         return [interval.to_tuple() for interval in self.intervals]
 
-    def simplify(self):
+    def simplify(self) -> None:
         """
         Simplify the union of intervals
 

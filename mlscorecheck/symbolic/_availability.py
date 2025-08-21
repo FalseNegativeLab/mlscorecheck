@@ -9,7 +9,7 @@ __all__ = ["symbolic_toolkits", "get_symbolic_toolkit", "check_importability"]
 symbolic_toolkits = []
 
 
-def check_importability(package: str):
+def check_importability(package: str) -> str | None:
     """
     Tests the importability of a package
 

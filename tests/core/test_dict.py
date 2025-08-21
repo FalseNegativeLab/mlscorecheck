@@ -22,5 +22,5 @@ def test_dict_minmax():
 
     minmax = dict_minmax([{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 0, "b": 2}])
 
-    assert minmax["a"] == [0, 3]
-    assert minmax["b"] == [2, 4]
+    assert minmax["a"] == (0, 3)
+    assert minmax["b"] == (2, 4)

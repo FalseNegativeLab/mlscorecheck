@@ -167,7 +167,7 @@ module = [
     "mlscorecheck.*",
 ]
 disable_error_code = [
-    "no-untyped-def",      # Function definitions without type annotations
+    # "no-untyped-def",      # Function definitions without type annotations
     "no-untyped-call",     # Calls to untyped functions  
     "type-arg",            # Missing type parameters for generics like dict, list
 ]
@@ -194,3 +194,7 @@ good-names = ["i", "j", "k", "n", "p", "tp", "tn", "fp", "fn", "N", "p4"]
 
 [tool.pylint.similarities]
 min-similarity-lines = 30
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

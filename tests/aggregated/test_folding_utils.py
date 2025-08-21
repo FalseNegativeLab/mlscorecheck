@@ -26,7 +26,7 @@ from mlscorecheck.aggregated import (
 from mlscorecheck.individual import generate_multiclass_dataset
 
 
-def test_generate_datasets_with_all_kfolds():
+def test_generate_datasets_with_all_kfolds() -> None:
     """
     Testing the generation of datasets with all kfold configurations
     """

@@ -2,6 +2,7 @@
 This module implements the complex interval arithmetics
 """
 
+from typing import Union
 from ._interval import Interval, IntervalUnion
 
 __all__ = ["ComplexInterval"]
@@ -12,7 +13,7 @@ class ComplexInterval:
     The class represents a complex interval
     """
 
-    def __init__(self, real, imag):
+    def __init__(self, real: Union[float, Interval, IntervalUnion], imag: Union[float, Interval, IntervalUnion]) -> None:
         """
         Constructor of the complex interval
 
@@ -23,7 +24,7 @@ class ComplexInterval:
         self.real = real
         self.imag = imag
 
-    def __add__(self, other):
+    def __add__(self, other: "ComplexInterval") -> "ComplexInterval":
         """
         Addition operator
 
@@ -38,7 +39,7 @@ class ComplexInterval:
 
         return ComplexInterval(self.real + other.real, self.imag + other.imag)
 
-    def __radd__(self, other):
+    def __radd__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Right addition operator
 
@@ -50,7 +51,7 @@ class ComplexInterval:
         """
         return self + other
 
-    def __sub__(self, other):
+    def __sub__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Subtraction operator
 
@@ -65,7 +66,7 @@ class ComplexInterval:
 
         return ComplexInterval(self.real - other.real, self.imag - other.imag)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Right subtraction operator
 
@@ -77,7 +78,7 @@ class ComplexInterval:
         """
         return (-1) * self + other
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Multiplication operator
 
@@ -95,7 +96,7 @@ class ComplexInterval:
             self.real * other.imag + self.imag * other.real,
         )
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Right multiplication operator
 
@@ -107,7 +108,7 @@ class ComplexInterval:
         """
         return self.__mul__(other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Division operator
 
@@ -127,7 +128,7 @@ class ComplexInterval:
             (self.imag * other.real - self.real * other.imag) / norm,
         )
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Union[float, Interval, IntervalUnion, "ComplexInterval"]) -> "ComplexInterval":
         """
         Right division operator
 
@@ -144,7 +145,7 @@ class ComplexInterval:
 
         return other / self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         The representation dunder
 
@@ -180,7 +181,7 @@ class ComplexInterval:
         """
         return not self.__eq__(other)
 
-    def __neg__(self):
+    def __neg__(self) -> "ComplexInterval":
         """
         The negation operator
 
@@ -189,7 +190,7 @@ class ComplexInterval:
         """
         return ComplexInterval(-self.real, -self.imag)
 
-    def __pow__(self, other):
+    def __pow__(self, other: Union[float, int]) -> "ComplexInterval":
         """
         The power operator
 

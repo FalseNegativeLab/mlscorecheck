@@ -3,6 +3,8 @@ This module contains the tp and tn solutions.
 This is a generated file, do not edit.
 """
 
+# mypy: ignore-errors
+
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
