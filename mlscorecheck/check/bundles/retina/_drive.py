@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-def _filter_drive(data, imageset, annotator, assumption):
+def _filter_drive(data: dict, imageset: str | list, annotator: int, assumption: str) -> list:
     """
     Filters the DRIVE dataset
 
@@ -50,11 +50,11 @@ def _filter_drive(data, imageset, annotator, assumption):
 
 
 def check_drive_vessel_aggregated_mos_assumption(
-    imageset,
+    imageset: str | list,
     assumption: str,
     annotator: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -264,10 +264,10 @@ def check_drive_vessel_image_assumption(
 
 
 def check_drive_vessel_aggregated(
-    imageset,
+    imageset: str | list,
     annotator: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,

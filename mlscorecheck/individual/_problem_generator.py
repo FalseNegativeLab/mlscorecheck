@@ -113,7 +113,7 @@ def generate_problems(
     max_n: int = 1000,
     zeros: list | None = None,
     add_complements: bool = False,
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
 ) -> tuple[dict | list, dict | list]:
     """
     Generates a random problem
@@ -149,7 +149,7 @@ def generate_problems(
 
 
 def generate_multiclass_dataset(
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
     max_n_classes: int = 5,
     min_n_classes: int = 3,
     max_class_size: int = 200,
@@ -200,7 +200,7 @@ def create_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarra
     return confusion_matrix
 
 
-def sample_multiclass_dataset(dataset: dict, random_state=None) -> np.ndarray:
+def sample_multiclass_dataset(dataset: dict, random_state: int | np.random.RandomState | None = None) -> np.ndarray:
     """
     Samples a multiclass dataset
 

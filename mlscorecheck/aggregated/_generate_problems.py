@@ -62,7 +62,7 @@ def generate_folding(
     max_folds: int = 10,
     max_repeats: int = 5,
     strategies: list | None = None,
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
     no_folds: bool = False,
 ) -> dict:
     """
@@ -113,7 +113,7 @@ def generate_evaluation(  # pylint: disable=too-many-locals
     strategies: list | None = None,
     feasible_fold_score_bounds: bool | None = None,
     aggregation: str | None = None,
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
     return_scores: bool = False,
     rounding_decimals: int | None = None,
     no_name: bool = False,
@@ -222,7 +222,7 @@ def generate_experiment(
     evaluation_params: dict | None = None,
     feasible_dataset_score_bounds: bool | None = None,
     aggregation: str | None = None,
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
     return_scores: bool = False,
     rounding_decimals: int | None = None,
     score_subset: list | None = None,
@@ -332,8 +332,12 @@ def get_dataset_score_bounds(
 
 
 def generate_scores_for_testsets(
-    testsets, rounding_decimals=None, subset=None, random_state=None, aggregation="mos"
-):
+    testsets: list,
+    rounding_decimals: int | None = None,
+    subset: list | None = None,
+    random_state: int | np.random.RandomState | None = None,
+    aggregation: str = "mos"
+) -> dict:
     """
     Sample scores for testsets
 
@@ -375,18 +379,18 @@ def generate_scores_for_testsets(
 
 def generate_dataset_folding_multiclass(
     *,
-    random_state=None,
-    max_n_classes=5,
-    min_n_classes=3,
-    max_class_size=200,
-    min_class_size=10,
-    max_n_folds=5,
-    max_n_repeats=3,
-    average=None,
-    aggregation=None,
-    rounding_decimals=None,
-    subset=None,
-):
+    random_state: int | np.random.RandomState | None = None,
+    max_n_classes: int = 5,
+    min_n_classes: int = 3,
+    max_class_size: int = 200,
+    min_class_size: int = 10,
+    max_n_folds: int = 5,
+    max_n_repeats: int = 3,
+    average: str | None = None,
+    aggregation: str | None = None,
+    rounding_decimals: int | None = None,
+    subset: list | None = None,
+) -> tuple:
     """
     Generates a multiclass dataset and folding with scores
 

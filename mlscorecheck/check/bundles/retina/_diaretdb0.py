@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-def _prepare_configuration_diaretdb0(subset: str, batch, class_name: str | list) -> list:
+def _prepare_configuration_diaretdb0(subset: str, batch: str | list, class_name: str | list) -> list:
     """
     Prepare the testset specifications for a "one vs rest" setup
 
@@ -52,10 +52,10 @@ def _prepare_configuration_diaretdb0(subset: str, batch, class_name: str | list)
 
 def check_diaretdb0_class_som(
     subset: str,
-    batch,
-    class_name,
+    batch: str | list,
+    class_name: str | list,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
@@ -130,10 +130,10 @@ def check_diaretdb0_class_som(
 
 def check_diaretdb0_class_mos(
     subset: str,
-    batch,
-    class_name,
+    batch: str | list,
+    class_name: str | list,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -212,10 +212,10 @@ def check_diaretdb0_class_mos(
 
 def check_diaretdb0_class(
     subset: str,
-    batch,
-    class_name,
+    batch: str | list,
+    class_name: str | list,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,

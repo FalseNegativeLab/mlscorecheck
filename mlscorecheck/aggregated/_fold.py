@@ -97,7 +97,7 @@ class Fold:
             else round_scores(self.scores, rounding_decimals)
         )
 
-    def set_initial_values(self, scores):
+    def set_initial_values(self, scores: dict) -> None:
         """
         Sets the initial values for the tp and tn variables
 

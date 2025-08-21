@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _prepare_testsets_drishti_gs(subset, target: str, confidence: float):
+def _prepare_testsets_drishti_gs(subset: str | list, target: str, confidence: float) -> list:
     """
     Preparing the testsets for the DRISHTI_GS dataset
 
@@ -67,7 +67,7 @@ def check_drishti_gs_segmentation_image(
     eps: float,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the segmentation results on one image.
 
@@ -133,7 +133,7 @@ def check_drishti_gs_segmentation_image(
 
 
 def check_drishti_gs_segmentation_aggregated_mos(
-    subset,
+    subset: str | list,
     confidence: float,
     target: str,
     scores: dict,

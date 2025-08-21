@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-def _filter_hrf(data: dict, imageset, assumption: str) -> list:
+def _filter_hrf(data: dict, imageset: str | list, assumption: str) -> list:
     """
     Filters the HRF dataset
 
@@ -45,10 +45,10 @@ def _filter_hrf(data: dict, imageset, assumption: str) -> list:
 
 
 def check_hrf_vessel_aggregated_mos_assumption(
-    imageset,
+    imageset: str | list,
     assumption: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -117,16 +117,28 @@ def check_hrf_vessel_aggregated_mos_assumption(
 
 
 def check_hrf_vessel_aggregated_som_assumption(
-    imageset: str | list, assumption: str, scores: dict, eps: float | dict, numerical_tolerance: float = NUMERICAL_TOLERANCE
+    imageset: str | list,
+    assumption: str,
+    scores: dict,
+    eps: float | dict,
+    *,
+    score_bounds: dict | None = None,
+    solver_name: str | None = None,
+    timeout: int | None = None,
+    verbosity: int = 1,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
-    Tests the consistency of scores calculated on the HRF dataset using
-    the score-of-means aggregation and an assumption on the region of evaluation.
+    Checking the consistency of scores with calculated for some images of
+    the HRF dataset using the som aggregation and an assumption on the region
+    of evaluation
 
     Args:
-        imageset (str|list): 'all' or the list of identifiers of images (e.g. ['13_h', '01_g'])
+        imageset (str|list(str)): the identifier(s) of the images to be tested.
+                                    Use the imageset specification 'all' to refer
+                                    to all images in the HRF dataset.
         assumption (str): the assumption on the region of evaluation to test ('fov'/'all')
-        scores (dict): the scores to check ('acc', 'sens', 'spec',
+        scores (dict(str,float)): the scores to be tested ('acc', 'sens', 'spec',
                                     'bacc', 'npv', 'ppv', 'f1', 'fm', 'f1n',
                                     'fbp', 'fbn', 'upm', 'gm', 'mk', 'lrp', 'lrn', 'mcc',
                                     'bm', 'pt', 'dor', 'ji', 'kappa'). When using f-beta
@@ -136,6 +148,12 @@ def check_hrf_vessel_aggregated_som_assumption(
                                     or 'tpr' instead of 'sens' and complements, like
                                     'false_positive_rate' for (1 - 'spec') can also be used.
         eps (float|dict(str,float)): the numerical uncertainty(ies) of the scores
+        score_bounds (None|dict(str,tuple(float,float))): the potential bounds on the
+                                    scores
+        solver_name (None|str): the solver to use
+        timeout (None|int): the timeout for the linear programming solver in seconds
+        verbosity (int): the verbosity of the linear programming solver,
+                                0: silent, 1: verbose.
         numerical_tolerance (float): in practice, beyond the numerical uncertainty of
                                     the scores, some further tolerance is applied. This is
                                     orders of magnitude smaller than the uncertainty of the
@@ -143,26 +161,26 @@ def check_hrf_vessel_aggregated_som_assumption(
                                     is 1, it might slightly decrease the sensitivity.
 
     Returns:
-        dict: A dictionary containing the results of the consistency check. The dictionary
-        includes the following keys:
+        dict: The summary of the results, with the following entries:
 
-        - ``'inconsistency'``:
-            A boolean flag indicating whether the set of feasible true
-            positive (tp) and true negative (tn) pairs is empty. If True,
-            it indicates that the provided scores are not consistent with the experiment.
-        - ``'details'``:
-            A list providing further details from the analysis of the scores one
-            after the other.
-        - ``'n_valid_tptn_pairs'``:
-            The number of tp and tn pairs that are compatible with all
-            scores.
-        - ``'prefiltering_details'``:
-            The results of the prefiltering by using the solutions for
-            the score pairs.
-        - ``'evidence'``:
-            The evidence for satisfying the consistency constraints.
+        - ``'inconsistency'``: True if the set of scores is not consistent with the
+            experiment, False otherwise
+        - ``'details'``: the details of the analysis
 
+    Examples:
+        >>> from mlscorecheck.check.bundles.retina import check_hrf_vessel_aggregated_som_assumption
+        >>> imageset = 'all'
+        >>> assumption = 'fov'
+        >>> scores = {'acc': 0.5673, 'sens': 0.4655, 'bacc': 0.5285}
+        >>> k = 3
+        >>> results = check_hrf_vessel_aggregated_som_assumption(imageset=imageset,
+        ...                                                     assumption=assumption,
+        ...                                                     scores=scores,
+        ...                                                     eps=10**(-k))
+        >>> results['inconsistency']
+        # True
     """
+
     data = get_experiment("retina.hrf")
 
     testsets = _filter_hrf(data, imageset, assumption)
@@ -172,7 +190,6 @@ def check_hrf_vessel_aggregated_som_assumption(
         scores=scores,
         eps=eps,
         numerical_tolerance=numerical_tolerance,
-        prefilter_by_pairs=True,
     )
 
 
@@ -180,7 +197,7 @@ def check_hrf_vessel_image_assumption(
     image_identifier: str,
     assumption: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
@@ -241,10 +258,10 @@ def check_hrf_vessel_image_assumption(
 
 
 def check_hrf_vessel_aggregated(
-    imageset,
+    imageset: str | list,
     assumption: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -325,7 +342,7 @@ def check_hrf_vessel_aggregated(
 
 
 def check_hrf_vessel_image(
-    image_identifier: str, scores: dict, eps, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
+    image_identifier: str, scores: dict, eps: float | dict, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Testing the scores calculated for one image of the HRF dataset with

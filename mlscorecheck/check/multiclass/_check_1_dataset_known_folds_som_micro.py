@@ -16,7 +16,7 @@ def check_1_dataset_known_folds_som_micro(
     dataset: dict,
     folding: dict,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     prefilter_by_pairs: bool = True,

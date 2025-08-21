@@ -14,7 +14,7 @@ __all__ = ["check_n_testsets_mos_no_kfold"]
 def check_n_testsets_mos_no_kfold(
     testsets: list,
     scores: dict,
-    eps: float,
+    eps: float | dict,
     *,
     testset_score_bounds: dict | None = None,
     solver_name: str | None = None,

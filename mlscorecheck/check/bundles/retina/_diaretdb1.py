@@ -111,10 +111,10 @@ def _prepare_configuration_diaretdb1(
 def check_diaretdb1_class(
     *,
     subset: str,
-    class_name,
+    class_name: str,
     confidence: float,
     scores: dict,
-    eps,
+    eps: float | dict,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
@@ -196,11 +196,11 @@ def check_diaretdb1_class(
 def check_diaretdb1_segmentation_image_assumption(
     *,
     image_identifier: str,
-    class_name,
+    class_name: str,
     assumption: str,
     confidence: float,
     scores: dict,
-    eps,
+    eps: float | dict,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
@@ -275,10 +275,10 @@ def check_diaretdb1_segmentation_image_assumption(
 def check_diaretdb1_segmentation_image(
     *,
     image_identifier: str,
-    class_name,
+    class_name: str,
     confidence: float,
     scores: dict,
-    eps,
+    eps: float | dict,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """
@@ -356,12 +356,12 @@ def check_diaretdb1_segmentation_image(
 def check_diaretdb1_segmentation_aggregated_assumption(
     *,
     subset: str,
-    class_name,
+    class_name: str,
     assumption: str,
     confidence: float,
     only_valid: bool,
     scores: dict,
-    eps,
+    eps: float | dict,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
     timeout: int | None = None,
@@ -446,11 +446,11 @@ def check_diaretdb1_segmentation_aggregated_assumption(
 def check_diaretdb1_segmentation_aggregated(
     *,
     subset: str,
-    class_name,
+    class_name: str,
     confidence: float,
     only_valid: bool,
     scores: dict,
-    eps,
+    eps: float | dict,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
     timeout: int | None = None,

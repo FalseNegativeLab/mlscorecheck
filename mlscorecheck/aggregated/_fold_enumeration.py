@@ -408,7 +408,10 @@ def multiclass_fold_partitioning_generator_22(
         yield {0: (c_00, n0 - c_00), 1: (c0 - c_00, n1 - c0 + c_00)}
 
 
-def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list):
+from typing import Iterator
+
+
+def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list) -> Iterator[dict]:
     """
     Generates the configurations for two folds of cardinalities n0 and n1 and a list
     of classes with sizes in cs
@@ -431,7 +434,7 @@ def multiclass_fold_partitioning_generator_2n(n0: int, n1: int, cs: list):
                 yield {0: (part[0][0], *(part_deep[0])), 1: (part[1][0], *(part_deep[1]))}
 
 
-def multiclass_fold_partitioning_generator_kn(ns: list, cs: list):
+def multiclass_fold_partitioning_generator_kn(ns: list, cs: list) -> Iterator[dict]:
     """
     Generates the configurations for a list of folds of sizes ns and a list
     of classes with sizes in cs

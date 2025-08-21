@@ -16,7 +16,7 @@ def check_1_dataset_known_folds_som_macro(
     dataset: dict,
     folding: dict,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     class_score_bounds: dict | None = None,
     solver_name: str | None = None,

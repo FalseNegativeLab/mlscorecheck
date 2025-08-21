@@ -27,7 +27,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         self.algebra = importlib.import_module("sage.all")  # pragma: no cover
         self.sqrt = self.algebra.sqrt  # pragma: no cover
 
-    def create_symbol(self, name: str, **kwargs) -> Any:  # pragma: no cover
+    def create_symbol(self, name: str, **kwargs: dict) -> Any:  # pragma: no cover
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -80,7 +80,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return self.algebra.factor(expression)  # pragma: no cover
 
-    def solve(self, equation: Any, var: Any, **kwargs) -> list[dict]:  # pragma: no cover
+    def solve(self, equation: Any, var: Any, **kwargs: dict) -> list[dict]:  # pragma: no cover
         """
         Solve an equation for a variable
 
@@ -112,7 +112,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return expression.subs(subs_dict)  # pragma: no cover
 
-    def args(self, expression) -> list:  # pragma: no cover
+    def args(self, expression: Any) -> list:  # pragma: no cover
         """
         The list of arguments
 

@@ -19,7 +19,7 @@ __all__ = [
 
 
 def _collect_denominators_and_bases(
-    expression, denoms: list, bases: list, algebra: Algebra, depth: int
+    expression: Any, denoms: list, bases: list, algebra: Algebra, depth: int
 ) -> None:
     """
     Recursive core of collecting all denominators and bases
@@ -53,7 +53,7 @@ def _collect_denominators_and_bases(
                 _collect_denominators_and_bases(operand, denoms, bases, algebra, depth + 1)
 
 
-def collect_denominators_and_bases(expression, algebra: Algebra) -> tuple[list, list]:
+def collect_denominators_and_bases(expression: Any, algebra: Algebra) -> tuple[list, list]:
     """
     Top level function for recursively collecting all denominators and bases
 
@@ -188,7 +188,7 @@ class ProblemSolver:
         self.str_solutions: Any = None  # Can be None or list
         self.str_solutions = None
 
-    def corner_case_solution(self, solution):
+    def corner_case_solution(self, solution: dict) -> bool:
         """
         Checks if the solution is a corner case solution
 
@@ -209,7 +209,7 @@ class ProblemSolver:
 
         return flag
 
-    def solve(self, **kwargs):
+    def solve(self, **kwargs: dict) -> "ProblemSolver":
         """
         Solves the problem
 

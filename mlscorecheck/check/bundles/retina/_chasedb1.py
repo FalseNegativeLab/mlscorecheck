@@ -165,10 +165,10 @@ def check_chasedb1_vessel_aggregated_som(
 
 
 def check_chasedb1_vessel_aggregated(
-    imageset,
+    imageset: str | list,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -249,7 +249,7 @@ def check_chasedb1_vessel_image(
     image_identifier: str,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
