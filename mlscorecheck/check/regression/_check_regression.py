@@ -113,7 +113,7 @@ def calculate_regression_scores(
 
 
 def generate_regression_problem_and_scores(
-    random_state=None, max_n_samples=1000, subset=None, rounding_decimals=None
+    random_state: int | None = None, max_n_samples: int = 1000, subset: list | None = None, rounding_decimals: int | None = None
 ) -> tuple[float, int, dict]:
     """
     Generate a regression problem and corresponding scores
@@ -150,7 +150,7 @@ score_formulas = {
 
 
 def expand_regression_scores(
-    var: float, n_samples: int, scores: dict, eps, numerical_tolerance: float
+    var: float, n_samples: int, scores: dict, eps: float | dict, numerical_tolerance: float
 ) -> dict:
     """
     Generate scores from the ones available and expand the scores to intervals given the
@@ -214,7 +214,7 @@ def check_1_testset_no_kfold(
     var: float,
     n_samples: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:
     """

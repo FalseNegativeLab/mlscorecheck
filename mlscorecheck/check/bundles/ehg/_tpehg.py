@@ -11,7 +11,7 @@ __all__ = ["check_tpehg"]
 
 def check_tpehg(
     scores: dict,
-    eps,
+    eps: float | dict,
     n_folds: int,
     n_repeats: int,
     *,

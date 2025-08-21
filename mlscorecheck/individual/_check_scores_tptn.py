@@ -4,7 +4,7 @@ tp and tn combinations.
 """
 
 import copy
-from typing import Any
+from typing import Any, Callable
 
 from ..core import NUMERICAL_TOLERANCE, logger, update_uncertainty
 from ._interval import Interval, IntervalUnion
@@ -45,7 +45,7 @@ preferred_order = [
 
 
 def iterate_tptn(
-    *, score: str, score_value: float, valid_pairs: dict, sol_fun, params: dict, iterate_by: str
+    *, score: str, score_value: float, valid_pairs: dict, sol_fun: Callable, params: dict, iterate_by: str
 ) -> dict:
     """
     Iterate through the potential values of tp or tn and construct feasible pairs
@@ -110,7 +110,7 @@ def update_sens(p: int, valid_pairs: dict, score_int: "Interval", solve_for: str
     return valid_pairs
 
 
-def update_spec(n: int, valid_pairs: dict, score_int, solve_for: str) -> dict:
+def update_spec(n: int, valid_pairs: dict, score_int: Interval | IntervalUnion, solve_for: str) -> dict:
     """
     Update specificity intervals
 
@@ -175,7 +175,7 @@ def _check_scores_tptn_pairs(
     p: int,
     n: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     solve_for: str | None = None,
@@ -347,7 +347,7 @@ def update_tptn(tp: Interval | IntervalUnion, tn: Interval | IntervalUnion, sols
 
 
 def _check_scores_tptn_intervals(
-    p: int, n: int, scores: dict, eps, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
+    p: int, n: int, scores: dict, eps: float | dict, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Check scores by iteratively reducing the set of feasible ``tp``, ``tn`` pairs.
@@ -484,7 +484,7 @@ def check_scores_tptn_pairs(
     p: int,
     n: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     solve_for: str | None = None,

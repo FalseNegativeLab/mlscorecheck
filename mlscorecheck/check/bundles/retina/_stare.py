@@ -111,7 +111,7 @@ def check_stare_vessel_aggregated_mos(
 
 
 def check_stare_vessel_aggregated_som(
-    imageset, annotator: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+    imageset: str | list, annotator: str, scores: dict, eps: float | dict, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Tests the consistency of scores calculated on the STARE dataset using
@@ -172,10 +172,10 @@ def check_stare_vessel_aggregated_som(
 
 
 def check_stare_vessel_aggregated(
-    imageset,
+    imageset: str | list,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -254,7 +254,7 @@ def check_stare_vessel_image(
     image_identifier: str,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
 ) -> dict:

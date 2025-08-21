@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _filter_chasedb1(data: dict, imageset, annotator: str) -> list:
+def _filter_chasedb1(data: dict, imageset: str | list, annotator: str) -> list:
     """
     Filters the CHASEDB1 dataset
 
@@ -38,10 +38,10 @@ def _filter_chasedb1(data: dict, imageset, annotator: str) -> list:
 
 
 def check_chasedb1_vessel_aggregated_mos(
-    imageset,
+    imageset: str | list,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     score_bounds: dict | None = None,
     solver_name: str | None = None,
@@ -107,7 +107,7 @@ def check_chasedb1_vessel_aggregated_mos(
 
 
 def check_chasedb1_vessel_aggregated_som(
-    imageset, annotator: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+    imageset: str | list, annotator: str, scores: dict, eps: float | dict, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Tests the consistency of scores calculated on the CHASEDB1 dataset using
