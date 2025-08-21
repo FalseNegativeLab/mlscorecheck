@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def _prepare_testsets_diaretdb1(subset_indices, data, key, assumption, threshold):
+def _prepare_testsets_diaretdb1(subset_indices: list, data: dict, key: str, assumption: str, threshold: float) -> tuple[list, dict]:
     """
     Helper function for generating the diaretdb1 evaluation configuration
 
@@ -60,7 +60,7 @@ def _prepare_testsets_diaretdb1(subset_indices, data, key, assumption, threshold
 
 
 def _prepare_configuration_diaretdb1(
-    *, subset, class_name, pixel_level: bool, assumption: str, confidence: float, only_valid=False
+    *, subset: str | list, class_name: str | list, pixel_level: bool, assumption: str, confidence: float, only_valid: bool = False
 ) -> list:
     """
     Prepares the experiment confuguration based on the description

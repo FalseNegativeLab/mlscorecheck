@@ -101,7 +101,7 @@ def calculate_scores(
 
 def calculate_multiclass_scores(
     confusion_matrix: np.ndarray,
-    average=None,
+    average: str | None = None,
     *,
     rounding_decimals: int | None = None,
     additional_symbols: dict | None = None,

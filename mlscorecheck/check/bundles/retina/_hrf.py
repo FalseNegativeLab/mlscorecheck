@@ -117,7 +117,7 @@ def check_hrf_vessel_aggregated_mos_assumption(
 
 
 def check_hrf_vessel_aggregated_som_assumption(
-    imageset, assumption: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+    imageset: str | list, assumption: str, scores: dict, eps: float | dict, numerical_tolerance: float = NUMERICAL_TOLERANCE
 ) -> dict:
     """
     Tests the consistency of scores calculated on the HRF dataset using

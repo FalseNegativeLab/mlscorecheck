@@ -72,7 +72,7 @@ class Evaluation:
 
     def sample_figures(
         self, 
-        random_state=None, 
+        random_state: int | None = None, 
         score_subset: list | None = None
     ) -> "Evaluation":
         """

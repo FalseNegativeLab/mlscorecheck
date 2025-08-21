@@ -63,7 +63,7 @@ class Experiment:
 
     def sample_figures(
         self, 
-        random_state=None, 
+        random_state: int | None = None, 
         score_subset: list | None = None
     ) -> "Experiment":
         """
@@ -166,7 +166,7 @@ class Experiment:
 
         return lp_problem
 
-    def populate(self, lp_problem) -> "Experiment":
+    def populate(self, lp_problem: pl.LpProblem) -> "Experiment":
         """
         Populates the evaluation with the figures in the solved linear programming problem
 

@@ -54,7 +54,7 @@ class Fold:
         """
         return {"p": self.p, "n": self.n, "identifier": self.identifier}
 
-    def sample_figures(self, random_state=None) -> "Fold":
+    def sample_figures(self, random_state: int | None = None) -> "Fold":
         """
         Samples the ``tp`` and ``tn`` figures
 

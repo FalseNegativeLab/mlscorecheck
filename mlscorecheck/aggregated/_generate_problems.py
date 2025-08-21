@@ -31,7 +31,7 @@ def generate_dataset(
     max_p: int = 100,
     max_n: int = 100,
     *,
-    random_state=None,
+    random_state: int | None = None,
 ) -> dict:
     """
     Generate a random dataset specification

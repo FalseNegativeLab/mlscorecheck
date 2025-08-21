@@ -37,7 +37,7 @@ functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
 
 
-def translate_metadata(original) -> dict | list:
+def translate_metadata(original: dict | list) -> dict | list:
     """
     Translates the metadata, internally uses p instead of n_positive, n_minority or
     n_1, and similarly, internally uses n instead of n_negative, n_majority, or n_0.
