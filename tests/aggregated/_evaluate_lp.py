@@ -12,8 +12,8 @@ __all__ = ["evaluate_timeout"]
 
 
 def evaluate_timeout(
-    result: pl.LpProblem, problem: Experiment, scores: dict, eps, score_subset: list
-):
+    result: pl.LpProblem, problem: Experiment, scores: dict, eps, score_subset: list[str]
+) -> None:
     """
     Evaluate the stopped or succeeded tests
 

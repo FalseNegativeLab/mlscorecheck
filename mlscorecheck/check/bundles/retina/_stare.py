@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _filter_stare(data, imageset, annotator):
+def _filter_stare(data: dict, imageset, annotator: str) -> list:
     """
     Filters the STARE dataset
 
@@ -111,8 +111,8 @@ def check_stare_vessel_aggregated_mos(
 
 
 def check_stare_vessel_aggregated_som(
-    imageset, annotator, scores, eps, numerical_tolerance=NUMERICAL_TOLERANCE
-):
+    imageset, annotator: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the consistency of scores calculated on the STARE dataset using
     the score-of-means aggregation.
@@ -257,7 +257,7 @@ def check_stare_vessel_image(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the STARE dataset
 

@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-def _filter_hrf(data, imageset, assumption):
+def _filter_hrf(data: dict, imageset, assumption: str) -> list:
     """
     Filters the HRF dataset
 
@@ -118,7 +118,7 @@ def check_hrf_vessel_aggregated_mos_assumption(
 
 def check_hrf_vessel_aggregated_som_assumption(
     imageset, assumption: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
-):
+) -> dict:
     """
     Tests the consistency of scores calculated on the HRF dataset using
     the score-of-means aggregation and an assumption on the region of evaluation.
@@ -183,7 +183,7 @@ def check_hrf_vessel_image_assumption(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the HRF dataset using an
     assumption on the region of evaluation.
@@ -242,6 +242,7 @@ def check_hrf_vessel_image_assumption(
 
 def check_hrf_vessel_aggregated(
     imageset,
+    assumption: str,
     scores: dict,
     eps,
     *,
@@ -325,7 +326,7 @@ def check_hrf_vessel_aggregated(
 
 def check_hrf_vessel_image(
     image_identifier: str, scores: dict, eps, *, numerical_tolerance: float = NUMERICAL_TOLERANCE
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the HRF dataset with
     both assumptions on the region of evaluation ('fov'/'all')

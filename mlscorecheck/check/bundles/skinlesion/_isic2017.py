@@ -9,7 +9,7 @@ from ...binary import check_1_testset_no_kfold
 __all__ = ["check_isic2017", "_prepare_testset_isic2017"]
 
 
-def _prepare_testset_isic2017(target, against):
+def _prepare_testset_isic2017(target: str | list, against: str | list | None) -> dict:
     """
     Preperation of the test set
 
@@ -25,7 +25,12 @@ def _prepare_testset_isic2017(target, against):
     data = get_experiment("skinlesion.isic2017")
 
     target = [target] if isinstance(target, str) else target
-    against = [against] if isinstance(against, str) else against
+    
+    if against is None:
+        all_classes = ['M', 'SK', 'N']
+        against = [cls for cls in all_classes if cls not in target]
+    else:
+        against = [against] if isinstance(against, str) else against
 
     mapping = {"M": "melanoma", "SK": "seborrheic keratosis", "N": "nevus"}
 
@@ -36,8 +41,13 @@ def _prepare_testset_isic2017(target, against):
 
 
 def check_isic2017(
-    *, target, against, scores: dict, eps: float, numerical_tolerance: float = NUMERICAL_TOLERANCE
-):
+    target: str,
+    scores: dict,
+    eps,
+    *,
+    against: str | None = None,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Tests if the scores are consistent with the test set of the ISIC2017
     skin lesion classification dataset. The dataset contains three classes,

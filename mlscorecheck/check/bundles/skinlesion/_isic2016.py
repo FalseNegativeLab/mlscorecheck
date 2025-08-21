@@ -9,7 +9,7 @@ from ...binary import check_1_testset_no_kfold
 __all__ = ["check_isic2016"]
 
 
-def check_isic2016(*, scores: dict, eps: float, numerical_tolerance: float = NUMERICAL_TOLERANCE):
+def check_isic2016(*, scores: dict, eps: float, numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
     """
     Tests if the scores are consistent with the test set of the ISIC2016
     melanoma classification dataset

@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _filter_chasedb1(data, imageset, annotator):
+def _filter_chasedb1(data: dict, imageset, annotator: str) -> list:
     """
     Filters the CHASEDB1 dataset
 
@@ -107,8 +107,8 @@ def check_chasedb1_vessel_aggregated_mos(
 
 
 def check_chasedb1_vessel_aggregated_som(
-    imageset, annotator, scores, eps, numerical_tolerance=NUMERICAL_TOLERANCE
-):
+    imageset, annotator: str, scores: dict, eps, numerical_tolerance=NUMERICAL_TOLERANCE
+) -> dict:
     """
     Tests the consistency of scores calculated on the CHASEDB1 dataset using
     the score-of-means aggregation.
@@ -252,7 +252,7 @@ def check_chasedb1_vessel_image(
     eps,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the CHASEDB1 dataset
 
