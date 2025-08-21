@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _filter_stare(data: dict, imageset, annotator: str) -> list:
+def _filter_stare(data: dict, imageset: str | list, annotator: str) -> list:
     """
     Filters the STARE dataset
 
@@ -38,12 +38,12 @@ def _filter_stare(data: dict, imageset, annotator: str) -> list:
 
 
 def check_stare_vessel_aggregated_mos(
-    imageset,
-    annotator: str,
+    imageset: str | list,
     scores: dict,
-    eps,
+    eps: float,
     *,
-    score_bounds: dict | None = None,
+    annotator: str = "ah",
+    testset_score_bounds: dict | None = None,
     solver_name: str | None = None,
     timeout: int | None = None,
     verbosity: int = 1,

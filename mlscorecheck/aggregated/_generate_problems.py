@@ -28,7 +28,10 @@ __all__ = [
 
 
 def generate_dataset(
-    max_p: int = 500, max_n: int = 500, random_state=None, no_name: bool = False
+    max_p: int = 100,
+    max_n: int = 100,
+    *,
+    random_state=None,
 ) -> dict:
     """
     Generate a random dataset specification

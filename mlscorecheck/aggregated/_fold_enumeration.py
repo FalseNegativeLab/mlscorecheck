@@ -4,6 +4,7 @@ This module implements the functionalities for enumerating fold configurations
 
 import copy
 import itertools
+from typing import Generator
 
 import numpy as np
 
@@ -26,7 +27,7 @@ __all__ = [
 ]
 
 
-def integer_partitioning_generator(n: int, m: int):  # pylint: disable=invalid-name
+def integer_partitioning_generator(n: int, m: int) -> Generator[list, None, None]:  # pylint: disable=invalid-name
     """
     Integer partitioning generator
 
@@ -75,7 +76,7 @@ def integer_partitioning_generator(n: int, m: int):  # pylint: disable=invalid-n
         x[m] = n - s[m - 1]
 
 
-def all_integer_partitioning_generator(n, k, non_zero, max_count):  # pylint: disable=invalid-name
+def all_integer_partitioning_generator(n: int, k: int, non_zero: bool, max_count: int) -> Generator[list, None, None]:  # pylint: disable=invalid-name
     """
     Generate all integer partitioning of n to k parts (including 0 parts)
 
@@ -99,7 +100,7 @@ def all_integer_partitioning_generator(n, k, non_zero, max_count):  # pylint: di
                     yield [0] * (k - m) + positives
 
 
-def not_enough_diverse_folds(p_values, n_values):
+def not_enough_diverse_folds(p_values: list, n_values: list) -> bool:
     """
     Checks if there are enough folds with positive and negative samples
 
@@ -117,8 +118,15 @@ def not_enough_diverse_folds(p_values, n_values):
 
 
 def determine_min_max_p(
-    *, p, n, k_a, k_b, c_a, p_non_zero, n_non_zero
-):  # pylint: disable=too-many-locals
+    *, 
+    p: int, 
+    n: int, 
+    k_a: int, 
+    k_b: int, 
+    c_a: int, 
+    p_non_zero: int, 
+    n_non_zero: int
+) -> tuple[int, int]:
     """
     Determines the minimum and maximum number of positives that can appear in folds
     of type A
@@ -146,8 +154,14 @@ def determine_min_max_p(
 
 
 def fold_partitioning_generator(
-    *, p, n, k, p_non_zero=True, n_non_zero=True, p_min=-1
-):  # pylint: disable=invalid-name,too-many-locals
+    *, 
+    p: int, 
+    n: int, 
+    k: int, 
+    p_non_zero: bool = True, 
+    n_non_zero: bool = True, 
+    p_min: int = -1
+) -> Generator[tuple[list, list], None, None]:
     """
     Generates the fold partitioning
 
@@ -240,7 +254,11 @@ def _check_specification_and_determine_p_n(dataset: dict, folding: dict) -> tupl
     return p, n
 
 
-def kfolds_generator(evaluation: dict, available_scores: list, repeat_idx=0):
+def kfolds_generator(
+    evaluation: dict, 
+    available_scores: list, 
+    repeat_idx: int = 0
+) -> Generator[list[dict], None, None]:
     """
     Generates the fold configurations
 
@@ -299,7 +317,10 @@ def kfolds_generator(evaluation: dict, available_scores: list, repeat_idx=0):
         ]
 
 
-def repeated_kfolds_generator(evaluation: dict, available_scores: list):
+def repeated_kfolds_generator(
+    evaluation: dict, 
+    available_scores: list
+) -> Generator[dict, None, None]:
     """
     Generates the evaluation variations
 
@@ -334,7 +355,10 @@ def repeated_kfolds_generator(evaluation: dict, available_scores: list):
             }
 
 
-def experiment_kfolds_generator(experiment: dict, available_scores: list):
+def experiment_kfolds_generator(
+    experiment: dict, 
+    available_scores: list
+) -> Generator[dict, None, None]:
     """
     Generates the experiment variations
 
@@ -360,7 +384,11 @@ def experiment_kfolds_generator(experiment: dict, available_scores: list):
         }
 
 
-def multiclass_fold_partitioning_generator_22(n0: int, n1: int, c0: int):
+def multiclass_fold_partitioning_generator_22(
+    n0: int, 
+    n1: int, 
+    c0: int
+) -> Generator[dict, None, None]:
     """
     Generates the configurations for two folds of cardinalities n0 and n1 and two
     classes of cardinalities c0 and n0 + n1 - c0

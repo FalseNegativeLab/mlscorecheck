@@ -17,15 +17,13 @@ __all__ = [
 
 
 def generate_problem_and_scores(
+    rounding_decimals: int = 4,
     *,
-    max_p: int = 1000,
-    max_n: int = 1000,
-    zeros: list | None = None,
-    add_complements: bool | None = None,
-    score_subset: list | None = None,
-    rounding_decimals: int | None = None,
     random_state=None,
-) -> tuple[dict, dict]:
+    p_bounds: tuple[int, int] = (10, 100),
+    n_bounds: tuple[int, int] = (10, 100),
+    available_scores: list | None = None,
+) -> dict:
     """
     Generates a random problem and random but feasible scores
 

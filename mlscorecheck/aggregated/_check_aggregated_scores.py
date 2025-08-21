@@ -23,10 +23,10 @@ PREFERRED_SOLVER = "PULP_CBC_CMD" if "PULP_CBC_CMD" in solvers else solvers[0]
 
 
 def check_aggregated_scores(
-    *,
     experiment: dict,
     scores: dict,
-    eps,
+    eps: float | dict,
+    *,
     solver_name: str | None = None,
     timeout: int | None = None,
     verbosity: int = 1,

@@ -37,7 +37,7 @@ functions = score_functions_without_complements
 functions_standardized = score_functions_standardized_without_complements
 
 
-def translate_metadata(original):
+def translate_metadata(original) -> dict | list:
     """
     Translates the metadata, internally uses p instead of n_positive, n_minority or
     n_1, and similarly, internally uses n instead of n_negative, n_majority, or n_0.
@@ -96,7 +96,11 @@ def resolve_aliases_and_complements(scores: dict) -> dict:
     return complemented
 
 
-def create_intervals(scores: dict, eps, numerical_tolerance: float = NUMERICAL_TOLERANCE) -> dict:
+def create_intervals(
+    scores: dict, 
+    eps: float | dict, 
+    numerical_tolerance: float = NUMERICAL_TOLERANCE
+) -> dict:
     """
     Turns the scores into intervals using the uncertainty specifications,
     the interval for a score will be (score - eps, score + eps).
@@ -159,7 +163,7 @@ def create_problems_2(scores: list) -> list:
     return problems
 
 
-def is_less_than_zero(value) -> bool:
+def is_less_than_zero(value: float | int | Interval | IntervalUnion) -> bool:
     """
     Checks if the parameter is less than zero
 
@@ -176,7 +180,7 @@ def is_less_than_zero(value) -> bool:
     return all(interval.upper_bound < 0 for interval in value.intervals)
 
 
-def is_zero(value, tolerance: float = 1e-8) -> bool:
+def is_zero(value: float | int | Interval | IntervalUnion, tolerance: float = 1e-8) -> bool:
     """
     Checks if the parameter is zero
 
@@ -192,7 +196,7 @@ def is_zero(value, tolerance: float = 1e-8) -> bool:
     return value.contains(0.0)
 
 
-def unify_results(value_list):
+def unify_results(value_list: list) -> list | IntervalUnion | None:
     """
     Unifies the list of solutions
 

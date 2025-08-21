@@ -2,6 +2,7 @@
 Some general purpose linear programming functionalities
 """
 
+from typing import Any
 import numpy as np
 import pulp as pl
 
@@ -54,7 +55,7 @@ def add_bounds(lp_problem: pl.LpProblem, variables: dict, bounds: dict, label: s
     return lp_problem
 
 
-def create_lp_target(obj, scores: dict, eps, lp_problem: pl.LpProblem) -> pl.LpProblem:
+def create_lp_target(obj: Any, scores: dict, eps: float | dict, lp_problem: pl.LpProblem) -> pl.LpProblem:
     """
     Add the target and the score conditions to the linear programming problem
 
@@ -78,7 +79,7 @@ def create_lp_target(obj, scores: dict, eps, lp_problem: pl.LpProblem) -> pl.LpP
     return lp_problem
 
 
-def solve(obj, scores: dict, eps, solver=None) -> pl.LpProblem:
+def solve(obj: Any, scores: dict, eps: float | dict, solver: Any = None) -> pl.LpProblem:
     """
     Solving a problem.
 

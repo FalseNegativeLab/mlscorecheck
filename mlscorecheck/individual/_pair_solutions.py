@@ -46,7 +46,7 @@ class Solution:
         else:
             self.conditions = []
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returning a dictionary representation
 
@@ -55,7 +55,7 @@ class Solution:
         """
         return {"solution": self.solution, "conditions": self.conditions}
 
-    def check_non_negative(self, value) -> bool:
+    def check_non_negative(self, value: float | int | Interval | IntervalUnion) -> bool:
         """
         Checks the non-negativity condition
 
@@ -76,7 +76,7 @@ class Solution:
 
         return False
 
-    def check_non_zero(self, value) -> bool:
+    def check_non_zero(self, value: float | int | Interval | IntervalUnion) -> bool:
         """
         Checks the non-zero condition
 
@@ -90,7 +90,7 @@ class Solution:
             not isinstance(value, Interval | IntervalUnion) and abs(value) < 1e-8
         )
 
-    def evaluate(self, subs):
+    def evaluate(self, subs: dict) -> dict:
         """
         Evaluate the solution with a substitution
 
@@ -161,7 +161,7 @@ class Solutions:
             "solutions": [sol.to_dict() for sol in self.solutions],
         }
 
-    def evaluate(self, subs):
+    def evaluate(self, subs: dict) -> list:
         """
         Evaluate the solutions with a substitution
 
@@ -180,7 +180,7 @@ class Solutions:
         return results
 
 
-def load_solutions():
+def load_solutions() -> dict:
     """
     Load the solutions
 

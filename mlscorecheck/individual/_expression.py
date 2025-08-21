@@ -3,8 +3,13 @@ This module implements a symbolic expression abstraction for the
 ease of handling symbolic formulas
 """
 
+from typing import TYPE_CHECKING
+
 from ..core import safe_eval
 from ._interval import sqrt
+
+if TYPE_CHECKING:
+    from ._interval import Interval, IntervalUnion
 
 __all__ = ["Expression"]
 
@@ -16,7 +21,7 @@ class Expression:
 
     def __init__(
         self, expression: str, symbols: list, functional_symbols: list | None = None, **kwargs
-    ):
+    ) -> None:
         """
         The constructor of the expression
 
@@ -34,7 +39,7 @@ class Expression:
         self.expression = expression
         self.symbols = symbols
 
-    def evaluate(self, subs: dict):
+    def evaluate(self, subs: dict) -> float | int | "Interval" | "IntervalUnion":
         """
         Evaluates the expression
 

@@ -16,7 +16,7 @@ __all__ = ["check_n_datasets_mos_known_folds_mos"]
 def check_n_datasets_mos_known_folds_mos(
     evaluations: list,
     scores: dict,
-    eps,
+    eps: float,
     dataset_score_bounds: dict | None = None,
     *,
     solver_name: str | None = None,

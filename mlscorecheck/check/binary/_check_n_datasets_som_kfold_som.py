@@ -16,11 +16,11 @@ __all__ = ["check_n_datasets_som_kfold_som"]
 def check_n_datasets_som_kfold_som(
     evaluations: list,
     scores: dict,
-    eps,
+    eps: float,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     prefilter_by_pairs: bool = True,
-):
+) -> dict:
     """
     Checking the consistency of scores calculated by applying k-fold
     cross validation to multiple datasets and aggregating the figures

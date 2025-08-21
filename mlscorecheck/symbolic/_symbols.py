@@ -35,7 +35,7 @@ class Symbols:  # pylint: disable=too-many-instance-attributes
         self.beta_negative = self.algebra.create_symbol("beta_negative", positive=True, real=True)
         self.sqrt = self.algebra.sqrt
 
-    def get_algebra(self):
+    def get_algebra(self) -> Union[SympyAlgebra, SageAlgebra]:
         """
         Returns the algebra
 

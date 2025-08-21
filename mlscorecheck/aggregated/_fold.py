@@ -54,7 +54,7 @@ class Fold:
         """
         return {"p": self.p, "n": self.n, "identifier": self.identifier}
 
-    def sample_figures(self, random_state=None):
+    def sample_figures(self, random_state=None) -> "Fold":
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -119,7 +119,7 @@ class Fold:
         self.tp.setInitialValue(int(tp_init))
         self.tn.setInitialValue(int(tn_init))
 
-    def init_lp(self, scores: dict | None = None):
+    def init_lp(self, scores: dict | None = None) -> pl.LpProblem:
         """
         Initialize a linear programming problem by creating the variables for the fold
 

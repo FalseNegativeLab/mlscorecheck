@@ -14,13 +14,14 @@ __all__ = ["check_n_testsets_mos_no_kfold"]
 def check_n_testsets_mos_no_kfold(
     testsets: list,
     scores: dict,
-    eps,
-    testset_score_bounds: dict | None = None,
+    eps: float,
     *,
+    testset_score_bounds: dict | None = None,
     solver_name: str | None = None,
     timeout: int | None = None,
     verbosity: int = 1,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True,
 ) -> dict:
     """
     This function checks the consistency of scores calculated on multiple testsets with no k-fold

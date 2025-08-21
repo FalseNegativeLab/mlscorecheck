@@ -15,7 +15,7 @@ __all__ = ["check_1_testset_no_kfold"]
 def check_1_testset_no_kfold(
     testset: dict,
     scores: dict,
-    eps,
+    eps: float,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     prefilter_by_pairs: bool = True,

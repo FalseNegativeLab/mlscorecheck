@@ -12,7 +12,7 @@ __all__ = ["random_identifier", "check_bounds", "compare_scores", "aggregated_sc
 aggregated_scores = ["acc", "sens", "spec", "bacc"]
 
 
-def random_identifier(length: int):
+def random_identifier(length: int) -> str:
     """
     Generating a random identifier
 
@@ -55,8 +55,12 @@ def check_bounds(scores: dict, bounds: dict | None = None, tolerance: float = 1e
 
 
 def compare_scores(
-    scores0: dict, scores1: dict, eps, subset: list | None = None, tolerance: float = 1e-5
-):
+    scores0: dict, 
+    scores1: dict, 
+    eps: float | dict, 
+    subset: list | None = None, 
+    tolerance: float = 1e-5
+) -> bool:
     """
     Compares two sets of scores
 

@@ -70,7 +70,11 @@ class Evaluation:
             "aggregation": self.aggregation,
         }
 
-    def sample_figures(self, random_state=None, score_subset: list | None = None):
+    def sample_figures(
+        self, 
+        random_state=None, 
+        score_subset: list | None = None
+    ) -> "Evaluation":
         """
         Samples the figures in the evaluation
 
@@ -156,7 +160,7 @@ class Evaluation:
 
         return lp_problem
 
-    def populate(self, lp_problem: pl.LpProblem):
+    def populate(self, lp_problem: pl.LpProblem) -> "Evaluation":
         """
         Populates the evaluation with the figures in the solved linear programming problem
 

@@ -20,7 +20,7 @@ __all__ = [
 
 def _collect_denominators_and_bases(
     expression, denoms: list, bases: list, algebra: Algebra, depth: int
-):
+) -> None:
     """
     Recursive core of collecting all denominators and bases
 
@@ -91,7 +91,7 @@ def collect_denominators_and_bases(expression, algebra: Algebra) -> tuple[list, 
     return denoms, bases
 
 
-def solve_order(score0: Score, score1: Score):
+def solve_order(score0: Score, score1: Score) -> tuple[Any, Any, str, str]:
     """
     Determining the order the equations should be solved, based on using the shortest solution
     first
@@ -270,7 +270,7 @@ class ProblemSolver:
                     self.solutions.append(sol)
         return self
 
-    def edge_cases(self):
+    def edge_cases(self) -> None:
         """
         Collects the edge cases and populates the fields 'denoms' and 'bases'
         """

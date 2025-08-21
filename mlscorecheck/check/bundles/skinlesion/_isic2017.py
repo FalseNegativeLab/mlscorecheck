@@ -43,7 +43,7 @@ def _prepare_testset_isic2017(target: str | list, against: str | list | None) ->
 def check_isic2017(
     target: str,
     scores: dict,
-    eps,
+    eps: float,
     *,
     against: str | None = None,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,

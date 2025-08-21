@@ -56,7 +56,7 @@ class Dataset:
         else:
             self.identifier = identifier
 
-    def resolve_pn(self):
+    def resolve_pn(self) -> None:
         """
         Resolves the ``p`` and ``n`` values from the name of the dataset
         """

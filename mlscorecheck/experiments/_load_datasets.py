@@ -65,7 +65,7 @@ def lookup_dataset(dataset: str) -> dict[str, Any]:
     return cast(dict[str, Any], dataset_statistics[dataset])
 
 
-def load_ml_datasets():
+def load_ml_datasets() -> None:
     """
     Load the ML datasets
     """

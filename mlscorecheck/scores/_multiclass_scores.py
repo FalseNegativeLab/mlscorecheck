@@ -3,6 +3,7 @@ This module implements the multiclass scores
 """
 
 import math
+from typing import Callable
 
 import numpy as np
 
@@ -65,9 +66,8 @@ __all__ = [
 
 
 def multiclass_score_macro(confusion_matrix: np.ndarray, 
-                          score_function,
-                          additional_params=None,
-                          name=None) -> float:
+                          score_funcs: dict,
+                          average: str = 'macro') -> float:
     """
     Calculates the multiclass macro average score
 
@@ -108,9 +108,9 @@ def multiclass_score_macro(confusion_matrix: np.ndarray,
 
 
 def multiclass_score_micro(confusion_matrix: np.ndarray, 
-                          score_function,
-                          additional_params=None,
-                          name=None) -> float:
+                          score_function: Callable,
+                          additional_params: dict | None = None,
+                          name: str | None = None) -> float:
     """
     Calculates the multiclass micro average score
 
@@ -148,9 +148,9 @@ def multiclass_score_micro(confusion_matrix: np.ndarray,
 
 
 def multiclass_score_weighted(confusion_matrix: np.ndarray, 
-                             score_function,
-                             additional_params=None,
-                             name=None) -> float:
+                             score_function: Callable,
+                             additional_params: dict | None = None,
+                             name: str | None = None) -> float:
     """
     Calculates the multiclass weighted macro average score
 
@@ -193,10 +193,9 @@ def multiclass_score_weighted(confusion_matrix: np.ndarray,
 
 
 def multiclass_score(confusion_matrix: np.ndarray, 
-                    score_function,
-                    average: str,
-                    additional_params=None,
-                    name=None) -> float:
+                    score_name: str,
+                    average: str = 'macro',
+                    additional_params: dict | None = None) -> float:
     """
     Calculates the multiclass average score
 

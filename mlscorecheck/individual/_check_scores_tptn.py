@@ -83,7 +83,7 @@ def iterate_tptn(
     return results
 
 
-def update_sens(p: int, valid_pairs: dict, score_int, solve_for: str) -> dict:
+def update_sens(p: int, valid_pairs: dict, score_int: "Interval", solve_for: str) -> dict:
     """
     Update sensitivity intervals
 

@@ -47,9 +47,9 @@ def estimate_n_experiments(evaluations: list, available_scores: list | None = No
 def check_n_datasets_mos_unknown_folds_mos(
     evaluations: list,
     scores: dict,
-    eps,
+    eps: float,
+    dataset_score_bounds: dict | None = None,
     *,
-    score_bounds: dict | None = None,
     solver_name: str | None = None,
     timeout: int | None = None,
     verbosity: int = 1,

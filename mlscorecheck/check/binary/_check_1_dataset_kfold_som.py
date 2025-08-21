@@ -1,5 +1,13 @@
 """
-This module implements the top level check function for
+This modudef check_1_dataset_kfold_som(
+    dataset: dict,
+    folding: dict,
+    scores: dict,
+    eps: float,
+    *,
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+    prefilter_by_pairs: bool = True,
+) -> dict:ents the top level check function for
 scores calculated by the score-of-means aggregation
 in a kfold scenario on one single dataset.
 """

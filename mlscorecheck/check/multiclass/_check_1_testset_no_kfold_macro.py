@@ -13,7 +13,7 @@ __all__ = ["check_1_testset_no_kfold_macro"]
 def check_1_testset_no_kfold_macro(
     testset: dict,
     scores: dict,
-    eps,
+    eps: float,
     *,
     class_score_bounds: dict | None = None,
     solver_name: str | None = None,

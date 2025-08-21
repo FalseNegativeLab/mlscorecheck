@@ -61,7 +61,11 @@ class Experiment:
             "aggregation": self.aggregation,
         }
 
-    def sample_figures(self, random_state=None, score_subset: list | None = None):
+    def sample_figures(
+        self, 
+        random_state=None, 
+        score_subset: list | None = None
+    ) -> "Experiment":
         """
         Samples the ``tp`` and ``tn`` figures
 
@@ -162,7 +166,7 @@ class Experiment:
 
         return lp_problem
 
-    def populate(self, lp_problem):
+    def populate(self, lp_problem) -> "Experiment":
         """
         Populates the evaluation with the figures in the solved linear programming problem
 

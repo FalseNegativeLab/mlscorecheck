@@ -15,7 +15,7 @@ def check_1_dataset_known_folds_mos(
     dataset: dict,
     folding: dict,
     scores: dict,
-    eps,
+    eps: float,
     fold_score_bounds: dict | None = None,
     *,
     solver_name: str | None = None,

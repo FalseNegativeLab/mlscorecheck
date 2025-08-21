@@ -14,11 +14,11 @@ __all__ = ["check_n_testsets_som_no_kfold"]
 def check_n_testsets_som_no_kfold(
     testsets: list,
     scores: dict,
-    eps,
+    eps: float,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
     prefilter_by_pairs: bool = True,
-):
+) -> dict:
     """
     Checking the consistency of scores calculated by aggregating the figures
     over testsets in the score of means fashion, without k-folding.

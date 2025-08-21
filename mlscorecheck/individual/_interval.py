@@ -10,7 +10,7 @@ from ..core import NUMERICAL_TOLERANCE
 __all__ = ["Interval", "IntervalUnion", "sqrt"]
 
 
-def sqrt(obj) -> "Interval | IntervalUnion | float":
+def sqrt(obj: "float | Interval | IntervalUnion") -> "Interval | IntervalUnion | float":
     """
     Square root of an interval or interval union
 

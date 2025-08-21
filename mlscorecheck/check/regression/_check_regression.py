@@ -87,7 +87,11 @@ regression_scores = {
 }
 
 
-def calculate_regression_scores(y_true: np.ndarray, y_pred: np.ndarray, subset=None) -> dict:
+def calculate_regression_scores(
+    y_true: np.ndarray, 
+    y_pred: np.ndarray, 
+    subset: list | None = None
+) -> dict:
     """
     Calculate the performance scores for a regression problem
 
