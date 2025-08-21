@@ -8,6 +8,7 @@ so the sage-related codes are excluded from the coverage report.
 __all__ = ["SageAlgebra"]
 
 import importlib
+from typing import Any
 
 from ._algebra import Algebra
 
@@ -17,7 +18,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
     The required algebra driven by sage
     """
 
-    def __init__(self):  # pragma: no cover
+    def __init__(self) -> None:  # pragma: no cover
         """
         Constructor of the algebra
         """
@@ -26,7 +27,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         self.algebra = importlib.import_module("sage.all")  # pragma: no cover
         self.sqrt = self.algebra.sqrt  # pragma: no cover
 
-    def create_symbol(self, name, **kwargs):  # pragma: no cover
+    def create_symbol(self, name: str, **kwargs) -> Any:  # pragma: no cover
         """
         Create a symbol in the algebra with the specified name and assumptions
 
@@ -55,7 +56,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
 
         return var  # pragma: no cover
 
-    def num_denom(self, expression):  # pragma: no cover
+    def num_denom(self, expression: Any) -> tuple[Any, Any]:  # pragma: no cover
         """
         Extract the numerator and denominator
 
@@ -67,7 +68,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return expression.numerator(), expression.denominator()  # pragma: no cover
 
-    def simplify(self, expression):  # pragma: no cover
+    def simplify(self, expression: Any) -> Any:  # pragma: no cover
         """
         Simplify the expression
 
@@ -79,7 +80,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return self.algebra.factor(expression)  # pragma: no cover
 
-    def solve(self, equation, var, **kwargs):  # pragma: no cover
+    def solve(self, equation: Any, var: Any, **kwargs) -> list[dict]:  # pragma: no cover
         """
         Solve an equation for a variable
 
@@ -98,7 +99,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
             solutions.append(solution)  # pragma: no cover
         return solutions  # pragma: no cover
 
-    def subs(self, expression, subs_dict):  # pragma: no cover
+    def subs(self, expression: Any, subs_dict: dict) -> Any:  # pragma: no cover
         """
         Substitute a substitution into the expression
 
@@ -123,7 +124,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return list(expression.args())  # pragma: no cover
 
-    def is_trivial(self, expression) -> bool:  # pragma: no cover
+    def is_trivial(self, expression: Any) -> bool:  # pragma: no cover
         """
         Checks if the expression is trivial
 
@@ -135,7 +136,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return True if expression is None else expression.is_trivially_equal(1)  # pragma: no cover
 
-    def is_root(self, expression) -> bool:  # pragma: no cover
+    def is_root(self, expression: Any) -> bool:  # pragma: no cover
         """
         Checks if the expression is a root
 
@@ -151,7 +152,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
                 return True  # pragma: no cover
         return False  # pragma: no cover
 
-    def is_power(self, expression) -> bool:  # pragma: no cover
+    def is_power(self, expression: Any) -> bool:  # pragma: no cover
         """
         Checks whether the expression is a power
 
@@ -166,7 +167,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
             and expression.operator().__qualname__ == "pow"
         )  # pragma: no cover
 
-    def is_division(self, expression) -> bool:  # pragma: no cover
+    def is_division(self, expression: Any) -> bool:  # pragma: no cover
         """
         Checks whether the expression is a division
 
@@ -198,7 +199,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
                         return True  # pragma: no cover
         return False  # pragma: no cover
 
-    def operands(self, expression) -> list:  # pragma: no cover
+    def operands(self, expression: Any) -> list:  # pragma: no cover
         """
         Returns the list of operands
 
@@ -210,7 +211,7 @@ class SageAlgebra(Algebra):  # pragma: no cover
         """
         return list(expression.operands())  # pragma: no cover
 
-    def free_symbols(self, expression) -> list:  # pragma: no cover
+    def free_symbols(self, expression: Any) -> list:  # pragma: no cover
         """
         Get all free symbols in an expression
 

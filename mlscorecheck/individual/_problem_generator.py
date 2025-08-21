@@ -12,14 +12,13 @@ __all__ = [
     "generate_problem_and_scores",
     "generate_multiclass_dataset",
     "sample_multiclass_dataset",
-    "create_confusion_matrix",
-]
+    "create_confusion_matrix",]
 
 
 def generate_problem_and_scores(
     rounding_decimals: int = 4,
     *,
-    random_state=None,
+    random_state: int | np.random.RandomState | None = None,
     p_bounds: tuple[int, int] = (10, 100),
     n_bounds: tuple[int, int] = (10, 100),
     available_scores: list | None = None,
@@ -60,7 +59,7 @@ def generate_1_problem(
     max_n: int = 1000,
     zeros: list | None = None,
     add_complements: bool = False,
-    random_state=None,
+    random_state: int | None = None,
 ) -> tuple[dict, dict]:
     """
     Generates a random problem

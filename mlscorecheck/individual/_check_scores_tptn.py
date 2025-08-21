@@ -322,7 +322,7 @@ def check_any_zero_division(sols: list) -> bool:
     return any(sol.get("message") == "zero division" for sol in sols)
 
 
-def update_tptn(tp, tn, sols: list):
+def update_tptn(tp: Interval | IntervalUnion, tn: Interval | IntervalUnion, sols: list) -> tuple[Interval | IntervalUnion, Interval | IntervalUnion]:
     """
     Updates the tp and tn intervals based on the solutions
 

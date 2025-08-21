@@ -318,7 +318,7 @@ class Interval:
         """
         return str(f"({str(self.lower_bound)}, {str(self.upper_bound)})")
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Equality operator
 
@@ -332,7 +332,7 @@ class Interval:
             return False
         return bool(self.lower_bound == other.lower_bound and self.upper_bound == other.upper_bound)
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: object) -> bool:
         """
         Non-equality operator
 
@@ -476,7 +476,7 @@ class IntervalUnion:
 
         self.intervals = final_intervals
 
-    def contains(self, value) -> bool:
+    def contains(self, value: float | int) -> bool:
         """
         Check if the interval contains the value
 
@@ -488,7 +488,7 @@ class IntervalUnion:
         """
         return any(interval.contains(value) for interval in self.intervals)
 
-    def intersection(self, other):
+    def intersection(self, other: "Interval | IntervalUnion") -> "IntervalUnion":
         """
         Returns the intersection of two intervals
 
@@ -521,7 +521,7 @@ class IntervalUnion:
 
         return any(interval.integer() for interval in self.intervals)
 
-    def shrink_to_integers(self):
+    def shrink_to_integers(self) -> "IntervalUnion":
         """
         Shrinking the interval to integer boundaries
 
@@ -550,7 +550,7 @@ class IntervalUnion:
             return True
         return all(interval.is_empty() for interval in self.intervals)
 
-    def __add__(self, other):
+    def __add__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The addition operator
 
@@ -569,7 +569,7 @@ class IntervalUnion:
 
         return IntervalUnion(intervals)
 
-    def __radd__(self, other):
+    def __radd__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The right hand addition
 
@@ -581,7 +581,7 @@ class IntervalUnion:
         """
         return self + other
 
-    def __sub__(self, other):
+    def __sub__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The subtraction operator
 
@@ -601,7 +601,7 @@ class IntervalUnion:
 
         return IntervalUnion(intervals)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The right hand subtraction
 
@@ -613,7 +613,7 @@ class IntervalUnion:
         """
         return -1 * self + other
 
-    def __mul__(self, other):
+    def __mul__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The multiplication operator
 
@@ -634,7 +634,7 @@ class IntervalUnion:
 
         return IntervalUnion(intervals)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The right hand multiplication operator
 
@@ -646,7 +646,7 @@ class IntervalUnion:
         """
         return self.__mul__(other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The division operator
 
@@ -678,7 +678,7 @@ class IntervalUnion:
 
         return IntervalUnion(intervals)
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: "int | float | Interval | IntervalUnion") -> "IntervalUnion":
         """
         The right hand division operator
 
@@ -696,7 +696,7 @@ class IntervalUnion:
 
         return other / self
 
-    def __neg__(self):
+    def __neg__(self) -> "IntervalUnion":
         """
         The negation operator
 
@@ -716,7 +716,7 @@ class IntervalUnion:
             [f"({interval.lower_bound}, {interval.upper_bound})" for interval in self.intervals]
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Equality operator
 
@@ -740,7 +740,7 @@ class IntervalUnion:
 
         return True
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: object) -> bool:
         """
         Non-equality operator
 
@@ -752,7 +752,7 @@ class IntervalUnion:
         """
         return not self.__eq__(other)
 
-    def __pow__(self, other):
+    def __pow__(self, other: float | int) -> "IntervalUnion":
         """
         The power operation on the interval union
 
@@ -764,7 +764,7 @@ class IntervalUnion:
         """
         return IntervalUnion([interval**other for interval in self.intervals])
 
-    def representing_int(self):
+    def representing_int(self) -> int | None:
         """
         Returns a representative integer
 

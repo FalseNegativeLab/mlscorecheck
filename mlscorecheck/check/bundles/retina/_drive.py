@@ -122,14 +122,14 @@ def check_drive_vessel_aggregated_mos_assumption(
 
 
 def check_drive_vessel_aggregated_som_assumption(
-    imageset,
+    imageset: str | list,
     assumption: str,
     annotator: int,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
-    numerical_tolerance=NUMERICAL_TOLERANCE,
-):
+    numerical_tolerance: float = NUMERICAL_TOLERANCE,
+) -> dict:
     """
     Tests the consistency of scores calculated on the DRIVE dataset using
     the score of means aggregation and a particular assumption on the region
@@ -192,10 +192,10 @@ def check_drive_vessel_image_assumption(
     assumption: str,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the DRIVE dataset with a particular
     assumption on the region of evaluation.
@@ -359,10 +359,10 @@ def check_drive_vessel_image(
     image_identifier: str,
     annotator: str,
     scores: dict,
-    eps,
+    eps: float | dict,
     *,
     numerical_tolerance: float = NUMERICAL_TOLERANCE,
-):
+) -> dict:
     """
     Testing the scores calculated for one image of the DRIVE dataset with
     both assumptions on the region of evaluation ('fov'/'all').
